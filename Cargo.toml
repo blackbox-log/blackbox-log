@@ -1,0 +1,14 @@
+[package]
+name = "blackbox"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+biterator = { version = "0.1.0", path = "../biterator" }
+# nom = { version = "7.1.1", default-features = false, features = ["alloc"] }
+num_enum = "0.5.7"
+thiserror = "1.0.32"
+ux = "0.1.4"
+
+[profile.release]
+lto = "thin"
