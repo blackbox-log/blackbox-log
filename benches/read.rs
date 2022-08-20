@@ -1,7 +1,9 @@
 use biterator::Biterator;
 use blackbox::{encoding, LogVersion};
+use criterion::measurement::WallTime;
 use criterion::{criterion_group, criterion_main};
-use criterion::{BatchSize, Bencher, BenchmarkId, Criterion, Throughput};
+use criterion::{BatchSize, Bencher, BenchmarkGroup, BenchmarkId, Criterion, Throughput};
+use std::fmt::Display;
 use std::iter;
 
 macro_rules! get_bench {
@@ -15,6 +17,22 @@ macro_rules! get_bench {
     };
 }
 
+fn run_bench_pair<P: Display>(
+    group: &mut BenchmarkGroup<WallTime>,
+    input: &[u8],
+    parameter: P,
+    ubench: impl FnMut(&mut Bencher, &[u8]),
+    ibench: impl FnMut(&mut Bencher, &[u8]),
+) {
+    group.throughput(Throughput::Bytes(input.len() as u64));
+
+    let id = BenchmarkId::new("unsigned", &parameter);
+    group.bench_with_input(id, input, ubench);
+
+    let id = BenchmarkId::new("signed", &parameter);
+    group.bench_with_input(id, input, ibench);
+}
+
 fn variable(c: &mut Criterion) {
     get_bench!(ubench, encoding::read_uvar);
     get_bench!(ibench, encoding::read_ivar);
@@ -23,13 +41,7 @@ fn variable(c: &mut Criterion) {
 
     let benches: [(_, &[u8]); 2] = [("min", &[0]), ("max", &[0xFF, 0xFF, 0xFF, 0xFF, 0xF8])];
     for (name, input) in benches {
-        group.throughput(Throughput::Bytes(input.len() as u64));
-
-        let id = BenchmarkId::new("unsigned", name);
-        group.bench_with_input(id, input, ubench);
-
-        let id = BenchmarkId::new("signed", name);
-        group.bench_with_input(id, input, ibench);
+        run_bench_pair(&mut group, input, name, ubench, ibench);
     }
 
     for extra_bytes in 1..5 {
@@ -38,13 +50,7 @@ fn variable(c: &mut Criterion) {
         let input = input.as_slice();
         let name = &format!("{}-byte 0", input.len());
 
-        group.throughput(Throughput::Bytes(input.len() as u64));
-
-        let id = BenchmarkId::new("unsigned", name);
-        group.bench_with_input(id, input, ubench);
-
-        let id = BenchmarkId::new("signed", name);
-        group.bench_with_input(id, input, ibench);
+        run_bench_pair(&mut group, input, name, ubench, ibench);
     }
 
     group.finish();
@@ -59,13 +65,7 @@ fn elias_delta(c: &mut Criterion) {
     let min: &[u8] = &[0x80];
     let max: &[u8] = &[0x04, 0x1F, 0xFF, 0xFF, 0xFF, 0xC0];
     for (input, name) in [(min, "minimum"), (max, "maximum")] {
-        group.throughput(Throughput::Bytes(input.len() as u64));
-
-        let id = BenchmarkId::new("unsigned", name);
-        group.bench_with_input(id, input, ubench);
-
-        let id = BenchmarkId::new("signed", name);
-        group.bench_with_input(id, input, ibench);
+        run_bench_pair(&mut group, input, name, ubench, ibench);
     }
 
     group.finish();
