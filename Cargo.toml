@@ -2,6 +2,7 @@
 name = "blackbox"
 version = "0.1.0"
 edition = "2021"
+publish = false
 
 [dependencies]
 biterator = { version = "0.1.0", path = "../biterator" }
