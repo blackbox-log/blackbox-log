@@ -16,7 +16,7 @@ num_enum = "0.5.7"
 reference-impl = { path = "reference-impl", optional = true }
 
 [dev-dependencies]
-criterion = "0.3.6"
+criterion = { version = "0.3.6", default-features = false }
 
 [lib]
 bench = false
