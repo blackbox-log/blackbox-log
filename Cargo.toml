@@ -10,5 +10,15 @@ num_enum = "0.5.7"
 thiserror = "1.0.32"
 ux = "0.1.4"
 
+[dev-dependencies]
+criterion = "0.3.6"
+
 [profile.release]
 lto = "thin"
+
+[lib]
+bench = false
+
+[[bench]]
+name = "read"
+harness = false
