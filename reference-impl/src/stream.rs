@@ -5,7 +5,6 @@ pub struct Stream {
     stream: *mut ffi::mmapStream_t,
 }
 
-#[allow(dead_code)]
 impl Stream {
     #[must_use]
     pub fn new(fd: RawFd) -> Self {
