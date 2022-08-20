@@ -28,10 +28,6 @@ harness = false
 [profile.release]
 lto = "thin"
 
-[profile.flame]
-inherits = "release"
-debug = true
-
 [profile.fuzz]
 inherits = "release"
 debug = true

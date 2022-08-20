@@ -14,6 +14,9 @@ set dotenv-load
 	echo '    (t)est    # run tests with nextest'
 	echo '    bench     # run criterion benchmarks'
 	echo
+	echo '    flame-bench <bench> <out> <filter>'
+	echo '              # save a flamegraph at <out>.svg of <bench> run for 10 seconds'
+	echo
 	echo 'Workspace commands:'
 	echo '    fmt-all (fa)'
 	echo '    check-all (ca)'
@@ -68,6 +71,12 @@ bench *args='': fmt
 bench-all *args='': fmt
 	cargo clippy --workspace --lib --benches && cargo criterion --workspace --benches {{args}}
 
+flame-bench bench out filter:
+	export CARGO_PROFILE_BENCH_DEBUG=true \
+		&& cd {{invocation_directory()}} \
+		&& cargo clippy --benches \
+		&& cargo flamegraph --deterministic --output {{out}}.svg --bench {{bench}} -- --bench --profile-time 10 '{{filter}}'
+
 export HFUZZ_BUILD_ARGS := '--profile=fuzz'
 export HFUZZ_DEBUGGER := 'rust-gdb'
 fuzz +args='-h':
@@ -90,4 +99,4 @@ fuzz-debug target *args='':
 	cd fuzzing/ && cargo hfuzz run-debug {{target}} ${args:-$default}
 
 install-dev-deps:
-	cargo install cargo-criterion cargo-nextest hfuzz
+	cargo install cargo-criterion cargo-nextest flamegraph honggfuzz
