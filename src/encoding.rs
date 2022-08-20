@@ -117,84 +117,45 @@ pub fn read_i32_elias_delta<R: Read>(data: &mut Biterator<R>) -> i32 {
 }
 
 pub fn read_tagged_16<R: Read>(version: LogVersion, data: &mut Biterator<R>) -> [i16; 4] {
+    const fn i4_to_i16(i4: u8) -> i16 {
+        let i4 = i4 as u16;
+        let byte = if (i4 & 8) > 0 { i4 & 0xFFF0 } else { i4 };
+        byte as i16
+    }
+
     data.byte_align();
 
-    match version {
-        LogVersion::V1 => read_tagged_16_v1(data),
-        LogVersion::V2 => read_tagged_16_v2(data),
-    }
-}
-
-const fn i4_to_i16(i4: u8) -> i16 {
-    let i4 = i4 as u16;
-    let byte = if (i4 & 8) > 0 { i4 & 0xFFF0 } else { i4 };
-    byte as i16
-}
-
-// TODO: rewrite using new Biterator features
-fn read_tagged_16_v1<R: Read>(data: &mut Biterator<R>) -> [i16; 4] {
     const COUNT: usize = 4;
 
     let tags = data.next_byte().unwrap();
     let mut result = [0; COUNT];
 
     let mut i = 0;
-    while i < result.len() {
-        let tag = tags & (0b11 << (i * 2));
-        let tag = tag >> (i * 2);
-
-        if tag == 0 {
-            result[i] = 0;
-        } else {
-            let next_byte = data.next_byte().unwrap();
-
-            match tag {
-                1 => {
-                    result[i] = i4_to_i16((next_byte >> 4) & 0x0F);
-                    i += 1;
-                    result[i] = i4_to_i16(next_byte & 0x0F);
-                }
-                2 => {
-                    result[i] = (next_byte as i8).into();
-                }
-                3 => {
-                    let second = data.next_byte().unwrap();
-                    result[i] = i16::from_be_bytes([next_byte, second]);
-                }
-                _ => unreachable!(),
-            }
-        }
-
-        i += 1;
-    }
-
-    result
-}
-
-fn read_tagged_16_v2<R: Read>(data: &mut Biterator<R>) -> [i16; 4] {
-    assert!(data.peek_byte().is_some());
-
-    const COUNT: usize = 4;
-
-    let tags = data.next_byte().unwrap();
-
-    let mut result = [0; COUNT];
-    for (i, result) in result.iter_mut().enumerate() {
+    while i < COUNT {
         let tag = (tags >> (i * 2)) & 3;
 
-        *result = match tag {
-            0 => 0,
-            1 => i4_to_i16(data.next_nibble().unwrap().value()),
-            2 => (data.next_byte().unwrap() as i8).into(),
+        match tag {
+            0 => result[i] = 0,
+            1 => match version {
+                LogVersion::V1 => {
+                    let byte = data.next_byte().unwrap();
+                    result[i] = i4_to_i16((byte >> 4) & 0xF);
+                    i += 1;
+                    result[i] = i4_to_i16(byte & 0xF)
+                }
+                LogVersion::V2 => result[i] = i4_to_i16(data.next_nibble().unwrap().value()),
+            },
+            2 => result[i] = (data.next_byte().unwrap()).into(),
             3 => {
-                // TODO: use Biterator native 16 bit reads
                 let byte1 = data.next_byte().unwrap();
                 let byte2 = data.next_byte().unwrap();
 
-                i16::from_be_bytes([byte1, byte2])
+                result[i] = i16::from_be_bytes([byte1, byte2])
             }
             4.. => unreachable!(),
         }
+
+        i += 1;
     }
 
     result
@@ -206,7 +167,7 @@ const fn zig_zag_decode(value: u32) -> i32 {
 
 #[cfg(test)]
 mod test {
-    use crate::{ParseError, ParseResult};
+    use crate::{LogVersion, ParseError, ParseResult};
     use biterator::Biterator;
     use std::iter;
 
@@ -262,68 +223,101 @@ mod test {
 
     #[test]
     fn tagged_16_all_zeros() {
+        use LogVersion::{V1, V2};
+
         let bytes = tagged_16_bytes(0x00, 0);
         let bytes = bytes.as_slice();
 
-        assert_eq!([0; 4], super::read_tagged_16_v1(&mut Biterator::new(bytes)));
-        assert_eq!([0; 4], super::read_tagged_16_v2(&mut Biterator::new(bytes)));
+        assert_eq!(
+            [0; 4],
+            super::read_tagged_16(LogVersion::V1, &mut Biterator::new(bytes))
+        );
+        assert_eq!(
+            [0; 4],
+            super::read_tagged_16(LogVersion::V2, &mut Biterator::new(bytes))
+        );
     }
 
     #[test]
     fn tagged_16_all_nibbles() {
+        use LogVersion::{V1, V2};
+
         let bytes = tagged_16_bytes(0x55, 2);
         let bytes = bytes.as_slice();
 
-        assert_eq!([0; 4], super::read_tagged_16_v1(&mut Biterator::new(bytes)));
-        assert_eq!([0; 4], super::read_tagged_16_v2(&mut Biterator::new(bytes)));
+        assert_eq!(
+            [0; 4],
+            super::read_tagged_16(V1, &mut Biterator::new(bytes))
+        );
+        assert_eq!(
+            [0; 4],
+            super::read_tagged_16(V2, &mut Biterator::new(bytes))
+        );
     }
 
     #[test]
     fn tagged_16_all_bytes() {
+        use LogVersion::{V1, V2};
+
         let bytes = tagged_16_bytes(0xAA, 4);
         let bytes = bytes.as_slice();
 
-        assert_eq!([0; 4], super::read_tagged_16_v1(&mut Biterator::new(bytes)));
-        assert_eq!([0; 4], super::read_tagged_16_v2(&mut Biterator::new(bytes)));
+        assert_eq!(
+            [0; 4],
+            super::read_tagged_16(V1, &mut Biterator::new(bytes))
+        );
+        assert_eq!(
+            [0; 4],
+            super::read_tagged_16(V2, &mut Biterator::new(bytes))
+        );
     }
 
     #[test]
     fn tagged_16_all_16_bits() {
+        use LogVersion::{V1, V2};
+
         let bytes: &[u8] = &[0xFF, 0, 1, 0, 2, 0, 3, 0, 4];
 
         let expected = [1, 2, 3, 4];
         assert_eq!(
             expected,
-            super::read_tagged_16_v1(&mut Biterator::new(bytes))
+            super::read_tagged_16(V1, &mut Biterator::new(bytes))
         );
         assert_eq!(
             expected,
-            super::read_tagged_16_v2(&mut Biterator::new(bytes))
+            super::read_tagged_16(V2, &mut Biterator::new(bytes))
         );
     }
 
     #[test]
     fn tagged_16_v1_tag_order() {
+        use LogVersion::{V1, V2};
+
         let bytes: &[u8] = &[0b1001_0100, 0x12, 0x03];
         let mut biterator = Biterator::new(bytes);
 
-        assert_eq!([0, 1, 2, 3], super::read_tagged_16_v1(&mut biterator));
+        assert_eq!([0, 1, 2, 3], super::read_tagged_16(V1, &mut biterator));
     }
 
     #[test]
     fn tagged_16_v2_tag_order() {
+        use LogVersion::{V1, V2};
+
         let bytes: &[u8] = &[0b1110_0100, 0x10, 0x20, 0x00, 0x30];
         let mut biterator = Biterator::new(bytes);
 
-        assert_eq!([0, 1, 2, 3], super::read_tagged_16_v2(&mut biterator));
+        assert_eq!([0, 1, 2, 3], super::read_tagged_16(V2, &mut biterator));
     }
 
     #[test]
     fn tagged_16_v1_nibble_ignores_next_tag() {
+        use LogVersion::V1;
+
         let bytes: &[u8] = &[0b0000_1101, 0x12];
         let mut biterator = Biterator::new(bytes);
 
-        assert_eq!([1, 2, 0x00, 0x00], super::read_tagged_16_v1(&mut biterator));
+        let expected = [1, 2, 0x00, 0x00];
+        assert_eq!(expected, super::read_tagged_16(V1, &mut biterator));
     }
 
     #[test]
