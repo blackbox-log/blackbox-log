@@ -1,0 +1,3 @@
+[submodule "reference-impl"]
+	path = reference-impl/upstream
+	url = https://github.com/betaflight/blackbox-tools

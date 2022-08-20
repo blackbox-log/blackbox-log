@@ -4,18 +4,21 @@ version = "0.1.0"
 edition = "2021"
 publish = false
 
+[workspace]
+members = ["fuzzing", "reference-impl"]
+
+[features]
+_reference-impl = ["dep:reference-impl"]
+
 [dependencies]
 biterator = { version = "0.1.0", path = "../biterator" }
-# nom = { version = "7.1.1", default-features = false, features = ["alloc"] }
 num_enum = "0.5.7"
+reference-impl = { path = "reference-impl", optional = true }
 thiserror = "1.0.32"
 ux = "0.1.4"
 
 [dev-dependencies]
 criterion = "0.3.6"
-
-[profile.release]
-lto = "thin"
 
 [lib]
 bench = false
@@ -23,3 +26,12 @@ bench = false
 [[bench]]
 name = "read"
 harness = false
+
+[profile.release]
+lto = "thin"
+
+[profile.fuzz]
+inherits = "release"
+debug = true
+debug-assertions = true
+overflow-checks = true
