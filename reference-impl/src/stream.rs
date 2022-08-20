@@ -32,6 +32,20 @@ impl Stream {
     pub fn read_i32_elias_delta(&mut self) -> i32 {
         unsafe { ffi::streamReadEliasDeltaS32(self.stream) }
     }
+
+    #[inline]
+    pub fn read_tagged_16_v1(&mut self) -> [i64; 4] {
+        let mut result = [0; 4];
+        unsafe { ffi::streamReadTag8_4S16_v1(self.stream, &mut result as *mut i64) }
+        result
+    }
+
+    #[inline]
+    pub fn read_tagged_16_v2(&mut self) -> [i64; 4] {
+        let mut result = [0; 4];
+        unsafe { ffi::streamReadTag8_4S16_v2(self.stream, &mut result as *mut i64) }
+        result
+    }
 }
 
 impl Drop for Stream {
@@ -692,8 +706,10 @@ mod ffi {
         pub(super) fn streamReadSignedVB(stream: *mut mmapStream_t) -> i32;
 
         // pub(super) fn streamReadTag2_3S32(stream: *mut mmapStream_t, values: *mut i64);
-        // pub(super) fn streamReadTag8_4S16_v1(stream: *mut mmapStream_t, values: *mut i64);
-        // pub(super) fn streamReadTag8_4S16_v2(stream: *mut mmapStream_t, values: *mut i64);
+
+        pub(super) fn streamReadTag8_4S16_v1(stream: *mut mmapStream_t, values: *mut i64);
+        pub(super) fn streamReadTag8_4S16_v2(stream: *mut mmapStream_t, values: *mut i64);
+
         // pub(super) fn streamReadTag8_8SVB(
         //     stream: *mut mmapStream_t,
         //     values: *mut i64,
