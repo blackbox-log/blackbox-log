@@ -14,8 +14,6 @@ _reference-impl = ["dep:reference-impl"]
 biterator = { version = "0.1.0", path = "../biterator" }
 num_enum = "0.5.7"
 reference-impl = { path = "reference-impl", optional = true }
-thiserror = "1.0.32"
-ux = "0.1.4"
 
 [dev-dependencies]
 criterion = "0.3.6"
@@ -29,6 +27,10 @@ harness = false
 
 [profile.release]
 lto = "thin"
+
+[profile.flame]
+inherits = "release"
+debug = true
 
 [profile.fuzz]
 inherits = "release"

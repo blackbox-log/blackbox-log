@@ -18,7 +18,6 @@ use std::iter::Peekable;
 use std::marker::PhantomData;
 use std::str;
 use std::str::FromStr;
-use thiserror::Error;
 
 // TODO
 // static const flightLogFrameType_t frameTypes[] = {
