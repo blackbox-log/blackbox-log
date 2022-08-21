@@ -84,7 +84,7 @@ pub fn read_uvar<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32> {
 }
 
 pub fn read_ivar<R: Read>(data: &mut Biterator<R>) -> ParseResult<i32> {
-    Ok(zig_zag_decode(read_uvar(data)?))
+    read_uvar(data).map(zig_zag_decode)
 }
 
 pub fn read_negative_14_bit<R: Read>(data: &mut Biterator<R>) -> i32 {
@@ -107,7 +107,6 @@ pub fn read_u32_elias_delta<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32
 
     let leading_zeros = leading_zeros;
     if leading_zeros > 5 {
-        dbg!(leading_zeros);
         return Err(ParseError::Corrupted);
     }
 
@@ -123,6 +122,9 @@ pub fn read_u32_elias_delta<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32
 
     // Guaranteed to be <= 31 since we're reading at most 5 bits
     let len = read(leading_zeros)? as u8;
+    if len > 31 {
+        return Err(ParseError::Corrupted);
+    }
 
     let result = read(len)?;
 
@@ -137,7 +139,7 @@ pub fn read_u32_elias_delta<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32
 }
 
 pub fn read_i32_elias_delta<R: Read>(data: &mut Biterator<R>) -> ParseResult<i32> {
-    Ok(zig_zag_decode(read_u32_elias_delta(data)?))
+    read_u32_elias_delta(data).map(zig_zag_decode)
 }
 
 pub fn read_tagged_16<R: Read>(version: LogVersion, data: &mut Biterator<R>) -> [i16; 4] {
@@ -235,12 +237,46 @@ mod test {
 
     #[test]
     fn read_u32_elias_delta_max() {
+        let bytes = &[0x04, 0x1F, 0xFF, 0xFF, 0xFF, 0xE0];
+        let mut biterator = Biterator::new(bytes.as_slice());
+
+        assert_eq!(
+            u32::MAX,
+            super::read_u32_elias_delta(&mut biterator).unwrap()
+        );
+    }
+
+    #[test]
+    fn read_i32_elias_delta() {
+        fn read(bytes: &[u8]) -> i32 {
+            super::read_i32_elias_delta(&mut Biterator::new(bytes)).unwrap()
+        }
+
+        assert_eq!(0, read(&[0x80, 0]));
+        assert_eq!(-1, read(&[0x40, 0]));
+        assert_eq!(1, read(&[0x50, 0]));
+        assert_eq!(-8, read(&[0x28, 0]));
+    }
+
+    #[test]
+    fn read_i32_elias_delta_min() {
+        let bytes = &[0x04, 0x1F, 0xFF, 0xFF, 0xFF, 0xE0];
+        let mut biterator = Biterator::new(bytes.as_slice());
+
+        assert_eq!(
+            i32::MIN,
+            super::read_i32_elias_delta(&mut biterator).unwrap()
+        );
+    }
+
+    #[test]
+    fn read_i32_elias_delta_max() {
         let bytes = &[0x04, 0x1F, 0xFF, 0xFF, 0xFF, 0xC0];
         let mut biterator = Biterator::new(bytes.as_slice());
 
         assert_eq!(
-            u32::MAX - 1,
-            super::read_u32_elias_delta(&mut biterator).unwrap()
+            i32::MAX,
+            super::read_i32_elias_delta(&mut biterator).unwrap()
         );
     }
 
