@@ -79,6 +79,7 @@ flame-bench bench out filter:
 
 export HFUZZ_BUILD_ARGS := '--profile=fuzz'
 export HFUZZ_DEBUGGER := 'rust-gdb'
+
 fuzz +args='-h':
 	@echo "HFUZZ_BUILD_ARGS='$HFUZZ_BUILD_ARGS'"
 	cd fuzzing/ && cargo hfuzz {{args}}
@@ -91,7 +92,7 @@ fuzz-run target *args='': fmt
 alias defuzz := fuzz-debug
 fuzz-debug target *args='':
 	#!/usr/bin/env bash
-	echo "HFUZZ_BUILD_ARGS='$HFUZZ_BUILD_ARGS'"
+	export HFUZZ_BUILD_ARGS=''
 	echo "HFUZZ_DEBUGGER='$HFUZZ_DEBUGGER'"
 	args={{args}}
 	default="hfuzz_workspace/{{target}}/*.fuzz"
