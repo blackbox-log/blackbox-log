@@ -53,11 +53,11 @@ impl Frame {
                         vec![field]
                     }
                     Encoding::U32EliasDelta => {
-                        values.push(encoding::read_u32_elias_delta(log).into());
+                        values.push(encoding::read_u32_elias_delta(log).unwrap().into());
                         vec![field]
                     }
                     Encoding::I32EliasDelta => {
-                        values.push(encoding::read_i32_elias_delta(log).into());
+                        values.push(encoding::read_i32_elias_delta(log).unwrap().into());
                         vec![field]
                     }
                     Encoding::Tagged16 => {
