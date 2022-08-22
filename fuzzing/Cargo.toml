@@ -1,7 +1,9 @@
 [package]
 name = "fuzzing"
 version = "0.1.0"
+license = "GPL-3.0-only"
 edition = "2021"
+publish = false
 
 [dependencies]
 biterator = { version = "0.1.0", path = "../../biterator" }
