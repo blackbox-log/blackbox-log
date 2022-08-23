@@ -6,7 +6,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
-biterator = { version = "0.1.0", path = "../../biterator" }
+biterator = { version = "0.1.0", git = "https://gitlab.com/wetheredge/biterator" }
 blackbox = { version = "0.1.0", path = ".." }
 honggfuzz = "0.5.55"
 memfile = "0.2.1"
