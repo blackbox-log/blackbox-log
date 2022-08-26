@@ -58,12 +58,12 @@ clippy-all *args='': fmt-all
 	cargo clippy --workspace --all-targets {{args}}
 
 alias t := test
-test +args='run': fmt
-	cd {{invocation_directory()}} && cargo clippy --tests && cargo nextest {{args}}
+test +args='': fmt
+	cd {{invocation_directory()}} && cargo clippy --tests && cargo nextest run {{args}}
 
 alias ta := test-all
-test-all +args='run': fmt
-	cargo clippy --workspace --lib --tests && cargo nextest {{args}}
+test-all +args='': fmt
+	cargo clippy --workspace --lib --tests && cargo nextest run {{args}}
 
 bench *args='': fmt
 	cd {{invocation_directory()}} && cargo clippy --benches && cargo criterion --benches {{args}}
@@ -87,6 +87,9 @@ alias fls := fuzz-list
 @fuzz-list:
 	echo "All available fuzzing targets:"
 	cargo fuzz list
+
+fuzz-check:
+	cargo +nightly fuzz check
 
 alias frun := fuzz-run
 fuzz-run target *args='':

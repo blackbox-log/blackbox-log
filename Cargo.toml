@@ -15,6 +15,7 @@ _reference-impl = ["dep:reference-impl"]
 biterator = { version = "0.1.0", git = "https://gitlab.com/wetheredge/biterator" }
 num_enum = "0.5.7"
 reference-impl = { path = "reference-impl", optional = true }
+test-case = "2.2.1"
 
 [dev-dependencies]
 criterion = { version = "0.3.6", default-features = false }

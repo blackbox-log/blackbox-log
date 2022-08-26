@@ -61,7 +61,7 @@ impl Frame {
                         vec![field]
                     }
                     Encoding::Tagged16 => {
-                        let read_values = encoding::read_tagged_16(headers.version, log);
+                        let read_values = encoding::read_tagged_16(headers.version, log).unwrap();
 
                         let fields = fields_with_same_encoding(fields.by_ref(), field);
                         assert!(fields.len() <= read_values.len());
