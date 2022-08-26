@@ -29,9 +29,3 @@ harness = false
 
 [profile.release]
 lto = "thin"
-
-[profile.fuzz]
-inherits = "release"
-debug = true
-debug-assertions = true
-overflow-checks = true
