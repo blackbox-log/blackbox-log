@@ -6,7 +6,7 @@ edition = "2021"
 publish = false
 
 [workspace]
-members = ["fuzzing", "reference-impl"]
+members = ["fuzz", "reference-impl"]
 
 [features]
 _reference-impl = ["dep:reference-impl"]

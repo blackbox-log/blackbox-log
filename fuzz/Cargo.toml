@@ -1,0 +1,52 @@
+[package]
+name = "blackbox-fuzz"
+version = "0.0.0"
+authors = ["Automatically generated"]
+publish = false
+edition = "2018"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+biterator = { version = "0.1.0", git = "https://gitlab.com/wetheredge/biterator" }
+blackbox = { path = ".." }
+libfuzzer-sys = "0.4"
+memfile = "0.2.1"
+reference-impl = { version = "0.1.0", path = "../reference-impl" }
+
+[[bin]]
+name = "ivar"
+path = "fuzz_targets/ivar.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "uvar"
+path = "fuzz_targets/uvar.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "i32_elias_delta"
+path = "fuzz_targets/i32_elias_delta.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "u32_elias_delta"
+path = "fuzz_targets/u32_elias_delta.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "tagged_16_v1"
+path = "fuzz_targets/tagged_16_v1.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "tagged_16_v2"
+path = "fuzz_targets/tagged_16_v2.rs"
+test = false
+doc = false

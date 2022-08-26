@@ -1,6 +1,6 @@
 pub use biterator::Biterator;
 pub use blackbox::encoding;
-pub use honggfuzz::fuzz;
+pub use libfuzzer_sys::fuzz_target;
 
 use memfile::MemFile;
 use reference_impl::stream::Stream;
