@@ -2,6 +2,7 @@
 
 set dotenv-load
 
+alias help := default
 @default:
 	# @just --list --justfile {{justfile()}} --unsorted
 	echo 'Usage:'
@@ -23,12 +24,21 @@ set dotenv-load
 	echo '    test-all (ca)'
 	echo '    bench-all'
 	echo
-	echo '# Will always run in <project_root>/fuzzing/'
+	echo '# Will always run in <project_root>/fuzz/'
 	echo 'Fuzzing:'
-	echo '    fuzz <command>           # cargo hfuzz <command>'
-	echo '    fuzz-run (fr) <target>   # fuzz <target>'
-	echo '    fuzz-debug <target>      # debug crashes for <target>'
-	echo '    defuzz                   # alias for fuzz-debug'
+	echo '    fuzz-add <target>           # Set up new fuzz target'
+	echo '    fuzz-list                   # List all fuzz targets'
+	echo '    fuzz-run <target>           # fuzz <target>'
+	echo '    fuzz-fmt <target> <input>   # Pretty-print input for target'
+	echo '    fuzz-cov <target>           # Generate coverage report for target'
+	echo '    fuzz-cmin <target>          # Minify corpus for target'
+	echo '    fuzz-tmin <target> <input>  # Minify input test for target'
+	echo
+	echo '    fls    # alias for fuzz-list'
+	echo '    frun   # alias for fuzz-run'
+	echo '    fcov   # alias for fuzz-cov'
+	echo '    fcmin  # alias for fuzz-cmin'
+	echo '    ftmin  # alias for fuzz-tmin'
 	echo
 	echo 'Misc:'
 	echo '    install-dev-deps   # install/update all necessary cargo subcommands'
@@ -80,37 +90,34 @@ flame-bench bench out filter:
 @fuzz-add target:
 	echo -e "\n[[bin]]\nname = \"{{target}}\"\npath = \"fuzz_targets/{{target}}.rs\"\ntest = false\ndoc = false" >> fuzz/Cargo.toml
 	mkdir -p fuzz/fuzz_targets
-	echo -e "#![no_main]\n\nuse blackbox_fuzz::{encoding, fuzz_target, get_streams};\n\nfuzz_target!(|data: &[u8]| {\n    let (mut reference, mut biterator) = get_streams(bytes).unwrap();\n\n    assert_eq!(todo!(), todo!());\n});" > fuzz/fuzz_targets/{{target}}.rs
+	echo -e '#![no_main]\n\nuse blackbox_fuzz::{encoding, fuzz_target, get_streams};\n\nfuzz_target!(|data: &[u8]| {\n    let (mut reference, mut biterator) = get_streams(bytes).unwrap();\n\n    assert_eq!(todo!(), todo!());\n});' > fuzz/fuzz_targets/{{target}}.rs
 	echo 'Initialized fuzz/fuzz_targets/{{target}}.rs'
 
 alias fls := fuzz-list
 @fuzz-list:
-	echo "All available fuzzing targets:"
+	echo 'All available fuzzing targets:'
 	cargo fuzz list
-
-fuzz-check:
-	cargo +nightly fuzz check
 
 alias frun := fuzz-run
 fuzz-run target *args='':
 	cargo +nightly fuzz run {{target}} {{args}}
 
-alias fcmin := fuzz-corpus-min
-fuzz-corpus-min target *args='':
+alias fcmin := fuzz-cmin
+fuzz-cmin target *args='':
 	cargo +nightly fuzz cmin {{target}} fuzz/corpus/{{target}} {{args}}
 
-alias ftmin := fuzz-test-min
-fuzz-test-min target *args='':
-	cargo +nightly fuzz tmin {{target}} fuzz/corpus/{{target}} {{args}}
+alias ftmin := fuzz-tmin
+fuzz-tmin target input *args='':
+	cargo +nightly fuzz tmin {{target}} fuzz/corpus/{{target}}/{{input}} {{args}}
 
 fuzz-fmt target input *args='':
 	cargo +nightly fuzz fmt {{target}} fuzz/corpus/{{target}}/{{input}} {{args}}
 
 nightlySysroot := `rustc +nightly --print sysroot`
-llvmCov := join(nightlySysroot, "lib/rustlib/*/bin/llvm-cov")
+llvmCov := join(nightlySysroot, 'lib/rustlib/*/bin/llvm-cov')
 
-alias fcov := fuzz-coverage
-fuzz-coverage target *args='':
+alias fcov := fuzz-cov
+fuzz-cov target *args='':
 	cargo +nightly fuzz coverage {{target}} {{args}}
 	@{{llvmCov}} show \
 		--format=html \
