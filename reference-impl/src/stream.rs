@@ -13,12 +13,19 @@ impl Stream {
     }
 
     #[inline]
+    pub fn byte_align(&mut self) {
+        unsafe { ffi::streamByteAlign(self.stream) }
+    }
+
+    #[inline]
     pub fn read_uvar(&mut self) -> u32 {
+        self.byte_align();
         unsafe { ffi::streamReadUnsignedVB(self.stream) }
     }
 
     #[inline]
     pub fn read_ivar(&mut self) -> i32 {
+        self.byte_align();
         unsafe { ffi::streamReadSignedVB(self.stream) }
     }
 
@@ -34,6 +41,8 @@ impl Stream {
 
     #[inline]
     pub fn read_tagged_16_v1(&mut self) -> [i64; 4] {
+        self.byte_align();
+
         let mut result = [0; 4];
         unsafe { ffi::streamReadTag8_4S16_v1(self.stream, &mut result as *mut i64) }
         result
@@ -41,9 +50,16 @@ impl Stream {
 
     #[inline]
     pub fn read_tagged_16_v2(&mut self) -> [i64; 4] {
+        self.byte_align();
+
         let mut result = [0; 4];
         unsafe { ffi::streamReadTag8_4S16_v2(self.stream, &mut result as *mut i64) }
         result
+    }
+
+    #[inline]
+    pub fn read_bits(&mut self, bits: u8) -> u32 {
+        unsafe { ffi::streamReadBits(self.stream, bits as i32) }
     }
 }
 
@@ -695,9 +711,13 @@ mod ffi {
         // fn streamReadByte(stream: *mut mmapStream_t) -> c_int;
         // fn streamUnreadChar(stream: *mut mmapStream_t);
         // fn streamRead(stream: *mut mmapStream_t, buf: *mut c_void, len: c_int);
-        // fn streamReadBits(stream: *mut mmapStream_t, numBits: c_int) -> u32;
+
+        pub(super) fn streamReadBits(stream: *mut mmapStream_t, numBits: c_int) -> u32;
+
         // fn streamReadBit(stream: *mut mmapStream_t) -> c_int;
-        // fn streamByteAlign(stream: *mut mmapStream_t);
+
+        pub(super) fn streamByteAlign(stream: *mut mmapStream_t);
+
         // fn streamReadS16(stream: *mut mmapStream_t) -> i16;
         // fn streamReadRawFloat(stream: *mut mmapStream_t) -> f32;
 
