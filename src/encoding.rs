@@ -128,14 +128,14 @@ pub fn read_tagged_16<R: Read>(
     data: &mut Biterator<R>,
 ) -> ParseResult<[i16; 4]> {
     fn i4_to_i16(i4: u8) -> i16 {
-        let i4 = i4 as u16;
+        let i4 = u16::from(i4);
         let byte = if (i4 & 8) > 0 { i4 ^ 0xFFF0 } else { i4 };
         byte as i16
     }
 
-    data.byte_align();
-
     const COUNT: usize = 4;
+
+    data.byte_align();
 
     let tags = data.next_byte().ok_or_else(ParseError::unexpected_eof)?;
     let mut result = [0; COUNT];
@@ -158,18 +158,18 @@ pub fn read_tagged_16<R: Read>(
                     // Lower nibble first...
                     result[i] = i4_to_i16(byte & 0xF);
                     i += 1;
-                    result[i] = i4_to_i16(byte >> 4)
+                    result[i] = i4_to_i16(byte >> 4);
                 }
                 LogVersion::V2 => {
                     result[i] = i4_to_i16(
                         data.next_nibble()
                             .ok_or_else(ParseError::unexpected_eof)?
                             .value(),
-                    )
+                    );
                 }
             },
             2 => {
-                result[i] = (data.next_byte().ok_or_else(ParseError::unexpected_eof)? as i8).into()
+                result[i] = (data.next_byte().ok_or_else(ParseError::unexpected_eof)? as i8).into();
             }
             3 => {
                 let byte1 = data.next_byte().ok_or_else(ParseError::unexpected_eof)?;

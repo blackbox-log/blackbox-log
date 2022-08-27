@@ -1,4 +1,5 @@
 use std::os::unix::io::RawFd;
+use std::ptr;
 
 #[derive(Debug)]
 pub struct Stream {
@@ -44,7 +45,8 @@ impl Stream {
         self.byte_align();
 
         let mut result = [0; 4];
-        unsafe { ffi::streamReadTag8_4S16_v1(self.stream, &mut result as *mut i64) }
+        let pointer = ptr::addr_of_mut!(result[0]);
+        unsafe { ffi::streamReadTag8_4S16_v1(self.stream, pointer) }
         result
     }
 
@@ -53,7 +55,8 @@ impl Stream {
         self.byte_align();
 
         let mut result = [0; 4];
-        unsafe { ffi::streamReadTag8_4S16_v2(self.stream, &mut result as *mut i64) }
+        let pointer = ptr::addr_of_mut!(result[0]);
+        unsafe { ffi::streamReadTag8_4S16_v2(self.stream, pointer) }
         result
     }
 

@@ -80,7 +80,7 @@ fn tagged_16(c: &mut Criterion) {
                 || Biterator::new(input),
                 |input| encoding::read_tagged_16(version, input),
                 BatchSize::SmallInput,
-            )
+            );
         }
     }
 
