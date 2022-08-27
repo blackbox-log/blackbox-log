@@ -18,34 +18,40 @@ reference-impl = { version = "0.1.0", path = "../reference-impl" }
 name = "ivar"
 path = "fuzz_targets/ivar.rs"
 test = false
+bench = false
 doc = false
 
 [[bin]]
 name = "uvar"
 path = "fuzz_targets/uvar.rs"
 test = false
+bench = false
 doc = false
 
 [[bin]]
 name = "i32_elias_delta"
 path = "fuzz_targets/i32_elias_delta.rs"
 test = false
+bench = false
 doc = false
 
 [[bin]]
 name = "u32_elias_delta"
 path = "fuzz_targets/u32_elias_delta.rs"
 test = false
+bench = false
 doc = false
 
 [[bin]]
 name = "tagged_16_v1"
 path = "fuzz_targets/tagged_16_v1.rs"
 test = false
+bench = false
 doc = false
 
 [[bin]]
 name = "tagged_16_v2"
 path = "fuzz_targets/tagged_16_v2.rs"
 test = false
+bench = false
 doc = false
