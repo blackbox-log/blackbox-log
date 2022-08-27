@@ -19,6 +19,8 @@ alias help := default
 	echo '              # save a flamegraph at <out>.svg of <bench> run for 10 seconds'
 	echo
 	echo 'Workspace commands:'
+	echo '    (r)un           # Run blackbox_decode'
+	echo '    rr              # Run release mode blackbox_decode'
 	echo '    fmt-all (fa)'
 	echo '    check-all (ca)'
 	echo '    test-all (ca)'
@@ -46,6 +48,13 @@ alias help := default
 alias b := build
 build *args='':
 	cargo build {{args}}
+
+alias r := run
+run *args='':
+	cargo run --manifest-path {{join(invocation_directory(), 'cli/Cargo.toml')}} -- {{args}}
+
+rr *args='':
+	cargo run --release --manifest-path {{join(invocation_directory(), 'cli/Cargo.toml')}} -- {{args}}
 
 alias f := fmt
 alias format := fmt
