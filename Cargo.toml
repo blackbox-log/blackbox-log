@@ -25,4 +25,8 @@ name = "read"
 harness = false
 
 [profile.release]
-lto = "thin"
+lto = true
+opt-level = 3
+codegen-units = 1
+panic = "abort"
+strip = true
