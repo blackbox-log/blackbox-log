@@ -8,7 +8,7 @@ mod parser;
 use biterator::Biterator;
 use encoding::Encoding;
 use num_enum::TryFromPrimitive;
-use parser::{Event, FrameKind, Headers, LogData};
+use parser::{Data, Event, FrameKind, Headers};
 // use peekable_ext::PeekableExt;
 use std::collections::HashMap;
 use std::fmt;
@@ -264,7 +264,7 @@ struct FrameDefs {
 #[derive(Debug)]
 pub struct Log {
     headers: Headers,
-    data: LogData,
+    data: Data,
 }
 
 impl Log {
@@ -272,7 +272,7 @@ impl Log {
         let mut log = Biterator::new(log);
 
         let headers = Headers::parse(&mut log)?;
-        let data = LogData::parse(&mut log, &headers)?;
+        let data = Data::parse(&mut log, &headers)?;
 
         Ok(Self { headers, data })
     }

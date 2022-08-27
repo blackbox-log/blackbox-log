@@ -12,12 +12,12 @@ use std::iter;
 use std::iter::Peekable;
 
 #[derive(Debug, Clone)]
-pub struct LogData {
+pub struct Data {
     pub(crate) events: Vec<Event>,
     pub(crate) frames: Vec<Frame>,
 }
 
-impl LogData {
+impl Data {
     pub fn parse<R: Read>(log: &mut Biterator<R>, headers: &Headers) -> ParseResult<Self> {
         let mut events = Vec::new();
         let mut frames = Vec::new();
