@@ -2,6 +2,7 @@ use crate::{encoding, ParseError, ParseResult};
 use biterator::Biterator;
 use num_enum::TryFromPrimitive;
 use std::io::Read;
+use tracing::instrument;
 
 pub type Time = u64;
 pub type DisarmReason = u32;
@@ -14,22 +15,24 @@ pub enum Event {
 }
 
 impl Event {
+    #[instrument(level = "debug", name = "Event::parse", skip_all, fields(kind))]
     pub fn parse<R>(data: &mut Biterator<R>) -> ParseResult<Self>
     where
         R: Read,
     {
-        match data.next_byte().map(EventType::try_from) {
-            Some(Ok(EventType::SyncBeep)) => {
+        let kind = data.next_byte().map(EventKind::try_from);
+        match kind {
+            Some(Ok(EventKind::SyncBeep)) => {
                 // TODO: SyncBeep handle time rollover
 
                 let time = encoding::read_uvar(data)?;
                 Ok(Self::SyncBeep(time.into()))
             }
-            Some(Ok(EventType::Disarm)) => {
+            Some(Ok(EventKind::Disarm)) => {
                 let reason = encoding::read_uvar(data)?;
                 Ok(Self::Disarm(reason))
             }
-            Some(Ok(EventType::End)) => {
+            Some(Ok(EventKind::End)) => {
                 const END_MESSAGE: &str = "End of log\0";
 
                 if !data.bytes().take(11).eq(END_MESSAGE.bytes()) {
@@ -47,7 +50,7 @@ impl Event {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, TryFromPrimitive)]
 #[repr(u8)]
-enum EventType {
+enum EventKind {
     SyncBeep = 0,
     InflightAdjustment = 13,
     Resume = 14,

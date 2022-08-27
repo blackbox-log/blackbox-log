@@ -3,32 +3,7 @@ use biterator::arbitrary_int::u1;
 use biterator::Biterator;
 use num_enum::TryFromPrimitive;
 use std::io::Read;
-
-#[derive(Debug)]
-pub enum Decoded {
-    Zero,
-    U32(u32),
-    I32(i32),
-    TaggedVar([i32; 8]),
-    Tagged32([i32; 3]),
-    Tagged16([i16; 4]),
-}
-
-macro_rules! impl_from {
-    ($from:ty, $variant:ident) => {
-        impl From<$from> for Decoded {
-            fn from(from: $from) -> Self {
-                Self::$variant(from)
-            }
-        }
-    };
-}
-
-impl_from!(u32, U32);
-impl_from!(i32, I32);
-impl_from!([i32; 8], TaggedVar);
-impl_from!([i32; 3], Tagged32);
-impl_from!([i16; 4], Tagged16);
+use tracing::instrument;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, TryFromPrimitive)]
 #[repr(u8)]
@@ -58,6 +33,7 @@ pub enum Encoding {
     I32EliasGamma,
 }
 
+#[instrument(level = "trace", skip(data), ret)]
 pub fn read_uvar<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32> {
     data.byte_align();
 
@@ -83,16 +59,19 @@ pub fn read_uvar<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32> {
     Ok(uvar)
 }
 
+#[instrument(level = "trace", skip(data), ret)]
 pub fn read_ivar<R: Read>(data: &mut Biterator<R>) -> ParseResult<i32> {
     read_uvar(data).map(zig_zag_decode)
 }
 
+#[instrument(level = "trace", skip(data), ret)]
 pub fn read_negative_14_bit<R: Read>(data: &mut Biterator<R>) -> i32 {
     data.byte_align();
 
     unimplemented!();
 }
 
+#[instrument(level = "trace", skip(data), ret)]
 pub fn read_u32_elias_delta<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32> {
     let mut bits = data.bits();
 
@@ -138,10 +117,12 @@ pub fn read_u32_elias_delta<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32
     }
 }
 
+#[instrument(level = "trace", skip(data), ret)]
 pub fn read_i32_elias_delta<R: Read>(data: &mut Biterator<R>) -> ParseResult<i32> {
     read_u32_elias_delta(data).map(zig_zag_decode)
 }
 
+#[instrument(level = "trace", skip(data), ret)]
 pub fn read_tagged_16<R: Read>(
     version: LogVersion,
     data: &mut Biterator<R>,

@@ -4,6 +4,7 @@ use crate::{Encoding, FieldDef, FrameDef, ParseResult, Predictor};
 use biterator::Biterator;
 use std::io::Read;
 use std::iter::Peekable;
+use tracing::instrument;
 
 fn fields_with_same_encoding<'a, I>(
     fields: &mut Peekable<I>,
@@ -21,31 +22,48 @@ where
     results
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum FrameKind {
+    Intra, // I
+    // Inter, // P
+    // Gps, // G
+    // GpsHome, // H
+    // Event, // E
+    Slow, // S
+}
+
 #[derive(Debug, Clone)]
 pub struct Frame {
+    kind: FrameKind,
     values: Vec<i64>,
 }
 
 impl Frame {
+    #[instrument(
+        level = "debug",
+        name = "Frame::parse",
+        skip_all,
+        fields(frame_type = ?frame_def.kind)
+    )]
     pub(crate) fn parse<R: Read>(
         log: &mut Biterator<R>,
         headers: &Headers,
         frame_def: &FrameDef,
     ) -> ParseResult<Self> {
-        let mut fields = (&frame_def.0).iter().peekable();
-        let mut values: Vec<i64> = Vec::with_capacity(frame_def.0.len());
+        let mut frame_fields = (&frame_def.fields).iter().peekable();
+        let mut values: Vec<i64> = Vec::with_capacity(frame_def.fields.len());
 
-        while let Some(field) = fields.next() {
+        while let Some(field) = frame_fields.next() {
             let read_fields = if field.predictor == Predictor::Increment {
                 todo!("Predictor::Increment")
             } else {
                 match field.encoding {
                     Encoding::IVar => {
-                        values.push(encoding::read_ivar(log).unwrap().into());
+                        values.push(encoding::read_ivar(log)?.into());
                         vec![field]
                     }
                     Encoding::UVar => {
-                        values.push(encoding::read_uvar(log).unwrap().into());
+                        values.push(encoding::read_uvar(log)?.into());
                         vec![field]
                     }
                     Encoding::Negative14Bit => {
@@ -53,20 +71,21 @@ impl Frame {
                         vec![field]
                     }
                     Encoding::U32EliasDelta => {
-                        values.push(encoding::read_u32_elias_delta(log).unwrap().into());
+                        values.push(encoding::read_u32_elias_delta(log)?.into());
                         vec![field]
                     }
                     Encoding::I32EliasDelta => {
-                        values.push(encoding::read_i32_elias_delta(log).unwrap().into());
+                        values.push(encoding::read_i32_elias_delta(log)?.into());
                         vec![field]
                     }
                     Encoding::Tagged16 => {
-                        let read_values = encoding::read_tagged_16(headers.version, log).unwrap();
+                        let read_values =
+                            encoding::read_tagged_16(headers.version, log)?.map(i64::from);
 
-                        let fields = fields_with_same_encoding(fields.by_ref(), field);
+                        let fields = fields_with_same_encoding(frame_fields.by_ref(), field);
                         assert!(fields.len() <= read_values.len());
 
-                        values.extend(read_values.iter().map(|x| i64::from(*x)).take(fields.len()));
+                        values.extend_from_slice(&read_values);
 
                         fields
                     }
@@ -85,17 +104,13 @@ impl Frame {
 
                 *value = field.predictor.apply(*value);
 
-                // if field.name == "flightModeFlags" {
-                //     eprintln!(
-                //         "flightModeFlags: {:?}",
-                //         betaflight::FlightModeFlags::new((*value).try_into().unwrap()).to_modes()
-                //     );
-                // } else {
-                //     eprintln!("{}: {value:?}", field.name);
-                // }
+                tracing::debug!(field = field.name, value);
             }
         }
 
-        Ok(Self { values })
+        Ok(Self {
+            kind: frame_def.kind,
+            values,
+        })
     }
 }

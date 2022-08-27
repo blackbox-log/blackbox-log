@@ -1,4 +1,4 @@
-use crate::{FrameDef, FrameDefs, LogVersion, ParseResult};
+use crate::{FrameDef, FrameDefs, FrameKind, LogVersion, ParseResult};
 use biterator::Biterator;
 use std::collections::HashMap;
 use std::io::Read;
@@ -45,8 +45,8 @@ impl Headers {
 
         let mut unknown = HashMap::new();
 
-        let mut intraframe = FrameDef::builder();
-        let mut slow = FrameDef::builder();
+        let mut intraframe = FrameDef::builder(FrameKind::Intra);
+        let mut slow = FrameDef::builder(FrameKind::Slow);
 
         let mut update_field_def = |name: &str, value| {
             // Skip `Field`

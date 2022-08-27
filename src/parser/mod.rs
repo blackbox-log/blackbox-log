@@ -1,5 +1,5 @@
+mod data;
 mod headers;
-mod log_data;
 
+pub use data::{Event, Frame, FrameKind, LogData};
 pub use headers::Headers;
-pub use log_data::{Event, Frame, LogData};

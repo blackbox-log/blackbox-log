@@ -6,11 +6,12 @@ mod parser;
 // mod peekable_ext;
 
 use biterator::Biterator;
-use encoding::{Decoded, Encoding};
+use encoding::Encoding;
 use num_enum::TryFromPrimitive;
-use parser::{Event, Headers, LogData};
+use parser::{Event, FrameKind, Headers, LogData};
 // use peekable_ext::PeekableExt;
 use std::collections::HashMap;
+use std::fmt;
 use std::io;
 use std::io::Read;
 use std::iter;
@@ -40,6 +41,17 @@ impl ParseError {
         Self::Io(io::Error::from(io::ErrorKind::UnexpectedEof))
     }
 }
+
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Corrupted => write!(f, "corrupted log file"),
+            Self::Io(io) => write!(f, "IO error: {}", io),
+        }
+    }
+}
+
+impl std::error::Error for ParseError {}
 
 impl<T> From<T> for ParseError
 where
@@ -83,10 +95,14 @@ struct FieldDef {
 }
 
 #[derive(Debug)]
-struct FrameDef(Vec<FieldDef>);
+struct FrameDef {
+    kind: FrameKind,
+    fields: Vec<FieldDef>,
+}
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 struct FrameDefBuilder {
+    kind: FrameKind,
     names: Option<String>,
     signs: Option<String>,
     widths: Option<String>,
@@ -95,14 +111,15 @@ struct FrameDefBuilder {
 }
 
 impl FrameDef {
-    fn builder() -> FrameDefBuilder {
-        FrameDefBuilder::default()
+    fn builder(kind: FrameKind) -> FrameDefBuilder {
+        FrameDefBuilder::new(kind)
     }
 }
 
 impl FrameDefBuilder {
-    const fn new() -> Self {
+    const fn new(kind: FrameKind) -> Self {
         Self {
+            kind,
             names: None,
             signs: None,
             widths: None,
@@ -187,7 +204,10 @@ impl FrameDefBuilder {
             )
             .collect();
 
-        FrameDef(fields)
+        FrameDef {
+            kind: self.kind,
+            fields,
+        }
     }
 }
 

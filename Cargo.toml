@@ -6,7 +6,7 @@ edition = "2021"
 publish = false
 
 [workspace]
-members = ["fuzz", "reference-impl"]
+members = ["cli", "fuzz", "reference-impl"]
 
 [features]
 _reference-impl = ["dep:reference-impl"]
@@ -16,6 +16,7 @@ biterator = { version = "0.1.0", git = "https://gitlab.com/wetheredge/biterator"
 num_enum = "0.5.7"
 reference-impl = { path = "reference-impl", optional = true }
 test-case = "2.2.1"
+tracing = "0.1.36"
 
 [dev-dependencies]
 criterion = { version = "0.3.6", default-features = false }
