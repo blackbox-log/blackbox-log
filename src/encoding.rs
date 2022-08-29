@@ -11,13 +11,13 @@ pub enum Encoding {
     /// Signed variable byte
     IVar = 0,
     /// Unsigned variable byte
-    UVar,
+    UVar = 1,
     /// Unsigned variable byte, but negated after decoding. Value fits in 14 bits
-    Negative14Bit,
-    U32EliasDelta,
-    I32EliasDelta,
-    TaggedVar,
-    Tagged32,
+    Negative14Bit = 3,
+    U32EliasDelta = 4,
+    I32EliasDelta = 5,
+    TaggedVar = 6,
+    Tagged32 = 7,
     /// 1 tag byte containing 4 2 bit tags, followed by 4 fields
     ///
     /// | Tag | Field width         |
@@ -26,11 +26,11 @@ pub enum Encoding {
     /// | 1   | 4                   |
     /// | 2   | 8                   |
     /// | 3   | 16                  |
-    Tagged16,
+    Tagged16 = 8,
     /// Nothing is written to the log, assume value is 0
-    Null,
-    U32EliasGamma,
-    I32EliasGamma,
+    Null = 9,
+    U32EliasGamma = 10,
+    I32EliasGamma = 11,
 }
 
 #[instrument(level = "trace", skip(data), ret)]
