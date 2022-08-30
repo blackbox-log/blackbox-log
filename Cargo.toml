@@ -9,7 +9,7 @@ publish = false
 members = ["cli", "fuzz", "reference-impl"]
 
 [dependencies]
-biterator = { version = "0.1.0", git = "https://gitlab.com/wetheredge/biterator" }
+biterator = { version = "0.1.0", git = "https://gitlab.com/wetheredge/biterator", rev = "4a4297a" }
 num_enum = "0.5.7"
 tracing = "0.1.36"
 

@@ -45,7 +45,7 @@ pub fn read_tagged_16<R: Read>(
                     result[i] = i4_to_i16(
                         data.next_nibble()
                             .ok_or_else(ParseError::unexpected_eof)?
-                            .value(),
+                            .get(),
                     );
                 }
             },

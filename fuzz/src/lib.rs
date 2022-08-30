@@ -48,7 +48,7 @@ impl UnalignedBytes {
         let biterator_bits = biterator
             .bits()
             .take(offset.into())
-            .fold(0, |acc, cur| (acc << 1) + u32::from(cur.value()));
+            .fold(0, |acc, cur| (acc << 1) + u32::from(cur.get()));
 
         assert_eq!(reference_bits, biterator_bits);
 

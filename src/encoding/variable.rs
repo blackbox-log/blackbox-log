@@ -11,13 +11,13 @@ pub fn read_uvar<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32> {
     let mut uvar: u32 = 0;
     for i in 0.. {
         let is_last_byte = match data.next_bit() {
-            Some(bit) => bit.value() == 0,
+            Some(bit) => bit.get() == 0,
             None => return Err(ParseError::unexpected_eof()),
         };
 
         // Unwrap is safe after byte_align() above
         let byte = data.next_bits::<7>().unwrap();
-        let byte = u32::from(byte)
+        let byte = u32::from(byte.get())
             .checked_shl(7 * i)
             .ok_or(ParseError::Corrupted)?;
         uvar |= byte;

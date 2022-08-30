@@ -11,7 +11,7 @@ pub fn read_u32_elias_delta<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32
     let mut leading_zeros: u8 = 0;
     for _ in 0..6 {
         match bits.next() {
-            Some(bit) if bit.value() == 0 => leading_zeros += 1,
+            Some(bit) if bit.get() == 0 => leading_zeros += 1,
             Some(_) => break,
             None => return Err(ParseError::unexpected_eof()),
         }
@@ -27,7 +27,7 @@ pub fn read_u32_elias_delta<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32
         for i in 0..count {
             let bit = bits.next().ok_or_else(ParseError::unexpected_eof)?;
             result <<= 1;
-            result += u32::from(bit);
+            result += u32::from(bit.get());
         }
         Ok(result - 1)
     };
@@ -43,7 +43,7 @@ pub fn read_u32_elias_delta<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32
     if result == (u32::MAX - 1) {
         // Use an extra bit to disambiguate (u32::MAX - 1) and u32::MAX
         let bit = bits.next().ok_or(ParseError::Corrupted)?;
-        let bit: u32 = bit.into();
+        let bit: u32 = bit.get().into();
         Ok(result + bit)
     } else {
         Ok(result)
