@@ -55,3 +55,10 @@ path = "fuzz_targets/tagged_16_v2.rs"
 test = false
 bench = false
 doc = false
+
+[[bin]]
+name = "tagged_32"
+path = "fuzz_targets/tagged_32.rs"
+test = false
+bench = false
+doc = false

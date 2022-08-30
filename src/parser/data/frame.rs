@@ -78,6 +78,16 @@ impl Frame {
                         values.push(encoding::read_i32_elias_delta(log)?.into());
                         vec![field]
                     }
+                    Encoding::Tagged32 => {
+                        let read_values = encoding::read_tagged_32(log)?.map(i64::from);
+
+                        let fields = fields_with_same_encoding(frame_fields.by_ref(), field);
+                        assert!(fields.len() <= read_values.len());
+
+                        values.extend_from_slice(&read_values);
+
+                        fields
+                    }
                     Encoding::Tagged16 => {
                         let read_values =
                             encoding::read_tagged_16(headers.version, log)?.map(i64::from);

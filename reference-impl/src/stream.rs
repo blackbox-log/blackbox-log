@@ -61,6 +61,16 @@ impl Stream {
     }
 
     #[inline]
+    pub fn read_tagged_32(&mut self) -> [i64; 3] {
+        self.byte_align();
+
+        let mut result = [0; 3];
+        let pointer = ptr::addr_of_mut!(result[0]);
+        unsafe { ffi::streamReadTag2_3S32(self.stream, pointer) }
+        result
+    }
+
+    #[inline]
     pub fn read_bits(&mut self, bits: u8) -> u32 {
         unsafe { ffi::streamReadBits(self.stream, bits as i32) }
     }
@@ -727,8 +737,7 @@ mod ffi {
         pub(super) fn streamReadUnsignedVB(stream: *mut mmapStream_t) -> u32;
         pub(super) fn streamReadSignedVB(stream: *mut mmapStream_t) -> i32;
 
-        // pub(super) fn streamReadTag2_3S32(stream: *mut mmapStream_t, values: *mut i64);
-
+        pub(super) fn streamReadTag2_3S32(stream: *mut mmapStream_t, values: *mut i64);
         pub(super) fn streamReadTag8_4S16_v1(stream: *mut mmapStream_t, values: *mut i64);
         pub(super) fn streamReadTag8_4S16_v2(stream: *mut mmapStream_t, values: *mut i64);
 

@@ -1,5 +1,6 @@
+use super::sign_extend;
 use crate::{LogVersion, ParseError, ParseResult};
-use biterator::Biterator;
+use biterator::{Biterator, CustomInt};
 use std::io::Read;
 use tracing::instrument;
 
@@ -8,12 +9,6 @@ pub fn read_tagged_16<R: Read>(
     version: LogVersion,
     data: &mut Biterator<R>,
 ) -> ParseResult<[i16; 4]> {
-    fn i4_to_i16(i4: u8) -> i16 {
-        let i4 = u16::from(i4);
-        let byte = if (i4 & 8) > 0 { i4 | 0xFFF0 } else { i4 };
-        byte as i16
-    }
-
     const COUNT: usize = 4;
 
     data.byte_align();
@@ -42,11 +37,11 @@ pub fn read_tagged_16<R: Read>(
                     result[i] = i4_to_i16(byte >> 4);
                 }
                 LogVersion::V2 => {
-                    result[i] = i4_to_i16(
-                        data.next_nibble()
-                            .ok_or_else(ParseError::unexpected_eof)?
-                            .get(),
-                    );
+                    let nibble = data
+                        .next_nibble()
+                        .ok_or_else(ParseError::unexpected_eof)?
+                        .get();
+                    result[i] = i4_to_i16(nibble);
                 }
             },
             2 => {
@@ -69,6 +64,10 @@ pub fn read_tagged_16<R: Read>(
     }
 
     Ok(result)
+}
+
+fn i4_to_i16(i4: u8) -> i16 {
+    sign_extend(CustomInt::<u8, 4>::new(i4))
 }
 
 #[cfg(test)]
