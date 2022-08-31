@@ -24,7 +24,6 @@ impl Data {
 
         tracing::info!("data parsing starting at 0x{:0>6x}", log.consumed_bytes());
         while let Some(byte) = log.bytes().next() {
-
             let kind = if let Some(kind) = FrameKind::from_byte(byte) {
                 kind
             } else {

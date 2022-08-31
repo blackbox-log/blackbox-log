@@ -119,7 +119,7 @@ mod test {
 
     #[test]
     fn all_06_bits() {
-        let b = bytes(0x80, 3);
+        let b = bytes(0x80, 2);
         let mut b = Biterator::new(b.as_slice());
 
         assert_eq!([0; 3], read_tagged_32(&mut b).unwrap());
