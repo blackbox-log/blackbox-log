@@ -39,26 +39,32 @@ pub fn read_ivar<R: Read>(data: &mut Biterator<R>) -> ParseResult<i32> {
 mod test {
     use super::*;
 
+    fn read_ok(bytes: &[u8]) -> u32 {
+        super::read_uvar(&mut Biterator::new(bytes)).unwrap()
+    }
+
+    fn read_err(bytes: &[u8]) -> ParseError {
+        super::read_uvar(&mut Biterator::new(bytes)).unwrap_err()
+    }
+
     #[test]
     fn read() {
-        fn read(bytes: &[u8]) -> u32 {
-            super::read_uvar(&mut Biterator::new(bytes)).unwrap()
-        }
+        assert_eq!(0, read_ok(&[0x00]));
+        assert_eq!(0, read_ok(&[0x80, 0x00]));
+        assert_eq!(1, read_ok(&[1]));
+        assert_eq!(0xFF, read_ok(&[0xFF, 0x01]));
+        assert_eq!(0x3FFF, read_ok(&[0xFF, 0x7F]));
+    }
 
-        assert_eq!(0, read(&[0x00]));
-        assert_eq!(0, read(&[0x80, 0x00]));
-        assert_eq!(1, read(&[1]));
-        assert_eq!(0xFF, read(&[0xFF, 0x01]));
-        assert_eq!(0x3FFF, read(&[0xFF, 0x7F]));
+    #[test]
+    fn max() {
+        assert_eq!(0xFFFF_FFFF, read_ok(&[0xFF, 0xFF, 0xFF, 0xFF, 0x7F]));
+        assert_eq!(0xFFFF_FFFF, read_ok(&[0xFF, 0xFF, 0xFF, 0xFF, 0x7F]));
     }
 
     #[test]
     fn corrupted() {
-        fn read(bytes: &[u8]) -> ParseResult<u32> {
-            super::read_uvar(&mut Biterator::new(bytes))
-        }
-
-        let err = read(&[0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]);
-        assert!(matches!(err, Err(ParseError::Corrupted)));
+        let err = read_err(&[0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]);
+        assert!(matches!(err, ParseError::Corrupted));
     }
 }

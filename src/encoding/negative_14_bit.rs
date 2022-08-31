@@ -17,3 +17,19 @@ pub fn read_negative_14_bit<R: Read>(data: &mut Biterator<R>) -> ParseResult<i32
 
     Ok(-result)
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use test_case::case;
+
+    #[case(0, &[0]; "zero")]
+    #[case(-0x1FFF, &[0xFF, 0x3F]; "min")]
+    #[case(0x2000, &[0x80, 0x40]; "max")]
+    #[case(1, &[0xFF, 0x7F]; "all bits set")]
+    #[case(1, &[0xFF, 0xFF, 0xFF, 0xFF, 0x7F]; "extra bits ignored")]
+    fn read_negative_14_bit(expected: i32, bytes: &[u8]) {
+        let mut b = Biterator::new(bytes);
+        assert_eq!(expected, super::read_negative_14_bit(&mut b).unwrap());
+    }
+}
