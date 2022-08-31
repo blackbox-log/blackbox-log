@@ -13,6 +13,7 @@ alias help := default
 	echo '    (f)mt'
 	echo '    (c)heck   # run clippy'
 	echo '    (t)est    # run tests with nextest'
+	echo '    cov       # generate html test coverage report'
 	echo '    bench     # run criterion benchmarks'
 	echo
 	echo '    flame-bench <bench> <out> <filter>'
@@ -83,6 +84,9 @@ test +args='': fmt
 alias ta := test-all
 test-all +args='': fmt
 	cargo clippy --workspace --lib --tests && cargo nextest run {{args}}
+
+cov: fmt
+	cargo llvm-cov nextest --html
 
 bench *args='': fmt
 	cd {{invocation_directory()}} && cargo clippy --benches && cargo criterion --benches {{args}}
