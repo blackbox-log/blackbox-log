@@ -73,12 +73,11 @@ impl Headers {
         while log.peek_byte() == Some(b'H') {
             let (name, value) = parse_header(log);
 
-            match name.as_str() {
-                name if is_field_def(name) => update_field_def(name, value),
-                _ => {
-                    unknown.insert(name, value);
-                }
-            };
+            if is_field_def(&name) {
+                update_field_def(&name, value);
+            } else {
+                unknown.insert(name, value);
+            }
         }
 
         interframe.names = intraframe.names.clone();

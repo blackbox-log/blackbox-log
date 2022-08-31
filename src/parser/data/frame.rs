@@ -122,7 +122,9 @@ impl Frame {
                         values.push(0);
                         vec![field]
                     }
-                    other => unimplemented!("{other:?}"),
+                    other @ (Encoding::TaggedVar
+                    | Encoding::U32EliasGamma
+                    | Encoding::I32EliasGamma) => unimplemented!("{other:?}"),
                 }
             };
 

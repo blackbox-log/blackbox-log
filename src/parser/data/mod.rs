@@ -64,7 +64,10 @@ impl Data {
                     FrameKind::Intra => &headers.frames.intraframe,
                     FrameKind::Inter => &headers.frames.interframe,
                     FrameKind::Slow => &headers.frames.slow,
-                    _ => todo!("unhandled frame type"),
+                    other @ (FrameKind::Gps | FrameKind::GpsHome) => {
+                        todo!("unhandled frame type: {other:?}")
+                    }
+                    FrameKind::Event => unreachable!(),
                 };
 
                 let frame = Frame::parse(log, headers, frame_def)?;

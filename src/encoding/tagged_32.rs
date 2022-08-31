@@ -72,11 +72,11 @@ pub fn read_tagged_32<R: Read>(data: &mut Biterator<R>) -> ParseResult<[i32; 3]>
                         }
                         *x = x.swap_bytes();
                     }
-                    _ => unreachable!(),
+                    4.. => unreachable!(),
                 }
             }
         }
-        _ => unreachable!(),
+        4.. => unreachable!(),
     }
 
     Ok(result)
