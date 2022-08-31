@@ -62,3 +62,9 @@ path = "fuzz_targets/tagged_32.rs"
 test = false
 bench = false
 doc = false
+
+[[bin]]
+name = "negative_14_bit"
+path = "fuzz_targets/negative_14_bit.rs"
+test = false
+doc = false

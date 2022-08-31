@@ -57,7 +57,8 @@ pub fn read_tagged_32<R: Read>(data: &mut Biterator<R>) -> ParseResult<[i32; 3]>
                     2 => {
                         let mut bytes = 0;
                         for _ in 0..3 {
-                            bytes |= data.next_byte().ok_or_else(ParseError::unexpected_eof)? as u32;
+                            bytes |=
+                                data.next_byte().ok_or_else(ParseError::unexpected_eof)? as u32;
                             bytes <<= 8;
                         }
 

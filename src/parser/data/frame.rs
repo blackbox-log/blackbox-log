@@ -67,7 +67,7 @@ impl Frame {
                         vec![field]
                     }
                     Encoding::Negative14Bit => {
-                        values.push(encoding::read_negative_14_bit(log).into());
+                        values.push(encoding::read_negative_14_bit(log)?.into());
                         vec![field]
                     }
                     Encoding::U32EliasDelta => {

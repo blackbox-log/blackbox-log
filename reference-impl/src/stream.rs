@@ -31,6 +31,12 @@ impl Stream {
     }
 
     #[inline]
+    pub fn read_negative_14_bit(&mut self) -> i32 {
+        self.byte_align();
+        unsafe { ffi::streamReadNeg14Bit(self.stream) }
+    }
+
+    #[inline]
     pub fn read_u32_elias_delta(&mut self) -> u32 {
         unsafe { ffi::streamReadEliasDeltaU32(self.stream) }
     }
@@ -751,5 +757,7 @@ mod ffi {
         pub(super) fn streamReadEliasDeltaS32(stream: *mut mmapStream_t) -> i32;
         // pub(super) fn streamReadEliasGammaU32(stream: *mut mmapStream_t) -> u32;
         // pub(super) fn streamReadEliasGammaS32(stream: *mut mmapStream_t) -> i32;
+
+        pub(super) fn streamReadNeg14Bit(stream: *mut mmapStream_t) -> i32;
     }
 }
