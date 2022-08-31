@@ -99,7 +99,7 @@ flame-bench bench out filter:
 @fuzz-add target:
 	echo -e "\n[[bin]]\nname = \"{{target}}\"\npath = \"fuzz_targets/{{target}}.rs\"\ntest = false\ndoc = false" >> fuzz/Cargo.toml
 	mkdir -p fuzz/fuzz_targets
-	echo -e '#![no_main]\n\nuse blackbox_fuzz::{encoding, fuzz_target, get_streams};\n\nfuzz_target!(|data: &[u8]| {\n    let (mut reference, mut biterator) = get_streams(bytes).unwrap();\n\n    assert_eq!(todo!(), todo!());\n});' > fuzz/fuzz_targets/{{target}}.rs
+	echo -e '#![no_main]\n\nuse blackbox_fuzz::{encoding, fuzz_target, UnalignedBytes};\n\nfuzz_target!(|data: UnalignedBytes| {\n    let (mut reference, mut biterator) = data.to_streams().unwrap();\n\n    assert_eq!(todo!(), todo!());\n});' > fuzz/fuzz_targets/{{target}}.rs
 	echo 'Initialized fuzz/fuzz_targets/{{target}}.rs'
 
 alias fls := fuzz-list
