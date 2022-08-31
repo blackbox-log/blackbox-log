@@ -118,6 +118,8 @@ impl Frame {
             }
         }
 
+        log.byte_align();
+
         Ok(Self {
             kind: frame_def.kind,
             values,
