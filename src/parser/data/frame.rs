@@ -24,12 +24,30 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum FrameKind {
-    Intra, // I
-    // Inter, // P
-    // Gps, // G
-    // GpsHome, // H
-    // Event, // E
-    Slow, // S
+    Event,
+    Intra,
+    Inter,
+    Gps,
+    GpsHome,
+    Slow,
+}
+
+impl FrameKind {
+    pub(crate) fn from_byte(byte: u8) -> Option<Self> {
+        match byte {
+            b'E' => Some(Self::Event),
+            b'I' => Some(Self::Intra),
+            b'P' => Some(Self::Inter),
+            b'G' => Some(Self::Gps),
+            b'H' => Some(Self::GpsHome),
+            b'S' => Some(Self::Slow),
+            _ => None,
+        }
+    }
+
+    pub(crate) fn is_data_frame(&self) -> bool {
+        *self != Self::Event
+    }
 }
 
 #[derive(Debug, Clone)]

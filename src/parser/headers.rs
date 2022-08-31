@@ -20,7 +20,7 @@ fn is_field_def(name: &str) -> bool {
     let mut name = name.split(' ');
 
     name.next() == Some("Field")
-        && matches!(name.next(), Some("I" | "S"))
+        && matches!(name.next(), Some("I" | "P" | "S"))
         && matches!(
             name.next(),
             Some("name" | "signed" | "width" | "predictor" | "encoding")
@@ -46,6 +46,7 @@ impl Headers {
         let mut unknown = HashMap::new();
 
         let mut intraframe = FrameDef::builder(FrameKind::Intra);
+        let mut interframe = FrameDef::builder(FrameKind::Inter);
         let mut slow = FrameDef::builder(FrameKind::Slow);
 
         let mut update_field_def = |name: &str, value| {
@@ -54,6 +55,7 @@ impl Headers {
 
             let frame = match name.next().unwrap() {
                 "I" => &mut intraframe,
+                "P" => &mut interframe,
                 "S" => &mut slow,
                 _ => unreachable!(),
             };
@@ -79,9 +81,18 @@ impl Headers {
             };
         }
 
+        interframe.names = intraframe.names.clone();
+        interframe.signs = intraframe.signs.clone();
+
         let intraframe = intraframe.parse();
+        let interframe = interframe.parse();
         let slow = slow.parse();
-        let frames = FrameDefs { intraframe, slow };
+
+        let frames = FrameDefs {
+            intraframe,
+            interframe,
+            slow,
+        };
 
         Ok(Self {
             version,

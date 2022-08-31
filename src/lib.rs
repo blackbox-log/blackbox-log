@@ -258,6 +258,7 @@ impl Predictor {
 #[derive(Debug)]
 struct FrameDefs {
     intraframe: FrameDef,
+    interframe: FrameDef,
     slow: FrameDef,
 }
 
