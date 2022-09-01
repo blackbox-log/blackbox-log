@@ -78,7 +78,7 @@ impl Stream {
 
     #[inline]
     pub fn read_bits(&mut self, bits: u8) -> u32 {
-        unsafe { ffi::streamReadBits(self.stream, bits as i32) }
+        unsafe { ffi::streamReadBits(self.stream, i32::from(bits)) }
     }
 }
 
@@ -88,9 +88,12 @@ impl Drop for Stream {
     }
 }
 
+#[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
+#[allow(unsafe_code)]
+#[allow(clippy::items_after_statements)]
+#[allow(clippy::unseparated_literal_suffix)]
 mod ffi {
-    #![allow(non_camel_case_types)]
-    #![allow(non_snake_case)]
 
     // TODO: switch to std::ffi
     use std::os::raw::{c_char, c_int, c_long, c_uint, c_ulong};

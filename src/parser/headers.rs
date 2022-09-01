@@ -28,6 +28,8 @@ fn is_field_def(name: &str) -> bool {
         && name.next() == None
 }
 
+// Reason: unfinished
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Headers {
     pub(crate) version: LogVersion,
@@ -37,7 +39,7 @@ pub struct Headers {
 
 impl Headers {
     pub fn parse<R: Read>(log: &mut Biterator<R>) -> ParseResult<Self> {
-        let (name, product) = parse_header(log);
+        let (name, _product) = parse_header(log);
         assert_eq!(name, "Product", "`Product` header must be first");
         let (name, version) = parse_header(log);
         assert_eq!(name, "Data version", "`Data version` header must be second");

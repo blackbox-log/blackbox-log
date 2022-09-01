@@ -1,3 +1,5 @@
+#![allow(clippy::cast_possible_wrap)]
+
 mod elias_delta;
 mod negative_14_bit;
 mod tagged_16;
@@ -12,7 +14,6 @@ pub use variable::{read_ivar, read_uvar};
 
 use biterator::custom_int::{CustomInt, Storage, ToSigned};
 use num_enum::TryFromPrimitive;
-use std::io::Read;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, TryFromPrimitive)]
 #[repr(u8)]

@@ -44,12 +44,10 @@ impl FrameKind {
             _ => None,
         }
     }
-
-    pub(crate) fn is_data_frame(&self) -> bool {
-        *self != Self::Event
-    }
 }
 
+// Reason: unfinished
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct Frame {
     kind: FrameKind,

@@ -86,19 +86,17 @@ impl FlightModeFlags {
     }
 
     pub fn to_modes(self) -> Vec<FlightMode> {
-        use FlightMode::*;
-
         [
-            Angle,
-            Horizon,
-            Mag,
-            Baro,
-            GpsHome,
-            GpsHold,
-            HeadFree,
-            Passthru,
-            RangeFinder,
-            Failsafe,
+            FlightMode::Angle,
+            FlightMode::Horizon,
+            FlightMode::Mag,
+            FlightMode::Baro,
+            FlightMode::GpsHome,
+            FlightMode::GpsHold,
+            FlightMode::HeadFree,
+            FlightMode::Passthru,
+            FlightMode::RangeFinder,
+            FlightMode::Failsafe,
         ]
         .into_iter()
         .filter(|&mode| self.is_mode_set(mode))

@@ -5,12 +5,13 @@ pub use event::Event;
 pub use frame::{Frame, FrameKind};
 
 use super::Headers;
-use crate::{ParseError, ParseResult};
+use crate::ParseResult;
 use biterator::Biterator;
 use std::io::Read;
 use std::iter;
-use std::iter::Peekable;
 
+// Reason: unfinished
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct Data {
     pub(crate) events: Vec<Event>,
@@ -24,9 +25,7 @@ impl Data {
 
         tracing::info!("data parsing starting at 0x{:0>6x}", log.consumed_bytes());
         while let Some(byte) = log.bytes().next() {
-            let kind = if let Some(kind) = FrameKind::from_byte(byte) {
-                kind
-            } else {
+            let kind = FrameKind::from_byte(byte).unwrap_or_else(|| {
                 eprintln!();
                 eprintln!("consumed_bytes = 0x{:0>6x}", log.consumed_bytes());
 
@@ -48,7 +47,7 @@ impl Data {
                 }
 
                 todo!();
-            };
+            });
 
             if kind == FrameKind::Event {
                 let event = Event::parse(log)?;

@@ -70,34 +70,34 @@ fmt-all:
 alias c := clippy
 alias check := clippy
 clippy *args='': fmt
-	cd {{invocation_directory()}} && cargo clippy {{args}}
+	cd {{invocation_directory()}} && cargo cranky {{args}}
 
 alias ca := clippy-all
 alias check-all := clippy-all
 clippy-all *args='': fmt-all
-	cargo clippy --workspace --all-targets {{args}}
+	cargo cranky --workspace --all-targets {{args}}
 
 alias t := test
 test +args='': fmt
-	cd {{invocation_directory()}} && cargo clippy --tests && cargo nextest run {{args}}
+	cd {{invocation_directory()}} && cargo cranky --tests && cargo nextest run {{args}}
 
 alias ta := test-all
 test-all +args='': fmt
-	cargo clippy --workspace --lib --tests && cargo nextest run {{args}}
+	cargo cranky --workspace --lib --tests && cargo nextest run {{args}}
 
 cov: fmt
 	cargo llvm-cov nextest --html
 
 bench *args='': fmt
-	cd {{invocation_directory()}} && cargo clippy --benches && cargo criterion --benches {{args}}
+	cd {{invocation_directory()}} && cargo cranky --benches && cargo criterion --benches {{args}}
 
 bench-all *args='': fmt
-	cargo clippy --workspace --lib --benches && cargo criterion --workspace --benches {{args}}
+	cargo cranky --workspace --lib --benches && cargo criterion --workspace --benches {{args}}
 
 flame-bench bench out filter:
 	export CARGO_PROFILE_BENCH_DEBUG=true \
 		&& cd {{invocation_directory()}} \
-		&& cargo clippy --benches \
+		&& cargo cranky --benches \
 		&& cargo flamegraph --deterministic --output {{out}}.svg --bench {{bench}} -- --bench --profile-time 10 '{{filter}}'
 
 @fuzz-add target:
@@ -141,4 +141,4 @@ fuzz-cov target *args='':
 	@echo "Saved coverage to fuzz/coverage/{{target}}/index.html"
 
 install-dev-deps:
-	cargo install cargo-criterion cargo-fuzz cargo-nextest flamegraph
+	cargo install cargo-cranky cargo-criterion cargo-fuzz cargo-llvm-cov cargo-nextest flamegraph

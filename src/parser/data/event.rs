@@ -36,7 +36,7 @@ impl Event {
                 const END_MESSAGE: &str = "End of log\0";
 
                 if !data.bytes().take(11).eq(END_MESSAGE.bytes()) {
-                    todo!("malformed end event");
+                    return Err(ParseError::Corrupted);
                 }
 
                 Ok(Self::End)

@@ -1,34 +1,19 @@
-#![allow(unused)]
+#![warn(unsafe_code)]
 
 pub mod betaflight;
 pub mod encoding;
 mod parser;
-// mod peekable_ext;
 
 use biterator::Biterator;
 use encoding::Encoding;
 use num_enum::TryFromPrimitive;
-use parser::{Data, Event, FrameKind, Headers};
-// use peekable_ext::PeekableExt;
-use std::collections::HashMap;
+use parser::{Data, FrameKind, Headers};
 use std::fmt;
 use std::io;
 use std::io::Read;
 use std::iter;
-use std::iter::Peekable;
-use std::marker::PhantomData;
 use std::str;
 use std::str::FromStr;
-
-// TODO
-// static const flightLogFrameType_t frameTypes[] = {
-//     {.marker = 'I', .parse = parseIntraframe,   .complete = completeIntraframe},
-//     {.marker = 'P', .parse = parseInterframe,   .complete = completeInterframe},
-//     {.marker = 'G', .parse = parseGPSFrame,     .complete = completeGPSFrame},
-//     {.marker = 'H', .parse = parseGPSHomeFrame, .complete = completeGPSHomeFrame},
-//     {.marker = 'E', .parse = parseEventFrame,   .complete = completeEventFrame},
-//     {.marker = 'S', .parse = parseSlowFrame,    .complete = completeSlowFrame}
-// };
 
 #[derive(Debug)]
 pub enum ParseError {
@@ -44,9 +29,9 @@ impl ParseError {
 
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
+        match *self {
             Self::Corrupted => write!(f, "corrupted log file"),
-            Self::Io(io) => write!(f, "IO error: {}", io),
+            Self::Io(ref io) => write!(f, "IO error: {}", io),
         }
     }
 }
@@ -82,9 +67,8 @@ impl FromStr for LogVersion {
     }
 }
 
-type Time = u64;
-type DisarmReason = u32;
-
+// Reason: unfinished
+#[allow(dead_code)]
 #[derive(Debug)]
 struct FieldDef {
     name: String,
@@ -262,6 +246,8 @@ struct FrameDefs {
     slow: FrameDef,
 }
 
+// Reason: unfinished
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Log {
     headers: Headers,

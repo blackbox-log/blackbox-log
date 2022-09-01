@@ -1,6 +1,6 @@
-use super::{read_uvar, sign_extend};
-use crate::{ParseError, ParseResult};
-use biterator::{Biterator, CustomInt};
+use super::read_uvar;
+use crate::ParseResult;
+use biterator::Biterator;
 use std::io::Read;
 use tracing::instrument;
 
@@ -8,11 +8,13 @@ use tracing::instrument;
 pub fn read_negative_14_bit<R: Read>(data: &mut Biterator<R>) -> ParseResult<i32> {
     data.byte_align();
 
+    // Reason: done to match reference impl
+    #[allow(clippy::cast_possible_truncation)]
     let result = read_uvar(data)? as u16;
     let result = if (result & 0x2000) > 0 {
         i32::from((result | 0xC000) as i16)
     } else {
-        result as i32
+        i32::from(result)
     };
 
     Ok(-result)

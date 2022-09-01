@@ -1,8 +1,8 @@
 use super::sign_extend;
 use crate::{ParseError, ParseResult};
 use biterator::{Biterator, CustomInt};
+use std::array;
 use std::io::Read;
-use std::{array, cmp, iter, marker, ops};
 use tracing::instrument;
 
 #[instrument(level = "trace", skip(data), ret)]
@@ -17,7 +17,7 @@ pub fn read_tagged_32<R: Read>(data: &mut Biterator<R>) -> ParseResult<[i32; 3]>
 
     match data.next_bits::<2>().unwrap().get() {
         0 => {
-            for x in result.iter_mut() {
+            for x in &mut result {
                 *x = next_as_i32::<2, R>(data)?;
             }
         }
@@ -26,7 +26,7 @@ pub fn read_tagged_32<R: Read>(data: &mut Biterator<R>) -> ParseResult<[i32; 3]>
             // Skip rest of tag byte
             data.next_bits::<2>();
 
-            for x in result.iter_mut() {
+            for x in &mut result {
                 *x = next_as_i32::<4, R>(data)?;
             }
         }
@@ -42,9 +42,9 @@ pub fn read_tagged_32<R: Read>(data: &mut Biterator<R>) -> ParseResult<[i32; 3]>
         }
 
         3 => {
-            let mut tags: [_; 3] = array::from_fn(|_| data.next_bits::<2>().unwrap().get());
+            let tags: [_; 3] = array::from_fn(|_| data.next_bits::<2>().unwrap().get());
             for (x, tag) in result.iter_mut().zip(tags.iter().rev()) {
-                match tag {
+                match *tag {
                     0 => {
                         *x = next_as_i32::<8, R>(data)?;
                     }
@@ -58,7 +58,7 @@ pub fn read_tagged_32<R: Read>(data: &mut Biterator<R>) -> ParseResult<[i32; 3]>
                         let mut bytes = 0;
                         for _ in 0..3 {
                             bytes |=
-                                data.next_byte().ok_or_else(ParseError::unexpected_eof)? as u32;
+                                u32::from(data.next_byte().ok_or_else(ParseError::unexpected_eof)?);
                             bytes <<= 8;
                         }
 
@@ -68,7 +68,8 @@ pub fn read_tagged_32<R: Read>(data: &mut Biterator<R>) -> ParseResult<[i32; 3]>
                     3 => {
                         for _ in 0..4 {
                             *x <<= 8;
-                            *x |= data.next_byte().ok_or_else(ParseError::unexpected_eof)? as i32;
+                            *x |=
+                                i32::from(data.next_byte().ok_or_else(ParseError::unexpected_eof)?);
                         }
                         *x = x.swap_bytes();
                     }

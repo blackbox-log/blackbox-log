@@ -22,7 +22,7 @@ impl<'a> Arbitrary<'a> for UnalignedBytes {
         let offset = if bytes.is_empty() {
             0
         } else {
-            u.choose_index(8)? as u8
+            u.choose_index(8)?.try_into().unwrap()
         };
 
         Ok(Self { offset, bytes })

@@ -24,7 +24,7 @@ pub fn read_u32_elias_delta<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32
 
     let mut read = |count: u8| -> ParseResult<u32> {
         let mut result = 1;
-        for i in 0..count {
+        for _ in 0..count {
             let bit = bits.next().ok_or_else(ParseError::unexpected_eof)?;
             result <<= 1;
             result += u32::from(bit.get());
@@ -32,7 +32,8 @@ pub fn read_u32_elias_delta<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32
         Ok(result - 1)
     };
 
-    // Guaranteed to be <= 31 since we're reading at most 5 bits
+    // Reason: guaranteed to be <= 31 since we're reading at most 5 bits
+    #[allow(clippy::cast_possible_truncation)]
     let len = read(leading_zeros)? as u8;
     if len > 31 {
         return Err(ParseError::Corrupted);
