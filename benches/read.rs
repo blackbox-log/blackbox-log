@@ -109,5 +109,19 @@ fn tagged_16(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(benches, variable, elias_delta, tagged_16);
+fn negative_14_bit(c: &mut Criterion) {
+    get_bench!(encoding::read_negative_14_bit);
+
+    let mut group = c.benchmark_group("negative 14 bit");
+
+    let benches: [(_, &[u8]); 2] = [("min", &[0]), ("max", &[0x80, 0x40])];
+    for (name, input) in benches {
+        group.throughput(Throughput::Bytes(input.len() as u64));
+        group.bench_with_input(name, input, bench);
+    }
+
+    group.finish();
+}
+
+criterion_group!(benches, variable, elias_delta, tagged_16, negative_14_bit);
 criterion_main!(benches);
