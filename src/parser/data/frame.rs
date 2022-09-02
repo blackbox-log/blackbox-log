@@ -126,12 +126,8 @@ impl Frame {
                 }
             };
 
-            for (i, field) in read_fields.into_iter().enumerate() {
-                let value = values.len() - i - 1;
-                let value = values.get_mut(value).unwrap();
-
+            for (field, value) in read_fields.into_iter().zip(values.iter_mut().rev()) {
                 *value = field.predictor.apply(*value);
-
                 tracing::debug!(field = field.name, value);
             }
         }
