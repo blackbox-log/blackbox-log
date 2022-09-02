@@ -6,7 +6,7 @@ edition = "2021"
 publish = false
 
 [workspace]
-members = ["cli", "fuzz", "reference-impl"]
+members = ["cli", "fuzz", "reference-impl", "xtask"]
 
 [dependencies]
 biterator = { version = "0.1.0", git = "https://gitlab.com/wetheredge/biterator", rev = "4a4297a" }
@@ -14,7 +14,7 @@ num_enum = "0.5.7"
 tracing = "0.1.36"
 
 [dev-dependencies]
-criterion = { version = "0.3.6", default-features = false }
+criterion = { version = "0.3.6", default-features = false, features = ["cargo_bench_support", "html_reports"] }
 test-case = "2.2.1"
 
 [lib]
