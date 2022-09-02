@@ -123,5 +123,42 @@ fn negative_14_bit(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(benches, variable, elias_delta, tagged_16, negative_14_bit);
+fn tagged_32(c: &mut Criterion) {
+    get_bench!(encoding::read_tagged_32);
+
+    fn input(first: u8, zeros: usize) -> Vec<u8> {
+        iter::once(first)
+            .chain(iter::repeat(0).take(zeros))
+            .collect()
+    }
+
+    let mut group = c.benchmark_group("tagged 32");
+
+    let benches = [
+        ("3x02 bits", input(0x00, 0)),
+        ("3x04 bits", input(0x40, 1)),
+        ("3x06 bits", input(0x80, 2)),
+        ("3x08 bits", input(0xC0, 3)),
+        ("3x16 bits", input(0xD7, 6)),
+        ("3x24 bits", input(0xEA, 9)),
+        ("3x32 bits", input(0xFF, 12)),
+    ];
+    for (id, input) in benches {
+        let input = input.as_slice();
+
+        group.throughput(Throughput::Bytes(input.len() as u64));
+        group.bench_with_input(id, input, bench);
+    }
+
+    group.finish();
+}
+
+criterion_group!(
+    benches,
+    variable,
+    elias_delta,
+    tagged_16,
+    negative_14_bit,
+    tagged_32
+);
 criterion_main!(benches);
