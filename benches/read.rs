@@ -56,6 +56,20 @@ fn variable(c: &mut Criterion) {
     group.finish();
 }
 
+fn negative_14_bit(c: &mut Criterion) {
+    get_bench!(encoding::read_negative_14_bit);
+
+    let mut group = c.benchmark_group("negative 14 bit");
+
+    let benches: [(_, &[u8]); 2] = [("min", &[0]), ("max", &[0x80, 0x40])];
+    for (name, input) in benches {
+        group.throughput(Throughput::Bytes(input.len() as u64));
+        group.bench_with_input(name, input, bench);
+    }
+
+    group.finish();
+}
+
 fn elias_delta(c: &mut Criterion) {
     get_bench!(ubench, encoding::read_u32_elias_delta);
     get_bench!(ibench, encoding::read_i32_elias_delta);
@@ -71,6 +85,12 @@ fn elias_delta(c: &mut Criterion) {
     group.finish();
 }
 
+fn tagged_zeros(first: u8, zeros: usize) -> Vec<u8> {
+    iter::once(first)
+        .chain(iter::repeat(0).take(zeros))
+        .collect()
+}
+
 fn tagged_16(c: &mut Criterion) {
     use LogVersion::{V1, V2};
 
@@ -84,20 +104,26 @@ fn tagged_16(c: &mut Criterion) {
         }
     }
 
-    fn input(first: u8, zeros: usize) -> Vec<u8> {
-        iter::once(first)
-            .chain(iter::repeat(0).take(zeros))
-            .collect()
-    }
-
     let mut group = c.benchmark_group("tagged 16");
 
     let benches = [
-        (BenchmarkId::from_parameter("zeros"), input(0x00, 0), V1),
-        (BenchmarkId::new("v1", "nibbles"), input(0x55, 2), V1),
-        (BenchmarkId::new("v2", "nibbles"), input(0x55, 2), V2),
-        (BenchmarkId::from_parameter("bytes"), input(0xAA, 4), V1),
-        (BenchmarkId::from_parameter("16 bits"), input(0xFF, 8), V1),
+        (
+            BenchmarkId::from_parameter("zeros"),
+            tagged_zeros(0x00, 0),
+            V1,
+        ),
+        (BenchmarkId::new("v1", "nibbles"), tagged_zeros(0x55, 2), V1),
+        (BenchmarkId::new("v2", "nibbles"), tagged_zeros(0x55, 2), V2),
+        (
+            BenchmarkId::from_parameter("bytes"),
+            tagged_zeros(0xAA, 4),
+            V1,
+        ),
+        (
+            BenchmarkId::from_parameter("16 bits"),
+            tagged_zeros(0xFF, 8),
+            V1,
+        ),
     ];
     for (id, input, version) in benches {
         let input = input.as_slice();
@@ -109,39 +135,19 @@ fn tagged_16(c: &mut Criterion) {
     group.finish();
 }
 
-fn negative_14_bit(c: &mut Criterion) {
-    get_bench!(encoding::read_negative_14_bit);
-
-    let mut group = c.benchmark_group("negative 14 bit");
-
-    let benches: [(_, &[u8]); 2] = [("min", &[0]), ("max", &[0x80, 0x40])];
-    for (name, input) in benches {
-        group.throughput(Throughput::Bytes(input.len() as u64));
-        group.bench_with_input(name, input, bench);
-    }
-
-    group.finish();
-}
-
 fn tagged_32(c: &mut Criterion) {
     get_bench!(encoding::read_tagged_32);
-
-    fn input(first: u8, zeros: usize) -> Vec<u8> {
-        iter::once(first)
-            .chain(iter::repeat(0).take(zeros))
-            .collect()
-    }
 
     let mut group = c.benchmark_group("tagged 32");
 
     let benches = [
-        ("3x02 bits", input(0x00, 0)),
-        ("3x04 bits", input(0x40, 1)),
-        ("3x06 bits", input(0x80, 2)),
-        ("3x08 bits", input(0xC0, 3)),
-        ("3x16 bits", input(0xD7, 6)),
-        ("3x24 bits", input(0xEA, 9)),
-        ("3x32 bits", input(0xFF, 12)),
+        ("3x02 bits", tagged_zeros(0x00, 0)),
+        ("3x04 bits", tagged_zeros(0x40, 1)),
+        ("3x06 bits", tagged_zeros(0x80, 2)),
+        ("3x08 bits", tagged_zeros(0xC0, 3)),
+        ("3x16 bits", tagged_zeros(0xD7, 6)),
+        ("3x24 bits", tagged_zeros(0xEA, 9)),
+        ("3x32 bits", tagged_zeros(0xFF, 12)),
     ];
     for (id, input) in benches {
         let input = input.as_slice();
@@ -156,9 +162,9 @@ fn tagged_32(c: &mut Criterion) {
 criterion_group!(
     benches,
     variable,
+    negative_14_bit,
     elias_delta,
     tagged_16,
-    negative_14_bit,
     tagged_32
 );
 criterion_main!(benches);
