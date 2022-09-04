@@ -214,10 +214,7 @@ enum Predictor {
 }
 
 impl Predictor {
-    const fn apply(
-        self,
-        value: i64, /*, current: i64, previous: i64, previous2: i64 */
-    ) -> i64 {
+    fn apply(self, value: i64 /*, current: i64, previous: i64, previous2: i64 */) -> i64 {
         let diff = match self {
             Self::Zero => 0,
             // Self::Previous => previous,
@@ -232,7 +229,10 @@ impl Predictor {
             // Self::LastMainFrameTime => todo!(),
             // Self::MinMotor => todo!(),
             // Self::HomeLon => todo!(),
-            _ => 0,
+            predictor => {
+                tracing::warn!("found unimplemented predictor: {predictor:?}");
+                0
+            }
         };
 
         value + diff
