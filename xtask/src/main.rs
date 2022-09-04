@@ -142,16 +142,25 @@ fn main() -> Result<()> {
 
                 Fuzz::Run(FuzzRun {
                     target,
+                    time,
+                    backtrace,
                     input,
-                    total_time,
                 }) => {
-                    let total_time = total_time.map(|t| format!("-max_total_time={t}"));
+                    let total_time = time.map(|t| format!("-max_total_time={t}"));
+                    let debug = backtrace.then_some("--debug");
 
-                    cmd!(
+                    let cmd = cmd!(
                         sh,
-                        "cargo +nightly fuzz run {dir_args...} {target} {input...} -- {total_time...}"
-                    )
-                    .run()
+                        "cargo +nightly fuzz run {debug...} {dir_args...} {target} {input...} -- {total_time...}"
+                    );
+
+                    let cmd = if backtrace {
+                        cmd.env("RUST_BACKTRACE", "1")
+                    } else {
+                        cmd
+                    };
+
+                    cmd.run()
                 }
 
                 Fuzz::Fmt { target, input } => {
@@ -353,9 +362,12 @@ struct FuzzRun {
     #[bpaf(positional("target"))]
     target: String,
 
-    #[bpaf(long, argument("seconds"))]
-    /// Passes -max_total_time=<seconds> to libFuzzer
-    total_time: Option<u16>,
+    #[bpaf(external)]
+    time: Option<u16>,
+
+    #[bpaf(long, switch)]
+    /// Runs in debug mode and prints a backtrace on panic
+    backtrace: bool,
 
     #[bpaf(positional("input"))]
     /// Runs the target on only this input, if given
@@ -365,6 +377,22 @@ struct FuzzRun {
 fn fuzz_with_default_run() -> impl bpaf::Parser<Fuzz> {
     let fuzz_run = fuzz_run().map(Fuzz::Run);
     bpaf::construct!([fuzz(), fuzz_run])
+}
+
+fn time_given() -> impl Parser<Option<u16>> {
+    bpaf::long("time")
+        .help("Passes -max_total_time=<seconds> to libFuzzer, defaulting to 15 minutes if passed without a value")
+        .argument("seconds")
+        .from_str()
+        .map(Some)
+}
+
+fn time_default() -> impl Parser<Option<u16>> {
+    bpaf::long("time").switch().hide().map(|x| x.then_some(900))
+}
+
+fn time() -> impl Parser<Option<u16>> {
+    bpaf::construct!([time_given(), time_default()])
 }
 
 fn get_root(sh: &Shell) -> Result<PathBuf> {
