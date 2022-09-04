@@ -1,0 +1,14 @@
+[package]
+name = "blackbox_decode"
+description = "Rust port of Nicholas Sherlock's blackbox_decode"
+version = "0.1.0"
+license = "GPL-3.0-only"
+edition = "2021"
+publish = false
+
+[dependencies]
+blackbox = { version = "0.1.0", path = ".." }
+clap = { version = "3.2.17", features = ["derive", "wrap_help"] }
+eyre = "0.6.8"
+tracing = "0.1.36"
+tracing-subscriber = "0.3.15"
