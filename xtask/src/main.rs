@@ -269,14 +269,6 @@ enum Args {
     #[bpaf(command)]
     /// Generates a flamegraph chart for a benchmark
     Profile {
-        #[bpaf(positional("bench"))]
-        /// Which benchmark binary to run
-        bench: String,
-
-        #[bpaf(positional("filter"))]
-        /// Filter to pass to the benchmark binary, see criterion docs
-        filter: String,
-
         #[bpaf(short, long, argument("seconds"), fallback(10))]
         /// How long the benchmark should run (default: 10)
         time: u16,
@@ -284,6 +276,14 @@ enum Args {
         #[bpaf(short, long, argument("name"))]
         /// Overrides the default name ({bench}-{unixtime})
         name: Option<String>,
+
+        #[bpaf(positional("bench"))]
+        /// Which benchmark binary to run
+        bench: String,
+
+        #[bpaf(positional("filter"))]
+        /// Filter to pass to the benchmark binary, see criterion docs
+        filter: String,
     },
 
     #[bpaf(command)]
