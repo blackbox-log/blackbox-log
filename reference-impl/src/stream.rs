@@ -20,19 +20,19 @@ impl Stream {
 
     #[inline]
     pub fn read_uvar(&mut self) -> u32 {
-        self.byte_align();
+        // self.byte_align();
         unsafe { ffi::streamReadUnsignedVB(self.stream) }
     }
 
     #[inline]
     pub fn read_ivar(&mut self) -> i32 {
-        self.byte_align();
+        // self.byte_align();
         unsafe { ffi::streamReadSignedVB(self.stream) }
     }
 
     #[inline]
     pub fn read_negative_14_bit(&mut self) -> i32 {
-        self.byte_align();
+        // self.byte_align();
         unsafe { ffi::streamReadNeg14Bit(self.stream) }
     }
 
@@ -48,7 +48,7 @@ impl Stream {
 
     #[inline]
     pub fn read_tagged_16_v1(&mut self) -> [i64; 4] {
-        self.byte_align();
+        // self.byte_align();
 
         let mut result = [0; 4];
         let pointer = ptr::addr_of_mut!(result[0]);
@@ -58,7 +58,7 @@ impl Stream {
 
     #[inline]
     pub fn read_tagged_16_v2(&mut self) -> [i64; 4] {
-        self.byte_align();
+        // self.byte_align();
 
         let mut result = [0; 4];
         let pointer = ptr::addr_of_mut!(result[0]);
@@ -68,7 +68,7 @@ impl Stream {
 
     #[inline]
     pub fn read_tagged_32(&mut self) -> [i64; 3] {
-        self.byte_align();
+        // self.byte_align();
 
         let mut result = [0; 3];
         let pointer = ptr::addr_of_mut!(result[0]);

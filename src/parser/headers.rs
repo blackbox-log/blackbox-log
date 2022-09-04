@@ -1,32 +1,7 @@
-use crate::{FrameDef, FrameDefs, FrameKind, LogVersion, ParseResult};
-use biterator::Biterator;
+use crate::{FrameDef, FrameDefs, FrameKind, LogVersion, ParseError, ParseResult, Reader};
+use bitter::BitReader;
 use std::collections::HashMap;
-use std::io::Read;
 use std::str;
-
-fn parse_header<R: Read>(log: &mut Biterator<R>) -> (String, String) {
-    assert_eq!(Some(b'H'), log.next_byte());
-    log.next_byte_if_eq(b' ');
-
-    let line = log.bytes().take_while(|b| *b != b'\n').collect::<Vec<_>>();
-
-    let line = str::from_utf8(&line).unwrap();
-    let (name, value) = line.split_once(':').unwrap();
-
-    (name.to_owned(), value.to_owned())
-}
-
-fn is_field_def(name: &str) -> bool {
-    let mut name = name.split(' ');
-
-    name.next() == Some("Field")
-        && matches!(name.next(), Some("I" | "P" | "S"))
-        && matches!(
-            name.next(),
-            Some("name" | "signed" | "width" | "predictor" | "encoding")
-        )
-        && name.next() == None
-}
 
 // Reason: unfinished
 #[allow(dead_code)]
@@ -38,10 +13,13 @@ pub struct Headers {
 }
 
 impl Headers {
-    pub fn parse<R: Read>(log: &mut Biterator<R>) -> ParseResult<Self> {
-        let (name, _product) = parse_header(log);
+    pub fn parse(data: &mut Reader) -> ParseResult<Self> {
+        read_h(data)?;
+        let (name, _product) = parse_header(data)?;
         assert_eq!(name, "Product", "`Product` header must be first");
-        let (name, version) = parse_header(log);
+
+        read_h(data)?;
+        let (name, version) = parse_header(data)?;
         assert_eq!(name, "Data version", "`Data version` header must be second");
         let version = version.parse().unwrap();
 
@@ -72,8 +50,18 @@ impl Headers {
             };
         };
 
-        while log.peek_byte() == Some(b'H') {
-            let (name, value) = parse_header(log);
+        loop {
+            // Need at least "H\n"
+            if !data.has_bits_remaining(16) {
+                return Err(ParseError::unexpected_eof());
+            }
+            assert!(data.refill_lookahead() >= 8);
+
+            if data.peek(8) != b'H'.into() {
+                break;
+            }
+
+            let (name, value) = parse_header(data)?;
 
             if is_field_def(&name) {
                 update_field_def(&name, value);
@@ -101,4 +89,41 @@ impl Headers {
             unknown,
         })
     }
+}
+
+fn read_h(data: &mut Reader) -> Result<(), ParseError> {
+    match data.read_u8() {
+        Some(b'H') => Ok(()),
+        Some(_) => Err(ParseError::Corrupted),
+        None => Err(ParseError::unexpected_eof()),
+    }
+}
+
+fn parse_header(log: &mut Reader) -> ParseResult<(String, String)> {
+    let mut line = Vec::new();
+    while let Some(byte) = log.read_u8() {
+        if byte == b'\n' {
+            break;
+        }
+
+        line.push(byte);
+    }
+
+    let line = line.strip_prefix(&[b' ']).unwrap_or(&line);
+    let line = str::from_utf8(line).unwrap();
+    let (name, value) = line.split_once(':').unwrap();
+
+    Ok((name.to_owned(), value.to_owned()))
+}
+
+fn is_field_def(name: &str) -> bool {
+    let mut name = name.split(' ');
+
+    name.next() == Some("Field")
+        && matches!(name.next(), Some("I" | "P" | "S"))
+        && matches!(
+            name.next(),
+            Some("name" | "signed" | "width" | "predictor" | "encoding")
+        )
+        && name.next() == None
 }

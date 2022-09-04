@@ -8,7 +8,7 @@ edition = "2021"
 cargo-fuzz = true
 
 [dependencies]
-biterator = { version = "0.1.0", git = "https://gitlab.com/wetheredge/biterator", rev = "4a4297a" }
+bitter = "0.6.0"
 blackbox = { path = ".." }
 libfuzzer-sys = "0.4"
 memfile = "0.2.1"

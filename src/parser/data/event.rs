@@ -1,7 +1,8 @@
-use crate::{encoding, ParseError, ParseResult};
-use biterator::Biterator;
+use std::iter;
+
+use crate::{encoding, ParseError, ParseResult, Reader};
+use bitter::BitReader;
 use num_enum::TryFromPrimitive;
-use std::io::Read;
 use tracing::instrument;
 
 pub type Time = u64;
@@ -16,11 +17,8 @@ pub enum Event {
 
 impl Event {
     #[instrument(level = "debug", name = "Event::parse", skip_all, fields(kind))]
-    pub fn parse<R>(data: &mut Biterator<R>) -> ParseResult<Self>
-    where
-        R: Read,
-    {
-        let kind = data.next_byte().map(EventKind::try_from);
+    pub fn parse(data: &mut Reader) -> ParseResult<Self> {
+        let kind = data.read_u8().map(EventKind::try_from);
         match kind {
             Some(Ok(EventKind::SyncBeep)) => {
                 // TODO: SyncBeep handle time rollover
@@ -35,7 +33,10 @@ impl Event {
             Some(Ok(EventKind::End)) => {
                 const END_MESSAGE: &str = "End of log\0";
 
-                if !data.bytes().take(11).eq(END_MESSAGE.bytes()) {
+                if !iter::from_fn(|| data.read_u8())
+                    .take(11)
+                    .eq(END_MESSAGE.bytes())
+                {
                     return Err(ParseError::Corrupted);
                 }
 

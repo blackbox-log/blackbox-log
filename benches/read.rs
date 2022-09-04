@@ -1,4 +1,4 @@
-use biterator::Biterator;
+use bitter::BigEndianReader;
 use blackbox::{encoding, LogVersion};
 use criterion::measurement::WallTime;
 use criterion::{criterion_group, criterion_main};
@@ -12,7 +12,7 @@ macro_rules! get_bench {
     };
     ($name:ident, $func:expr) => {
         fn $name(b: &mut Bencher, input: &[u8]) {
-            b.iter_batched_ref(|| Biterator::new(input), $func, BatchSize::SmallInput);
+            b.iter_batched_ref(|| BigEndianReader::new(input), $func, BatchSize::SmallInput);
         }
     };
 }
@@ -97,7 +97,7 @@ fn tagged_16(c: &mut Criterion) {
     fn get_bench(version: LogVersion) -> impl FnMut(&mut Bencher, &[u8]) {
         move |b, input| {
             b.iter_batched_ref(
-                || Biterator::new(input),
+                || BigEndianReader::new(input),
                 |input| encoding::read_tagged_16(version, input),
                 BatchSize::SmallInput,
             );

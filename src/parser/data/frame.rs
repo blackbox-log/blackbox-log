@@ -1,8 +1,6 @@
 use super::Headers;
-use crate::encoding;
+use crate::{encoding, Reader};
 use crate::{Encoding, FieldDef, FrameDef, ParseResult, Predictor};
-use biterator::Biterator;
-use std::io::Read;
 use std::iter::Peekable;
 use tracing::instrument;
 
@@ -61,8 +59,8 @@ impl Frame {
         skip_all,
         fields(frame_type = ?frame_def.kind)
     )]
-    pub(crate) fn parse<R: Read>(
-        log: &mut Biterator<R>,
+    pub(crate) fn parse(
+        log: &mut Reader,
         headers: &Headers,
         frame_def: &FrameDef,
     ) -> ParseResult<Self> {
@@ -132,7 +130,7 @@ impl Frame {
             }
         }
 
-        log.byte_align();
+        // FIXME: log.byte_align();
 
         Ok(Self {
             kind: frame_def.kind,

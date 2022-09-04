@@ -1,39 +1,46 @@
 use super::zig_zag_decode;
-use crate::{ParseError, ParseResult};
-use biterator::Biterator;
-use std::io::Read;
+use crate::{ParseError, ParseResult, Reader};
+use bitter::BitReader;
 use tracing::instrument;
 
 #[instrument(level = "trace", skip(data), ret)]
-pub fn read_u32_elias_delta<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32> {
-    let mut bits = data.bits();
-
-    let mut leading_zeros: u8 = 0;
-    for _ in 0..6 {
-        match bits.next() {
-            Some(bit) if bit.get() == 0 => leading_zeros += 1,
-            Some(_) => break,
-            None => return Err(ParseError::unexpected_eof()),
+pub fn read_u32_elias_delta(data: &mut Reader) -> ParseResult<u32> {
+    let leading_zeros = {
+        let mut leading_zeros: u8 = 0;
+        for _ in 0..6 {
+            match data.read_bit() {
+                Some(false) => leading_zeros += 1,
+                Some(_) => break,
+                None => return Err(ParseError::unexpected_eof()),
+            }
         }
-    }
 
-    let leading_zeros = leading_zeros;
-    if leading_zeros > 5 {
-        return Err(ParseError::Corrupted);
-    }
-
-    let mut read = |count: u8| -> ParseResult<u32> {
-        let mut result = 1;
-        for _ in 0..count {
-            let bit = bits.next().ok_or_else(ParseError::unexpected_eof)?;
-            result <<= 1;
-            result += u32::from(bit.get());
+        if leading_zeros > 5 {
+            return Err(ParseError::Corrupted);
         }
-        Ok(result - 1)
+
+        leading_zeros
     };
 
-    // Reason: guaranteed to be <= 31 since we're reading at most 5 bits
-    #[allow(clippy::cast_possible_truncation)]
+    let mut read = |count: u8| -> ParseResult<u32> {
+        let count = count.into();
+
+        if count == 0 {
+            return Ok(0);
+        }
+
+        debug_assert!(count <= bitter::MAX_READ_BITS);
+
+        if data.refill_lookahead() < count {
+            return Err(ParseError::unexpected_eof());
+        }
+
+        let result = (1 << count) | data.peek(count);
+        data.consume(count);
+        Ok(result as u32 - 1)
+    };
+
+    // Guaranteed to be <= 31 since we're reading at most 5 bits
     let len = read(leading_zeros)? as u8;
     if len > 31 {
         return Err(ParseError::Corrupted);
@@ -43,8 +50,7 @@ pub fn read_u32_elias_delta<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32
 
     if result == (u32::MAX - 1) {
         // Use an extra bit to disambiguate (u32::MAX - 1) and u32::MAX
-        let bit = bits.next().ok_or(ParseError::Corrupted)?;
-        let bit: u32 = bit.get().into();
+        let bit: u32 = data.read_bit().ok_or(ParseError::Corrupted)?.into();
         Ok(result + bit)
     } else {
         Ok(result)
@@ -52,7 +58,7 @@ pub fn read_u32_elias_delta<R: Read>(data: &mut Biterator<R>) -> ParseResult<u32
 }
 
 #[instrument(level = "trace", skip(data), ret)]
-pub fn read_i32_elias_delta<R: Read>(data: &mut Biterator<R>) -> ParseResult<i32> {
+pub fn read_i32_elias_delta(data: &mut Reader) -> ParseResult<i32> {
     read_u32_elias_delta(data).map(zig_zag_decode)
 }
 
@@ -63,7 +69,7 @@ mod test {
     #[test]
     fn unsigned() {
         fn read(bytes: &[u8]) -> u32 {
-            super::read_u32_elias_delta(&mut Biterator::new(bytes)).unwrap()
+            super::read_u32_elias_delta(&mut Reader::new(bytes)).unwrap()
         }
 
         assert_eq!(0, read(&[0x80, 0]));
@@ -78,18 +84,15 @@ mod test {
     #[test]
     fn unsigned_max() {
         let bytes = &[0x04, 0x1F, 0xFF, 0xFF, 0xFF, 0xE0];
-        let mut biterator = Biterator::new(bytes.as_slice());
+        let mut bits = Reader::new(bytes.as_slice());
 
-        assert_eq!(
-            u32::MAX,
-            super::read_u32_elias_delta(&mut biterator).unwrap()
-        );
+        assert_eq!(u32::MAX, super::read_u32_elias_delta(&mut bits).unwrap());
     }
 
     #[test]
     fn signed() {
         fn read(bytes: &[u8]) -> i32 {
-            super::read_i32_elias_delta(&mut Biterator::new(bytes)).unwrap()
+            super::read_i32_elias_delta(&mut Reader::new(bytes)).unwrap()
         }
 
         assert_eq!(0, read(&[0x80, 0]));
@@ -101,22 +104,16 @@ mod test {
     #[test]
     fn signed_min() {
         let bytes = &[0x04, 0x1F, 0xFF, 0xFF, 0xFF, 0xE0];
-        let mut biterator = Biterator::new(bytes.as_slice());
+        let mut bits = Reader::new(bytes.as_slice());
 
-        assert_eq!(
-            i32::MIN,
-            super::read_i32_elias_delta(&mut biterator).unwrap()
-        );
+        assert_eq!(i32::MIN, super::read_i32_elias_delta(&mut bits).unwrap());
     }
 
     #[test]
     fn signed_max() {
         let bytes = &[0x04, 0x1F, 0xFF, 0xFF, 0xFF, 0xC0];
-        let mut biterator = Biterator::new(bytes.as_slice());
+        let mut bits = Reader::new(bytes.as_slice());
 
-        assert_eq!(
-            i32::MAX,
-            super::read_i32_elias_delta(&mut biterator).unwrap()
-        );
+        assert_eq!(i32::MAX, super::read_i32_elias_delta(&mut bits).unwrap());
     }
 }

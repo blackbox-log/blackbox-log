@@ -1,4 +1,5 @@
 #![allow(clippy::cast_possible_wrap)]
+#![allow(clippy::cast_possible_truncation)]
 
 mod elias_delta;
 mod negative_14_bit;
@@ -12,7 +13,6 @@ pub use tagged_16::read_tagged_16;
 pub use tagged_32::read_tagged_32;
 pub use variable::{read_ivar, read_uvar};
 
-use biterator::custom_int::{CustomInt, Storage, ToSigned};
 use num_enum::TryFromPrimitive;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, TryFromPrimitive)]
@@ -43,14 +43,9 @@ pub enum Encoding {
     I32EliasGamma = 11,
 }
 
-fn sign_extend<N, const BITS: u8, T, U>(n: CustomInt<N, BITS>) -> U
-where
-    N: Storage,
-    CustomInt<N, BITS>: ToSigned<Signed = T>,
-    U: From<T>,
-{
-    let x: T = n.to_signed();
-    U::from(x)
+fn sign_extend(from: u64, bits: u32) -> i64 {
+    let unused_bits = 64 - bits;
+    (from << unused_bits) as i64 >> unused_bits
 }
 
 const fn zig_zag_decode(value: u32) -> i32 {
@@ -61,12 +56,12 @@ const fn zig_zag_decode(value: u32) -> i32 {
 mod test {
     #[test]
     fn sign_extend() {
-        use super::{sign_extend, CustomInt};
+        use super::sign_extend;
 
-        assert_eq!(0_i64, sign_extend::<u8, 2, _, i64>(CustomInt::new(0b00)));
-        assert_eq!(1_i64, sign_extend::<u8, 2, _, i64>(CustomInt::new(0b01)));
-        assert_eq!(-2_i64, sign_extend::<u8, 2, _, i64>(CustomInt::new(0b10)));
-        assert_eq!(-1_i64, sign_extend::<u8, 2, _, i64>(CustomInt::new(0b11)));
+        assert_eq!(0, sign_extend(0b00, 2));
+        assert_eq!(1, sign_extend(0b01, 2));
+        assert_eq!(-2, sign_extend(0b10, 2));
+        assert_eq!(-1, sign_extend(0b11, 2));
     }
 
     #[test]

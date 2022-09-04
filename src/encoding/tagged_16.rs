@@ -1,19 +1,15 @@
 use super::sign_extend;
-use crate::{LogVersion, ParseError, ParseResult};
-use biterator::{Biterator, CustomInt};
-use std::io::Read;
+use crate::{LogVersion, ParseError, ParseResult, Reader};
+use bitter::BitReader;
 use tracing::instrument;
 
 #[instrument(level = "trace", skip(data), ret)]
-pub fn read_tagged_16<R: Read>(
-    version: LogVersion,
-    data: &mut Biterator<R>,
-) -> ParseResult<[i16; 4]> {
+pub fn read_tagged_16(version: LogVersion, data: &mut Reader) -> ParseResult<[i16; 4]> {
     const COUNT: usize = 4;
 
-    data.byte_align();
+    // FIXME: data.byte_align();
 
-    let tags = data.next_byte().ok_or_else(ParseError::unexpected_eof)?;
+    let tags = data.read_u8().ok_or_else(ParseError::unexpected_eof)?;
     let mut result = [0; COUNT];
 
     let mut i = 0;
@@ -29,7 +25,7 @@ pub fn read_tagged_16<R: Read>(
                         return Err(ParseError::Corrupted);
                     }
 
-                    let byte = data.next_byte().ok_or_else(ParseError::unexpected_eof)?;
+                    let byte = data.read_u8().ok_or_else(ParseError::unexpected_eof)?;
 
                     // Lower nibble first...
                     result[i] = i4_to_i16(byte & 0xF);
@@ -37,24 +33,19 @@ pub fn read_tagged_16<R: Read>(
                     result[i] = i4_to_i16(byte >> 4);
                 }
                 LogVersion::V2 => {
-                    let nibble = data
-                        .next_nibble()
-                        .ok_or_else(ParseError::unexpected_eof)?
-                        .get();
-                    result[i] = i4_to_i16(nibble);
+                    let nibble = data.read_bits(4).ok_or_else(ParseError::unexpected_eof)?;
+                    result[i] = i4_to_i16(nibble as u8);
                 }
             },
             2 => {
-                result[i] = (data.next_byte().ok_or_else(ParseError::unexpected_eof)? as i8).into();
+                result[i] = (data.read_i8().ok_or_else(ParseError::unexpected_eof)?).into();
             }
             3 => {
-                let byte1 = data.next_byte().ok_or_else(ParseError::unexpected_eof)?;
-                let byte2 = data.next_byte().ok_or_else(ParseError::unexpected_eof)?;
-                let bytes = [byte1, byte2];
+                let bytes = data.read_i16().ok_or_else(ParseError::unexpected_eof)?;
 
                 result[i] = match version {
-                    LogVersion::V1 => i16::from_le_bytes(bytes),
-                    LogVersion::V2 => i16::from_be_bytes(bytes),
+                    LogVersion::V1 => i16::from_be(bytes),
+                    LogVersion::V2 => i16::from_le(bytes),
                 };
             }
             4.. => unreachable!(),
@@ -66,8 +57,8 @@ pub fn read_tagged_16<R: Read>(
     Ok(result)
 }
 
-fn i4_to_i16(i4: u8) -> i16 {
-    sign_extend(CustomInt::<u8, 4>::new(i4))
+fn i4_to_i16(nibble: u8) -> i16 {
+    sign_extend(nibble.into(), 4) as i16
 }
 
 #[cfg(test)]
@@ -90,11 +81,11 @@ mod test {
 
         assert_eq!(
             [0; 4],
-            super::read_tagged_16(V1, &mut Biterator::new(bytes)).unwrap()
+            super::read_tagged_16(V1, &mut Reader::new(bytes)).unwrap()
         );
         assert_eq!(
             [0; 4],
-            super::read_tagged_16(V2, &mut Biterator::new(bytes)).unwrap()
+            super::read_tagged_16(V2, &mut Reader::new(bytes)).unwrap()
         );
     }
 
@@ -105,11 +96,11 @@ mod test {
 
         assert_eq!(
             [0; 4],
-            super::read_tagged_16(V1, &mut Biterator::new(bytes)).unwrap()
+            super::read_tagged_16(V1, &mut Reader::new(bytes)).unwrap()
         );
         assert_eq!(
             [0; 4],
-            super::read_tagged_16(V2, &mut Biterator::new(bytes)).unwrap()
+            super::read_tagged_16(V2, &mut Reader::new(bytes)).unwrap()
         );
     }
 
@@ -120,67 +111,61 @@ mod test {
 
         assert_eq!(
             [0; 4],
-            super::read_tagged_16(V1, &mut Biterator::new(bytes)).unwrap()
+            super::read_tagged_16(V1, &mut Reader::new(bytes)).unwrap()
         );
         assert_eq!(
             [0; 4],
-            super::read_tagged_16(V2, &mut Biterator::new(bytes)).unwrap()
+            super::read_tagged_16(V2, &mut Reader::new(bytes)).unwrap()
         );
     }
 
     #[test]
     fn all_16_bits_v1() {
         let bytes: &[u8] = &[0xFF, 1, 0, 2, 0, 3, 0, 4, 0];
-        let mut biterator = Biterator::new(bytes);
+        let mut bits = Reader::new(bytes);
 
         let expected = [1, 2, 3, 4];
-        assert_eq!(expected, super::read_tagged_16(V1, &mut biterator).unwrap());
+        assert_eq!(expected, super::read_tagged_16(V1, &mut bits).unwrap());
     }
 
     #[test]
     fn all_16_bits_v2() {
         let bytes: &[u8] = &[0xFF, 0, 1, 0, 2, 0, 3, 0, 4];
-        let mut biterator = Biterator::new(bytes);
+        let mut bits = Reader::new(bytes);
 
         let expected = [1, 2, 3, 4];
-        assert_eq!(expected, super::read_tagged_16(V2, &mut biterator).unwrap());
+        assert_eq!(expected, super::read_tagged_16(V2, &mut bits).unwrap());
     }
 
     #[test]
     fn tag_order_v1() {
         let bytes: &[u8] = &[0b1001_0100, 0x21, 0x03];
-        let mut biterator = Biterator::new(bytes);
+        let mut bits = Reader::new(bytes);
 
-        assert_eq!(
-            [0, 1, 2, 3],
-            super::read_tagged_16(V1, &mut biterator).unwrap()
-        );
+        assert_eq!([0, 1, 2, 3], super::read_tagged_16(V1, &mut bits).unwrap());
     }
 
     #[test]
     fn tag_order_v2() {
         let bytes: &[u8] = &[0b1110_0100, 0x10, 0x20, 0x00, 0x30];
-        let mut biterator = Biterator::new(bytes);
+        let mut bits = Reader::new(bytes);
 
-        assert_eq!(
-            [0, 1, 2, 3],
-            super::read_tagged_16(V2, &mut biterator).unwrap()
-        );
+        assert_eq!([0, 1, 2, 3], super::read_tagged_16(V2, &mut bits).unwrap());
     }
 
     #[test]
     fn v1_nibble_ignores_next_tag() {
         let bytes: &[u8] = &[0b0000_1101, 0x21];
-        let mut biterator = Biterator::new(bytes);
+        let mut bits = Reader::new(bytes);
 
         let expected = [1, 2, 0x00, 0x00];
-        assert_eq!(expected, super::read_tagged_16(V1, &mut biterator).unwrap());
+        assert_eq!(expected, super::read_tagged_16(V1, &mut bits).unwrap());
     }
 
     #[case(V1, &[1, 194] => [2, -4, 0, 0] ; "low nibble first")]
     #[case(V1, &[10, 163, 10] => [-93, 10, 0, 0] ; "8 bit sign extend")]
     fn diff_from_reference(version: LogVersion, bytes: &[u8]) -> [i16; 4] {
-        let mut biterator = Biterator::new(bytes);
-        super::read_tagged_16(version, &mut biterator).unwrap()
+        let mut bits = Reader::new(bytes);
+        super::read_tagged_16(version, &mut bits).unwrap()
     }
 }

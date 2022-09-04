@@ -4,13 +4,12 @@ pub mod betaflight;
 pub mod encoding;
 mod parser;
 
-use biterator::Biterator;
+use bitter::BigEndianReader;
 use encoding::Encoding;
 use num_enum::TryFromPrimitive;
 use parser::{Data, FrameKind, Headers};
 use std::fmt;
 use std::io;
-use std::io::Read;
 use std::iter;
 use std::str;
 use std::str::FromStr;
@@ -246,6 +245,8 @@ struct FrameDefs {
     slow: FrameDef,
 }
 
+pub(crate) type Reader<'a> = BigEndianReader<'a>;
+
 // Reason: unfinished
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -255,8 +256,8 @@ pub struct Log {
 }
 
 impl Log {
-    pub fn new<R: Read>(log: R) -> ParseResult<Self> {
-        let mut log = Biterator::new(log);
+    pub fn new(data: &[u8]) -> ParseResult<Self> {
+        let mut log = Reader::new(data);
 
         let headers = Headers::parse(&mut log)?;
         let data = Data::parse(&mut log, &headers)?;

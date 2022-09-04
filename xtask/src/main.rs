@@ -121,7 +121,7 @@ fn main() -> Result<()> {
                         writeln!(f, "fuzz_target!(|data: UnalignedBytes| {{")?;
                         writeln!(
                             f,
-                            "    let (mut reference, mut biterator) = data.to_streams().unwrap();"
+                            "    let (mut reference, mut bits) = data.to_streams_unaligned().unwrap();"
                         )?;
                         writeln!(f)?;
                         writeln!(f, "    assert_eq!(todo!(), todo!());")?;
