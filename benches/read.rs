@@ -6,12 +6,19 @@ use criterion::{BatchSize, Bencher, BenchmarkGroup, BenchmarkId, Criterion, Thro
 use std::fmt::Display;
 use std::iter;
 
+fn get_optimized_input(input: &[u8]) -> Vec<u8> {
+    let mut input = input.to_owned();
+    input.extend(iter::from_fn(|| Some(0)).take(8));
+    input
+}
+
 macro_rules! get_bench {
     ($func:expr) => {
         get_bench!(bench, $func)
     };
     ($name:ident, $func:expr) => {
         fn $name(b: &mut Bencher, input: &[u8]) {
+            let input = &get_optimized_input(input);
             b.iter_batched_ref(|| BigEndianReader::new(input), $func, BatchSize::SmallInput);
         }
     };
@@ -96,6 +103,7 @@ fn tagged_16(c: &mut Criterion) {
 
     fn get_bench(version: LogVersion) -> impl FnMut(&mut Bencher, &[u8]) {
         move |b, input| {
+            let input = &get_optimized_input(input);
             b.iter_batched_ref(
                 || BigEndianReader::new(input),
                 |input| encoding::read_tagged_16(version, input),
