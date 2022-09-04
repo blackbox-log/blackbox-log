@@ -23,7 +23,7 @@ fn main() -> Result<()> {
         Args::Fmt => Ok(()),
 
         Args::Check { all } => {
-            let lints = get_root(&sh)?.join(".lints.toml");
+            let lints = get_root(&sh)?.join("Cranky.toml");
             let lints = sh.read_file(lints)?;
             let lints: Lints = toml::from_str(&lints).unwrap();
             let lints = lints.into_clippy_args();
