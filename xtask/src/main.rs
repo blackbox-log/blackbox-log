@@ -86,7 +86,8 @@ fn main() -> Result<()> {
         }
 
         Args::Fuzz(fuzz) => {
-            let fuzz_dir = get_root(&sh)?.join("fuzz");
+            let root_dir = get_root(&sh)?;
+            let fuzz_dir = root_dir.join("fuzz");
 
             let dir_args = [
                 "--fuzz-dir",
@@ -180,11 +181,11 @@ fn main() -> Result<()> {
                         .unwrap();
                     let cov = sysroot.join("bin/llvm-cov");
 
-                    let coverage_dir = sh.current_dir().join("coverage").join(&target);
+                    let coverage_dir = fuzz_dir.join("coverage").join(&target);
                     let profdata = coverage_dir.join("coverage.profdata");
 
                     let triple = sysroot.file_name().unwrap();
-                    let bin = sh.current_dir().join("target").join(triple);
+                    let bin = root_dir.join("target").join(triple);
                     let bin = bin.join("coverage").join(triple);
                     let bin = bin.join("release").join(&target);
 
