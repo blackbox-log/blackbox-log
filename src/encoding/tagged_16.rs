@@ -1,9 +1,7 @@
 use super::sign_extend;
 use crate::{LogVersion, ParseError, ParseResult, Reader};
 use bitter::BitReader;
-use tracing::instrument;
 
-#[instrument(level = "trace", skip(data), ret)]
 pub fn read_tagged_16(version: LogVersion, data: &mut Reader) -> ParseResult<[i16; 4]> {
     const COUNT: usize = 4;
 

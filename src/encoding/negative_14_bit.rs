@@ -1,8 +1,6 @@
 use super::read_uvar;
 use crate::{ParseResult, Reader};
-use tracing::instrument;
 
-#[instrument(level = "trace", skip(data), ret)]
 pub fn read_negative_14_bit(data: &mut Reader) -> ParseResult<i32> {
     let result = read_uvar(data)? as u16;
     let result = if (result & 0x2000) > 0 {

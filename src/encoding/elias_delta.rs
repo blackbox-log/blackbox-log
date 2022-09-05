@@ -1,9 +1,7 @@
 use super::zig_zag_decode;
 use crate::{ParseError, ParseResult, Reader};
 use bitter::BitReader;
-use tracing::instrument;
 
-#[instrument(level = "trace", skip(data), ret)]
 /// NB: May leave the bit stream unaligned
 pub fn read_u32_elias_delta(data: &mut Reader) -> ParseResult<u32> {
     let leading_zeros = {
@@ -55,7 +53,6 @@ pub fn read_u32_elias_delta(data: &mut Reader) -> ParseResult<u32> {
     }
 }
 
-#[instrument(level = "trace", skip(data), ret)]
 /// NB: May leave the bit stream unaligned
 pub fn read_i32_elias_delta(data: &mut Reader) -> ParseResult<i32> {
     read_u32_elias_delta(data).map(zig_zag_decode)

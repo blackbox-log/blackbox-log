@@ -1,12 +1,10 @@
 use super::sign_extend;
 use crate::{ParseError, ParseResult, Reader};
 use bitter::BitReader;
-use tracing::instrument;
 
 const COUNT: usize = 3;
 
 #[allow(clippy::assertions_on_constants)]
-#[instrument(level = "trace", skip(data), ret)]
 pub fn read_tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
     // Allows up to the 6 bit case in one refill
     const _: () = assert!(24 <= bitter::MAX_READ_BITS, "bit buffer is too small");
