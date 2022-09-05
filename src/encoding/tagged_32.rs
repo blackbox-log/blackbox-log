@@ -1,80 +1,97 @@
 use super::sign_extend;
 use crate::{ParseError, ParseResult, Reader};
 use bitter::BitReader;
-use std::array;
 use tracing::instrument;
 
+const COUNT: usize = 3;
+
+#[allow(clippy::assertions_on_constants)]
 #[instrument(level = "trace", skip(data), ret)]
-pub fn read_tagged_32(data: &mut Reader) -> ParseResult<[i32; 3]> {
-    const COUNT: usize = 3;
+pub fn read_tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
+    // Allows up to the 6 bit case in one refill
+    const _: () = assert!(24 <= bitter::MAX_READ_BITS, "bit buffer is too small");
+
     let mut result = [0; COUNT];
 
-    if !data.has_bits_remaining(8) {
+    if data.refill_lookahead() < 8 {
         return Err(ParseError::unexpected_eof());
     }
 
-    match data.read_bits(2).unwrap() {
+    let tag = data.peek(2);
+    data.consume(2);
+
+    match tag {
         0 => {
             for x in &mut result {
-                *x = next_as_i32(data, 2)?;
+                *x = next_as_i32(data, 2);
             }
         }
 
         1 => {
-            // Skip rest of tag byte
-            data.read_bits(2);
+            // Re-align to nibbles
+            data.consume(2);
+
+            if !data.has_bits_remaining(12) {
+                return Err(ParseError::unexpected_eof());
+            }
 
             for x in &mut result {
-                *x = next_as_i32(data, 4)?;
+                *x = next_as_i32(data, 4);
             }
         }
 
         2 => {
-            result[0] = next_as_i32(data, 6)?;
+            result[0] = next_as_i32(data, 6);
 
-            for x in result.iter_mut().skip(1) {
-                // Skip upper 2 bits
-                data.read_bits(2);
-                *x = next_as_i32(data, 6)?;
-            }
+            // Skip upper 2 bits
+            data.consume(2);
+            result[1] = next_as_i32(data, 6);
+
+            data.consume(2);
+            result[2] = next_as_i32(data, 6);
         }
 
-        3 => {
-            let tags: [_; 3] = array::from_fn(|_| data.read_bits(2).unwrap());
-            for (x, tag) in result.iter_mut().zip(tags.iter().rev()) {
-                match *tag {
-                    0 => {
-                        *x = next_as_i32(data, 8)?;
-                    }
+        3.. => {
+            let mut tags = data.read_bits(6).unwrap();
+            for x in &mut result {
+                let tag = tags & 3;
+                tags >>= 2;
+
+                *x = match tag {
+                    0 => data
+                        .read_bits(8)
+                        .map(|x| sign_extend(x, 8) as i32)
+                        .ok_or_else(ParseError::unexpected_eof)?,
                     1 => {
                         let value = data.read_i16().ok_or_else(ParseError::unexpected_eof)?;
-                        *x = i16::from_be(value).into();
+                        i16::from_be(value).into()
                     }
 
                     2 => {
                         let value: u64 =
                             data.read_bits(24).ok_or_else(ParseError::unexpected_eof)?;
                         let value = value.swap_bytes() >> (64 - 24);
-                        *x = sign_extend(value, 24) as i32;
+                        sign_extend(value, 24) as i32
                     }
-                    3 => {
+                    3.. => {
                         let value = data.read_i32().ok_or_else(ParseError::unexpected_eof)?;
-                        *x = i32::from_be(value as i32);
+                        i32::from_be(value as i32)
                     }
-                    4.. => unreachable!(),
                 }
             }
         }
-        4.. => unreachable!(),
     }
 
     Ok(result)
 }
 
-fn next_as_i32(data: &mut Reader, bits: u32) -> ParseResult<i32> {
-    data.read_bits(bits)
-        .map(|x| sign_extend(x, bits) as i32)
-        .ok_or_else(ParseError::unexpected_eof)
+#[inline(always)]
+/// Read `bits` bits using the manual API and sign extend into an i32.
+// Ensure there is enough data available before calling.
+fn next_as_i32(data: &mut Reader, bits: u32) -> i32 {
+    let x = data.peek(bits);
+    data.consume(bits);
+    sign_extend(x, bits) as i32
 }
 
 #[cfg(test)]
