@@ -38,7 +38,7 @@ pub fn read_tagged_16(version: LogVersion, data: &mut Reader) -> ParseResult<[i1
             2 => {
                 result[i] = (data.read_i8().ok_or_else(ParseError::unexpected_eof)?).into();
             }
-            3 => {
+            3.. => {
                 let bytes = data.read_i16().ok_or_else(ParseError::unexpected_eof)?;
 
                 result[i] = match version {
@@ -46,7 +46,6 @@ pub fn read_tagged_16(version: LogVersion, data: &mut Reader) -> ParseResult<[i1
                     LogVersion::V2 => i16::from_le(bytes),
                 };
             }
-            4.. => unreachable!(),
         }
 
         i += 1;

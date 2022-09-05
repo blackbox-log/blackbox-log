@@ -101,43 +101,27 @@ fn tagged_zeros(first: u8, zeros: usize) -> Vec<u8> {
 fn tagged_16(c: &mut Criterion) {
     use LogVersion::{V1, V2};
 
-    fn get_bench(version: LogVersion) -> impl FnMut(&mut Bencher, &[u8]) {
-        move |b, input| {
-            let input = &get_optimized_input(input);
-            b.iter_batched_ref(
-                || BigEndianReader::new(input),
-                |input| encoding::read_tagged_16(version, input),
-                BatchSize::SmallInput,
-            );
-        }
-    }
+    get_bench!(bench_v1, |data| encoding::read_tagged_16(V1, data));
+    get_bench!(bench_v2, |data| encoding::read_tagged_16(V2, data));
 
     let mut group = c.benchmark_group("tagged 16");
 
     let benches = [
-        (
-            BenchmarkId::from_parameter("zeros"),
-            tagged_zeros(0x00, 0),
-            V1,
-        ),
-        (BenchmarkId::new("v1", "nibbles"), tagged_zeros(0x55, 2), V1),
-        (BenchmarkId::new("v2", "nibbles"), tagged_zeros(0x55, 2), V2),
-        (
-            BenchmarkId::from_parameter("bytes"),
-            tagged_zeros(0xAA, 4),
-            V1,
-        ),
-        (
-            BenchmarkId::from_parameter("16 bits"),
-            tagged_zeros(0xFF, 8),
-            V1,
-        ),
+        ("4x00 bits", tagged_zeros(0x00, 0)),
+        ("4x04 bits", tagged_zeros(0x55, 2)),
+        ("4x08 bits", tagged_zeros(0xAA, 4)),
+        ("4x16 bits", tagged_zeros(0xFF, 8)),
     ];
-    for (id, input, version) in benches {
+    for (name, input) in benches {
         let input = input.as_slice();
 
         group.throughput(Throughput::Bytes(input.len() as u64));
-        group.bench_with_input(id, input, get_bench(version));
+
+        let id = BenchmarkId::new("v1", name);
+        group.bench_with_input(id, input, bench_v1);
+
+        let id = BenchmarkId::new("v2", name);
+        group.bench_with_input(id, input, bench_v2);
     }
 
     group.finish();
