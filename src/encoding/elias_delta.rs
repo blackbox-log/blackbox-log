@@ -32,16 +32,13 @@ pub fn read_u32_elias_delta(data: &mut Reader) -> ParseResult<u32> {
 
         debug_assert!(count <= bitter::MAX_READ_BITS);
 
-        if data.refill_lookahead() < count {
-            return Err(ParseError::unexpected_eof());
-        }
-
-        let result = (1 << count) | data.peek(count);
-        data.consume(count);
+        let result = data
+            .read_bits(count)
+            .ok_or_else(ParseError::unexpected_eof)?;
+        let result = (1 << count) | result;
         Ok(result as u32 - 1)
     };
 
-    // Guaranteed to be <= 31 since we're reading at most 5 bits
     let len = read(leading_zeros)? as u8;
     if len > 31 {
         return Err(ParseError::Corrupted);
@@ -51,8 +48,8 @@ pub fn read_u32_elias_delta(data: &mut Reader) -> ParseResult<u32> {
 
     if result == (u32::MAX - 1) {
         // Use an extra bit to disambiguate (u32::MAX - 1) and u32::MAX
-        let bit: u32 = data.read_bit().ok_or(ParseError::Corrupted)?.into();
-        Ok(result + bit)
+        let bit = data.read_bit().ok_or_else(ParseError::unexpected_eof)?;
+        Ok(result + u32::from(bit))
     } else {
         Ok(result)
     }
@@ -67,6 +64,13 @@ pub fn read_i32_elias_delta(data: &mut Reader) -> ParseResult<i32> {
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn unaligned_min() {
+        let mut bits = Reader::new(&[1]);
+        bits.read_bits(7);
+        assert_eq!(0, super::read_u32_elias_delta(&mut bits).unwrap());
+    }
 
     #[test]
     fn unsigned() {
@@ -117,5 +121,48 @@ mod test {
         let mut bits = Reader::new(bytes.as_slice());
 
         assert_eq!(i32::MAX, super::read_i32_elias_delta(&mut bits).unwrap());
+    }
+
+    #[test]
+    #[should_panic(expected = "UnexpectedEof")]
+    fn no_data() {
+        let mut bits = Reader::new(&[]);
+        super::read_u32_elias_delta(&mut bits).unwrap();
+    }
+
+    #[test]
+    fn too_many_leading_zeros() {
+        let mut bits = Reader::new(&[0b0000_0010]);
+        let result = super::read_u32_elias_delta(&mut bits);
+        assert!(matches!(result, Err(ParseError::Corrupted)));
+    }
+
+    #[test]
+    #[should_panic(expected = "UnexpectedEof")]
+    fn too_few_middle_bits() {
+        let mut bits = Reader::new(&[6]);
+        super::read_u32_elias_delta(&mut bits).unwrap();
+    }
+
+    #[test]
+    fn too_many_middle_bits() {
+        let mut bits = Reader::new(&[6, 0]);
+        let result = super::read_u32_elias_delta(&mut bits);
+        assert!(matches!(result, Err(ParseError::Corrupted)));
+    }
+
+    #[test]
+    #[should_panic(expected = "UnexpectedEof")]
+    fn too_few_remainder_bits() {
+        let mut bits = Reader::new(&[0x36]);
+        super::read_u32_elias_delta(&mut bits).unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "UnexpectedEof")]
+    fn missing_disambiguation_bit() {
+        let mut bits = Reader::new(&[0, 0x10, 0x7F, 0xFF, 0xFF, 0xFF]);
+        bits.read_bits(6);
+        super::read_u32_elias_delta(&mut bits).unwrap();
     }
 }
