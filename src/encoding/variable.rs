@@ -6,8 +6,6 @@ use tracing::instrument;
 #[allow(clippy::assertions_on_constants)]
 #[instrument(level = "trace", skip(data), ret)]
 pub fn read_uvar(data: &mut Reader) -> ParseResult<u32> {
-    // FIXME: data.byte_align();
-
     // 32 bits at 7 bits / byte = 5 bytes
     const _: () = assert!((5 * 8) <= bitter::MAX_READ_BITS, "bit buffer is too small");
 

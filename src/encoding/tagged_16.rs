@@ -7,8 +7,6 @@ use tracing::instrument;
 pub fn read_tagged_16(version: LogVersion, data: &mut Reader) -> ParseResult<[i16; 4]> {
     const COUNT: usize = 4;
 
-    // FIXME: data.byte_align();
-
     let tags = data.read_u8().ok_or_else(ParseError::unexpected_eof)?;
     let mut result = [0; COUNT];
 

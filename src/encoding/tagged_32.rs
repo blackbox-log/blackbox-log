@@ -9,8 +9,6 @@ pub fn read_tagged_32(data: &mut Reader) -> ParseResult<[i32; 3]> {
     const COUNT: usize = 3;
     let mut result = [0; COUNT];
 
-    // FIXME: data.byte_align();
-
     if !data.has_bits_remaining(8) {
         return Err(ParseError::unexpected_eof());
     }

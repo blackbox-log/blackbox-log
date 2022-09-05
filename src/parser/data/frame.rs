@@ -60,7 +60,7 @@ impl Frame {
         fields(frame_type = ?frame_def.kind)
     )]
     pub(crate) fn parse(
-        log: &mut Reader,
+        data: &mut Reader,
         headers: &Headers,
         frame_def: &FrameDef,
     ) -> ParseResult<Self> {
@@ -73,27 +73,32 @@ impl Frame {
             } else {
                 match field.encoding {
                     Encoding::IVar => {
-                        values.push(encoding::read_ivar(log)?.into());
+                        crate::byte_align(data);
+                        values.push(encoding::read_ivar(data)?.into());
                         vec![field]
                     }
                     Encoding::UVar => {
-                        values.push(encoding::read_uvar(log)?.into());
+                        crate::byte_align(data);
+                        values.push(encoding::read_uvar(data)?.into());
                         vec![field]
                     }
                     Encoding::Negative14Bit => {
-                        values.push(encoding::read_negative_14_bit(log)?.into());
+                        crate::byte_align(data);
+                        values.push(encoding::read_negative_14_bit(data)?.into());
                         vec![field]
                     }
                     Encoding::U32EliasDelta => {
-                        values.push(encoding::read_u32_elias_delta(log)?.into());
+                        values.push(encoding::read_u32_elias_delta(data)?.into());
                         vec![field]
                     }
                     Encoding::I32EliasDelta => {
-                        values.push(encoding::read_i32_elias_delta(log)?.into());
+                        values.push(encoding::read_i32_elias_delta(data)?.into());
                         vec![field]
                     }
                     Encoding::Tagged32 => {
-                        let read_values = encoding::read_tagged_32(log)?.map(i64::from);
+                        crate::byte_align(data);
+
+                        let read_values = encoding::read_tagged_32(data)?.map(i64::from);
 
                         let fields = fields_with_same_encoding(frame_fields.by_ref(), field);
                         assert!(fields.len() <= read_values.len());
@@ -103,8 +108,10 @@ impl Frame {
                         fields
                     }
                     Encoding::Tagged16 => {
+                        crate::byte_align(data);
+
                         let read_values =
-                            encoding::read_tagged_16(headers.version, log)?.map(i64::from);
+                            encoding::read_tagged_16(headers.version, data)?.map(i64::from);
 
                         let fields = fields_with_same_encoding(frame_fields.by_ref(), field);
                         assert!(fields.len() <= read_values.len());
@@ -130,7 +137,7 @@ impl Frame {
             }
         }
 
-        // FIXME: log.byte_align();
+        crate::byte_align(data);
 
         Ok(Self {
             kind: frame_def.kind,

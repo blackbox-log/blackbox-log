@@ -5,6 +5,7 @@ pub mod encoding;
 mod parser;
 
 use bitter::BigEndianReader;
+use bitter::BitReader;
 use encoding::Encoding;
 use num_enum::TryFromPrimitive;
 use parser::{Data, FrameKind, Headers};
@@ -263,5 +264,11 @@ impl Log {
         let data = Data::parse(&mut log, &headers)?;
 
         Ok(Self { headers, data })
+    }
+}
+
+pub(crate) fn byte_align(data: &mut Reader) {
+    while !data.byte_aligned() {
+        data.consume(1);
     }
 }

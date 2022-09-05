@@ -4,8 +4,6 @@ use tracing::instrument;
 
 #[instrument(level = "trace", skip(data), ret)]
 pub fn read_negative_14_bit(data: &mut Reader) -> ParseResult<i32> {
-    // FIXME: data.byte_align();
-
     let result = read_uvar(data)? as u16;
     let result = if (result & 0x2000) > 0 {
         i32::from((result | 0xC000) as i16)
