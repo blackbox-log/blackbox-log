@@ -14,11 +14,9 @@ pub struct Headers {
 
 impl Headers {
     pub fn parse(data: &mut Reader) -> ParseResult<Self> {
-        read_h(data)?;
         let (name, _product) = parse_header(data)?;
         assert_eq!(name, "Product", "`Product` header must be first");
 
-        read_h(data)?;
         let (name, version) = parse_header(data)?;
         assert_eq!(name, "Data version", "`Data version` header must be second");
         let version = version.parse().unwrap();
@@ -51,11 +49,9 @@ impl Headers {
         };
 
         loop {
-            // Need at least "H\n"
-            if !data.has_bits_remaining(16) {
+            if data.refill_lookahead() < 8 {
                 return Err(ParseError::unexpected_eof());
             }
-            assert!(data.refill_lookahead() >= 8);
 
             if data.peek(8) != b'H'.into() {
                 break;
@@ -91,17 +87,16 @@ impl Headers {
     }
 }
 
-fn read_h(data: &mut Reader) -> Result<(), ParseError> {
+/// Expects the next character to be the leading H
+fn parse_header(data: &mut Reader) -> ParseResult<(String, String)> {
     match data.read_u8() {
-        Some(b'H') => Ok(()),
-        Some(_) => Err(ParseError::Corrupted),
-        None => Err(ParseError::unexpected_eof()),
+        Some(b'H') => {}
+        Some(_) => return Err(ParseError::Corrupted),
+        None => return Err(ParseError::unexpected_eof()),
     }
-}
 
-fn parse_header(log: &mut Reader) -> ParseResult<(String, String)> {
     let mut line = Vec::new();
-    while let Some(byte) = log.read_u8() {
+    while let Some(byte) = data.read_u8() {
         if byte == b'\n' {
             break;
         }
@@ -112,6 +107,8 @@ fn parse_header(log: &mut Reader) -> ParseResult<(String, String)> {
     let line = line.strip_prefix(&[b' ']).unwrap_or(&line);
     let line = str::from_utf8(line).unwrap();
     let (name, value) = line.split_once(':').unwrap();
+
+    tracing::trace!("parsed header `{name}` = `{value}`");
 
     Ok((name.to_owned(), value.to_owned()))
 }
