@@ -1,15 +1,20 @@
-use crate::{FrameDef, FrameDefs, FrameKind, LogVersion, ParseError, ParseResult, Reader};
+mod frame_def;
+
+pub use frame_def::{FieldDef, FrameDefs};
+
+use super::{ParseError, ParseResult};
+use crate::{LogVersion, Reader};
 use bitter::BitReader;
-use std::collections::HashMap;
 use std::str;
 
-// Reason: unfinished
-#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Headers {
     pub(crate) version: LogVersion,
     pub(crate) frames: FrameDefs,
-    pub(crate) unknown: HashMap<String, String>,
+
+    pub(crate) firmware_revision: String,
+    pub(crate) board_info: String,
+    pub(crate) craft_name: String,
 }
 
 impl Headers {
@@ -19,38 +24,16 @@ impl Headers {
 
         let (name, version) = parse_header(data)?;
         assert_eq!(name, "Data version", "`Data version` header must be second");
-        let version = version.parse().unwrap();
+        let version = version.parse().map_err(|_| ParseError::InvalidHeader {
+            header: name,
+            value: version,
+        })?;
 
-        let mut unknown = HashMap::new();
-
-        let mut intraframe = FrameDef::builder(FrameKind::Intra);
-        let mut interframe = FrameDef::builder(FrameKind::Inter);
-        let mut slow = FrameDef::builder(FrameKind::Slow);
-
-        let mut update_field_def = |name: &str, value| {
-            // Skip `Field`
-            let mut name = name.split(' ').skip(1);
-
-            let frame = match name.next().unwrap() {
-                "I" => &mut intraframe,
-                "P" => &mut interframe,
-                "S" => &mut slow,
-                _ => unreachable!(),
-            };
-
-            match name.next().unwrap() {
-                "name" => frame.names(value),
-                "signed" => frame.signed(value),
-                "width" => frame.widths(value),
-                "predictor" => frame.predictors(value),
-                "encoding" => frame.encodings(value),
-                _ => unreachable!(),
-            };
-        };
+        let mut state = State::new(version);
 
         loop {
             if data.refill_lookahead() < 8 {
-                return Err(ParseError::unexpected_eof());
+                return Err(ParseError::UnexpectedEof);
             }
 
             if data.peek(8) != b'H'.into() {
@@ -58,32 +41,62 @@ impl Headers {
             }
 
             let (name, value) = parse_header(data)?;
-
-            if is_field_def(&name) {
-                update_field_def(&name, value);
-            } else {
-                unknown.insert(name, value);
-            }
+            state.update(name, value)?;
         }
 
-        interframe.names = intraframe.names.clone();
-        interframe.signs = intraframe.signs.clone();
+        state.finish()
+    }
+}
 
-        let intraframe = intraframe.parse();
-        let interframe = interframe.parse();
-        let slow = slow.parse();
+#[derive(Debug)]
+struct State {
+    version: LogVersion,
+    frames: frame_def::Builders,
+}
 
-        let frames = FrameDefs {
-            intraframe,
-            interframe,
-            slow,
-        };
-
-        Ok(Self {
+impl State {
+    fn new(version: LogVersion) -> Self {
+        Self {
             version,
-            frames,
-            unknown,
-        })
+            frames: frame_def::Builders::default(),
+        }
+    }
+
+    fn update(&mut self, header: String, value: String) -> ParseResult<()> {
+        match header {
+            full_header if full_header.starts_with("Field ") => {
+                let unknown_header = || ParseError::UnknownHeader(full_header.clone());
+
+                let (frame, field) = full_header
+                    .strip_prefix("Field ")
+                    .unwrap()
+                    .split_once(' ')
+                    .ok_or_else(unknown_header)?;
+
+                let frame = match frame {
+                    "I" => &mut self.frames.intra,
+                    "P" => &mut self.frames.inter,
+                    "S" => &mut self.frames.slow,
+                    _ => return Err(unknown_header()),
+                };
+
+                match field {
+                    "name" => frame.names = Some(value),
+                    "signed" => frame.signs = Some(value),
+                    "width" => tracing::warn!("ignoring `{full_header}` header"),
+                    "predictor" => frame.predictors = Some(value),
+                    "encoding" => frame.encodings = Some(value),
+                    _ => return Err(unknown_header()),
+                };
+            }
+            header => tracing::warn!("skipping unknown header: `{header}` = `{value}`"),
+        }
+
+        Ok(())
+    }
+
+    fn finish(self) -> ParseResult<Headers> {
+        todo!()
     }
 }
 
@@ -92,7 +105,7 @@ fn parse_header(data: &mut Reader) -> ParseResult<(String, String)> {
     match data.read_u8() {
         Some(b'H') => {}
         Some(_) => return Err(ParseError::Corrupted),
-        None => return Err(ParseError::unexpected_eof()),
+        None => return Err(ParseError::UnexpectedEof),
     }
 
     let mut line = Vec::new();
@@ -108,19 +121,7 @@ fn parse_header(data: &mut Reader) -> ParseResult<(String, String)> {
     let line = str::from_utf8(line).unwrap();
     let (name, value) = line.split_once(':').unwrap();
 
-    tracing::trace!("parsed header `{name}` = `{value}`");
+    tracing::trace!("read header `{name}` = `{value}`");
 
     Ok((name.to_owned(), value.to_owned()))
-}
-
-fn is_field_def(name: &str) -> bool {
-    let mut name = name.split(' ');
-
-    name.next() == Some("Field")
-        && matches!(name.next(), Some("I" | "P" | "S"))
-        && matches!(
-            name.next(),
-            Some("name" | "signed" | "width" | "predictor" | "encoding")
-        )
-        && name.next() == None
 }

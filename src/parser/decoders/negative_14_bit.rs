@@ -1,5 +1,6 @@
 use super::read_uvar;
-use crate::{ParseResult, Reader};
+use crate::parser::ParseResult;
+use crate::Reader;
 
 pub fn read_negative_14_bit(data: &mut Reader) -> ParseResult<i32> {
     let result = read_uvar(data)? as u16;

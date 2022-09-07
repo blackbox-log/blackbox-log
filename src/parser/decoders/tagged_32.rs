@@ -1,5 +1,6 @@
 use super::sign_extend;
-use crate::{ParseError, ParseResult, Reader};
+use crate::parser::{ParseError, ParseResult};
+use crate::Reader;
 use bitter::BitReader;
 
 const COUNT: usize = 3;
@@ -12,7 +13,7 @@ pub fn read_tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
     let mut result = [0; COUNT];
 
     if data.refill_lookahead() < 8 {
-        return Err(ParseError::unexpected_eof());
+        return Err(ParseError::UnexpectedEof);
     }
 
     let tag = data.peek(2);
@@ -30,7 +31,7 @@ pub fn read_tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
             data.consume(2);
 
             if !data.has_bits_remaining(12) {
-                return Err(ParseError::unexpected_eof());
+                return Err(ParseError::UnexpectedEof);
             }
 
             for x in &mut result {
@@ -59,20 +60,19 @@ pub fn read_tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
                     0 => data
                         .read_bits(8)
                         .map(|x| sign_extend(x, 8) as i32)
-                        .ok_or_else(ParseError::unexpected_eof)?,
+                        .ok_or(ParseError::UnexpectedEof)?,
                     1 => {
-                        let value = data.read_i16().ok_or_else(ParseError::unexpected_eof)?;
+                        let value = data.read_i16().ok_or(ParseError::UnexpectedEof)?;
                         i16::from_be(value).into()
                     }
 
                     2 => {
-                        let value: u64 =
-                            data.read_bits(24).ok_or_else(ParseError::unexpected_eof)?;
+                        let value: u64 = data.read_bits(24).ok_or(ParseError::UnexpectedEof)?;
                         let value = value.swap_bytes() >> (64 - 24);
                         sign_extend(value, 24) as i32
                     }
                     3.. => {
-                        let value = data.read_i32().ok_or_else(ParseError::unexpected_eof)?;
+                        let value = data.read_i32().ok_or(ParseError::UnexpectedEof)?;
                         i32::from_be(value as i32)
                     }
                 }

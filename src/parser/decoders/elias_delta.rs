@@ -1,5 +1,6 @@
 use super::zig_zag_decode;
-use crate::{ParseError, ParseResult, Reader};
+use crate::parser::{ParseError, ParseResult};
+use crate::Reader;
 use bitter::BitReader;
 
 /// NB: May leave the bit stream unaligned
@@ -10,7 +11,7 @@ pub fn read_u32_elias_delta(data: &mut Reader) -> ParseResult<u32> {
             match data.read_bit() {
                 Some(false) => leading_zeros += 1,
                 Some(_) => break,
-                None => return Err(ParseError::unexpected_eof()),
+                None => return Err(ParseError::UnexpectedEof),
             }
         }
 
@@ -30,9 +31,7 @@ pub fn read_u32_elias_delta(data: &mut Reader) -> ParseResult<u32> {
 
         debug_assert!(count <= bitter::MAX_READ_BITS);
 
-        let result = data
-            .read_bits(count)
-            .ok_or_else(ParseError::unexpected_eof)?;
+        let result = data.read_bits(count).ok_or(ParseError::UnexpectedEof)?;
         let result = (1 << count) | result;
         Ok(result as u32 - 1)
     };
@@ -46,7 +45,7 @@ pub fn read_u32_elias_delta(data: &mut Reader) -> ParseResult<u32> {
 
     if result == (u32::MAX - 1) {
         // Use an extra bit to disambiguate (u32::MAX - 1) and u32::MAX
-        let bit = data.read_bit().ok_or_else(ParseError::unexpected_eof)?;
+        let bit = data.read_bit().ok_or(ParseError::UnexpectedEof)?;
         Ok(result + u32::from(bit))
     } else {
         Ok(result)

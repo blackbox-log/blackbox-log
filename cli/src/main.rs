@@ -1,6 +1,6 @@
 mod cli;
 
-use blackbox::Log;
+use blackbox::parser::Config;
 use clap::Parser;
 use cli::Cli;
 use std::fs::File;
@@ -21,7 +21,8 @@ fn main() -> eyre::Result<()> {
             data
         };
 
-        let _log = Log::new(&data)?;
+        let config = Config::default();
+        let _log = config.parse(&data)?;
         // dbg!(log);
     }
 

@@ -1,13 +1,13 @@
 #![no_main]
 
-use blackbox::{encoding, LogVersion};
-use blackbox_fuzz::{fuzz_target, UnalignedBytes};
+use blackbox::LogVersion;
+use blackbox_fuzz::{decoders, fuzz_target, UnalignedBytes};
 
 fuzz_target!(|data: UnalignedBytes| {
     let (mut reference, mut bits) = data.to_streams_aligned().unwrap();
 
     let expected = reference.read_tagged_16_v1();
-    let got = encoding::read_tagged_16(LogVersion::V1, &mut bits);
+    let got = decoders::read_tagged_16(LogVersion::V1, &mut bits);
 
     if let Ok(got) = got {
         let got = got.map(Into::into);

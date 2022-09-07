@@ -1,5 +1,6 @@
 use super::zig_zag_decode;
-use crate::{ParseError, ParseResult, Reader};
+use crate::parser::{ParseError, ParseResult};
+use crate::Reader;
 use bitter::BitReader;
 
 #[allow(clippy::assertions_on_constants)]
@@ -13,7 +14,7 @@ pub fn read_uvar(data: &mut Reader) -> ParseResult<u32> {
     let mut offset: u32 = 0;
     loop {
         if !data.has_bits_remaining(8) {
-            return Err(ParseError::unexpected_eof());
+            return Err(ParseError::UnexpectedEof);
         }
 
         let is_last_byte = data.peek(1) == 0;

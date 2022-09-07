@@ -1,12 +1,12 @@
 mod event;
 mod frame;
 
-use bitter::BitReader;
 pub use event::Event;
 pub use frame::{Frame, FrameKind};
 
-use super::Headers;
-use crate::{ParseResult, Reader};
+use super::{Headers, ParseResult};
+use crate::Reader;
+use bitter::BitReader;
 use std::iter;
 
 // Reason: unfinished
@@ -59,8 +59,8 @@ impl Data {
                 events.push(event);
             } else {
                 let frame_def = match kind {
-                    FrameKind::Intra => &headers.frames.intraframe,
-                    FrameKind::Inter => &headers.frames.interframe,
+                    FrameKind::Intra => &headers.frames.intra,
+                    FrameKind::Inter => &headers.frames.inter,
                     FrameKind::Slow => &headers.frames.slow,
                     other @ (FrameKind::Gps | FrameKind::GpsHome) => {
                         todo!("unhandled frame type: {other:?}")

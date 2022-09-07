@@ -1,8 +1,8 @@
-use std::iter;
-
-use crate::{encoding, ParseError, ParseResult, Reader};
+use crate::parser::{decoders, ParseError, ParseResult};
+use crate::Reader;
 use bitter::BitReader;
 use num_enum::TryFromPrimitive;
+use std::iter;
 use tracing::instrument;
 
 pub type Time = u64;
@@ -23,11 +23,11 @@ impl Event {
             Some(Ok(EventKind::SyncBeep)) => {
                 // TODO: SyncBeep handle time rollover
 
-                let time = encoding::read_uvar(data)?;
+                let time = decoders::read_uvar(data)?;
                 Ok(Self::SyncBeep(time.into()))
             }
             Some(Ok(EventKind::Disarm)) => {
-                let reason = encoding::read_uvar(data)?;
+                let reason = decoders::read_uvar(data)?;
                 Ok(Self::Disarm(reason))
             }
             Some(Ok(EventKind::End)) => {
@@ -44,7 +44,7 @@ impl Event {
             }
             Some(Ok(event)) => todo!("unsupported event: {:?}", event),
             Some(Err(err)) => todo!("invalid event: {err}"),
-            None => Err(ParseError::unexpected_eof()),
+            None => Err(ParseError::UnexpectedEof),
         }
     }
 }

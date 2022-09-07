@@ -1,11 +1,12 @@
 use super::sign_extend;
-use crate::{LogVersion, ParseError, ParseResult, Reader};
+use crate::parser::{ParseError, ParseResult};
+use crate::{LogVersion, Reader};
 use bitter::BitReader;
 
 pub fn read_tagged_16(version: LogVersion, data: &mut Reader) -> ParseResult<[i16; 4]> {
     const COUNT: usize = 4;
 
-    let tags = data.read_u8().ok_or_else(ParseError::unexpected_eof)?;
+    let tags = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
     let mut result = [0; COUNT];
 
     let mut i = 0;
@@ -21,7 +22,7 @@ pub fn read_tagged_16(version: LogVersion, data: &mut Reader) -> ParseResult<[i1
                         return Err(ParseError::Corrupted);
                     }
 
-                    let byte = data.read_u8().ok_or_else(ParseError::unexpected_eof)?;
+                    let byte = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
 
                     // Lower nibble first...
                     result[i] = i4_to_i16(byte & 0xF);
@@ -29,15 +30,15 @@ pub fn read_tagged_16(version: LogVersion, data: &mut Reader) -> ParseResult<[i1
                     result[i] = i4_to_i16(byte >> 4);
                 }
                 LogVersion::V2 => {
-                    let nibble = data.read_bits(4).ok_or_else(ParseError::unexpected_eof)?;
+                    let nibble = data.read_bits(4).ok_or(ParseError::UnexpectedEof)?;
                     result[i] = i4_to_i16(nibble as u8);
                 }
             },
             2 => {
-                result[i] = (data.read_i8().ok_or_else(ParseError::unexpected_eof)?).into();
+                result[i] = (data.read_i8().ok_or(ParseError::UnexpectedEof)?).into();
             }
             3.. => {
-                let bytes = data.read_i16().ok_or_else(ParseError::unexpected_eof)?;
+                let bytes = data.read_i16().ok_or(ParseError::UnexpectedEof)?;
 
                 result[i] = match version {
                     LogVersion::V1 => i16::from_be(bytes),
