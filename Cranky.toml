@@ -31,7 +31,6 @@ warn = [
     "clippy::inconsistent_struct_constructor",
     "clippy::items_after_statements",
     "clippy::manual_ok_or",
-    "clippy::map_err_ignore",
     "clippy::map_unwrap_or",
     "clippy::match_on_vec_items",
     "clippy::match_same_arms",
