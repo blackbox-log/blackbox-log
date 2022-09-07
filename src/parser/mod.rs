@@ -10,6 +10,8 @@ pub use predictor::Predictor;
 
 use crate::{Log, Reader};
 
+pub type ParseResult<T> = Result<T, ParseError>;
+
 #[derive(Debug, thiserror::Error)]
 pub enum ParseError {
     #[error("unknown product name: `{0}`")]
@@ -25,8 +27,6 @@ pub enum ParseError {
     #[error("unexpected end of file")]
     UnexpectedEof,
 }
-
-pub type ParseResult<T> = Result<T, ParseError>;
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Config {

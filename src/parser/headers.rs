@@ -6,15 +6,21 @@ use super::{ParseError, ParseResult};
 use crate::{LogVersion, Reader};
 use bitter::BitReader;
 use std::str;
+use std::str::FromStr;
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Headers {
     pub(crate) version: LogVersion,
     pub(crate) frames: FrameDefs,
 
     pub(crate) firmware_revision: String,
+    pub(crate) firmware_kind: FirmwareKind,
     pub(crate) board_info: String,
     pub(crate) craft_name: String,
+
+    /// Measured battery voltage at arm
+    pub(crate) vbat_reference: u16,
 }
 
 impl Headers {
@@ -48,10 +54,38 @@ impl Headers {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum FirmwareKind {
+    Baseflight,
+    Cleanflight,
+}
+
+impl FromStr for FirmwareKind {
+    type Err = ParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "Cleanflight" => Ok(Self::Cleanflight),
+            "Baseflight" => Ok(Self::Baseflight),
+            _ => Err(ParseError::InvalidHeader {
+                header: "Firmware type".to_owned(),
+                value: s.to_owned(),
+            }),
+        }
+    }
+}
+
 #[derive(Debug)]
 struct State {
     version: LogVersion,
     frames: frame_def::Builders,
+
+    firmware_revision: Option<String>,
+    firmware_kind: Option<FirmwareKind>,
+    board_info: Option<String>,
+    craft_name: Option<String>,
+
+    vbat_reference: Option<u16>,
 }
 
 impl State {
@@ -59,15 +93,31 @@ impl State {
         Self {
             version,
             frames: frame_def::Builders::default(),
+            firmware_revision: None,
+            firmware_kind: None,
+            board_info: None,
+            craft_name: None,
+            vbat_reference: None,
         }
     }
 
     fn update(&mut self, header: String, value: String) -> ParseResult<()> {
-        match header {
-            full_header if full_header.starts_with("Field ") => {
-                let unknown_header = || ParseError::UnknownHeader(full_header.clone());
+        match header.as_str() {
+            "Firmware revision" => self.firmware_revision = Some(value),
+            "Firmware type" => self.firmware_kind = Some(value.parse()?),
+            "Board information" => self.board_info = Some(value),
+            "Craft name" => self.craft_name = Some(value),
+            "vbatref" => {
+                self.vbat_reference = Some(
+                    value
+                        .parse()
+                        .map_err(|_| ParseError::InvalidHeader { header, value })?,
+                );
+            }
+            _ if header.starts_with("Field ") => {
+                let unknown_header = || ParseError::UnknownHeader(header.clone());
 
-                let (frame, field) = full_header
+                let (frame, field) = header
                     .strip_prefix("Field ")
                     .unwrap()
                     .split_once(' ')
@@ -83,7 +133,7 @@ impl State {
                 match field {
                     "name" => frame.names = Some(value),
                     "signed" => frame.signs = Some(value),
-                    "width" => tracing::warn!("ignoring `{full_header}` header"),
+                    "width" => tracing::warn!("ignoring `{header}` header"),
                     "predictor" => frame.predictors = Some(value),
                     "encoding" => frame.encodings = Some(value),
                     _ => return Err(unknown_header()),
@@ -96,7 +146,17 @@ impl State {
     }
 
     fn finish(self) -> ParseResult<Headers> {
-        todo!()
+        Ok(Headers {
+            version: self.version,
+            frames: self.frames.parse()?,
+
+            // TODO: return an error instead of unwrap
+            firmware_revision: self.firmware_revision.unwrap(),
+            firmware_kind: self.firmware_kind.unwrap(),
+            board_info: self.board_info.unwrap(),
+            craft_name: self.craft_name.unwrap(),
+            vbat_reference: self.vbat_reference.unwrap(),
+        })
     }
 }
 
