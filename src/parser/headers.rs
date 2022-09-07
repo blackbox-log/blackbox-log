@@ -1,6 +1,6 @@
 mod frame_def;
 
-pub use frame_def::{FieldDef, FrameDefs};
+pub use frame_def::{FieldDef, FrameDef, FrameDefs};
 
 use super::{ParseError, ParseResult};
 use crate::{LogVersion, Reader};
@@ -78,7 +78,7 @@ impl FromStr for FirmwareKind {
 #[derive(Debug)]
 struct State {
     version: LogVersion,
-    frames: frame_def::Builders,
+    frames: frame_def::FrameDefsBuilder,
 
     firmware_revision: Option<String>,
     firmware_kind: Option<FirmwareKind>,
@@ -92,7 +92,7 @@ impl State {
     fn new(version: LogVersion) -> Self {
         Self {
             version,
-            frames: frame_def::Builders::default(),
+            frames: frame_def::FrameDefs::builder(),
             firmware_revision: None,
             firmware_kind: None,
             board_info: None,

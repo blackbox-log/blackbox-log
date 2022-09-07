@@ -1,30 +1,116 @@
 use std::borrow::ToOwned;
+use std::ops::Index;
 
-use crate::parser::{Encoding, ParseError, ParseResult, Predictor};
+use crate::parser::{DataFrameKind, Encoding, ParseError, ParseResult, Predictor};
 
 #[derive(Debug)]
 pub struct FrameDefs {
-    pub(in crate::parser) intra: Vec<FieldDef>,
-    pub(in crate::parser) inter: Vec<FieldDef>,
-    pub(in crate::parser) slow: Vec<FieldDef>,
+    intra: FrameDef,
+    inter: FrameDef,
+    slow: FrameDef,
+}
+
+impl FrameDefs {
+    pub(super) const fn builder() -> FrameDefsBuilder {
+        FrameDefsBuilder {
+            intra: FrameDef::builder(DataFrameKind::Intra),
+            inter: FrameDef::builder(DataFrameKind::Inter),
+            slow: FrameDef::builder(DataFrameKind::Slow),
+        }
+    }
+
+    pub fn intra(&self) -> &FrameDef {
+        &self.intra
+    }
+
+    pub fn inter(&self) -> &FrameDef {
+        &self.inter
+    }
+
+    pub fn slow(&self) -> &FrameDef {
+        &self.slow
+    }
+}
+
+#[derive(Debug)]
+pub struct FrameDef {
+    kind: DataFrameKind,
+    fields: Vec<FieldDef>,
+}
+
+impl FrameDef {
+    pub(super) const fn builder(kind: DataFrameKind) -> Builder {
+        Builder {
+            kind,
+            names: None,
+            signs: None,
+            predictors: None,
+            encodings: None,
+        }
+    }
+
+    pub(crate) const fn kind(&self) -> DataFrameKind {
+        self.kind
+    }
+
+    pub fn values(&self) -> &[FieldDef] {
+        self.fields.as_ref()
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &FieldDef> {
+        self.fields.iter()
+    }
+
+    pub fn len(&self) -> usize {
+        self.fields.len()
+    }
+}
+
+impl<T> Index<T> for FrameDef
+where
+    Vec<FieldDef>: Index<T>,
+{
+    type Output = <Vec<FieldDef> as Index<T>>::Output;
+
+    fn index(&self, index: T) -> &Self::Output {
+        &self.fields[index]
+    }
 }
 
 #[derive(Debug)]
 pub struct FieldDef {
-    pub(in crate::parser) name: String,
-    pub(in crate::parser) signed: bool,
-    pub(in crate::parser) predictor: Predictor,
-    pub(in crate::parser) encoding: Encoding,
+    name: String,
+    signed: bool,
+    predictor: Predictor,
+    encoding: Encoding,
 }
 
-#[derive(Debug, Default)]
-pub(super) struct Builders {
+impl FieldDef {
+    pub fn name(&self) -> &str {
+        self.name.as_ref()
+    }
+
+    pub const fn signed(&self) -> bool {
+        self.signed
+    }
+
+    pub const fn predictor(&self) -> Predictor {
+        self.predictor
+    }
+
+    pub const fn encoding(&self) -> Encoding {
+        self.encoding
+    }
+}
+
+#[derive(Debug)]
+pub(super) struct FrameDefsBuilder {
     pub intra: Builder,
     pub inter: Builder,
     pub slow: Builder,
 }
 
-impl Builders {
+impl FrameDefsBuilder {
     pub(super) fn parse(mut self) -> ParseResult<FrameDefs> {
         self.inter.names = self.intra.names.clone();
         self.inter.signs = self.intra.signs.clone();
@@ -37,8 +123,9 @@ impl Builders {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub(super) struct Builder {
+    kind: DataFrameKind,
     pub names: Option<String>,
     pub signs: Option<String>,
     pub predictors: Option<String>,
@@ -46,7 +133,7 @@ pub(super) struct Builder {
 }
 
 impl Builder {
-    fn parse(self) -> ParseResult<Vec<FieldDef>> {
+    fn parse(self) -> ParseResult<FrameDef> {
         // FIXME: give these errors their own variant
         let names = self.names.ok_or(ParseError::Corrupted)?;
         let signs = self.signs.ok_or(ParseError::Corrupted)?;
@@ -85,6 +172,9 @@ impl Builder {
             })
             .collect();
 
-        Ok(fields)
+        Ok(FrameDef {
+            kind: self.kind,
+            fields,
+        })
     }
 }

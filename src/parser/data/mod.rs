@@ -2,9 +2,9 @@ mod event;
 mod frame;
 
 pub use event::Event;
-pub use frame::{Frame, FrameKind};
+pub use frame::Frame;
 
-use super::{Headers, ParseResult};
+use super::{DataFrameKind, FrameKind, Headers, ParseResult};
 use crate::Reader;
 use bitter::BitReader;
 use std::iter;
@@ -48,29 +48,34 @@ impl Data {
                 todo!();
             });
 
-            if kind == FrameKind::Event {
-                let event = Event::parse(data)?;
+            match kind {
+                FrameKind::Event => {
+                    let event = Event::parse(data)?;
+                    let is_end = event == Event::End;
+                    events.push(event);
 
-                if event == Event::End {
-                    tracing::trace!("found the end event");
-                    break;
-                }
-
-                events.push(event);
-            } else {
-                let frame_def = match kind {
-                    FrameKind::Intra => &headers.frames.intra,
-                    FrameKind::Inter => &headers.frames.inter,
-                    FrameKind::Slow => &headers.frames.slow,
-                    other @ (FrameKind::Gps | FrameKind::GpsHome) => {
-                        todo!("unhandled frame type: {other:?}")
+                    if is_end {
+                        tracing::trace!("found the end event");
+                        break;
                     }
-                    FrameKind::Event => unreachable!(),
-                };
+                }
+                FrameKind::Data(data_kind) => {
+                    let frame_def = match data_kind {
+                        DataFrameKind::Intra => headers.frames.intra(),
+                        DataFrameKind::Inter => headers.frames.inter(),
+                        DataFrameKind::Slow => headers.frames.slow(),
+                        other @ (DataFrameKind::Gps | DataFrameKind::GpsHome) => {
+                            todo!("unhandled frame type: {other:?}")
+                        }
+                    };
 
-                let frame = Frame::parse(data, headers, frame_def)?;
-                frames.push(frame);
-            };
+                    let current = frames.len();
+                    let last = current.checked_sub(1).and_then(|i| frames.get(i));
+                    let last_last = current.checked_sub(2).and_then(|i| frames.get(i));
+                    let frame = Frame::parse(data, headers, frame_def, last, last_last)?;
+                    frames.push(frame);
+                }
+            }
         }
 
         Ok(Self { events, frames })

@@ -3,7 +3,7 @@ pub mod decoders;
 mod headers;
 mod predictor;
 
-pub use data::{Data, Event, Frame, FrameKind};
+pub use data::{Data, Event, Frame};
 pub use decoders::Encoding;
 pub use headers::{FieldDef, FrameDefs, Headers};
 pub use predictor::Predictor;
@@ -41,5 +41,43 @@ impl Config {
         let data = Data::parse(&mut data, &headers)?;
 
         Ok(Log { headers, data })
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+enum FrameKind {
+    Event,
+    Data(DataFrameKind),
+}
+
+impl FrameKind {
+    pub(crate) fn from_byte(byte: u8) -> Option<Self> {
+        if byte == b'E' {
+            Some(Self::Event)
+        } else {
+            Some(Self::Data(DataFrameKind::from_byte(byte)?))
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub(crate) enum DataFrameKind {
+    Intra,
+    Inter,
+    Gps,
+    GpsHome,
+    Slow,
+}
+
+impl DataFrameKind {
+    pub(crate) fn from_byte(byte: u8) -> Option<Self> {
+        match byte {
+            b'I' => Some(Self::Intra),
+            b'P' => Some(Self::Inter),
+            b'G' => Some(Self::Gps),
+            b'H' => Some(Self::GpsHome),
+            b'S' => Some(Self::Slow),
+            _ => None,
+        }
     }
 }

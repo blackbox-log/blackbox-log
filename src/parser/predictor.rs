@@ -1,6 +1,8 @@
 use num_enum::TryFromPrimitive;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, TryFromPrimitive)]
+use super::Headers;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive)]
 #[repr(u8)]
 pub enum Predictor {
     Zero = 0,
@@ -12,25 +14,34 @@ pub enum Predictor {
     Increment,
     HomeLat, // TODO: check that lat = 0, lon = 1
     FifteenHundred,
-    VBatRef,
+    VBatReference,
     LastMainFrameTime,
     MinMotor,
     // HomeLon = 256,
 }
 
 impl Predictor {
-    pub fn apply(self, value: i64 /*, current: i64, previous: i64, previous2: i64 */) -> i64 {
+    pub fn apply(
+        self,
+        headers: &Headers,
+        value: i64,
+        last: Option<i64>,
+        last_last: Option<i64>,
+    ) -> i64 {
+        let last = last.unwrap_or(0);
+        let last_last = last_last.unwrap_or(0);
+
         let diff = match self {
             Self::Zero => 0,
-            // Self::Previous => previous,
-            // Self::StraightLine => (2 * previous) - previous2,
-            // Self::Average2 => (previous + previous2) / 2,
+            Self::Previous => last,
+            Self::StraightLine => (2 * last) - last_last,
+            Self::Average2 => (last + last_last) / 2,
             // Self::MinThrottle => todo!(),
             // Self::Motor0 => todo!(),
             // Self::Increment => todo!(),
             // Self::HomeLat => todo!(), // TODO: check that lat = 0, lon = 1
             Self::FifteenHundred => 1500,
-            // Self::VBatRef => todo!(),
+            Self::VBatReference => headers.vbat_reference.into(),
             // Self::LastMainFrameTime => todo!(),
             // Self::MinMotor => todo!(),
             // Self::HomeLon => todo!(),
