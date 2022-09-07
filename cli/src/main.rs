@@ -1,6 +1,5 @@
 mod cli;
 
-use blackbox::parser::Config;
 use clap::Parser;
 use cli::Cli;
 use std::fs::File;
@@ -13,6 +12,8 @@ fn main() -> eyre::Result<()> {
         .with_max_level(cli.log_level_filter())
         .init();
 
+    let config = cli.to_blackbox_config();
+
     for log in cli.logs {
         let data = {
             let mut log = File::open(log)?;
@@ -21,7 +22,6 @@ fn main() -> eyre::Result<()> {
             data
         };
 
-        let config = Config::default();
         let _log = config.parse(&data)?;
         // dbg!(log);
     }

@@ -1,5 +1,6 @@
+use crate::parser::decoders;
 use crate::parser::headers::FrameDef;
-use crate::parser::{decoders, DataFrameKind, Encoding, FieldDef, Headers, ParseResult, Predictor};
+use crate::parser::{Config, DataFrameKind, Encoding, FieldDef, Headers, ParseResult, Predictor};
 use crate::Reader;
 use std::iter::Peekable;
 use tracing::instrument;
@@ -30,6 +31,7 @@ impl Frame {
     )]
     pub(crate) fn parse(
         data: &mut Reader,
+        config: &Config,
         headers: &Headers,
         frame_def: &FrameDef,
         last: Option<&Frame>,
@@ -110,7 +112,10 @@ impl Frame {
                 let last = last.map(|l| l.values[i]);
                 let last_last = last_last.map(|l| l.values[i]);
 
-                *value = field.predictor().apply(headers, *value, last, last_last);
+                if !config.raw {
+                    *value = field.predictor().apply(headers, *value, last, last_last);
+                }
+
                 tracing::debug!(field = field.name(), value);
 
                 // TODO: check field.signed

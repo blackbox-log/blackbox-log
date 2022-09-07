@@ -31,14 +31,14 @@ pub enum ParseError {
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Config {
     /// Skip applying predictors to the parsed values
-    raw: bool,
+    pub raw: bool,
 }
 
 impl Config {
     pub fn parse(&self, data: &[u8]) -> ParseResult<Log> {
         let mut data = Reader::new(data);
         let headers = Headers::parse(&mut data)?;
-        let data = Data::parse(&mut data, &headers)?;
+        let data = Data::parse(&mut data, self, &headers)?;
 
         Ok(Log { headers, data })
     }

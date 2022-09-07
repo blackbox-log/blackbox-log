@@ -4,7 +4,7 @@ mod frame;
 pub use event::Event;
 pub use frame::Frame;
 
-use super::{DataFrameKind, FrameKind, Headers, ParseResult};
+use super::{Config, DataFrameKind, FrameKind, Headers, ParseResult};
 use crate::Reader;
 use bitter::BitReader;
 use std::iter;
@@ -18,7 +18,7 @@ pub struct Data {
 }
 
 impl Data {
-    pub fn parse(data: &mut Reader, headers: &Headers) -> ParseResult<Self> {
+    pub fn parse(data: &mut Reader, config: &Config, headers: &Headers) -> ParseResult<Self> {
         let mut events = Vec::new();
         let mut frames = Vec::new();
 
@@ -72,7 +72,7 @@ impl Data {
                     let current = frames.len();
                     let last = current.checked_sub(1).and_then(|i| frames.get(i));
                     let last_last = current.checked_sub(2).and_then(|i| frames.get(i));
-                    let frame = Frame::parse(data, headers, frame_def, last, last_last)?;
+                    let frame = Frame::parse(data, config, headers, frame_def, last, last_last)?;
                     frames.push(frame);
                 }
             }

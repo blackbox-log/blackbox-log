@@ -1,3 +1,4 @@
+use blackbox::parser::Config;
 use clap::{AppSettings, ArgAction, Parser, ValueEnum, ValueHint};
 use std::path::PathBuf;
 use tracing_subscriber::filter::LevelFilter;
@@ -206,5 +207,9 @@ impl Cli {
             4 => LevelFilter::DEBUG,
             _ => LevelFilter::TRACE,
         }
+    }
+
+    pub fn to_blackbox_config(&self) -> Config {
+        Config { raw: self.raw }
     }
 }
