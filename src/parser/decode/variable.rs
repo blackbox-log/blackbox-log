@@ -25,7 +25,11 @@ pub fn variable(data: &mut Reader) -> ParseResult<u32> {
 
         offset += 7;
 
-        if is_last_byte || offset >= 32 {
+        if !is_last_byte && offset >= 32 {
+            return Err(ParseError::Corrupted);
+        }
+
+        if is_last_byte {
             break;
         }
     }
@@ -42,21 +46,38 @@ mod test {
     use super::*;
 
     fn read_ok(bytes: &[u8]) -> u32 {
-        super::variable(&mut Reader::new(bytes)).unwrap()
+        variable(&mut Reader::new(bytes)).unwrap()
     }
 
     #[test]
-    fn read() {
+    fn zero() {
         assert_eq!(0, read_ok(&[0x00]));
         assert_eq!(0, read_ok(&[0x80, 0x00]));
+    }
+
+    #[test]
+    fn one() {
         assert_eq!(1, read_ok(&[1]));
+    }
+
+    #[test]
+    fn full_byte_output() {
         assert_eq!(0xFF, read_ok(&[0xFF, 0x01]));
+    }
+
+    #[test]
+    fn max_two_byte_input() {
         assert_eq!(0x3FFF, read_ok(&[0xFF, 0x7F]));
     }
 
     #[test]
     fn max() {
         assert_eq!(0xFFFF_FFFF, read_ok(&[0xFF, 0xFF, 0xFF, 0xFF, 0x7F]));
-        assert_eq!(0xFFFF_FFFF, read_ok(&[0xFF, 0xFF, 0xFF, 0xFF, 0x7F]));
+    }
+
+    #[test]
+    #[should_panic(expected = "Corrupted")]
+    fn too_many_bytes() {
+        assert_eq!(0xFFFF_FFFF, read_ok(&[0x80, 0x80, 0x80, 0x80, 0x80]));
     }
 }
