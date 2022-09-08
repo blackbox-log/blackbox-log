@@ -19,13 +19,13 @@ impl Stream {
     }
 
     #[inline]
-    pub fn read_uvar(&mut self) -> u32 {
+    pub fn read_variable(&mut self) -> u32 {
         // self.byte_align();
         unsafe { ffi::streamReadUnsignedVB(self.stream) }
     }
 
     #[inline]
-    pub fn read_ivar(&mut self) -> i32 {
+    pub fn read_variable_signed(&mut self) -> i32 {
         // self.byte_align();
         unsafe { ffi::streamReadSignedVB(self.stream) }
     }
@@ -37,12 +37,12 @@ impl Stream {
     }
 
     #[inline]
-    pub fn read_u32_elias_delta(&mut self) -> u32 {
+    pub fn read_elias_delta(&mut self) -> u32 {
         unsafe { ffi::streamReadEliasDeltaU32(self.stream) }
     }
 
     #[inline]
-    pub fn read_i32_elias_delta(&mut self) -> i32 {
+    pub fn read_elias_delta_signed(&mut self) -> i32 {
         unsafe { ffi::streamReadEliasDeltaS32(self.stream) }
     }
 
