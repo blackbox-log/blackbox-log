@@ -96,12 +96,12 @@ fn main() -> Result<()> {
             match fuzz {
                 Fuzz::List => cmd!(sh, "cargo fuzz list {dir_args...}").run(),
 
-                Fuzz::Run(FuzzRun {
+                Fuzz::Run {
                     target,
                     time,
                     backtrace,
                     input,
-                }) => {
+                } => {
                     let total_time = time.map(|t| format!("-max_total_time={t}"));
                     let debug = backtrace.then_some("--debug");
 
@@ -261,7 +261,7 @@ enum Args {
         args: Vec<OsString>,
     },
 
-    Fuzz(#[bpaf(external(fuzz_with_default_run))] Fuzz),
+    Fuzz(#[bpaf(external(fuzz))] Fuzz),
 
     #[bpaf(command)]
     /// Installs necessary dev tools
@@ -278,7 +278,21 @@ enum Fuzz {
 
     #[bpaf(command)]
     /// Runs a fuzz target
-    Run(#[bpaf(external(fuzz_run))] FuzzRun),
+    Run {
+        #[bpaf(positional("target"))]
+        target: String,
+
+        #[bpaf(external)]
+        time: Option<u16>,
+
+        #[bpaf(long, switch)]
+        /// Runs in debug mode and prints a backtrace on panic
+        backtrace: bool,
+
+        #[bpaf(positional("input"))]
+        /// Runs the target on only this input, if given
+        input: Option<PathBuf>,
+    },
 
     #[bpaf(command)]
     /// Pretty-prints the failing input
@@ -306,29 +320,6 @@ enum Fuzz {
         #[bpaf(positional("input"))]
         input: Option<PathBuf>,
     },
-}
-
-#[derive(Debug, Clone, Bpaf)]
-#[bpaf(generate(fuzz_run))]
-struct FuzzRun {
-    #[bpaf(positional("target"))]
-    target: String,
-
-    #[bpaf(external)]
-    time: Option<u16>,
-
-    #[bpaf(long, switch)]
-    /// Runs in debug mode and prints a backtrace on panic
-    backtrace: bool,
-
-    #[bpaf(positional("input"))]
-    /// Runs the target on only this input, if given
-    input: Option<PathBuf>,
-}
-
-fn fuzz_with_default_run() -> impl bpaf::Parser<Fuzz> {
-    let fuzz_run = fuzz_run().map(Fuzz::Run);
-    bpaf::construct!([fuzz(), fuzz_run])
 }
 
 fn time_given() -> impl Parser<Option<u16>> {
