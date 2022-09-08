@@ -3,10 +3,7 @@
 use bpaf::{Bpaf, Parser};
 use serde::Deserialize;
 use std::ffi::OsString;
-use std::fs::File;
-use std::io;
-use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use xshell::{cmd, Result, Shell};
 
 fn main() -> Result<()> {
@@ -97,48 +94,6 @@ fn main() -> Result<()> {
             ];
 
             match fuzz {
-                Fuzz::Add { target } => {
-                    fn update_manifest(path: &Path, target: &str) -> io::Result<()> {
-                        let mut f = File::open(path)?;
-
-                        writeln!(f)?;
-                        writeln!(f, "[[dir]]")?;
-                        writeln!(f, "name = \"{target}\"")?;
-                        writeln!(f, "path = \"fuzz_targets/{target}.rs\"")?;
-                        writeln!(f, "test = false")?;
-                        writeln!(f, "doc = false")
-                    }
-
-                    fn write_target(path: &Path) -> io::Result<()> {
-                        let mut f = File::open(path)?;
-
-                        writeln!(f, "#![no_main]")?;
-                        writeln!(f)?;
-                        writeln!(
-                            f,
-                            "use blackbox_fuzz::{{encoding, fuzz_target, UnalignedBytes}};"
-                        )?;
-                        writeln!(f)?;
-                        writeln!(f, "fuzz_target!(|data: UnalignedBytes| {{")?;
-                        writeln!(
-                            f,
-                            "    let (mut reference, mut bits) = data.to_streams_unaligned().unwrap();"
-                        )?;
-                        writeln!(f)?;
-                        writeln!(f, "    assert_eq!(todo!(), todo!());")?;
-                        writeln!(f, "}});")
-                    }
-
-                    update_manifest(&fuzz_dir.join("Cargo.toml"), &target)
-                        .expect("updated fuzz/Cargo.toml");
-                    let targets_dir = fuzz_dir.join("fuzz_targets");
-                    sh.create_dir(&targets_dir)?;
-                    write_target(&targets_dir.join(format!("{target}.rs")))
-                        .expect("wrote fuzz target");
-
-                    Ok(())
-                }
-
                 Fuzz::List => cmd!(sh, "cargo fuzz list {dir_args...}").run(),
 
                 Fuzz::Run(FuzzRun {
@@ -317,14 +272,6 @@ enum Args {
 #[bpaf(command)]
 /// Manage & run fuzz targets
 enum Fuzz {
-    #[bpaf(command)]
-    /// Sets up a new fuzz target
-    Add {
-        #[bpaf(positional("target"))]
-        /// Sets the name of the new target
-        target: String,
-    },
-
     #[bpaf(command)]
     /// List all fuzz targets
     List,
