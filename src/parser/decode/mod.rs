@@ -19,14 +19,14 @@ use num_enum::TryFromPrimitive;
 #[repr(u8)]
 pub enum Encoding {
     /// Signed variable byte
-    IVar = 0,
+    VariableSigned = 0,
     /// Unsigned variable byte
-    UVar = 1,
+    Variable = 1,
     /// Unsigned variable byte, but negated after decoding. Value fits in 14 bits
     Negative14Bit = 3,
-    U32EliasDelta = 4,
-    I32EliasDelta = 5,
-    TaggedVar = 6,
+    EliasDelta = 4,
+    EliasDeltaSigned = 5,
+    TaggedVariable = 6,
     Tagged32 = 7,
     /// 1 tag byte containing 4 2 bit tags, followed by 4 fields
     ///
@@ -39,8 +39,8 @@ pub enum Encoding {
     Tagged16 = 8,
     /// Nothing is written to the log, assume value is 0
     Null = 9,
-    U32EliasGamma = 10,
-    I32EliasGamma = 11,
+    EliasGamma = 10,
+    EliasGammaSigned = 11,
 }
 
 fn sign_extend(from: u64, bits: u32) -> i64 {

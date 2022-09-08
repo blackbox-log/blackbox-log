@@ -76,13 +76,13 @@ impl Frame {
                 }
 
                 match encoding {
-                    Encoding::UVar => values.push(decode::variable(data)?.into()),
-                    Encoding::IVar => values.push(decode::variable_signed(data)?.into()),
+                    Encoding::Variable => values.push(decode::variable(data)?.into()),
+                    Encoding::VariableSigned => values.push(decode::variable_signed(data)?.into()),
 
                     Encoding::Negative14Bit => values.push(decode::negative_14_bit(data)?.into()),
 
-                    Encoding::U32EliasDelta => values.push(decode::elias_delta(data)?.into()),
-                    Encoding::I32EliasDelta => {
+                    Encoding::EliasDelta => values.push(decode::elias_delta(data)?.into()),
+                    Encoding::EliasDeltaSigned => {
                         values.push(decode::elias_delta_signed(data)?.into());
                     }
 
@@ -106,7 +106,9 @@ impl Frame {
 
                     Encoding::Null => values.push(0),
 
-                    Encoding::TaggedVar | Encoding::U32EliasGamma | Encoding::I32EliasGamma => {
+                    Encoding::TaggedVariable
+                    | Encoding::EliasGamma
+                    | Encoding::EliasGammaSigned => {
                         unimplemented!("{encoding:?}")
                     }
                 }
