@@ -103,7 +103,7 @@ fn main() -> Result<()> {
                     input,
                 } => {
                     let total_time = time.map(|t| format!("-max_total_time={t}"));
-                    let debug = backtrace.then_some("--debug");
+                    let debug = backtrace.then_some("--dev");
 
                     let cmd = cmd!(
                         sh,
@@ -279,15 +279,15 @@ enum Fuzz {
     #[bpaf(command)]
     /// Runs a fuzz target
     Run {
-        #[bpaf(positional("target"))]
-        target: String,
-
         #[bpaf(external)]
         time: Option<u16>,
 
         #[bpaf(long, switch)]
         /// Runs in debug mode and prints a backtrace on panic
         backtrace: bool,
+
+        #[bpaf(positional("target"))]
+        target: String,
 
         #[bpaf(positional("input"))]
         /// Runs the target on only this input, if given
@@ -327,7 +327,7 @@ fn time_given() -> impl Parser<Option<u16>> {
         .help("Passes -max_total_time=<seconds> to libFuzzer, defaulting to 15 minutes if passed without a value")
         .argument("seconds")
         .from_str()
-        .map(Some)
+        .optional()
 }
 
 fn time_default() -> impl Parser<Option<u16>> {
