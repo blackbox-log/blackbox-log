@@ -8,6 +8,7 @@ edition = "2021"
 cargo-fuzz = true
 
 [dependencies]
+arbitrary = { version = "*", features = ["derive"] }
 bitter = "0.6.0"
 blackbox = { path = ".." }
 libfuzzer-sys = "0.4"

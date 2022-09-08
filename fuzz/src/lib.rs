@@ -10,6 +10,17 @@ use std::io;
 use std::io::Write;
 use std::os::unix::io::AsRawFd;
 
+#[derive(Debug, Arbitrary)]
+pub struct AlignedBytes {
+    bytes: Vec<u8>,
+}
+
+impl AlignedBytes {
+    pub fn to_streams(&self) -> io::Result<(Stream, BigEndianReader)> {
+        get_streams(&self.bytes)
+    }
+}
+
 #[derive(Debug)]
 pub struct UnalignedBytes {
     offset: u8,
@@ -34,10 +45,10 @@ impl<'a> Arbitrary<'a> for UnalignedBytes {
 }
 
 impl UnalignedBytes {
-    pub fn to_streams_unaligned(&self) -> io::Result<(Stream, BigEndianReader)> {
-        let (mut reference, mut bitter) = self.to_streams_aligned()?;
+    pub fn to_streams(&self) -> io::Result<(Stream, BigEndianReader)> {
+        let (mut reference, mut bitter) = get_streams(&self.bytes)?;
 
-        let offset = self.offset % 8;
+        let offset = self.offset;
         if offset > 0 {
             let reference_bits = reference.read_bits(offset);
             let bitter_bits = bitter.read_bits(offset.into()).unwrap_or(0);
@@ -46,15 +57,15 @@ impl UnalignedBytes {
 
         Ok((reference, bitter))
     }
+}
 
-    pub fn to_streams_aligned(&self) -> io::Result<(Stream, BigEndianReader)> {
-        let mut f = MemFile::create_default("reference-impl-input")?;
-        f.write_all(&self.bytes)?;
-        f.flush()?;
+fn get_streams(bytes: &[u8]) -> io::Result<(Stream, BigEndianReader)> {
+    let mut f = MemFile::create_default("reference-impl-input")?;
+    f.write_all(bytes)?;
+    f.flush()?;
 
-        let reference = Stream::new(f.as_raw_fd());
-        let bitter = BigEndianReader::new(self.bytes.as_slice());
+    let reference = Stream::new(f.as_raw_fd());
+    let bitter = BigEndianReader::new(bytes);
 
-        Ok((reference, bitter))
-    }
+    Ok((reference, bitter))
 }

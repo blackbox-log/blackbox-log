@@ -1,10 +1,10 @@
 #![no_main]
 
 use blackbox::LogVersion;
-use blackbox_fuzz::{decode, fuzz_target, UnalignedBytes};
+use blackbox_fuzz::{decode, fuzz_target, AlignedBytes};
 
-fuzz_target!(|data: UnalignedBytes| {
-    let (mut reference, mut bits) = data.to_streams_aligned().unwrap();
+fuzz_target!(|data: AlignedBytes| {
+    let (mut reference, mut bits) = data.to_streams().unwrap();
 
     let expected = reference.read_tagged_16_v2();
     let got = decode::tagged_16(LogVersion::V2, &mut bits);

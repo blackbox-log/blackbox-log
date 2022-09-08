@@ -1,9 +1,9 @@
 #![no_main]
 
-use blackbox_fuzz::{decode, fuzz_target, UnalignedBytes};
+use blackbox_fuzz::{decode, fuzz_target, AlignedBytes};
 
-fuzz_target!(|data: UnalignedBytes| {
-    let (mut reference, mut bits) = data.to_streams_aligned().unwrap();
+fuzz_target!(|data: AlignedBytes| {
+    let (mut reference, mut bits) = data.to_streams().unwrap();
 
     assert_eq!(
         reference.read_negative_14_bit(),
