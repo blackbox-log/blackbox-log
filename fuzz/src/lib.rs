@@ -1,5 +1,5 @@
 pub use bitter::{BigEndianReader, BitReader};
-pub use blackbox::parser::decoders;
+pub use blackbox::parser::decode;
 pub use libfuzzer_sys::arbitrary::Arbitrary;
 pub use libfuzzer_sys::fuzz_target;
 

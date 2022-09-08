@@ -22,7 +22,7 @@ test-case = "2.2.1"
 bench = false
 
 [[bench]]
-name = "read"
+name = "decode"
 harness = false
 
 [profile.release]

@@ -6,7 +6,7 @@ use bitter::BitReader;
 const COUNT: usize = 3;
 
 #[allow(clippy::assertions_on_constants)]
-pub fn read_tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
+pub fn tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
     // Allows up to the 6 bit case in one refill
     const _: () = assert!(24 <= bitter::MAX_READ_BITS, "bit buffer is too small");
 
@@ -108,7 +108,7 @@ mod test {
         let b = bytes(0x00, 0);
         let mut b = Reader::new(b.as_slice());
 
-        assert_eq!([0; 3], read_tagged_32(&mut b).unwrap());
+        assert_eq!([0; 3], tagged_32(&mut b).unwrap());
         assert!(b.is_empty());
     }
 
@@ -117,7 +117,7 @@ mod test {
         let b = bytes(0x40, 1);
         let mut b = Reader::new(b.as_slice());
 
-        assert_eq!([0; 3], read_tagged_32(&mut b).unwrap());
+        assert_eq!([0; 3], tagged_32(&mut b).unwrap());
         assert!(b.is_empty());
     }
 
@@ -126,7 +126,7 @@ mod test {
         let b = bytes(0x80, 2);
         let mut b = Reader::new(b.as_slice());
 
-        assert_eq!([0; 3], read_tagged_32(&mut b).unwrap());
+        assert_eq!([0; 3], tagged_32(&mut b).unwrap());
         assert!(b.is_empty());
     }
 
@@ -135,7 +135,7 @@ mod test {
         let b = bytes(0b1100_0000, 3);
         let mut b = Reader::new(b.as_slice());
 
-        assert_eq!([0; 3], read_tagged_32(&mut b).unwrap());
+        assert_eq!([0; 3], tagged_32(&mut b).unwrap());
         assert!(b.is_empty());
     }
 
@@ -144,7 +144,7 @@ mod test {
         let b = bytes(0b1101_0101, 6);
         let mut b = Reader::new(b.as_slice());
 
-        assert_eq!([0; 3], read_tagged_32(&mut b).unwrap());
+        assert_eq!([0; 3], tagged_32(&mut b).unwrap());
         assert!(b.is_empty());
     }
 
@@ -153,7 +153,7 @@ mod test {
         let b = bytes(0b1110_1010, 9);
         let mut b = Reader::new(b.as_slice());
 
-        assert_eq!([0; 3], read_tagged_32(&mut b).unwrap());
+        assert_eq!([0; 3], tagged_32(&mut b).unwrap());
         assert!(b.is_empty());
     }
 
@@ -162,7 +162,7 @@ mod test {
         let b = bytes(0xFF, 12);
         let mut b = Reader::new(b.as_slice());
 
-        assert_eq!([0; 3], read_tagged_32(&mut b).unwrap());
+        assert_eq!([0; 3], tagged_32(&mut b).unwrap());
         assert!(b.is_empty());
     }
 }

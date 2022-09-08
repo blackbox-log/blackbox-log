@@ -7,11 +7,11 @@ mod tagged_16;
 mod tagged_32;
 mod variable;
 
-pub use elias_delta::{read_i32_elias_delta, read_u32_elias_delta};
-pub use negative_14_bit::read_negative_14_bit;
-pub use tagged_16::read_tagged_16;
-pub use tagged_32::read_tagged_32;
-pub use variable::{read_ivar, read_uvar};
+pub use elias_delta::{elias_delta, elias_delta_signed};
+pub use negative_14_bit::negative_14_bit;
+pub use tagged_16::tagged_16;
+pub use tagged_32::tagged_32;
+pub use variable::{variable, variable_signed};
 
 use num_enum::TryFromPrimitive;
 

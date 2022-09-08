@@ -4,7 +4,7 @@ use crate::Reader;
 use bitter::BitReader;
 
 #[allow(clippy::assertions_on_constants)]
-pub fn read_uvar(data: &mut Reader) -> ParseResult<u32> {
+pub fn variable(data: &mut Reader) -> ParseResult<u32> {
     // 32 bits at 7 bits / byte = 5 bytes
     const _: () = assert!((5 * 8) <= bitter::MAX_READ_BITS, "bit buffer is too small");
 
@@ -33,8 +33,8 @@ pub fn read_uvar(data: &mut Reader) -> ParseResult<u32> {
     Ok(uvar)
 }
 
-pub fn read_ivar(data: &mut Reader) -> ParseResult<i32> {
-    read_uvar(data).map(zig_zag_decode)
+pub fn variable_signed(data: &mut Reader) -> ParseResult<i32> {
+    variable(data).map(zig_zag_decode)
 }
 
 #[cfg(test)]
@@ -42,7 +42,7 @@ mod test {
     use super::*;
 
     fn read_ok(bytes: &[u8]) -> u32 {
-        super::read_uvar(&mut Reader::new(bytes)).unwrap()
+        super::variable(&mut Reader::new(bytes)).unwrap()
     }
 
     #[test]

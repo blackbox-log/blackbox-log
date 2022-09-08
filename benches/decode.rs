@@ -1,5 +1,5 @@
 use bitter::BigEndianReader;
-use blackbox::parser::decoders;
+use blackbox::parser::decode;
 use blackbox::LogVersion;
 use criterion::measurement::WallTime;
 use criterion::{criterion_group, criterion_main};
@@ -42,8 +42,8 @@ fn run_bench_pair<P: Display>(
 }
 
 fn variable(c: &mut Criterion) {
-    get_bench!(ubench, decoders::read_uvar);
-    get_bench!(ibench, decoders::read_ivar);
+    get_bench!(ubench, decode::variable);
+    get_bench!(ibench, decode::variable_signed);
 
     let mut group = c.benchmark_group("variable byte");
 
@@ -65,7 +65,7 @@ fn variable(c: &mut Criterion) {
 }
 
 fn negative_14_bit(c: &mut Criterion) {
-    get_bench!(decoders::read_negative_14_bit);
+    get_bench!(decode::negative_14_bit);
 
     let mut group = c.benchmark_group("negative 14 bit");
 
@@ -79,8 +79,8 @@ fn negative_14_bit(c: &mut Criterion) {
 }
 
 fn elias_delta(c: &mut Criterion) {
-    get_bench!(ubench, decoders::read_u32_elias_delta);
-    get_bench!(ibench, decoders::read_i32_elias_delta);
+    get_bench!(ubench, decode::elias_delta);
+    get_bench!(ibench, decode::elias_delta_signed);
 
     let mut group = c.benchmark_group("Elias delta");
 
@@ -102,8 +102,8 @@ fn tagged_zeros(first: u8, zeros: usize) -> Vec<u8> {
 fn tagged_16(c: &mut Criterion) {
     use LogVersion::{V1, V2};
 
-    get_bench!(bench_v1, |data| decoders::read_tagged_16(V1, data));
-    get_bench!(bench_v2, |data| decoders::read_tagged_16(V2, data));
+    get_bench!(bench_v1, |data| decode::tagged_16(V1, data));
+    get_bench!(bench_v2, |data| decode::tagged_16(V2, data));
 
     let mut group = c.benchmark_group("tagged 16");
 
@@ -129,7 +129,7 @@ fn tagged_16(c: &mut Criterion) {
 }
 
 fn tagged_32(c: &mut Criterion) {
-    get_bench!(decoders::read_tagged_32);
+    get_bench!(decode::tagged_32);
 
     let mut group = c.benchmark_group("tagged 32");
 

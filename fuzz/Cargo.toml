@@ -15,56 +15,56 @@ memfile = "0.2.1"
 reference-impl = { version = "0.1.0", path = "../reference-impl" }
 
 [[bin]]
-name = "ivar"
-path = "fuzz_targets/ivar.rs"
+name = "variable-signed"
+path = "fuzz_targets/variable_signed.rs"
 test = false
 bench = false
 doc = false
 
 [[bin]]
-name = "uvar"
-path = "fuzz_targets/uvar.rs"
+name = "variable"
+path = "fuzz_targets/variable.rs"
 test = false
 bench = false
 doc = false
 
 [[bin]]
-name = "i32_elias_delta"
-path = "fuzz_targets/i32_elias_delta.rs"
+name = "elias-delta-signed"
+path = "fuzz_targets/elias_delta_signed.rs"
 test = false
 bench = false
 doc = false
 
 [[bin]]
-name = "u32_elias_delta"
-path = "fuzz_targets/u32_elias_delta.rs"
+name = "elias-delta"
+path = "fuzz_targets/elias_delta.rs"
 test = false
 bench = false
 doc = false
 
 [[bin]]
-name = "tagged_16_v1"
+name = "tagged-16-v1"
 path = "fuzz_targets/tagged_16_v1.rs"
 test = false
 bench = false
 doc = false
 
 [[bin]]
-name = "tagged_16_v2"
+name = "tagged-16-v2"
 path = "fuzz_targets/tagged_16_v2.rs"
 test = false
 bench = false
 doc = false
 
 [[bin]]
-name = "tagged_32"
+name = "tagged-32"
 path = "fuzz_targets/tagged_32.rs"
 test = false
 bench = false
 doc = false
 
 [[bin]]
-name = "negative_14_bit"
+name = "negative-14-bit"
 path = "fuzz_targets/negative_14_bit.rs"
 test = false
 doc = false

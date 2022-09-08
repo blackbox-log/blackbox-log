@@ -1,4 +1,4 @@
-use crate::parser::decoders;
+use crate::parser::decode;
 use crate::parser::headers::FrameDef;
 use crate::parser::{Config, DataFrameKind, Encoding, FieldDef, Headers, ParseResult, Predictor};
 use crate::Reader;
@@ -41,68 +41,51 @@ impl Frame {
         let mut values: Vec<i64> = Vec::with_capacity(frame_def.len());
 
         while let Some((i, field)) = frame_fields.next() {
-            let extra_fields = if field.predictor() == Predictor::Increment {
+            let mut extra_fields = 0;
+
+            if field.predictor() == Predictor::Increment {
                 todo!("Predictor::Increment")
             } else {
-                match field.encoding() {
-                    Encoding::IVar => {
-                        crate::byte_align(data);
-                        values.push(decoders::read_ivar(data)?.into());
-                        0
-                    }
-                    Encoding::UVar => {
-                        crate::byte_align(data);
-                        values.push(decoders::read_uvar(data)?.into());
-                        0
-                    }
-                    Encoding::Negative14Bit => {
-                        crate::byte_align(data);
-                        values.push(decoders::read_negative_14_bit(data)?.into());
-                        0
-                    }
-                    Encoding::U32EliasDelta => {
-                        values.push(decoders::read_u32_elias_delta(data)?.into());
-                        0
-                    }
+                let encoding = field.encoding();
+
+                if !matches!(
+                    encoding,
+                    Encoding::Tagged16 | Encoding::Tagged32 | Encoding::Null
+                ) {
+                    crate::byte_align(data);
+                }
+
+                match encoding {
+                    Encoding::IVar => values.push(decode::variable_signed(data)?.into()),
+                    Encoding::UVar => values.push(decode::variable(data)?.into()),
+                    Encoding::Negative14Bit => values.push(decode::negative_14_bit(data)?.into()),
+                    Encoding::U32EliasDelta => values.push(decode::elias_delta(data)?.into()),
                     Encoding::I32EliasDelta => {
-                        values.push(decoders::read_i32_elias_delta(data)?.into());
-                        0
+                        values.push(decode::elias_delta_signed(data)?.into());
                     }
                     Encoding::Tagged32 => {
-                        crate::byte_align(data);
+                        let read_values = decode::tagged_32(data)?.map(i64::from);
 
-                        let read_values = decoders::read_tagged_32(data)?.map(i64::from);
-
-                        let fields =
-                            fields_with_same_encoding(frame_fields.by_ref(), field.encoding());
+                        let fields = fields_with_same_encoding(frame_fields.by_ref(), encoding);
                         assert!(fields <= read_values.len());
+                        extra_fields = fields;
 
                         values.extend_from_slice(&read_values);
-
-                        fields
                     }
                     Encoding::Tagged16 => {
-                        crate::byte_align(data);
+                        let read_values = decode::tagged_16(headers.version, data)?.map(i64::from);
 
-                        let read_values =
-                            decoders::read_tagged_16(headers.version, data)?.map(i64::from);
-
-                        let fields =
-                            fields_with_same_encoding(frame_fields.by_ref(), field.encoding());
+                        let fields = fields_with_same_encoding(frame_fields.by_ref(), encoding);
                         assert!(fields <= read_values.len());
+                        extra_fields = fields;
 
                         values.extend_from_slice(&read_values);
+                    }
+                    Encoding::Null => values.push(0),
 
-                        fields
+                    Encoding::TaggedVar | Encoding::U32EliasGamma | Encoding::I32EliasGamma => {
+                        unimplemented!("{encoding:?}")
                     }
-                    Encoding::Null => {
-                        // TODO: check if prediction needs to be applied
-                        values.push(0);
-                        0
-                    }
-                    other @ (Encoding::TaggedVar
-                    | Encoding::U32EliasGamma
-                    | Encoding::I32EliasGamma) => unimplemented!("{other:?}"),
                 }
             };
 

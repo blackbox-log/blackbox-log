@@ -3,7 +3,7 @@ use crate::parser::{ParseError, ParseResult};
 use crate::{LogVersion, Reader};
 use bitter::BitReader;
 
-pub fn read_tagged_16(version: LogVersion, data: &mut Reader) -> ParseResult<[i16; 4]> {
+pub fn tagged_16(version: LogVersion, data: &mut Reader) -> ParseResult<[i16; 4]> {
     const COUNT: usize = 4;
 
     let tags = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
@@ -77,11 +77,11 @@ mod test {
 
         assert_eq!(
             [0; 4],
-            super::read_tagged_16(V1, &mut Reader::new(bytes)).unwrap()
+            super::tagged_16(V1, &mut Reader::new(bytes)).unwrap()
         );
         assert_eq!(
             [0; 4],
-            super::read_tagged_16(V2, &mut Reader::new(bytes)).unwrap()
+            super::tagged_16(V2, &mut Reader::new(bytes)).unwrap()
         );
     }
 
@@ -92,11 +92,11 @@ mod test {
 
         assert_eq!(
             [0; 4],
-            super::read_tagged_16(V1, &mut Reader::new(bytes)).unwrap()
+            super::tagged_16(V1, &mut Reader::new(bytes)).unwrap()
         );
         assert_eq!(
             [0; 4],
-            super::read_tagged_16(V2, &mut Reader::new(bytes)).unwrap()
+            super::tagged_16(V2, &mut Reader::new(bytes)).unwrap()
         );
     }
 
@@ -107,11 +107,11 @@ mod test {
 
         assert_eq!(
             [0; 4],
-            super::read_tagged_16(V1, &mut Reader::new(bytes)).unwrap()
+            super::tagged_16(V1, &mut Reader::new(bytes)).unwrap()
         );
         assert_eq!(
             [0; 4],
-            super::read_tagged_16(V2, &mut Reader::new(bytes)).unwrap()
+            super::tagged_16(V2, &mut Reader::new(bytes)).unwrap()
         );
     }
 
@@ -121,7 +121,7 @@ mod test {
         let mut bits = Reader::new(bytes);
 
         let expected = [1, 2, 3, 4];
-        assert_eq!(expected, super::read_tagged_16(V1, &mut bits).unwrap());
+        assert_eq!(expected, super::tagged_16(V1, &mut bits).unwrap());
     }
 
     #[test]
@@ -130,7 +130,7 @@ mod test {
         let mut bits = Reader::new(bytes);
 
         let expected = [1, 2, 3, 4];
-        assert_eq!(expected, super::read_tagged_16(V2, &mut bits).unwrap());
+        assert_eq!(expected, super::tagged_16(V2, &mut bits).unwrap());
     }
 
     #[test]
@@ -138,7 +138,7 @@ mod test {
         let bytes: &[u8] = &[0b1001_0100, 0x21, 0x03];
         let mut bits = Reader::new(bytes);
 
-        assert_eq!([0, 1, 2, 3], super::read_tagged_16(V1, &mut bits).unwrap());
+        assert_eq!([0, 1, 2, 3], super::tagged_16(V1, &mut bits).unwrap());
     }
 
     #[test]
@@ -146,7 +146,7 @@ mod test {
         let bytes: &[u8] = &[0b1110_0100, 0x10, 0x20, 0x00, 0x30];
         let mut bits = Reader::new(bytes);
 
-        assert_eq!([0, 1, 2, 3], super::read_tagged_16(V2, &mut bits).unwrap());
+        assert_eq!([0, 1, 2, 3], super::tagged_16(V2, &mut bits).unwrap());
     }
 
     #[test]
@@ -155,13 +155,13 @@ mod test {
         let mut bits = Reader::new(bytes);
 
         let expected = [1, 2, 0x00, 0x00];
-        assert_eq!(expected, super::read_tagged_16(V1, &mut bits).unwrap());
+        assert_eq!(expected, super::tagged_16(V1, &mut bits).unwrap());
     }
 
     #[case(V1, &[1, 194] => [2, -4, 0, 0] ; "low nibble first")]
     #[case(V1, &[10, 163, 10] => [-93, 10, 0, 0] ; "8 bit sign extend")]
     fn diff_from_reference(version: LogVersion, bytes: &[u8]) -> [i16; 4] {
         let mut bits = Reader::new(bytes);
-        super::read_tagged_16(version, &mut bits).unwrap()
+        super::tagged_16(version, &mut bits).unwrap()
     }
 }

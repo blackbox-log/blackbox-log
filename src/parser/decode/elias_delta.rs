@@ -4,7 +4,7 @@ use crate::Reader;
 use bitter::BitReader;
 
 /// NB: May leave the bit stream unaligned
-pub fn read_u32_elias_delta(data: &mut Reader) -> ParseResult<u32> {
+pub fn elias_delta(data: &mut Reader) -> ParseResult<u32> {
     let leading_zeros = {
         let mut leading_zeros: u8 = 0;
         for _ in 0..6 {
@@ -53,8 +53,8 @@ pub fn read_u32_elias_delta(data: &mut Reader) -> ParseResult<u32> {
 }
 
 /// NB: May leave the bit stream unaligned
-pub fn read_i32_elias_delta(data: &mut Reader) -> ParseResult<i32> {
-    read_u32_elias_delta(data).map(zig_zag_decode)
+pub fn elias_delta_signed(data: &mut Reader) -> ParseResult<i32> {
+    elias_delta(data).map(zig_zag_decode)
 }
 
 #[cfg(test)]
@@ -65,13 +65,13 @@ mod test {
     fn unaligned_min() {
         let mut bits = Reader::new(&[1]);
         bits.read_bits(7);
-        assert_eq!(0, super::read_u32_elias_delta(&mut bits).unwrap());
+        assert_eq!(0, super::elias_delta(&mut bits).unwrap());
     }
 
     #[test]
     fn unsigned() {
         fn read(bytes: &[u8]) -> u32 {
-            super::read_u32_elias_delta(&mut Reader::new(bytes)).unwrap()
+            super::elias_delta(&mut Reader::new(bytes)).unwrap()
         }
 
         assert_eq!(0, read(&[0x80, 0]));
@@ -88,13 +88,13 @@ mod test {
         let bytes = &[0x04, 0x1F, 0xFF, 0xFF, 0xFF, 0xE0];
         let mut bits = Reader::new(bytes.as_slice());
 
-        assert_eq!(u32::MAX, super::read_u32_elias_delta(&mut bits).unwrap());
+        assert_eq!(u32::MAX, super::elias_delta(&mut bits).unwrap());
     }
 
     #[test]
     fn signed() {
         fn read(bytes: &[u8]) -> i32 {
-            super::read_i32_elias_delta(&mut Reader::new(bytes)).unwrap()
+            super::elias_delta_signed(&mut Reader::new(bytes)).unwrap()
         }
 
         assert_eq!(0, read(&[0x80, 0]));
@@ -108,7 +108,7 @@ mod test {
         let bytes = &[0x04, 0x1F, 0xFF, 0xFF, 0xFF, 0xE0];
         let mut bits = Reader::new(bytes.as_slice());
 
-        assert_eq!(i32::MIN, super::read_i32_elias_delta(&mut bits).unwrap());
+        assert_eq!(i32::MIN, super::elias_delta_signed(&mut bits).unwrap());
     }
 
     #[test]
@@ -116,20 +116,20 @@ mod test {
         let bytes = &[0x04, 0x1F, 0xFF, 0xFF, 0xFF, 0xC0];
         let mut bits = Reader::new(bytes.as_slice());
 
-        assert_eq!(i32::MAX, super::read_i32_elias_delta(&mut bits).unwrap());
+        assert_eq!(i32::MAX, super::elias_delta_signed(&mut bits).unwrap());
     }
 
     #[test]
     #[should_panic(expected = "UnexpectedEof")]
     fn no_data() {
         let mut bits = Reader::new(&[]);
-        super::read_u32_elias_delta(&mut bits).unwrap();
+        super::elias_delta(&mut bits).unwrap();
     }
 
     #[test]
     fn too_many_leading_zeros() {
         let mut bits = Reader::new(&[0b0000_0010]);
-        let result = super::read_u32_elias_delta(&mut bits);
+        let result = super::elias_delta(&mut bits);
         assert!(matches!(result, Err(ParseError::Corrupted)));
     }
 
@@ -137,13 +137,13 @@ mod test {
     #[should_panic(expected = "UnexpectedEof")]
     fn too_few_middle_bits() {
         let mut bits = Reader::new(&[6]);
-        super::read_u32_elias_delta(&mut bits).unwrap();
+        super::elias_delta(&mut bits).unwrap();
     }
 
     #[test]
     fn too_many_middle_bits() {
         let mut bits = Reader::new(&[6, 0]);
-        let result = super::read_u32_elias_delta(&mut bits);
+        let result = super::elias_delta(&mut bits);
         assert!(matches!(result, Err(ParseError::Corrupted)));
     }
 
@@ -151,7 +151,7 @@ mod test {
     #[should_panic(expected = "UnexpectedEof")]
     fn too_few_remainder_bits() {
         let mut bits = Reader::new(&[0x36]);
-        super::read_u32_elias_delta(&mut bits).unwrap();
+        super::elias_delta(&mut bits).unwrap();
     }
 
     #[test]
@@ -159,6 +159,6 @@ mod test {
     fn missing_disambiguation_bit() {
         let mut bits = Reader::new(&[0, 0x10, 0x7F, 0xFF, 0xFF, 0xFF]);
         bits.read_bits(6);
-        super::read_u32_elias_delta(&mut bits).unwrap();
+        super::elias_delta(&mut bits).unwrap();
     }
 }

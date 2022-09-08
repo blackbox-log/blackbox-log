@@ -1,10 +1,10 @@
 mod data;
-pub mod decoders;
+pub mod decode;
 mod headers;
 mod predictor;
 
 pub use data::{Data, Event, Frame};
-pub use decoders::Encoding;
+pub use decode::Encoding;
 pub use headers::{FieldDef, FrameDefs, Headers};
 pub use predictor::Predictor;
 

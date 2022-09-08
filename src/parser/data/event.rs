@@ -1,4 +1,4 @@
-use crate::parser::{decoders, ParseError, ParseResult};
+use crate::parser::{decode, ParseError, ParseResult};
 use crate::Reader;
 use bitter::BitReader;
 use num_enum::TryFromPrimitive;
@@ -23,11 +23,11 @@ impl Event {
             Some(Ok(EventKind::SyncBeep)) => {
                 // TODO: SyncBeep handle time rollover
 
-                let time = decoders::read_uvar(data)?;
+                let time = decode::variable(data)?;
                 Ok(Self::SyncBeep(time.into()))
             }
             Some(Ok(EventKind::Disarm)) => {
-                let reason = decoders::read_uvar(data)?;
+                let reason = decode::variable(data)?;
                 Ok(Self::Disarm(reason))
             }
             Some(Ok(EventKind::End)) => {
