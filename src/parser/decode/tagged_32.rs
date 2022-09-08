@@ -42,6 +42,10 @@ pub fn tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
         2 => {
             result[0] = next_as_i32(data, 6);
 
+            if !data.has_bits_remaining(16) {
+                return Err(ParseError::UnexpectedEof);
+            }
+
             // Skip upper 2 bits
             data.consume(2);
             result[1] = next_as_i32(data, 6);
@@ -164,5 +168,19 @@ mod test {
 
         assert_eq!([0; 3], tagged_32(&mut b).unwrap());
         assert!(b.is_empty());
+    }
+
+    #[test]
+    #[should_panic(expected = "UnexpectedEof")]
+    fn eof_04_bit() {
+        let mut b = Reader::new(&[0x40]);
+        tagged_32(&mut b).unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "UnexpectedEof")]
+    fn eof_06_bit() {
+        let mut b = Reader::new(&[0x80]);
+        tagged_32(&mut b).unwrap();
     }
 }
