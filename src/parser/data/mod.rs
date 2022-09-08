@@ -14,13 +14,19 @@ use std::iter;
 #[derive(Debug, Clone)]
 pub struct Data {
     pub(crate) events: Vec<Event>,
-    pub(crate) frames: Vec<Frame>,
+    pub(crate) main_frames: Vec<Frame>,
+    pub(crate) gps_frames: Vec<Frame>,
+    pub(crate) gps_home_frames: Vec<Frame>,
+    pub(crate) slow_frames: Vec<Frame>,
 }
 
 impl Data {
     pub fn parse(data: &mut Reader, config: &Config, headers: &Headers) -> ParseResult<Self> {
         let mut events = Vec::new();
-        let mut frames = Vec::new();
+        let mut main_frames = Vec::new();
+        let gps_frames = Vec::new();
+        let gps_home_frames = Vec::new();
+        let mut slow_frames = Vec::new();
 
         // tracing::info!("data parsing starting at 0x{:0>6x}", log.consumed_bytes());
         while let Some(byte) = data.read_u8() {
@@ -59,25 +65,56 @@ impl Data {
                         break;
                     }
                 }
-                FrameKind::Data(data_kind) => {
-                    let frame_def = match data_kind {
-                        DataFrameKind::Intra => headers.frames.intra(),
-                        DataFrameKind::Inter => headers.frames.inter(),
-                        DataFrameKind::Slow => headers.frames.slow(),
-                        other @ (DataFrameKind::Gps | DataFrameKind::GpsHome) => {
-                            todo!("unhandled frame type: {other:?}")
-                        }
-                    };
+                FrameKind::Data(DataFrameKind::Intra) => {
+                    let frame_def = headers.frames.intra();
 
-                    let current = frames.len();
-                    let last = current.checked_sub(1).and_then(|i| frames.get(i));
-                    let last_last = current.checked_sub(2).and_then(|i| frames.get(i));
-                    let frame = Frame::parse(data, config, headers, frame_def, last, last_last)?;
-                    frames.push(frame);
+                    let current_idx = main_frames.len();
+                    let last = current_idx.checked_sub(1).and_then(|i| main_frames.get(i));
+                    let last_last = None;
+
+                    let skipped = 0;
+
+                    let frame =
+                        Frame::parse(data, config, headers, frame_def, last, last_last, skipped)?;
+
+                    main_frames.push(frame);
+                }
+                FrameKind::Data(DataFrameKind::Inter) => {
+                    let frame_def = headers.frames.inter();
+
+                    let current_idx = main_frames.len();
+                    let last = current_idx.checked_sub(1).and_then(|i| main_frames.get(i));
+                    let last_last = current_idx.checked_sub(2).and_then(|i| main_frames.get(i));
+
+                    let skipped = 0; // FIXME
+
+                    let frame =
+                        Frame::parse(data, config, headers, frame_def, last, last_last, skipped)?;
+
+                    main_frames.push(frame);
+                }
+                FrameKind::Data(DataFrameKind::Gps) => todo!("handle gps frames"),
+                FrameKind::Data(DataFrameKind::GpsHome) => todo!("handle gps home frames"),
+                FrameKind::Data(DataFrameKind::Slow) => {
+                    let frame_def = headers.frames.slow();
+                    let last = None;
+                    let last_last = None;
+                    let skipped = 0;
+
+                    let frame =
+                        Frame::parse(data, config, headers, frame_def, last, last_last, skipped)?;
+
+                    slow_frames.push(frame);
                 }
             }
         }
 
-        Ok(Self { events, frames })
+        Ok(Self {
+            events,
+            main_frames,
+            gps_frames,
+            gps_home_frames,
+            slow_frames,
+        })
     }
 }
