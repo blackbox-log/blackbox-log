@@ -53,9 +53,13 @@ impl Event {
 #[repr(u8)]
 enum EventKind {
     SyncBeep = 0,
+    AutotuneCycleStart = 10,
+    AutotuneCycleResult = 11,
+    AutotuneTargets = 12,
     InflightAdjustment = 13,
     Resume = 14,
     Disarm = 15,
-    FlightMode = 40,
+    GTuneCycleResult = 20,
+    FlightMode = 30,
     End = 255,
 }
