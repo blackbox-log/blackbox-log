@@ -12,25 +12,38 @@ pub type DisarmReason = u32;
 pub enum Event {
     SyncBeep(Time),
     Disarm(DisarmReason),
+    FlightMode { flags: u32, last_flags: u32 },
     End,
 }
 
 impl Event {
     #[instrument(level = "debug", name = "Event::parse", skip_all, fields(kind))]
     pub fn parse(data: &mut Reader) -> ParseResult<Self> {
-        let kind = data.read_u8().map(EventKind::try_from);
+        let kind = data
+            .read_u8()
+            .map(EventKind::try_from)
+            .ok_or(ParseError::UnexpectedEof)?;
+
         match kind {
-            Some(Ok(EventKind::SyncBeep)) => {
+            Ok(EventKind::SyncBeep) => {
                 // TODO: SyncBeep handle time rollover
 
                 let time = decode::variable(data)?;
                 Ok(Self::SyncBeep(time.into()))
             }
-            Some(Ok(EventKind::Disarm)) => {
+
+            Ok(EventKind::Disarm) => {
                 let reason = decode::variable(data)?;
                 Ok(Self::Disarm(reason))
             }
-            Some(Ok(EventKind::End)) => {
+
+            Ok(EventKind::FlightMode) => {
+                let flags = decode::variable(data)?;
+                let last_flags = decode::variable(data)?;
+                Ok(Self::FlightMode { flags, last_flags })
+            }
+
+            Ok(EventKind::End) => {
                 const END_MESSAGE: &str = "End of log\0";
 
                 if !iter::from_fn(|| data.read_u8())
@@ -42,9 +55,9 @@ impl Event {
 
                 Ok(Self::End)
             }
-            Some(Ok(event)) => todo!("unsupported event: {:?}", event),
-            Some(Err(err)) => todo!("invalid event: {err}"),
-            None => Err(ParseError::UnexpectedEof),
+
+            Ok(event) => todo!("unsupported event: {:?}", event),
+            Err(err) => todo!("invalid event: {err}"),
         }
     }
 }
