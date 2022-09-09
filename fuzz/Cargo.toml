@@ -44,6 +44,13 @@ bench = false
 doc = false
 
 [[bin]]
+name = "tagged-variable"
+path = "fuzz_targets/tagged_variable.rs"
+test = false
+bench = false
+doc = false
+
+[[bin]]
 name = "tagged-16-v1"
 path = "fuzz_targets/tagged_16_v1.rs"
 test = false

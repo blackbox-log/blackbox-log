@@ -6,6 +6,8 @@ use bitter::BitReader;
 pub fn tagged_16(version: LogVersion, data: &mut Reader) -> ParseResult<[i16; 4]> {
     const COUNT: usize = 4;
 
+    debug_assert!(data.byte_aligned());
+
     let tags = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
     let mut result = [0; COUNT];
 

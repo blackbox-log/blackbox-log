@@ -8,6 +8,8 @@ pub fn variable(data: &mut Reader) -> ParseResult<u32> {
     // 32 bits at 7 bits / byte = 5 bytes
     const _: () = assert!((5 * 8) <= bitter::MAX_READ_BITS, "bit buffer is too small");
 
+    debug_assert!(data.byte_aligned());
+
     data.refill_lookahead();
 
     let mut uvar: u32 = 0;

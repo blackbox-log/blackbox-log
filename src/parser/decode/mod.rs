@@ -5,12 +5,14 @@ mod elias_delta;
 mod negative_14_bit;
 mod tagged_16;
 mod tagged_32;
+mod tagged_variable;
 mod variable;
 
 pub use elias_delta::{elias_delta, elias_delta_signed};
 pub use negative_14_bit::negative_14_bit;
 pub use tagged_16::tagged_16;
 pub use tagged_32::tagged_32;
+pub use tagged_variable::tagged_variable;
 pub use variable::{variable, variable_signed};
 
 use num_enum::TryFromPrimitive;

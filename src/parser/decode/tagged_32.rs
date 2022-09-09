@@ -10,6 +10,8 @@ pub fn tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
     // Allows up to the 6 bit case in one refill
     const _: () = assert!(24 <= bitter::MAX_READ_BITS, "bit buffer is too small");
 
+    debug_assert!(data.byte_aligned());
+
     let mut result = [0; COUNT];
 
     if data.refill_lookahead() < 8 {

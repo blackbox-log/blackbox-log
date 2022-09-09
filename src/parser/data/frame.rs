@@ -70,7 +70,7 @@ impl Frame {
 
                 if !matches!(
                     encoding,
-                    Encoding::Tagged16 | Encoding::Tagged32 | Encoding::Null
+                    Encoding::EliasDelta | Encoding::EliasDeltaSigned | Encoding::Null
                 ) {
                     crate::byte_align(data);
                 }
@@ -84,6 +84,24 @@ impl Frame {
                     Encoding::EliasDelta => values.push(decode::elias_delta(data)?.into()),
                     Encoding::EliasDeltaSigned => {
                         values.push(decode::elias_delta_signed(data)?.into());
+                    }
+
+                    Encoding::TaggedVariable => {
+                        while frame_fields
+                            .next_if(|&(_, field)| field.encoding() == encoding)
+                            .is_some()
+                        {
+                            extra_fields += 1;
+                        }
+
+                        let read_values = decode::tagged_variable(data, extra_fields)?;
+
+                        values.extend(
+                            read_values
+                                .into_iter()
+                                .take(extra_fields + 1)
+                                .map(i64::from),
+                        );
                     }
 
                     Encoding::Tagged32 => {
@@ -106,9 +124,7 @@ impl Frame {
 
                     Encoding::Null => values.push(0),
 
-                    Encoding::TaggedVariable
-                    | Encoding::EliasGamma
-                    | Encoding::EliasGammaSigned => {
+                    Encoding::EliasGamma | Encoding::EliasGammaSigned => {
                         unimplemented!("{encoding:?}")
                     }
                 }

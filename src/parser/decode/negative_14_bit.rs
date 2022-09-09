@@ -1,8 +1,11 @@
 use super::variable;
 use crate::parser::ParseResult;
 use crate::Reader;
+use bitter::BitReader;
 
 pub fn negative_14_bit(data: &mut Reader) -> ParseResult<i32> {
+    debug_assert!(data.byte_aligned());
+
     let result = variable(data)? as u16;
     let result = if (result & 0x2000) > 0 {
         i32::from((result | 0xC000) as i16)

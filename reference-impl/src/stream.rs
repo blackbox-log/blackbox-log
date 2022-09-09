@@ -20,19 +20,16 @@ impl Stream {
 
     #[inline]
     pub fn read_variable(&mut self) -> u32 {
-        // self.byte_align();
         unsafe { ffi::streamReadUnsignedVB(self.stream) }
     }
 
     #[inline]
     pub fn read_variable_signed(&mut self) -> i32 {
-        // self.byte_align();
         unsafe { ffi::streamReadSignedVB(self.stream) }
     }
 
     #[inline]
     pub fn read_negative_14_bit(&mut self) -> i32 {
-        // self.byte_align();
         unsafe { ffi::streamReadNeg14Bit(self.stream) }
     }
 
@@ -47,9 +44,15 @@ impl Stream {
     }
 
     #[inline]
-    pub fn read_tagged_16_v1(&mut self) -> [i64; 4] {
-        // self.byte_align();
+    pub fn read_tagged_variable(&mut self, count: i32) -> [i64; 8] {
+        let mut result = [0; 8];
+        let pointer = ptr::addr_of_mut!(result[0]);
+        unsafe { ffi::streamReadTag8_8SVB(self.stream, pointer, count) }
+        result
+    }
 
+    #[inline]
+    pub fn read_tagged_16_v1(&mut self) -> [i64; 4] {
         let mut result = [0; 4];
         let pointer = ptr::addr_of_mut!(result[0]);
         unsafe { ffi::streamReadTag8_4S16_v1(self.stream, pointer) }
@@ -58,8 +61,6 @@ impl Stream {
 
     #[inline]
     pub fn read_tagged_16_v2(&mut self) -> [i64; 4] {
-        // self.byte_align();
-
         let mut result = [0; 4];
         let pointer = ptr::addr_of_mut!(result[0]);
         unsafe { ffi::streamReadTag8_4S16_v2(self.stream, pointer) }
@@ -68,8 +69,6 @@ impl Stream {
 
     #[inline]
     pub fn read_tagged_32(&mut self) -> [i64; 3] {
-        // self.byte_align();
-
         let mut result = [0; 3];
         let pointer = ptr::addr_of_mut!(result[0]);
         unsafe { ffi::streamReadTag2_3S32(self.stream, pointer) }
@@ -750,11 +749,11 @@ mod ffi {
         pub(super) fn streamReadTag8_4S16_v1(stream: *mut mmapStream_t, values: *mut i64);
         pub(super) fn streamReadTag8_4S16_v2(stream: *mut mmapStream_t, values: *mut i64);
 
-        // pub(super) fn streamReadTag8_8SVB(
-        //     stream: *mut mmapStream_t,
-        //     values: *mut i64,
-        //     valueCount: c_int,
-        // );
+        pub(super) fn streamReadTag8_8SVB(
+            stream: *mut mmapStream_t,
+            values: *mut i64,
+            valueCount: c_int,
+        );
 
         pub(super) fn streamReadEliasDeltaU32(stream: *mut mmapStream_t) -> u32;
         pub(super) fn streamReadEliasDeltaS32(stream: *mut mmapStream_t) -> i32;
