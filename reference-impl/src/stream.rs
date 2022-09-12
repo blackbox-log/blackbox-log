@@ -118,8 +118,7 @@ mod ffi {
 
     #[test]
     fn bindgen_test_layout_timespec() {
-        use std::mem;
-        use std::mem::MaybeUninit;
+        use std::mem::{self, MaybeUninit};
         use std::ptr;
 
         assert_eq!(
@@ -190,8 +189,7 @@ mod ffi {
 
     #[test]
     fn bindgen_test_layout_stat() {
-        use std::mem;
-        use std::mem::MaybeUninit;
+        use std::mem::{self, MaybeUninit};
         use std::ptr;
 
         assert_eq!(
@@ -472,8 +470,7 @@ mod ffi {
 
     #[test]
     fn bindgen_test_layout_fileMapping_t() {
-        use std::mem;
-        use std::mem::MaybeUninit;
+        use std::mem::{self, MaybeUninit};
         use std::ptr;
 
         assert_eq!(
@@ -571,8 +568,7 @@ mod ffi {
 
     #[test]
     fn bindgen_test_layout_mmapStream_t() {
-        use std::mem;
-        use std::mem::MaybeUninit;
+        use std::mem::{self, MaybeUninit};
         use std::ptr;
 
         assert_eq!(
