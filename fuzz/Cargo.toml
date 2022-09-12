@@ -8,10 +8,10 @@ edition = "2021"
 cargo-fuzz = true
 
 [dependencies]
-arbitrary = { version = "*", features = ["derive"] }
+arbitrary = { version = "1.1.6", features = ["derive"] }
 bitter = "0.6.0"
 blackbox = { path = ".." }
-libfuzzer-sys = "0.4"
+libfuzzer-sys = "0.4.4"
 memfile = "0.2.1"
 reference-impl = { version = "0.1.0", path = "../reference-impl" }
 
