@@ -1,12 +1,18 @@
-fn main() {
-    cc::Build::new()
-        .file("./upstream/src/platform.c")
-        .file("./upstream/src/tools.c")
-        .file("./upstream/src/stream.c")
-        .file("./upstream/src/decoders.c")
-        .file("./src/negative_14_bit.c")
-        .flag("-w") // Disable all warnings
-        .compile("blackbox");
+const FILES: &[&str] = &[
+    "upstream/src/platform.c",
+    "upstream/src/tools.c",
+    "upstream/src/stream.c",
+    "upstream/src/decoders.c",
+    "src/negative_14_bit.c",
+];
 
-    println!("cargo:rustc-link-lib=blackbox");
+fn main() {
+    for file in FILES {
+        println!("cargo:rerun-if-changed={file}");
+    }
+
+    cc::Build::new()
+        .flag("-w") // Disable all warnings
+        .files(FILES)
+        .compile("upstream");
 }
