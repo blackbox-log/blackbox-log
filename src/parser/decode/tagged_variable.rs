@@ -5,6 +5,7 @@ use crate::Reader;
 
 pub fn tagged_variable(data: &mut Reader, extra: usize) -> ParseResult<[i32; 8]> {
     debug_assert!(data.byte_aligned());
+    debug_assert!(extra < 8);
 
     let mut values = [0; 8];
 
@@ -23,7 +24,9 @@ pub fn tagged_variable(data: &mut Reader, extra: usize) -> ParseResult<[i32; 8]>
             header >>= 1;
         }
 
-        debug_assert_eq!(header, 0);
+        if header != 0 {
+            return Err(ParseError::Corrupted);
+        }
     }
 
     Ok(values)

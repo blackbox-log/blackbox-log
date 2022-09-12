@@ -6,13 +6,13 @@ use libfuzzer_sys::arbitrary::Arbitrary;
 
 #[derive(Debug)]
 struct Input {
-    count: usize,
+    count: u8,
     data: AlignedBytes,
 }
 
 impl<'a> Arbitrary<'a> for Input {
     fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
-        let count = u.choose_index(9)?;
+        let count = u.int_in_range(1..=8)?;
         let data = u.arbitrary()?;
 
         Ok(Self { count, data })
@@ -21,12 +21,11 @@ impl<'a> Arbitrary<'a> for Input {
 
 fuzz_target!(|input: Input| {
     let Input { count, data } = input;
-    let count = count % 9;
 
     let (mut reference, mut bits) = data.to_streams().unwrap();
 
-    let expected = reference.read_tagged_variable(count as i32);
-    let got = decode::tagged_variable(&mut bits, count - 1);
+    let expected = reference.read_tagged_variable(count.into());
+    let got = decode::tagged_variable(&mut bits, (count - 1).into());
 
     if let Ok(got) = got {
         let got = got.map(Into::into);
