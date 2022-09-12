@@ -64,7 +64,7 @@ impl Data {
                     }
                 }
                 FrameKind::Data(DataFrameKind::Intra) => {
-                    let frame_def = headers.frames.intra();
+                    let frame_def = &headers.frames.intra;
 
                     let current_idx = main_frames.len();
                     let last = current_idx.checked_sub(1).and_then(|i| main_frames.get(i));
@@ -78,7 +78,7 @@ impl Data {
                     main_frames.push(frame);
                 }
                 FrameKind::Data(DataFrameKind::Inter) => {
-                    let frame_def = headers.frames.inter();
+                    let frame_def = &headers.frames.inter;
 
                     let current_idx = main_frames.len();
                     let last = current_idx.checked_sub(1).and_then(|i| main_frames.get(i));
@@ -94,7 +94,7 @@ impl Data {
                 FrameKind::Data(DataFrameKind::Gps) => todo!("handle gps frames"),
                 FrameKind::Data(DataFrameKind::GpsHome) => todo!("handle gps home frames"),
                 FrameKind::Data(DataFrameKind::Slow) => {
-                    let frame_def = headers.frames.slow();
+                    let frame_def = &headers.frames.slow;
                     let last = None;
                     let last_last = None;
                     let skipped = 0;

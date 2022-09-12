@@ -41,7 +41,6 @@ warn = [
     "clippy::needless_for_each",
     "clippy::option_if_let_else",
     "clippy::option_if_let_else",
-    "clippy::pattern_type_mismatch",
     "clippy::print_stdout",
     "clippy::redundant_closure_for_method_calls",
     "clippy::redundant_else",

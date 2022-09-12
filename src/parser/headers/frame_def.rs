@@ -5,9 +5,9 @@ use crate::parser::{DataFrameKind, Encoding, ParseError, ParseResult, Predictor}
 
 #[derive(Debug)]
 pub struct FrameDefs {
-    intra: FrameDef,
-    inter: FrameDef,
-    slow: FrameDef,
+    pub intra: FrameDef,
+    pub inter: FrameDef,
+    pub slow: FrameDef,
 }
 
 impl FrameDefs {
@@ -17,18 +17,6 @@ impl FrameDefs {
             inter: FrameDef::builder(DataFrameKind::Inter),
             slow: FrameDef::builder(DataFrameKind::Slow),
         }
-    }
-
-    pub fn intra(&self) -> &FrameDef {
-        &self.intra
-    }
-
-    pub fn inter(&self) -> &FrameDef {
-        &self.inter
-    }
-
-    pub fn slow(&self) -> &FrameDef {
-        &self.slow
     }
 }
 

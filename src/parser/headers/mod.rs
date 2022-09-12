@@ -2,23 +2,24 @@ mod frame_def;
 
 pub use frame_def::{FieldDef, FrameDef, FrameDefs};
 
-use super::{reader::ByteReader, ParseError, ParseResult, Reader};
+use super::reader::ByteReader;
+use super::{ParseError, ParseResult, Reader};
 use crate::LogVersion;
 use std::str::{self, FromStr};
 
 #[allow(dead_code)]
 #[derive(Debug)]
 pub struct Headers {
-    pub(crate) version: LogVersion,
-    pub(crate) frames: FrameDefs,
+    pub version: LogVersion,
+    pub frames: FrameDefs,
 
-    pub(crate) firmware_revision: String,
-    pub(crate) firmware_kind: FirmwareKind,
-    pub(crate) board_info: String,
-    pub(crate) craft_name: String,
+    pub firmware_revision: String,
+    pub firmware_kind: FirmwareKind,
+    pub board_info: String,
+    pub craft_name: String,
 
     /// Measured battery voltage at arm
-    pub(crate) vbat_reference: u16,
+    pub vbat_reference: u16,
 }
 
 impl Headers {

@@ -25,8 +25,6 @@ where
     }
 }
 
-// Reason: unfinished
-#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct Frame {
     kind: DataFrameKind,
@@ -34,6 +32,28 @@ pub struct Frame {
 }
 
 impl Frame {
+    pub(crate) const fn kind(&self) -> DataFrameKind {
+        self.kind
+    }
+
+    pub fn values(&self) -> &[i64] {
+        &self.values
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &i64> {
+        self.values.iter()
+    }
+
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.values.len()
+    }
+
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     #[instrument(
         level = "debug",
         name = "Frame::parse",

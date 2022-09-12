@@ -10,5 +10,6 @@ publish = false
 blackbox = { version = "0.1.0", path = ".." }
 clap = { version = "3.2.21", features = ["derive", "wrap_help"] }
 eyre = "0.6.8"
+itertools = "0.10.3"
 tracing = { version = "0.1.36", features = ["release_max_level_debug"] }
 tracing-subscriber = "0.3.15"
