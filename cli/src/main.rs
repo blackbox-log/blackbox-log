@@ -15,6 +15,11 @@ fn main() -> eyre::Result<()> {
         .with_max_level(cli.log_level_filter())
         .init();
 
+    if cli.logs.len() > 1 && cli.stdout {
+        tracing::error!("cannot write multiple logs to stdout");
+        return Ok(());
+    }
+
     let config = cli.to_blackbox_config();
 
     for log in cli.logs {
@@ -26,28 +31,32 @@ fn main() -> eyre::Result<()> {
         };
 
         let log = config.parse(&data)?;
-        let mut csv = File::create("out.csv")?;
+        let mut out: Box<dyn Write> = if cli.stdout {
+            Box::new(io::stdout())
+        } else {
+            Box::new(File::create("out.csv")?)
+        };
 
-        write_header(&mut csv, &log)?;
+        write_header(&mut out, &log)?;
 
         for frame in log.main_frames() {
             for s in Itertools::intersperse(frame.iter().map(ToString::to_string), ",".to_owned()) {
-                csv.write_all(s.as_bytes())?;
+                out.write_all(s.as_bytes())?;
             }
 
-            writeln!(csv)?;
+            writeln!(out)?;
         }
     }
 
     Ok(())
 }
 
-fn write_header(csv: &mut File, log: &Log) -> io::Result<()> {
+fn write_header(out: &mut impl Write, log: &Log) -> io::Result<()> {
     let FrameDefs { intra, .. } = &log.headers().frames;
 
     for s in Itertools::intersperse(intra.iter().map(FieldDef::name), ",") {
-        csv.write_all(s.as_bytes())?;
+        out.write_all(s.as_bytes())?;
     }
 
-    writeln!(csv)
+    writeln!(out)
 }

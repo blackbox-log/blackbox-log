@@ -94,7 +94,7 @@ pub(crate) struct Cli {
     /// One or more logs to parse
     pub logs: Vec<PathBuf>,
 
-    // #[clap(short, visible_short_alias = '?', long, default_value_t, action = ArgAction::Help)]
+    // #[clap(short, long, action = ArgAction::Help)]
     // /// Print this help message
     // help: bool,
     #[clap(short, long, value_name = "index")]
