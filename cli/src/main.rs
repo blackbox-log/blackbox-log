@@ -6,7 +6,7 @@ use clap::Parser;
 use cli::Cli;
 use itertools::Itertools;
 use std::fs::File;
-use std::io::{self, Read, Write};
+use std::io::{self, BufWriter, Read, Write};
 
 fn main() -> eyre::Result<()> {
     let cli = Cli::parse();
@@ -31,11 +31,12 @@ fn main() -> eyre::Result<()> {
         };
 
         let log = config.parse(&data)?;
-        let mut out: Box<dyn Write> = if cli.stdout {
-            Box::new(io::stdout())
+        let out: Box<dyn Write> = if cli.stdout {
+            Box::new(io::stdout().lock())
         } else {
             Box::new(File::create("out.csv")?)
         };
+        let mut out = BufWriter::new(out);
 
         write_header(&mut out, &log)?;
 
@@ -46,6 +47,8 @@ fn main() -> eyre::Result<()> {
 
             writeln!(out)?;
         }
+
+        out.flush()?;
     }
 
     Ok(())
