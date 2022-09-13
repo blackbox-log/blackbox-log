@@ -1,5 +1,5 @@
-pub use bitter::{BigEndianReader, BitReader};
-pub use blackbox::parser::decode;
+use bitter::BitReader as _;
+pub use blackbox::parser::{decode, Reader};
 pub use libfuzzer_sys::arbitrary::Arbitrary;
 pub use libfuzzer_sys::fuzz_target;
 
@@ -16,7 +16,7 @@ pub struct AlignedBytes {
 }
 
 impl AlignedBytes {
-    pub fn to_streams(&self) -> io::Result<(Stream, BigEndianReader)> {
+    pub fn to_streams(&self) -> io::Result<(Stream, Reader)> {
         get_streams(&self.bytes)
     }
 }
@@ -45,13 +45,13 @@ impl<'a> Arbitrary<'a> for UnalignedBytes {
 }
 
 impl UnalignedBytes {
-    pub fn to_streams(&self) -> io::Result<(Stream, BigEndianReader)> {
+    pub fn to_streams(&self) -> io::Result<(Stream, Reader)> {
         let (mut reference, mut bitter) = get_streams(&self.bytes)?;
 
         let offset = self.offset;
         if offset > 0 {
             let reference_bits = reference.read_bits(offset);
-            let bitter_bits = bitter.read_bits(offset.into()).unwrap_or(0);
+            let bitter_bits = bitter.bits().read_bits(offset.into()).unwrap_or(0);
             assert_eq!(u64::from(reference_bits), bitter_bits);
         }
 
@@ -59,13 +59,13 @@ impl UnalignedBytes {
     }
 }
 
-fn get_streams(bytes: &[u8]) -> io::Result<(Stream, BigEndianReader)> {
+fn get_streams(bytes: &[u8]) -> io::Result<(Stream, Reader)> {
     let mut f = MemFile::create_default("reference-impl-input")?;
     f.write_all(bytes)?;
     f.flush()?;
 
     let reference = Stream::new(f.as_raw_fd());
-    let bitter = BigEndianReader::new(bytes);
+    let bitter = Reader::new(bytes);
 
     Ok((reference, bitter))
 }

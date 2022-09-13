@@ -3,8 +3,6 @@
 pub mod betaflight;
 pub mod parser;
 
-use bitter::BigEndianReader;
-use bitter::BitReader;
 use parser::{Data, Headers};
 use std::str;
 use std::str::FromStr;
@@ -27,18 +25,10 @@ impl FromStr for LogVersion {
     }
 }
 
-pub(crate) type Reader<'a> = BigEndianReader<'a>;
-
 // Reason: unfinished
 #[allow(dead_code)]
 #[derive(Debug)]
 pub struct Log {
     headers: Headers,
     data: Data,
-}
-
-pub(crate) fn byte_align(data: &mut Reader) {
-    while !data.byte_aligned() {
-        data.consume(1);
-    }
 }

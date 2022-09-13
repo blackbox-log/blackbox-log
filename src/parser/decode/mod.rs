@@ -45,11 +45,13 @@ pub enum Encoding {
     EliasGammaSigned = 11,
 }
 
-fn sign_extend(from: u64, bits: u32) -> i64 {
-    let unused_bits = 64 - bits;
-    (from << unused_bits) as i64 >> unused_bits
+#[inline]
+const fn sign_extend<const BITS: u32>(from: u32) -> i32 {
+    let unused_bits = 32 - BITS;
+    (from << unused_bits) as i32 >> unused_bits
 }
 
+#[inline]
 const fn zig_zag_decode(value: u32) -> i32 {
     (value >> 1) as i32 ^ -(value as i32 & 1)
 }
@@ -60,10 +62,10 @@ mod test {
     fn sign_extend() {
         use super::sign_extend;
 
-        assert_eq!(0, sign_extend(0b00, 2));
-        assert_eq!(1, sign_extend(0b01, 2));
-        assert_eq!(-2, sign_extend(0b10, 2));
-        assert_eq!(-1, sign_extend(0b11, 2));
+        assert_eq!(0, sign_extend::<2>(0b00));
+        assert_eq!(1, sign_extend::<2>(0b01));
+        assert_eq!(-2, sign_extend::<2>(0b10));
+        assert_eq!(-1, sign_extend::<2>(0b11));
     }
 
     #[test]

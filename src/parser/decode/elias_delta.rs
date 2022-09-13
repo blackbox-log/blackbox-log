@@ -1,14 +1,15 @@
 use super::zig_zag_decode;
-use crate::parser::{ParseError, ParseResult};
-use crate::Reader;
+use crate::parser::{ParseError, ParseResult, Reader};
 use bitter::BitReader;
 
 /// NB: May leave the bit stream unaligned
 pub fn elias_delta(data: &mut Reader) -> ParseResult<u32> {
+    let bits = data.bits();
+
     let leading_zeros = {
         let mut leading_zeros: u8 = 0;
         for _ in 0..6 {
-            match data.read_bit() {
+            match bits.read_bit() {
                 Some(false) => leading_zeros += 1,
                 Some(_) => break,
                 None => return Err(ParseError::UnexpectedEof),
@@ -31,7 +32,7 @@ pub fn elias_delta(data: &mut Reader) -> ParseResult<u32> {
 
         debug_assert!(count <= bitter::MAX_READ_BITS);
 
-        let result = data.read_bits(count).ok_or(ParseError::UnexpectedEof)?;
+        let result = bits.read_bits(count).ok_or(ParseError::UnexpectedEof)?;
         let result = (1 << count) | result;
         Ok(result as u32 - 1)
     };
@@ -45,7 +46,7 @@ pub fn elias_delta(data: &mut Reader) -> ParseResult<u32> {
 
     if result == (u32::MAX - 1) {
         // Use an extra bit to disambiguate (u32::MAX - 1) and u32::MAX
-        let bit = data.read_bit().ok_or(ParseError::UnexpectedEof)?;
+        let bit = bits.read_bit().ok_or(ParseError::UnexpectedEof)?;
         Ok(result + u32::from(bit))
     } else {
         Ok(result)
@@ -64,7 +65,7 @@ mod test {
     #[test]
     fn unaligned_min() {
         let mut bits = Reader::new(&[1]);
-        bits.read_bits(7);
+        bits.bits().read_bits(7);
         assert_eq!(0, super::elias_delta(&mut bits).unwrap());
     }
 
@@ -158,7 +159,7 @@ mod test {
     #[should_panic(expected = "UnexpectedEof")]
     fn missing_disambiguation_bit() {
         let mut bits = Reader::new(&[0, 0x10, 0x7F, 0xFF, 0xFF, 0xFF]);
-        bits.read_bits(6);
+        bits.bits().read_bits(6);
         super::elias_delta(&mut bits).unwrap();
     }
 }

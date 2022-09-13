@@ -1,7 +1,8 @@
 use crate::parser::headers::FrameDef;
-use crate::parser::{decode, ParseError};
-use crate::parser::{Config, DataFrameKind, Encoding, FieldDef, Headers, ParseResult, Predictor};
-use crate::Reader;
+use crate::parser::{
+    decode, Config, DataFrameKind, Encoding, FieldDef, Headers, ParseError, ParseResult, Predictor,
+    Reader,
+};
 use std::iter::Peekable;
 use tracing::instrument;
 
@@ -68,14 +69,7 @@ impl Frame {
             } else {
                 let encoding = field.encoding();
 
-                if !matches!(
-                    encoding,
-                    Encoding::EliasDelta | Encoding::EliasDeltaSigned | Encoding::Null
-                ) {
-                    crate::byte_align(data);
-                }
-
-                match encoding {
+                match field.encoding() {
                     Encoding::Variable => values.push(decode::variable(data)?.into()),
                     Encoding::VariableSigned => values.push(decode::variable_signed(data)?.into()),
 
@@ -154,7 +148,7 @@ impl Frame {
             }
         }
 
-        crate::byte_align(data);
+        data.byte_align();
 
         Ok(Self {
             kind: frame_def.kind(),

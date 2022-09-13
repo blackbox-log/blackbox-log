@@ -2,11 +2,9 @@ mod frame_def;
 
 pub use frame_def::{FieldDef, FrameDef, FrameDefs};
 
-use super::{ParseError, ParseResult};
-use crate::{LogVersion, Reader};
-use bitter::BitReader;
-use std::str;
-use std::str::FromStr;
+use super::{reader::ByteReader, ParseError, ParseResult, Reader};
+use crate::LogVersion;
+use std::str::{self, FromStr};
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -25,10 +23,12 @@ pub struct Headers {
 
 impl Headers {
     pub fn parse(data: &mut Reader) -> ParseResult<Self> {
-        let (name, _product) = parse_header(data)?;
+        let bytes = &mut data.bytes();
+
+        let (name, _product) = parse_header(bytes)?;
         assert_eq!(name, "Product", "`Product` header must be first");
 
-        let (name, version) = parse_header(data)?;
+        let (name, version) = parse_header(bytes)?;
         assert_eq!(name, "Data version", "`Data version` header must be second");
         let version = version.parse().map_err(|_| ParseError::InvalidHeader {
             header: name,
@@ -38,15 +38,13 @@ impl Headers {
         let mut state = State::new(version);
 
         loop {
-            if data.refill_lookahead() < 8 {
-                return Err(ParseError::UnexpectedEof);
+            match bytes.peek() {
+                Some(b'H') => {}
+                Some(_) => break,
+                None => return Err(ParseError::UnexpectedEof),
             }
 
-            if data.peek(8) != b'H'.into() {
-                break;
-            }
-
-            let (name, value) = parse_header(data)?;
+            let (name, value) = parse_header(bytes)?;
             state.update(name, value)?;
         }
 
@@ -161,15 +159,15 @@ impl State {
 }
 
 /// Expects the next character to be the leading H
-fn parse_header(data: &mut Reader) -> ParseResult<(String, String)> {
-    match data.read_u8() {
+fn parse_header(bytes: &mut ByteReader) -> ParseResult<(String, String)> {
+    match bytes.read_u8() {
         Some(b'H') => {}
         Some(_) => return Err(ParseError::Corrupted),
         None => return Err(ParseError::UnexpectedEof),
     }
 
     let mut line = Vec::new();
-    while let Some(byte) = data.read_u8() {
+    while let Some(byte) = bytes.read_u8() {
         if byte == b'\n' {
             break;
         }

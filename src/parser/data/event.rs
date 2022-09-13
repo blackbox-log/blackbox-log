@@ -1,8 +1,6 @@
-use crate::parser::{decode, ParseError, ParseResult};
-use crate::Reader;
-use bitter::BitReader;
+use crate::parser::{decode, ParseError, ParseResult, Reader};
 use num_enum::TryFromPrimitive;
-use std::iter;
+use std::io::Read;
 use tracing::instrument;
 
 pub type Time = u64;
@@ -20,6 +18,7 @@ impl Event {
     #[instrument(level = "debug", name = "Event::parse", skip_all, fields(kind))]
     pub fn parse(data: &mut Reader) -> ParseResult<Self> {
         let kind = data
+            .bytes()
             .read_u8()
             .map(EventKind::try_from)
             .ok_or(ParseError::UnexpectedEof)?;
@@ -46,7 +45,10 @@ impl Event {
             Ok(EventKind::End) => {
                 const END_MESSAGE: &str = "End of log\0";
 
-                if !iter::from_fn(|| data.read_u8())
+                if !data
+                    .bytes()
+                    .bytes()
+                    .filter_map(Result::ok)
                     .take(11)
                     .eq(END_MESSAGE.bytes())
                 {

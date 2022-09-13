@@ -2,13 +2,15 @@ mod data;
 pub mod decode;
 mod headers;
 mod predictor;
+mod reader;
 
 pub use data::{Data, Event, Frame};
 pub use decode::Encoding;
 pub use headers::{FieldDef, FrameDefs, Headers};
 pub use predictor::Predictor;
+pub use reader::Reader;
 
-use crate::{Log, Reader};
+use crate::Log;
 
 pub type ParseResult<T> = Result<T, ParseError>;
 

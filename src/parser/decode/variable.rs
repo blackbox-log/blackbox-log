@@ -1,30 +1,18 @@
 use super::zig_zag_decode;
-use crate::parser::{ParseError, ParseResult};
-use crate::Reader;
-use bitter::BitReader;
+use crate::parser::{ParseError, ParseResult, Reader};
 
 #[allow(clippy::assertions_on_constants)]
 pub fn variable(data: &mut Reader) -> ParseResult<u32> {
-    // 32 bits at 7 bits / byte = 5 bytes
-    const _: () = assert!((5 * 8) <= bitter::MAX_READ_BITS, "bit buffer is too small");
-
-    debug_assert!(data.byte_aligned());
-
-    data.refill_lookahead();
+    let mut bytes = data.bytes();
 
     let mut uvar: u32 = 0;
     let mut offset: u32 = 0;
     loop {
-        if !data.has_bits_remaining(8) {
-            return Err(ParseError::UnexpectedEof);
-        }
+        let byte = bytes.read_u8().ok_or(ParseError::UnexpectedEof)?;
+        let is_last_byte = (byte & 0x80) == 0;
 
-        let is_last_byte = data.peek(1) == 0;
-        data.consume(1);
-
-        uvar |= (data.peek(7) << offset) as u32;
-        data.consume(7);
-
+        let byte = u32::from(byte & !0x80);
+        uvar |= byte << offset;
         offset += 7;
 
         if !is_last_byte && offset >= 32 {

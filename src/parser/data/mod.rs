@@ -4,9 +4,7 @@ mod frame;
 pub use event::Event;
 pub use frame::Frame;
 
-use super::{Config, DataFrameKind, FrameKind, Headers, ParseResult};
-use crate::Reader;
-use bitter::BitReader;
+use super::{Config, DataFrameKind, FrameKind, Headers, ParseResult, Reader};
 use std::iter;
 
 // Reason: unfinished
@@ -29,7 +27,7 @@ impl Data {
         let mut slow_frames = Vec::new();
 
         // tracing::info!("data parsing starting at 0x{:0>6x}", log.consumed_bytes());
-        while let Some(byte) = data.read_u8() {
+        while let Some(byte) = data.bytes().read_u8() {
             let kind = FrameKind::from_byte(byte).unwrap_or_else(|| {
                 // eprintln!();
                 // eprintln!("consumed_bytes = 0x{:0>6x}", log.consumed_bytes());
@@ -37,7 +35,7 @@ impl Data {
                 let lines = 4;
                 let bytes_per_line = 8;
                 let bytes = iter::once(byte)
-                    .chain(iter::from_fn(|| data.read_u8()))
+                    .chain(iter::from_fn(|| data.bytes().read_u8()))
                     .take(lines * bytes_per_line)
                     .collect::<Vec<u8>>();
 

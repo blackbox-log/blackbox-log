@@ -1,85 +1,91 @@
 use super::sign_extend;
-use crate::parser::{ParseError, ParseResult};
-use crate::Reader;
-use bitter::BitReader;
+use crate::parser::{reader::ByteReader, ParseError, ParseResult, Reader};
 
 const COUNT: usize = 3;
 
 #[allow(clippy::assertions_on_constants)]
 pub fn tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
-    // Allows up to the 6 bit case in one refill
-    const _: () = assert!(24 <= bitter::MAX_READ_BITS, "bit buffer is too small");
+    fn read_u8_or_eof(bytes: &mut ByteReader) -> ParseResult<u8> {
+        bytes.read_u8().ok_or(ParseError::UnexpectedEof)
+    }
 
-    debug_assert!(data.byte_aligned());
+    let mut bytes = data.bytes();
 
     let mut result = [0; COUNT];
 
-    if data.refill_lookahead() < 8 {
-        return Err(ParseError::UnexpectedEof);
-    }
-
-    let tag = data.peek(2);
-    data.consume(2);
-
-    match tag {
+    let byte = read_u8_or_eof(&mut bytes)?;
+    match (byte & 0xC0) >> 6 {
+        // 2 bits
         0 => {
-            for x in &mut result {
-                *x = next_as_i32(data, 2);
+            #[inline(always)]
+            fn convert(x: u8) -> i32 {
+                sign_extend::<2>((x & 3).into())
             }
+
+            result[0] = convert(byte >> 4);
+            result[1] = convert(byte >> 2);
+            result[2] = convert(byte);
         }
 
+        // 4 bits
         1 => {
-            // Re-align to nibbles
-            data.consume(2);
-
-            if !data.has_bits_remaining(12) {
-                return Err(ParseError::UnexpectedEof);
+            #[inline(always)]
+            fn convert(x: u8) -> i32 {
+                sign_extend::<4>(x.into())
             }
 
-            for x in &mut result {
-                *x = next_as_i32(data, 4);
-            }
+            result[0] = convert(byte & 0x0F);
+
+            let byte = read_u8_or_eof(&mut bytes)?;
+            result[1] = convert(byte >> 4);
+            result[2] = convert(byte & 0x0F);
         }
 
+        // 6 bits
         2 => {
-            result[0] = next_as_i32(data, 6);
-
-            if !data.has_bits_remaining(16) {
-                return Err(ParseError::UnexpectedEof);
+            #[inline(always)]
+            fn convert(x: u8) -> i32 {
+                sign_extend::<6>((x & 0x3F).into())
             }
 
-            // Skip upper 2 bits
-            data.consume(2);
-            result[1] = next_as_i32(data, 6);
+            result[0] = convert(byte);
 
-            data.consume(2);
-            result[2] = next_as_i32(data, 6);
+            let byte = read_u8_or_eof(&mut bytes)?;
+            result[1] = convert(byte);
+
+            let byte = read_u8_or_eof(&mut bytes)?;
+            result[2] = convert(byte);
         }
 
         3.. => {
-            let mut tags = data.read_bits(6).unwrap();
+            let mut tags = byte & 0x3F;
             for x in &mut result {
                 let tag = tags & 3;
                 tags >>= 2;
 
                 *x = match tag {
-                    0 => data
-                        .read_bits(8)
-                        .map(|x| sign_extend(x, 8) as i32)
-                        .ok_or(ParseError::UnexpectedEof)?,
-                    1 => {
-                        let value = data.read_i16().ok_or(ParseError::UnexpectedEof)?;
-                        i16::from_be(value).into()
+                    // 8 bits
+                    0 => {
+                        let x = read_u8_or_eof(&mut bytes)?;
+                        sign_extend::<8>(x.into()) as i32
                     }
 
-                    2 => {
-                        let value: u64 = data.read_bits(24).ok_or(ParseError::UnexpectedEof)?;
-                        let value = value.swap_bytes() >> (64 - 24);
-                        sign_extend(value, 24) as i32
+                    // 16 bits
+                    1 => {
+                        let value = bytes.read_u16().ok_or(ParseError::UnexpectedEof)?;
+                        (value as i16).into()
                     }
+
+                    // 24 bits
+                    2 => {
+                        let x = bytes.read_u24().ok_or(ParseError::UnexpectedEof)?;
+                        sign_extend::<24>(x)
+                    }
+
+                    // 32 bits
                     3.. => {
-                        let value = data.read_i32().ok_or(ParseError::UnexpectedEof)?;
-                        i32::from_be(value as i32)
+                        let value = bytes.read_u32().ok_or(ParseError::UnexpectedEof)?;
+                        value as i32
                     }
                 }
             }
@@ -89,86 +95,84 @@ pub fn tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
     Ok(result)
 }
 
-#[inline(always)]
-/// Read `bits` bits using the manual API and sign extend into an i32.
-// Ensure there is enough data available before calling.
-fn next_as_i32(data: &mut Reader, bits: u32) -> i32 {
-    let x = data.peek(bits);
-    data.consume(bits);
-    sign_extend(x, bits) as i32
-}
-
 #[cfg(test)]
 mod test {
     use super::*;
-    use std::iter;
 
-    fn bytes(first: u8, zeros: usize) -> Vec<u8> {
-        iter::once(first)
-            .chain(iter::repeat(0).take(zeros))
-            .collect()
+    fn bytes(tag: u8, width: usize) -> Vec<u8> {
+        assert_eq!(tag, tag & 3);
+
+        let tag = 0xC0 | (tag << 4) | (tag << 2) | tag;
+        let mut bytes = vec![tag];
+
+        for i in 1..=3 {
+            bytes.push(i);
+            bytes.append(&mut vec![0; width - 1]);
+        }
+
+        bytes
     }
 
     #[test]
     fn all_02_bits() {
-        let b = bytes(0x00, 0);
-        let mut b = Reader::new(b.as_slice());
+        let b = [0x0D];
+        let mut b = Reader::new(&b);
 
-        assert_eq!([0; 3], tagged_32(&mut b).unwrap());
+        assert_eq!([0, -1, 1], tagged_32(&mut b).unwrap());
         assert!(b.is_empty());
     }
 
     #[test]
     fn all_04_bits() {
-        let b = bytes(0x40, 1);
-        let mut b = Reader::new(b.as_slice());
+        let b = [0x41, 0x23];
+        let mut b = Reader::new(&b);
 
-        assert_eq!([0; 3], tagged_32(&mut b).unwrap());
+        assert_eq!([1, 2, 3], tagged_32(&mut b).unwrap());
         assert!(b.is_empty());
     }
 
     #[test]
     fn all_06_bits() {
-        let b = bytes(0x80, 2);
-        let mut b = Reader::new(b.as_slice());
+        let b = [0x81, 0x02, 0x03];
+        let mut b = Reader::new(&b);
 
-        assert_eq!([0; 3], tagged_32(&mut b).unwrap());
+        assert_eq!([1, 2, 3], tagged_32(&mut b).unwrap());
         assert!(b.is_empty());
     }
 
     #[test]
     fn all_08_bits() {
-        let b = bytes(0b1100_0000, 3);
-        let mut b = Reader::new(b.as_slice());
+        let b = bytes(0, 1);
+        let mut b = Reader::new(&b);
 
-        assert_eq!([0; 3], tagged_32(&mut b).unwrap());
+        assert_eq!([1, 2, 3], tagged_32(&mut b).unwrap());
         assert!(b.is_empty());
     }
 
     #[test]
     fn all_16_bits() {
-        let b = bytes(0b1101_0101, 6);
-        let mut b = Reader::new(b.as_slice());
+        let b = bytes(1, 2);
+        let mut b = Reader::new(&b);
 
-        assert_eq!([0; 3], tagged_32(&mut b).unwrap());
+        assert_eq!([1, 2, 3], tagged_32(&mut b).unwrap());
         assert!(b.is_empty());
     }
 
     #[test]
     fn all_24_bits() {
-        let b = bytes(0b1110_1010, 9);
-        let mut b = Reader::new(b.as_slice());
+        let b = bytes(2, 3);
+        let mut b = Reader::new(&b);
 
-        assert_eq!([0; 3], tagged_32(&mut b).unwrap());
+        assert_eq!([1, 2, 3], tagged_32(&mut b).unwrap());
         assert!(b.is_empty());
     }
 
     #[test]
     fn all_32_bits() {
-        let b = bytes(0xFF, 12);
-        let mut b = Reader::new(b.as_slice());
+        let b = bytes(3, 4);
+        let mut b = Reader::new(&b);
 
-        assert_eq!([0; 3], tagged_32(&mut b).unwrap());
+        assert_eq!([1, 2, 3], tagged_32(&mut b).unwrap());
         assert!(b.is_empty());
     }
 

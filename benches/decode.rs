@@ -1,5 +1,4 @@
-use bitter::BigEndianReader;
-use blackbox::parser::decode;
+use blackbox::parser::{decode, Reader};
 use blackbox::LogVersion;
 use criterion::measurement::WallTime;
 use criterion::{criterion_group, criterion_main};
@@ -13,14 +12,32 @@ fn get_optimized_input(input: &[u8]) -> Vec<u8> {
     input
 }
 
+fn get_bytes_reader<'a>(input: &'a [u8]) -> impl Fn() -> Reader<'a> {
+    || Reader::new(input)
+}
+
+fn get_bits_reader<'a>(input: &'a [u8]) -> impl Fn() -> Reader<'a> {
+    || {
+        let mut reader = Reader::new(input);
+        reader.bits();
+        reader
+    }
+}
+
 macro_rules! get_bench {
-    ($func:expr) => {
-        get_bench!(bench, $func)
+    ($as:ident, $func:expr) => {
+        get_bench!(bench, $as, $func)
     };
-    ($name:ident, $func:expr) => {
+    ($name:ident, bytes, $func:expr) => {
         fn $name(b: &mut Bencher, input: &[u8]) {
             let input = &get_optimized_input(input);
-            b.iter_batched_ref(|| BigEndianReader::new(input), $func, BatchSize::SmallInput);
+            b.iter_batched_ref(get_bytes_reader(input), $func, BatchSize::SmallInput);
+        }
+    };
+    ($name:ident, bits, $func:expr) => {
+        fn $name(b: &mut Bencher, input: &[u8]) {
+            let input = &get_optimized_input(input);
+            b.iter_batched_ref(get_bits_reader(input), $func, BatchSize::SmallInput);
         }
     };
 }
@@ -42,8 +59,8 @@ fn run_bench_pair<P: Display>(
 }
 
 fn variable(c: &mut Criterion) {
-    get_bench!(ubench, decode::variable);
-    get_bench!(ibench, decode::variable_signed);
+    get_bench!(ubench, bytes, decode::variable);
+    get_bench!(ibench, bytes, decode::variable_signed);
 
     let mut group = c.benchmark_group("variable byte");
 
@@ -65,7 +82,7 @@ fn variable(c: &mut Criterion) {
 }
 
 fn negative_14_bit(c: &mut Criterion) {
-    get_bench!(decode::negative_14_bit);
+    get_bench!(bytes, decode::negative_14_bit);
 
     let mut group = c.benchmark_group("negative 14 bit");
 
@@ -79,8 +96,8 @@ fn negative_14_bit(c: &mut Criterion) {
 }
 
 fn elias_delta(c: &mut Criterion) {
-    get_bench!(ubench, decode::elias_delta);
-    get_bench!(ibench, decode::elias_delta_signed);
+    get_bench!(ubench, bits, decode::elias_delta);
+    get_bench!(ibench, bits, decode::elias_delta_signed);
 
     let mut group = c.benchmark_group("Elias delta");
 
@@ -102,8 +119,8 @@ fn tagged_zeros(first: u8, zeros: usize) -> Vec<u8> {
 fn tagged_16(c: &mut Criterion) {
     use LogVersion::{V1, V2};
 
-    get_bench!(bench_v1, |data| decode::tagged_16(V1, data));
-    get_bench!(bench_v2, |data| decode::tagged_16(V2, data));
+    get_bench!(bench_v1, bytes, |data| decode::tagged_16(V1, data));
+    get_bench!(bench_v2, bits, |data| decode::tagged_16(V2, data));
 
     let mut group = c.benchmark_group("tagged 16");
 
@@ -129,7 +146,7 @@ fn tagged_16(c: &mut Criterion) {
 }
 
 fn tagged_32(c: &mut Criterion) {
-    get_bench!(decode::tagged_32);
+    get_bench!(bytes, decode::tagged_32);
 
     let mut group = c.benchmark_group("tagged 32");
 
