@@ -15,7 +15,7 @@ thiserror = "1.0.34"
 tracing = "0.1.36"
 
 [dev-dependencies]
-criterion = { version = "0.4.0", default-features = false, features = ["cargo_bench_support", "html_reports"] }
+criterion = { version = "0.4.0", features = ["html_reports"] }
 test-case = "2.2.1"
 
 [lib]
