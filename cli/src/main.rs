@@ -23,6 +23,15 @@ fn main() -> eyre::Result<()> {
     let config = cli.to_blackbox_config();
 
     for log in cli.logs {
+        let out: Box<dyn Write> = if cli.stdout {
+            Box::new(io::stdout().lock())
+        } else {
+            let mut name = log.clone();
+            name.set_extension("csv");
+            Box::new(File::create(name)?)
+        };
+        let mut out = BufWriter::new(out);
+
         let data = {
             let mut log = File::open(log)?;
             let mut data = Vec::new();
@@ -31,12 +40,6 @@ fn main() -> eyre::Result<()> {
         };
 
         let log = config.parse(&data)?;
-        let out: Box<dyn Write> = if cli.stdout {
-            Box::new(io::stdout().lock())
-        } else {
-            Box::new(File::create("out.csv")?)
-        };
-        let mut out = BufWriter::new(out);
 
         write_header(&mut out, &log)?;
 
