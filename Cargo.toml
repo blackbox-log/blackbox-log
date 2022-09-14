@@ -25,6 +25,11 @@ bench = false
 name = "decode"
 harness = false
 
+[profile.bench]
+strip = false
+debug = true
+debug-assertions = false
+
 [profile.release]
 lto = "thin"
 opt-level = 3

@@ -64,7 +64,7 @@ fn main() -> Result<()> {
 
             let time = time.to_string();
 
-            cmd!(sh, "cargo flamegraph --dev --package blackbox --deterministic --palette rust --output {output} --bench {bench} -- --bench --profile-time {time} {filter}")
+            cmd!(sh, "cargo flamegraph --package blackbox --deterministic --palette rust --output {output} --bench {bench} -- --bench --profile-time {time} {filter}")
                 .env("CARGO_PROFILE_BENCH_DEBUG", "true")
                 .run()
         }
