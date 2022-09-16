@@ -26,9 +26,10 @@ fn main() -> eyre::Result<()> {
         let out: Box<dyn Write> = if cli.stdout {
             Box::new(io::stdout().lock())
         } else {
-            let mut name = log.clone();
-            name.set_extension("csv");
-            Box::new(File::create(name)?)
+            let mut out = log.clone();
+            out.set_extension("csv");
+            tracing::info!("Decoding `{}` to `{}`", log.display(), out.display());
+            Box::new(File::create(out)?)
         };
         let mut out = BufWriter::new(out);
 

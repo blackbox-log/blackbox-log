@@ -138,7 +138,7 @@ impl State {
                     _ => return Err(unknown_header()),
                 };
             }
-            header => tracing::warn!("skipping unknown header: `{header}` = `{value}`"),
+            header => tracing::debug!("skipping unknown header: `{header}` = `{value}`"),
         }
 
         Ok(())

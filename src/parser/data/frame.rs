@@ -146,13 +146,7 @@ impl Frame {
                 for i in i..=(i + extra_fields) {
                     let field = &frame_def[i];
                     let value = &mut values[i];
-
-                    tracing::trace!(
-                        field = field.name(),
-                        value,
-                        encoding = ?field.encoding(),
-                        predictor = ?field.predictor()
-                    );
+                    let raw_value = *value;
 
                     let last = last.map(|l| l.values[i]);
                     let last_last = last_last.map(|l| l.values[i]);
@@ -161,7 +155,13 @@ impl Frame {
                         *value = field.predictor().apply(headers, *value, last, last_last);
                     }
 
-                    tracing::debug!(field = field.name(), value);
+                    tracing::trace!(
+                        field = field.name(),
+                        encoding = ?field.encoding(),
+                        predictor = ?field.predictor(),
+                        raw = raw_value,
+                        value,
+                    );
 
                     // TODO: check field.signed
                 }

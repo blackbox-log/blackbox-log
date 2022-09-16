@@ -199,7 +199,8 @@ pub(crate) struct Cli {
 
 impl Cli {
     pub fn log_level_filter(&self) -> LevelFilter {
-        match 2_u8.saturating_sub(self.quiet) + self.verbose {
+        let default: u8 = if cfg!(debug_assertions) { 4 } else { 3 };
+        match default.saturating_sub(self.quiet) + self.verbose {
             0 => LevelFilter::OFF,
             1 => LevelFilter::ERROR,
             2 => LevelFilter::WARN,
