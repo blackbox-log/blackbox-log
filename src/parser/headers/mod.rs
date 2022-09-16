@@ -176,11 +176,23 @@ fn parse_header(bytes: &mut ByteReader) -> ParseResult<(String, String)> {
         line.push(byte);
     }
 
-    let line = line.strip_prefix(&[b' ']).unwrap_or(&line);
-    let line = str::from_utf8(line).unwrap();
-    let (name, value) = line.split_once(':').unwrap();
+    let line = str::from_utf8(&line)?;
+    let line = line.strip_prefix(' ').unwrap_or(line);
+    let (name, value) = line.split_once(':').ok_or(ParseError::HeaderMissingColon)?;
 
     tracing::trace!("read header `{name}` = `{value}`");
 
     Ok((name.to_owned(), value.to_owned()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic(expected = "HeaderInvalidUtf8")]
+    fn invalid_utf8() {
+        let mut b = Reader::new(b"H \xFF:\xFF\n");
+        parse_header(&mut b.bytes()).unwrap();
+    }
 }

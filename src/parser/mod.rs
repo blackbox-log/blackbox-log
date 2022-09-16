@@ -11,6 +11,7 @@ pub use predictor::Predictor;
 pub use reader::Reader;
 
 use crate::Log;
+use std::str::Utf8Error;
 
 pub type ParseResult<T> = Result<T, ParseError>;
 
@@ -24,6 +25,10 @@ pub enum ParseError {
     InvalidHeader { header: String, value: String },
     #[error("unknown or invalid header name: `{0}`")]
     UnknownHeader(String),
+    #[error("header with invalid UTF-8 bytes")]
+    HeaderInvalidUtf8(#[from] Utf8Error),
+    #[error("header without a colon as separator")]
+    HeaderMissingColon,
     #[error("invalid/corrupted data")]
     Corrupted,
     #[error("unexpected end of file")]
