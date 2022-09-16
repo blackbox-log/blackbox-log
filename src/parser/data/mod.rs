@@ -35,7 +35,7 @@ impl Data {
                 let lines = 4;
                 let bytes_per_line = 8;
                 let bytes = iter::once(byte)
-                    .chain(iter::from_fn(|| data.bytes().read_u8()))
+                    .chain(data.bytes().iter())
                     .take(lines * bytes_per_line)
                     .collect::<Vec<u8>>();
 

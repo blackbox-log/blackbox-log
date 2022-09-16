@@ -68,6 +68,10 @@ impl<'data, 'reader> ByteReader<'data, 'reader> {
         self.0.data.len() - self.0.index
     }
 
+    pub fn iter<'me>(&'me mut self) -> Bytes<'data, 'reader, 'me> {
+        Bytes(self)
+    }
+
     pub fn peek(&self) -> Option<u8> {
         self.0.data.get(self.0.index).copied()
     }
@@ -139,5 +143,15 @@ impl<'data, 'reader> Read for ByteReader<'data, 'reader> {
 
         self.0.index += len;
         Ok(len)
+    }
+}
+
+pub struct Bytes<'data: 'reader, 'reader: 'bytes, 'bytes>(&'bytes mut ByteReader<'data, 'reader>);
+
+impl Iterator for Bytes<'_, '_, '_> {
+    type Item = u8;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.read_u8()
     }
 }

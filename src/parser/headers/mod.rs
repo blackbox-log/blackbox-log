@@ -167,14 +167,7 @@ fn parse_header(bytes: &mut ByteReader) -> ParseResult<(String, String)> {
         None => return Err(ParseError::UnexpectedEof),
     }
 
-    let mut line = Vec::new();
-    while let Some(byte) = bytes.read_u8() {
-        if byte == b'\n' {
-            break;
-        }
-
-        line.push(byte);
-    }
+    let line = bytes.iter().take_while(|b| *b != b'\n').collect::<Vec<_>>();
 
     let line = str::from_utf8(&line)?;
     let line = line.strip_prefix(' ').unwrap_or(line);
