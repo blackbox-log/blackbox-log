@@ -1,12 +1,14 @@
 mod data;
 pub mod decode;
+mod frame;
 mod headers;
 mod predictor;
 mod reader;
 
-pub use data::{Data, Event, Frame};
+pub use data::{Data, Event};
 pub use decode::Encoding;
-pub use headers::{FieldDef, FrameDefs, Headers};
+pub use frame::{Frame, MainFrame, SlowFrame};
+pub use headers::Headers;
 pub use predictor::Predictor;
 pub use reader::Reader;
 
@@ -29,6 +31,8 @@ pub enum ParseError {
     HeaderInvalidUtf8(#[from] Utf8Error),
     #[error("header without a colon as separator")]
     HeaderMissingColon,
+    #[error("missing header `{0}`")]
+    MissingHeader(String),
     #[error("invalid/corrupted data")]
     Corrupted,
     #[error("unexpected end of file")]
@@ -42,7 +46,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn parse(&self, data: &[u8]) -> ParseResult<Log> {
+    pub fn parse<'data>(&self, data: &'data [u8]) -> ParseResult<Log<'data>> {
         let mut data = Reader::new(data);
         let headers = Headers::parse(&mut data)?;
         let data = Data::parse(&mut data, self, &headers)?;

@@ -15,6 +15,8 @@ pub use tagged_32::tagged_32;
 pub use tagged_variable::tagged_variable;
 pub use variable::{variable, variable_signed};
 
+use super::{ParseResult, Reader};
+use crate::LogVersion;
 use num_enum::TryFromPrimitive;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, TryFromPrimitive)]
@@ -43,6 +45,52 @@ pub enum Encoding {
     Null = 9,
     EliasGamma = 10,
     EliasGammaSigned = 11,
+}
+
+impl Encoding {
+    pub(crate) fn max_chunk_size(&self) -> usize {
+        match self {
+            Self::TaggedVariable => 8,
+            Self::Tagged32 => 3,
+            Self::Tagged16 => 4,
+            Self::VariableSigned
+            | Self::Variable
+            | Self::Negative14Bit
+            | Self::EliasDelta
+            | Self::EliasDeltaSigned
+            | Self::Null
+            | Self::EliasGamma
+            | Self::EliasGammaSigned => 1,
+        }
+    }
+
+    pub(crate) fn decode(
+        &self,
+        data: &mut Reader,
+        version: LogVersion,
+        extra: usize,
+    ) -> ParseResult<Vec<i64>> {
+        let range = 0..=extra;
+        let values = match self {
+            Self::VariableSigned => vec![variable_signed(data)?.into()],
+            Self::Variable => vec![variable(data)?.into()],
+
+            Self::Negative14Bit => vec![negative_14_bit(data)?.into()],
+
+            Self::EliasDelta => vec![elias_delta(data)?.into()],
+            Self::EliasDeltaSigned => vec![elias_delta_signed(data)?.into()],
+
+            Self::TaggedVariable => tagged_variable(data, extra)?.map(Into::into)[range].to_vec(),
+            Self::Tagged32 => tagged_32(data)?.map(Into::into)[range].to_vec(),
+            Self::Tagged16 => tagged_16(version, data)?.map(Into::into)[range].to_vec(),
+
+            Self::Null => vec![0],
+
+            Self::EliasGamma | Self::EliasGammaSigned => todo!(),
+        };
+
+        Ok(values)
+    }
 }
 
 #[inline]

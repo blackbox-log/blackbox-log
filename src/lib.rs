@@ -3,7 +3,7 @@
 pub mod betaflight;
 pub mod parser;
 
-use parser::{Data, Event, Frame, Headers};
+use parser::{Data, Event, Headers, MainFrame, SlowFrame};
 use std::str;
 use std::str::FromStr;
 
@@ -26,13 +26,13 @@ impl FromStr for LogVersion {
 }
 
 #[derive(Debug)]
-pub struct Log {
-    headers: Headers,
+pub struct Log<'data> {
+    headers: Headers<'data>,
     data: Data,
 }
 
-impl Log {
-    pub fn headers(&self) -> &Headers {
+impl<'data> Log<'data> {
+    pub fn headers(&self) -> &Headers<'data> {
         &self.headers
     }
 
@@ -40,19 +40,19 @@ impl Log {
         &self.data.events
     }
 
-    pub fn main_frames(&self) -> &[Frame] {
+    pub fn main_frames(&self) -> &[MainFrame] {
         &self.data.main_frames
     }
 
-    pub fn gps_frames(&self) -> &[Frame] {
-        &self.data.gps_frames
-    }
+    // pub fn gps_frames(&self) -> &[Frame] {
+    //     &self.data.gps_frames
+    // }
 
-    pub fn gps_home_frames(&self) -> &[Frame] {
-        &self.data.gps_home_frames
-    }
+    // pub fn gps_home_frames(&self) -> &[Frame] {
+    //     &self.data.gps_home_frames
+    // }
 
-    pub fn slow_frames(&self) -> &[Frame] {
+    pub fn slow_frames(&self) -> &[SlowFrame] {
         &self.data.slow_frames
     }
 }

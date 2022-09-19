@@ -76,6 +76,19 @@ impl<'data, 'reader> ByteReader<'data, 'reader> {
         self.0.data.get(self.0.index).copied()
     }
 
+    pub fn read_line(&mut self) -> Option<&'data [u8]> {
+        let start = self.0.index;
+        if let Some(len) = self.0.data.get(start..)?.iter().position(|b| *b == b'\n') {
+            self.0.index += len + 1; // Skip the '\n'
+
+            let end = start + len;
+            self.0.data.get(start..end)
+        } else {
+            self.0.index = self.0.data.len();
+            self.0.data.get(start..)
+        }
+    }
+
     pub fn read_u8(&mut self) -> Option<u8> {
         let byte = self.peek();
         if byte.is_some() {

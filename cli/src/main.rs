@@ -1,10 +1,9 @@
 mod cli;
 
-use blackbox::parser::{FieldDef, FrameDefs};
+use blackbox::parser::Frame;
 use blackbox::Log;
 use clap::Parser;
 use cli::Cli;
-use itertools::Itertools;
 use std::fs::File;
 use std::io::{self, BufWriter, Read, Write};
 
@@ -45,7 +44,12 @@ fn main() -> eyre::Result<()> {
         write_header(&mut out, &log)?;
 
         for frame in log.main_frames() {
-            for s in Itertools::intersperse(frame.iter().map(ToString::to_string), ",".to_owned()) {
+            out.write_all(frame.iteration().to_string().as_bytes())?;
+            write!(out, ",")?;
+            out.write_all(frame.time().to_string().as_bytes())?;
+
+            for s in frame.values().iter().map(ToString::to_string) {
+                write!(out, ",")?;
                 out.write_all(s.as_bytes())?;
             }
 
@@ -59,9 +63,11 @@ fn main() -> eyre::Result<()> {
 }
 
 fn write_header(out: &mut impl Write, log: &Log) -> io::Result<()> {
-    let FrameDefs { intra, .. } = &log.headers().frames;
+    let mut fields = log.headers().main_fields();
+    out.write_all(fields.next().unwrap().as_bytes())?;
 
-    for s in Itertools::intersperse(intra.iter().map(FieldDef::name), ",") {
+    for s in fields {
+        write!(out, ",")?;
         out.write_all(s.as_bytes())?;
     }
 
