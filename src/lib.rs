@@ -3,7 +3,8 @@
 pub mod betaflight;
 pub mod parser;
 
-use parser::{Data, Event, Headers, MainFrame, SlowFrame};
+use memchr::memmem;
+use parser::{Config, Data, Event, Headers, MainFrame, ParseResult, Reader, SlowFrame};
 use std::str;
 use std::str::FromStr;
 
@@ -32,6 +33,14 @@ pub struct Log<'data> {
 }
 
 impl<'data> Log<'data> {
+    pub fn parse<'a>(config: &'a Config, data: &'data [u8]) -> ParseResult<Self> {
+        let mut data = Reader::new(data);
+        let headers = Headers::parse(&mut data)?;
+        let data = Data::parse(&mut data, config, &headers)?;
+
+        Ok(Self { headers, data })
+    }
+
     pub fn headers(&self) -> &Headers<'data> {
         &self.headers
     }
@@ -55,4 +64,11 @@ impl<'data> Log<'data> {
     pub fn slow_frames(&self) -> &[SlowFrame] {
         &self.data.slow_frames
     }
+}
+
+pub fn parse_file<'a, 'data: 'a>(
+    config: &'a Config,
+    data: &'data [u8],
+) -> impl Iterator<Item = ParseResult<Log<'data>>> + 'a {
+    memmem::find_iter(data, parser::MARKER).map(|start| Log::parse(config, &data[start..]))
 }

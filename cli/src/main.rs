@@ -21,42 +21,51 @@ fn main() -> eyre::Result<()> {
 
     let config = cli.to_blackbox_config();
 
-    for log in cli.logs {
-        let out: Box<dyn Write> = if cli.stdout {
-            Box::new(io::stdout().lock())
-        } else {
-            let mut out = log.clone();
-            out.set_extension("csv");
-            tracing::info!("Decoding `{}` to `{}`", log.display(), out.display());
-            Box::new(File::create(out)?)
-        };
-        let mut out = BufWriter::new(out);
-
+    for filename in cli.logs {
         let data = {
-            let mut log = File::open(log)?;
+            let mut log = File::open(&filename)?;
             let mut data = Vec::new();
             log.read_to_end(&mut data)?;
             data
         };
 
-        let log = config.parse(&data)?;
+        for (i, log) in blackbox::parse_file(&config, &data)
+            .enumerate()
+            .map(|(i, log)| (i + 1, log))
+        {
+            let log = log?;
 
-        write_header(&mut out, &log)?;
+            let out: Box<dyn Write> = if cli.stdout {
+                Box::new(io::stdout().lock())
+            } else {
+                let mut out = filename.clone();
+                out.set_extension(format!("{i:0>2}.csv"));
+                tracing::info!(
+                    "Writing log {i} from '{}' to '{}'",
+                    filename.display(),
+                    out.display()
+                );
+                Box::new(File::create(out)?)
+            };
+            let mut out = BufWriter::new(out);
 
-        for frame in log.main_frames() {
-            out.write_all(frame.iteration().to_string().as_bytes())?;
-            write!(out, ",")?;
-            out.write_all(frame.time().to_string().as_bytes())?;
+            write_header(&mut out, &log)?;
 
-            for s in frame.values().iter().map(ToString::to_string) {
+            for frame in log.main_frames() {
+                out.write_all(frame.iteration().to_string().as_bytes())?;
                 write!(out, ",")?;
-                out.write_all(s.as_bytes())?;
+                out.write_all(frame.time().to_string().as_bytes())?;
+
+                for s in frame.values().iter().map(ToString::to_string) {
+                    write!(out, ",")?;
+                    out.write_all(s.as_bytes())?;
+                }
+
+                writeln!(out)?;
             }
 
-            writeln!(out)?;
+            out.flush()?;
         }
-
-        out.flush()?;
     }
 
     Ok(())

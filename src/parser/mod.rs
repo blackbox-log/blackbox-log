@@ -16,6 +16,7 @@ use crate::Log;
 use std::str::Utf8Error;
 
 pub type ParseResult<T> = Result<T, ParseError>;
+pub(crate) const MARKER: &[u8] = b"H Product:Blackbox flight data recorder by Nicholas Sherlock\n";
 
 #[derive(Debug, thiserror::Error)]
 pub enum ParseError {
@@ -47,11 +48,7 @@ pub struct Config {
 
 impl Config {
     pub fn parse<'data>(&self, data: &'data [u8]) -> ParseResult<Log<'data>> {
-        let mut data = Reader::new(data);
-        let headers = Headers::parse(&mut data)?;
-        let data = Data::parse(&mut data, self, &headers)?;
-
-        Ok(Log { headers, data })
+        Log::parse(self, data)
     }
 }
 
