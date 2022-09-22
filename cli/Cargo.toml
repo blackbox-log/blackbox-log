@@ -8,6 +8,6 @@ publish = false
 
 [dependencies]
 blackbox = { version = "0.1.0", path = ".." }
-clap = { version = "3.2.21", features = ["derive", "wrap_help"] }
+clap = { version = "3.2.22", features = ["derive", "wrap_help"] }
 tracing = { version = "0.1.36", features = ["release_max_level_debug"] }
 tracing-subscriber = { version = "0.3.15", default-features = false, features = ["smallvec", "fmt", "ansi", "std"] }

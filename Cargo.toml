@@ -12,7 +12,7 @@ members = ["cli", "fuzz", "reference-impl", "xtask"]
 bitter = "0.6.0"
 memchr = "2.5.0"
 num_enum = "0.5.7"
-thiserror = "1.0.34"
+thiserror = "1.0.35"
 tracing = "0.1.36"
 
 [dev-dependencies]
