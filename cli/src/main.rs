@@ -56,7 +56,7 @@ fn main() -> QuietResult<()> {
     let config = cli.to_blackbox_config();
 
     for filename in cli.logs {
-        let span = tracing::info_span!("file", name = %filename.display());
+        let span = tracing::info_span!("file", name = ?filename);
         let _span = span.enter();
 
         let data = match read_log_file(&filename) {
