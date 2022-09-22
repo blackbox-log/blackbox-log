@@ -5,8 +5,9 @@ pub mod parser;
 
 use memchr::memmem;
 use parser::{Config, Data, Event, Headers, MainFrame, ParseResult, Reader, SlowFrame};
-use std::str;
 use std::str::FromStr;
+use std::{slice, str};
+use tracing::instrument;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum LogVersion {
@@ -66,9 +67,62 @@ impl<'data> Log<'data> {
     }
 }
 
-pub fn parse_file<'a, 'data: 'a>(
-    config: &'a Config,
+pub struct File<'data> {
+    offsets: Vec<usize>,
     data: &'data [u8],
-) -> impl Iterator<Item = ParseResult<Log<'data>>> + 'a {
-    memmem::find_iter(data, parser::MARKER).map(|start| Log::parse(config, &data[start..]))
+}
+
+impl<'data> File<'data> {
+    pub fn new(data: &'data [u8]) -> Self {
+        let offsets = memmem::find_iter(data, parser::MARKER).collect();
+        Self { offsets, data }
+    }
+
+    pub fn log_count(&self) -> usize {
+        self.offsets.len()
+    }
+
+    pub fn parse_iter<'config, 'file>(
+        &'file self,
+        config: &'config Config,
+    ) -> FileIter<'config, 'file, 'data> {
+        FileIter {
+            config,
+            offsets: self.offsets.iter(),
+            file: self,
+        }
+    }
+
+    /// # Panics
+    ///
+    /// This panics if given an `index` greater than or equal to the number of logs in the file.
+    pub fn parse_index(&self, config: &Config, index: usize) -> ParseResult<Log<'data>> {
+        let start = self.offsets[index];
+        self.parse_offset(config, start)
+    }
+
+    #[instrument(level = "trace", skip(self, config))]
+    fn parse_offset(&self, config: &Config, start: usize) -> ParseResult<Log<'data>> {
+        Log::parse(config, &self.data[start..])
+    }
+}
+
+pub struct FileIter<'config, 'file, 'data> {
+    config: &'config Config,
+    offsets: slice::Iter<'file, usize>,
+    file: &'file File<'data>,
+}
+
+impl<'config, 'file, 'data> Iterator for FileIter<'config, 'file, 'data> {
+    type Item = ParseResult<Log<'data>>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.offsets
+            .next()
+            .map(|&start| self.file.parse_offset(self.config, start))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.offsets.size_hint()
+    }
 }
