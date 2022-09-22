@@ -32,11 +32,19 @@ pub(crate) struct MainFrameDef<'data> {
     pub(crate) iteration: MainFieldDef<'data>,
     pub(crate) time: MainFieldDef<'data>,
     pub(crate) fields: Vec<MainFieldDef<'data>>,
+
+    index_motor_0: Option<usize>,
 }
 
 impl<'data> MainFrameDef<'data> {
     pub(crate) fn builder() -> MainFrameDefBuilder<'data> {
         MainFrameDefBuilder::default()
+    }
+
+    pub(crate) fn get_motor_0_from(&self, frame: &[i64]) -> ParseResult<i64> {
+        self.index_motor_0
+            .map(|index| frame[index])
+            .ok_or(ParseError::MissingField("motor[0]"))
     }
 
     #[instrument(level = "trace", name = "MainFrameDef::parse_intra", skip_all)]
@@ -68,14 +76,16 @@ impl<'data> MainFrameDef<'data> {
         }
 
         debug_assert_eq!(values.len(), self.fields.len());
-        for (i, value) in values.iter_mut().enumerate() {
+        for i in 0..values.len() {
             let field = &self.fields[i];
-            let raw = *value;
+            let raw = values[i];
 
             let last = last.map(|l| l.values[i]);
 
             if !config.raw {
-                *value = field.predictor_intra.apply(headers, *value, last, None, 0);
+                values[i] = field
+                    .predictor_intra
+                    .apply(headers, raw, &values, last, None, 0)?;
             }
 
             tracing::trace!(
@@ -83,7 +93,7 @@ impl<'data> MainFrameDef<'data> {
                 encoding = ?field.encoding_intra,
                 predictor = ?field.predictor_intra,
                 raw,
-                value,
+                value = values[i],
             );
 
             // TODO: check field.signed
@@ -142,21 +152,22 @@ impl<'data> MainFrameDef<'data> {
         }
 
         debug_assert_eq!(values.len(), self.fields.len());
-        for (i, value) in values.iter_mut().enumerate() {
+        for i in 0..values.len() {
             let field = &self.fields[i];
-            let raw = *value;
+            let raw = values[i];
 
             let last = last.map(|l| l.values[i]);
             let last_last = last_last.map(|l| l.values[i]);
 
             if !config.raw {
-                *value = field.predictor_inter.apply(
+                values[i] = field.predictor_inter.apply(
                     headers,
-                    *value,
+                    raw,
+                    &values,
                     last,
                     last_last,
                     skipped_frames.into(),
-                );
+                )?;
             }
 
             tracing::trace!(
@@ -164,7 +175,7 @@ impl<'data> MainFrameDef<'data> {
                 encoding = ?field.encoding_inter,
                 predictor = ?field.predictor_inter,
                 raw,
-                value,
+                value = values[i],
             );
 
             // TODO: check field.signed
@@ -274,10 +285,14 @@ impl<'data> MainFrameDefBuilder<'data> {
             "all `Field *` headers must have the same number of elements"
         );
 
+        let index_motor_0 = fields.iter().position(|f| f.name == "motor[0]");
+
         Ok(MainFrameDef {
             iteration,
             time,
             fields,
+
+            index_motor_0,
         })
     }
 }

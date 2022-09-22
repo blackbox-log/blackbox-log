@@ -34,10 +34,21 @@ pub enum ParseError {
     HeaderMissingColon,
     #[error("missing header `{0}`")]
     MissingHeader(String),
+    #[error("missing field `{0}`")]
+    MissingField(&'static str),
     #[error("invalid/corrupted data")]
     Corrupted,
     #[error("unexpected end of file")]
     UnexpectedEof,
+}
+
+impl ParseError {
+    pub(crate) fn invalid_header(header: impl Into<String>, value: impl Into<String>) -> Self {
+        Self::InvalidHeader {
+            header: header.into(),
+            value: value.into(),
+        }
+    }
 }
 
 #[derive(Debug, Default, Clone, Copy)]

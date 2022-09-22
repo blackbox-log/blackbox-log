@@ -41,20 +41,22 @@ impl<'data> SlowFrameDef<'data> {
             values.append(&mut encoding.decode(data, headers.version, extra)?);
         }
 
-        for (i, value) in values.iter_mut().enumerate() {
+        for i in 0..values.len() {
             let field = &self.0[i];
-            let raw_value = *value;
+            let raw = values[i];
 
             if !config.raw {
-                *value = field.predictor.apply(headers, *value, None, None, 0);
+                values[i] = field
+                    .predictor
+                    .apply(headers, raw, &values, None, None, 0)?;
             }
 
             tracing::trace!(
                 field = field.name,
                 encoding = ?field.encoding,
                 predictor = ?field.predictor,
-                raw = raw_value,
-                value,
+                raw,
+                value = values[i],
             );
 
             // TODO: check field.signed

@@ -22,6 +22,8 @@ pub struct Headers<'data> {
 
     /// Measured battery voltage at arm
     pub vbat_reference: u16,
+    pub min_throttle: u16,
+    pub motor_output_range: MotorOutputRange,
 }
 
 impl<'data> Headers<'data> {
@@ -69,20 +71,53 @@ impl<'data> Headers<'data> {
 pub enum FirmwareKind {
     Baseflight,
     Cleanflight,
+    INav,
 }
 
 impl FromStr for FirmwareKind {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "Cleanflight" => Ok(Self::Cleanflight),
-            "Baseflight" => Ok(Self::Baseflight),
+        match s.to_ascii_lowercase().as_str() {
+            "cleanflight" => Ok(Self::Cleanflight),
+            "baseflight" => Ok(Self::Baseflight),
+            "inav" => Ok(Self::INav),
             _ => Err(ParseError::InvalidHeader {
                 header: "Firmware type".to_owned(),
                 value: s.to_owned(),
             }),
         }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct MotorOutputRange(u16, u16);
+
+impl MotorOutputRange {
+    pub const fn new(min: u16, max: u16) -> Self {
+        Self(min, max)
+    }
+
+    pub const fn min(&self) -> u16 {
+        self.0
+    }
+
+    pub const fn max(&self) -> u16 {
+        self.1
+    }
+}
+
+impl FromStr for MotorOutputRange {
+    type Err = ParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        s.split_once(',')
+            .and_then(|(min, max)| {
+                let min = min.parse().ok()?;
+                let max = max.parse().ok()?;
+                Some(MotorOutputRange::new(min, max))
+            })
+            .ok_or(ParseError::Corrupted)
     }
 }
 
@@ -98,6 +133,8 @@ struct State<'data> {
     craft_name: Option<&'data str>,
 
     vbat_reference: Option<u16>,
+    min_throttle: Option<u16>,
+    motor_output_range: Option<MotorOutputRange>,
 }
 
 impl<'data> State<'data> {
@@ -111,23 +148,39 @@ impl<'data> State<'data> {
             firmware_kind: None,
             board_info: None,
             craft_name: None,
+
             vbat_reference: None,
+            min_throttle: None,
+            motor_output_range: None,
         }
     }
 
     fn update(&mut self, header: &'data str, value: &'data str) -> ParseResult<()> {
-        match header {
-            "Firmware revision" => self.firmware_revision = Some(value),
-            "Firmware type" => self.firmware_kind = Some(value.parse()?),
-            "Board information" => self.board_info = Some(value),
-            "Craft name" => self.craft_name = Some(value),
+        match header.to_ascii_lowercase().as_str() {
+            "firmware revision" => self.firmware_revision = Some(value),
+            "firmware type" => self.firmware_kind = Some(value.parse()?),
+            "board information" => self.board_info = Some(value),
+            "craft name" => self.craft_name = Some(value),
+
             "vbatref" => {
-                self.vbat_reference =
-                    Some(value.parse().map_err(|_| ParseError::InvalidHeader {
-                        header: header.to_owned(),
-                        value: value.to_owned(),
-                    })?);
+                let vbat_reference = value
+                    .parse()
+                    .map_err(|_| ParseError::invalid_header(header, value))?;
+                self.vbat_reference = Some(vbat_reference);
             }
+            "minthrottle" => {
+                let min_throttle = value
+                    .parse()
+                    .map_err(|_| ParseError::invalid_header(header, value))?;
+                self.min_throttle = Some(min_throttle);
+            }
+            "motoroutput" => {
+                let range = value
+                    .parse()
+                    .map_err(|_| ParseError::invalid_header(header, value))?;
+                self.motor_output_range = Some(range);
+            }
+
             _ if is_frame_def_header(header) => {
                 let (frame_kind, property) = parse_frame_def_header(header).unwrap();
 
@@ -155,7 +208,10 @@ impl<'data> State<'data> {
             firmware_kind: self.firmware_kind.unwrap(),
             board_info: self.board_info.unwrap(),
             craft_name: self.craft_name.unwrap(),
+
             vbat_reference: self.vbat_reference.unwrap(),
+            min_throttle: self.min_throttle.unwrap(),
+            motor_output_range: self.motor_output_range.unwrap(),
         })
     }
 }
