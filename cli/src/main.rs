@@ -9,17 +9,17 @@ use std::io::{self, BufWriter, Read, Write};
 use std::path::Path;
 use std::process::{ExitCode, Termination};
 
+#[derive(Debug)]
 enum QuietResult<T> {
     Ok(T),
-    Err,
+    Err(ExitCode),
 }
 
-impl Termination for QuietResult<()> {
-    fn report(self) -> ExitCode {
-        match self {
-            Self::Ok(()) => ExitCode::SUCCESS,
-            Self::Err => ExitCode::FAILURE,
-        }
+impl<T> QuietResult<T> {
+    const FAILURE: Self = Self::Err(ExitCode::FAILURE);
+
+    fn err(code: exitcode::ExitCode) -> Self {
+        Self::Err(ExitCode::from(u8::try_from(code).unwrap()))
     }
 }
 
@@ -27,7 +27,16 @@ impl<T> From<blackbox::parser::ParseResult<T>> for QuietResult<T> {
     fn from(result: blackbox::parser::ParseResult<T>) -> Self {
         match result {
             Ok(ok) => Self::Ok(ok),
-            Err(_) => Self::Err,
+            Err(_) => Self::FAILURE,
+        }
+    }
+}
+
+impl Termination for QuietResult<()> {
+    fn report(self) -> ExitCode {
+        match self {
+            Self::Ok(()) => ExitCode::SUCCESS,
+            Self::Err(code) => code,
         }
     }
 }
@@ -41,7 +50,7 @@ fn main() -> QuietResult<()> {
 
     if cli.logs.len() > 1 && cli.stdout {
         tracing::error!("cannot write multiple logs to stdout");
-        return QuietResult::Err;
+        return QuietResult::err(exitcode::USAGE);
     }
 
     let config = cli.to_blackbox_config();
@@ -54,7 +63,7 @@ fn main() -> QuietResult<()> {
             Ok(data) => data,
             Err(error) => {
                 tracing::error!(%error, "failed to read log file");
-                return QuietResult::Err;
+                return QuietResult::err(exitcode::IOERR);
             }
         };
 
@@ -63,7 +72,7 @@ fn main() -> QuietResult<()> {
         let log_count = file.log_count();
         if cli.stdout && log_count > 1 {
             tracing::error!("found {log_count} logs, choose one to write to stdout with `--index`");
-            return QuietResult::Err;
+            return QuietResult::err(exitcode::USAGE);
         }
 
         for i in 0..log_count {
@@ -74,20 +83,20 @@ fn main() -> QuietResult<()> {
 
             let log = match file.parse_index(&config, i) {
                 Ok(log) => log,
-                Err(_) => return QuietResult::Err,
+                Err(_) => return QuietResult::err(exitcode::DATAERR),
             };
 
             let mut out = match get_output(cli.stdout, &filename, index) {
                 Ok(out) => BufWriter::new(out),
                 Err(error) => {
                     tracing::error!(%error, "failed to open output file");
-                    return QuietResult::Err;
+                    return QuietResult::err(exitcode::CANTCREAT);
                 }
             };
 
             if let Err(error) = write_csv(&mut out, &log) {
                 tracing::error!(%error, "failed to write csv");
-                return QuietResult::Err;
+                return QuietResult::err(exitcode::IOERR);
             }
         }
     }
