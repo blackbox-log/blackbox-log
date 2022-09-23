@@ -2,13 +2,17 @@
 name = "blackbox_decode"
 description = "Rust port of Nicholas Sherlock's blackbox_decode"
 version = "0.1.0"
-license = "GPL-3.0-only"
-edition = "2021"
 publish = false
 
+license.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
 [dependencies]
-blackbox = { version = "0.1.0", path = ".." }
+blackbox.workspace = true
 clap = { version = "3.2.22", features = ["derive", "wrap_help"] }
+color-eyre = "0.6.2"
 exitcode = "1.1.2"
-tracing = { version = "0.1.36", features = ["release_max_level_debug"] }
+eyre = "0.6.8"
+tracing = { workspace = true, features = ["release_max_level_debug"] }
 tracing-subscriber = { version = "0.3.15", default-features = false, features = ["smallvec", "fmt", "ansi", "std"] }

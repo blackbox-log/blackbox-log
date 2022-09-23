@@ -1,12 +1,22 @@
+[workspace]
+members = ["cli", "fuzz", "reference-impl", "xtask"]
+
+[workspace.package]
+edition = "2021"
+license = "GPL-3.0-only"
+rust-version = "1.64"
+
+[workspace.dependencies]
+blackbox = { path = "." }
+tracing = "0.1.36"
+
 [package]
 name = "blackbox"
 version = "0.1.0"
 license = "GPL-3.0-only"
 edition = "2021"
+rust-version = "1.64.0"
 publish = false
-
-[workspace]
-members = ["cli", "fuzz", "reference-impl", "xtask"]
 
 [dependencies]
 bitter = "0.6.0"

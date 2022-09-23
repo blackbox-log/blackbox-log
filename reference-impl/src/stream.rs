@@ -93,9 +93,7 @@ impl Drop for Stream {
 #[allow(clippy::items_after_statements)]
 #[allow(clippy::unseparated_literal_suffix)]
 mod ffi {
-
-    // TODO: switch to std::ffi
-    use std::os::raw::{c_char, c_int, c_long, c_uint, c_ulong};
+    use std::ffi::{c_char, c_int, c_long, c_uint, c_ulong};
 
     type __dev_t = c_ulong;
     type __uid_t = c_uint;
