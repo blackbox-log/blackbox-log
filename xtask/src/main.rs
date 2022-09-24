@@ -216,7 +216,6 @@ enum Args {
     #[bpaf(command)]
     /// Runs benchmarks for `blackbox` lib
     Bench {
-        #[bpaf(long)]
         /// Tests all benchmarks run successfully, ignores any extra args for criterion
         test: bool,
 
@@ -281,7 +280,6 @@ enum Fuzz {
         #[bpaf(external)]
         time: Option<u16>,
 
-        #[bpaf(long)]
         /// Runs in debug mode and prints a backtrace on panic
         backtrace: bool,
 
