@@ -1,11 +1,12 @@
 use super::{count_fields_with_same_encoding, Frame, FrameKind, FrameProperty};
 use crate::parser::{
-    decode, Config, Encoding, Headers, ParseError, ParseResult, Predictor, Reader,
+    decode, predictor, Config, Encoding, Headers, ParseError, ParseResult, Predictor, Reader,
 };
 use tracing::instrument;
 
 #[derive(Debug, Clone)]
 pub struct MainFrame {
+    intra: bool,
     iteration: u32,
     time: i64,
     values: Vec<i64>,
@@ -18,6 +19,14 @@ impl MainFrame {
 
     pub fn time(&self) -> i64 {
         self.time
+    }
+
+    pub const fn is_intra(&self) -> bool {
+        self.intra
+    }
+
+    pub const fn is_inter(&self) -> bool {
+        !self.intra
     }
 }
 
@@ -100,6 +109,7 @@ impl<'data> MainFrameDef<'data> {
         }
 
         Ok(MainFrame {
+            intra: true,
             iteration,
             time,
             values,
@@ -119,17 +129,20 @@ impl<'data> MainFrameDef<'data> {
         let iteration = 1 + last.map_or(0, MainFrame::iteration) + skipped_frames;
         tracing::trace!(iteration);
 
-        let time = {
+        let time: i64 = {
             let raw = decode::variable_signed(data)?.into();
 
             if config.raw {
                 tracing::trace!(time = raw);
                 raw
             } else {
-                let offset = last_last.map_or(0, |ll| last.unwrap().time - ll.time)
-                    + last.map_or(0, MainFrame::time);
+                let last_last = last
+                    .filter(|f| f.is_inter())
+                    .and_then(|_| last_last.map(MainFrame::time));
 
-                let time = offset + raw;
+                let offset = predictor::straight_line(last.map(MainFrame::time), last_last);
+
+                let time = raw.saturating_add(offset);
 
                 tracing::trace!(time, raw);
                 time
@@ -182,6 +195,7 @@ impl<'data> MainFrameDef<'data> {
         }
 
         Ok(MainFrame {
+            intra: false,
             iteration,
             time,
             values,

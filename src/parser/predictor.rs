@@ -1,6 +1,6 @@
-use num_enum::TryFromPrimitive;
-
 use super::{Headers, ParseResult};
+use num_enum::TryFromPrimitive;
+use std::ops::{Add, Sub};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive)]
 #[repr(u8)]
@@ -33,11 +33,7 @@ impl Predictor {
         let diff = match self {
             Self::Zero => 0,
             Self::Previous => last.unwrap_or(0),
-            Self::StraightLine => match (last, last_last) {
-                (Some(last), Some(last_last)) => (last - last_last) + last,
-                (Some(last), None) => last,
-                _ => 0,
-            },
+            Self::StraightLine => straight_line(last, last_last),
             Self::Average2 => (last.unwrap_or(0) + last_last.unwrap_or(0)) / 2,
             Self::MinThrottle => headers.min_throttle.into(),
             Self::Motor0 => headers.main_frames.get_motor_0_from(current)?,
@@ -55,5 +51,31 @@ impl Predictor {
         };
 
         Ok(value + diff)
+    }
+}
+
+#[inline]
+pub(crate) fn straight_line<T>(last: Option<T>, last_last: Option<T>) -> T
+where
+    T: Copy + Add<Output = T> + Sub<Output = T> + From<bool>,
+{
+    match (last, last_last) {
+        (Some(last), Some(last_last)) => (last - last_last) + last,
+        (Some(last), None) => last,
+        _ => false.into(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use test_case::case;
+
+    #[case(None, None => 0)]
+    #[case(Some(10), None => 10)]
+    #[case(Some(-2), None => -2)]
+    #[case(Some(12), Some(10) => 14)]
+    #[case(Some(10), Some(12) => 8)]
+    fn straight_line(last: Option<i8>, last_last: Option<i8>) -> i8 {
+        super::straight_line(last, last_last)
     }
 }
