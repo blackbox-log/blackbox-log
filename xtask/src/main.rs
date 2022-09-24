@@ -328,7 +328,7 @@ fn time_given() -> impl Parser<Option<u16>> {
 }
 
 fn time_default() -> impl Parser<Option<u16>> {
-    bpaf::long("time").switch().hide().map(|x| x.then_some(900))
+    bpaf::long("time").flag(Some(900), None).hide()
 }
 
 fn time() -> impl Parser<Option<u16>> {
