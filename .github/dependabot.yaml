@@ -1,0 +1,27 @@
+version: 2
+updates:
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "cargo"
+    directory: "/cli"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "cargo"
+    directory: "/fuzz"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "cargo"
+    directory: "/reference-impl"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "cargo"
+    directory: "/xtask"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "gitsubmodule"
+    directory: "/reference-impl/upstream"
+    schedule:
+      interval: "daily"
