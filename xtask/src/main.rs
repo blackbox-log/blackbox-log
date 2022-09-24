@@ -322,8 +322,7 @@ enum Fuzz {
 fn time_given() -> impl Parser<Option<u16>> {
     bpaf::long("time")
         .help("Passes -max_total_time=<seconds> to libFuzzer, defaulting to 15 minutes if passed without a value")
-        .argument("seconds")
-        .from_str()
+        .argument::<u16>("seconds")
         .optional()
 }
 
