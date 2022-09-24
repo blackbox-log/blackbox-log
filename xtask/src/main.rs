@@ -197,7 +197,7 @@ enum Args {
     #[bpaf(command)]
     /// Runs clippy for linting
     Check {
-        #[bpaf(short, long, switch)]
+        #[bpaf(short, long)]
         /// Lint entire workspace
         all: bool,
     },
@@ -205,7 +205,6 @@ enum Args {
     #[bpaf(command)]
     /// Runs nextest tests for `blackbox` lib
     Test {
-        #[bpaf(switch)]
         /// Generates a coverage report while running tests
         coverage: bool,
 
@@ -217,7 +216,6 @@ enum Args {
     #[bpaf(command)]
     /// Runs benchmarks for `blackbox` lib
     Bench {
-        #[bpaf(long, switch)]
         /// Tests all benchmarks run successfully, ignores any extra args for criterion
         test: bool,
 
@@ -252,7 +250,7 @@ enum Args {
     ///
     /// NB: pass `-- -h` to get help for `blackbox_decode`
     Run {
-        #[bpaf(short, long, switch)]
+        #[bpaf(short, long)]
         /// Run in release mode
         release: bool,
 
@@ -282,7 +280,6 @@ enum Fuzz {
         #[bpaf(external)]
         time: Option<u16>,
 
-        #[bpaf(long, switch)]
         /// Runs in debug mode and prints a backtrace on panic
         backtrace: bool,
 
@@ -325,13 +322,12 @@ enum Fuzz {
 fn time_given() -> impl Parser<Option<u16>> {
     bpaf::long("time")
         .help("Passes -max_total_time=<seconds> to libFuzzer, defaulting to 15 minutes if passed without a value")
-        .argument("seconds")
-        .from_str()
+        .argument::<u16>("seconds")
         .optional()
 }
 
 fn time_default() -> impl Parser<Option<u16>> {
-    bpaf::long("time").switch().hide().map(|x| x.then_some(900))
+    bpaf::long("time").flag(Some(900), None).hide()
 }
 
 fn time() -> impl Parser<Option<u16>> {
