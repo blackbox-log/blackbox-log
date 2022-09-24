@@ -197,7 +197,7 @@ enum Args {
     #[bpaf(command)]
     /// Runs clippy for linting
     Check {
-        #[bpaf(short, long, switch)]
+        #[bpaf(short, long)]
         /// Lint entire workspace
         all: bool,
     },
@@ -205,7 +205,6 @@ enum Args {
     #[bpaf(command)]
     /// Runs nextest tests for `blackbox` lib
     Test {
-        #[bpaf(switch)]
         /// Generates a coverage report while running tests
         coverage: bool,
 
@@ -217,7 +216,7 @@ enum Args {
     #[bpaf(command)]
     /// Runs benchmarks for `blackbox` lib
     Bench {
-        #[bpaf(long, switch)]
+        #[bpaf(long)]
         /// Tests all benchmarks run successfully, ignores any extra args for criterion
         test: bool,
 
@@ -252,7 +251,7 @@ enum Args {
     ///
     /// NB: pass `-- -h` to get help for `blackbox_decode`
     Run {
-        #[bpaf(short, long, switch)]
+        #[bpaf(short, long)]
         /// Run in release mode
         release: bool,
 
@@ -282,7 +281,7 @@ enum Fuzz {
         #[bpaf(external)]
         time: Option<u16>,
 
-        #[bpaf(long, switch)]
+        #[bpaf(long)]
         /// Runs in debug mode and prints a backtrace on panic
         backtrace: bool,
 
