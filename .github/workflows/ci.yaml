@@ -1,0 +1,66 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          components: clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build xtasks
+        run: cargo build --package xtask
+      - run: cargo xtask check --all
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: false
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          components: llvm-tools-preview
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: baptiste0928/cargo-install@v1
+        with:
+          crate: cargo-llvm-cov
+          args: --locked
+      - uses: baptiste0928/cargo-install@v1
+        with:
+          crate: cargo-nextest
+          args: --locked
+
+      - run: cargo llvm-cov nextest --lcov --output-path coverage.lcov
+      - uses: codecov/codecov-action@v3
+        with:
+          files: coverage.lcov
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          components: rustfmt
+
+      - run: cargo fmt --all --check

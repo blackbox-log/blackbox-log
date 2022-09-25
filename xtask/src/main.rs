@@ -2,6 +2,7 @@
 
 use bpaf::{Bpaf, Parser};
 use serde::Deserialize;
+use std::env;
 use std::ffi::OsString;
 use std::path::PathBuf;
 use xshell::{cmd, Result, Shell};
@@ -10,8 +11,9 @@ fn main() -> Result<()> {
     let sh = Shell::new()?;
     let args = args().run();
 
-    {
+    if env::var("CI").is_err() {
         let _push_dir = sh.push_dir(get_root(&sh)?);
+
         cmd!(sh, "cargo fmt").run()?;
     }
 

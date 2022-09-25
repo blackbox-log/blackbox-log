@@ -1,3 +1,4 @@
 [alias]
 x = "run --release --package xtask --"
 xtask = "run --release --package xtask --"
+ci = "run --package xtask -- ci"
