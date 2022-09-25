@@ -68,6 +68,11 @@ impl<'data, 'reader> ByteReader<'data, 'reader> {
         self.0.data.len() - self.0.index
     }
 
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.remaining() == 0
+    }
+
     pub fn iter<'me>(&'me mut self) -> Bytes<'data, 'reader, 'me> {
         Bytes(self)
     }
@@ -77,8 +82,11 @@ impl<'data, 'reader> ByteReader<'data, 'reader> {
     }
 
     pub fn read_line(&mut self) -> Option<&'data [u8]> {
-        let start = self.0.index;
-        if let Some(len) = self.0.data.get(start..)?.iter().position(|b| *b == b'\n') {
+        let start = dbg!(self.0.index);
+
+        let rest = self.0.data.get(start..).filter(|x| !x.is_empty())?;
+
+        if let Some(len) = rest.iter().position(|b| *b == b'\n') {
             self.0.index += len + 1; // Skip the '\n'
 
             let end = start + len;
@@ -166,5 +174,120 @@ impl Iterator for Bytes<'_, '_, '_> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.0.read_u8()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn byte_align() {
+        let mut reader = Reader::new(&[0, 1]);
+
+        {
+            let bits = reader.bits();
+            bits.read_bit();
+        }
+
+        assert!(!reader.is_byte_aligned());
+        reader.byte_align();
+        assert!(reader.is_byte_aligned());
+
+        assert_eq!(Some(1), reader.bytes().read_u8());
+    }
+
+    #[test]
+    fn implicit_byte_align() {
+        let mut reader = Reader::new(&[0, 1]);
+
+        {
+            let bits = reader.bits();
+            bits.read_bit();
+        }
+
+        assert!(!reader.is_byte_aligned());
+        assert_eq!(Some(1), reader.bytes().read_u8());
+        assert!(reader.is_byte_aligned());
+
+        assert_eq!(None, reader.bytes().read_u8());
+    }
+
+    #[test]
+    fn bytes_read_line() {
+        let mut reader = Reader::new(&[b'a', 0, b'\n', b'b']);
+        let mut bytes = reader.bytes();
+
+        assert_eq!(Some(b"a\0".as_ref()), bytes.read_line());
+        assert_eq!(Some(b'b'), bytes.read_u8());
+    }
+
+    #[test]
+    fn bytes_read_line_without_newline() {
+        let mut reader = Reader::new(&[b'a', 0]);
+        let mut bytes = reader.bytes();
+
+        assert_eq!(Some(b"a\0".as_ref()), bytes.read_line());
+        assert_eq!(None, bytes.read_u8());
+    }
+
+    #[test]
+    fn bytes_read_line_empty() {
+        let mut reader = Reader::new(&[]);
+        let mut bytes = reader.bytes();
+
+        assert_eq!(None, bytes.read_line());
+    }
+
+    #[test]
+    fn bytes_read() {
+        let input = [0, 1, 2, 3];
+
+        let mut reader = Reader::new(&input);
+        let mut bytes = reader.bytes();
+
+        let mut buf = [0; 4];
+        let read = bytes.read(&mut buf).unwrap();
+
+        assert_eq!(read, input.len());
+        assert_eq!(buf, input);
+        assert!(bytes.is_empty());
+    }
+
+    #[test]
+    fn bytes_read_exact() {
+        let input = [0, 1, 2, 3];
+
+        let mut reader = Reader::new(&input);
+        let mut bytes = reader.bytes();
+
+        let mut buf = [0; 4];
+        bytes.read_exact(&mut buf).unwrap();
+
+        assert_eq!(buf, input);
+        assert!(bytes.is_empty());
+    }
+
+    #[test]
+    fn bytes_read_empty() {
+        let mut reader = Reader::new(&[]);
+        let mut bytes = reader.bytes();
+
+        let mut buf = [0; 1];
+        let read = bytes.read(&mut buf).unwrap();
+
+        assert_eq!([0], buf);
+        assert_eq!(read, 0);
+    }
+
+    #[test]
+    fn bytes_iter() {
+        let mut reader = Reader::new(&[0]);
+        let mut bytes = reader.bytes();
+        let mut iter = bytes.iter();
+
+        assert_eq!(Some(0), iter.next());
+        assert_eq!(None, iter.next());
+        assert!(bytes.is_empty());
     }
 }
