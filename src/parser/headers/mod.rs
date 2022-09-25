@@ -246,7 +246,7 @@ mod tests {
     use super::*;
 
     #[test]
-    #[should_panic(expected = "HeaderInvalidUtf8")]
+    #[should_panic(expected = "Corrupted")]
     fn invalid_utf8() {
         let mut b = Reader::new(b"H \xFF:\xFF\n");
         parse_header(&mut b.bytes()).unwrap();
