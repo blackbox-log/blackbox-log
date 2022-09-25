@@ -1,5 +1,6 @@
 [workspace]
 members = ["cli", "fuzz", "reference-impl", "xtask"]
+default-members = [".", "cli"]
 
 [workspace.package]
 edition = "2021"

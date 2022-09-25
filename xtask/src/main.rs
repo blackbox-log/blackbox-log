@@ -69,19 +69,6 @@ fn main() -> Result<()> {
                 .run()
         }
 
-        Args::Run { release, args } => {
-            let release = release.then_some("--release");
-
-            let root = get_root(&sh)?;
-            let cli_toml = root.join("cli/Cargo.toml");
-
-            cmd!(
-                sh,
-                "cargo run {release...} --manifest-path {cli_toml} -- {args...}"
-            )
-            .run()
-        }
-
         Args::Fuzz(fuzz) => {
             let root_dir = get_root(&sh)?;
             let fuzz_dir = root_dir.join("fuzz");
@@ -242,21 +229,6 @@ enum Args {
         #[bpaf(positional("filter"))]
         /// Filter to pass to the benchmark binary, see criterion docs
         filter: String,
-    },
-
-    #[bpaf(command)]
-    /// Runs `blackbox_decode`
-    ///
-    ///
-    /// NB: pass `-- -h` to get help for `blackbox_decode`
-    Run {
-        #[bpaf(short, long)]
-        /// Run in release mode
-        release: bool,
-
-        #[bpaf(positional)]
-        /// Passthrough arguments
-        args: Vec<OsString>,
     },
 
     Fuzz(#[bpaf(external(fuzz))] Fuzz),
