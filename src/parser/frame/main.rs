@@ -51,9 +51,15 @@ impl<'data> MainFrameDef<'data> {
     }
 
     pub(crate) fn get_motor_0_from(&self, frame: &[i64]) -> ParseResult<i64> {
-        self.index_motor_0
-            .map(|index| frame[index])
-            .ok_or(ParseError::MissingField("motor[0]"))
+        self.index_motor_0.map_or_else(
+            || {
+                tracing::error!(
+                    "tried to get a value for motor[0] but it is missing from the frame definition"
+                );
+                Err(ParseError::Corrupted)
+            },
+            |index| Ok(frame[index]),
+        )
     }
 
     #[instrument(level = "trace", name = "MainFrameDef::parse_intra", skip_all)]
@@ -263,7 +269,6 @@ impl<'data> MainFrameDefBuilder<'data> {
                 },
             );
 
-        // TODO: improve errors
         let iteration = match fields.next() {
             Some(Ok(
                 field @ MainFieldDef {
@@ -290,14 +295,15 @@ impl<'data> MainFrameDefBuilder<'data> {
         };
         let fields = fields.collect::<ParseResult<Vec<_>>>()?;
 
-        assert!(
-            names.next().is_none()
-                && predictors_intra.next().is_none()
-                && predictors_inter.next().is_none()
-                && encodings_intra.next().is_none()
-                && encodings_inter.next().is_none(),
-            "all `Field *` headers must have the same number of elements"
-        );
+        if names.next().is_none()
+            || predictors_intra.next().is_none()
+            || predictors_inter.next().is_none()
+            || encodings_intra.next().is_none()
+            || encodings_inter.next().is_none()
+        {
+            tracing::error!("all `Field *` headers must have the same number of elements");
+            return Err(ParseError::Corrupted);
+        }
 
         let index_motor_0 = fields.iter().position(|f| f.name == "motor[0]");
 

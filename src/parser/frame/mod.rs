@@ -80,19 +80,9 @@ impl FrameProperty {
     }
 }
 
-fn parse_list<'a>(
-    kind: FrameKind,
-    property: &'static str,
-    s: Option<&'a str>,
-) -> ParseResult<std::str::Split<'a, char>> {
-    let s = s.ok_or_else(|| {
-        ParseError::MissingHeader(format!("Field {} {property}", char::from(kind)))
-    })?;
-    Ok(s.split(','))
-}
-
 fn missing_header_error(kind: FrameKind, property: &'static str) -> ParseError {
-    ParseError::MissingHeader(format!("Field {} {property}", char::from(kind)))
+    tracing::error!("missing header `Field {} {property}`", char::from(kind));
+    ParseError::Corrupted
 }
 
 fn parse_names(kind: FrameKind, names: Option<&str>) -> ParseResult<impl Iterator<Item = &'_ str>> {
@@ -108,8 +98,9 @@ fn parse_enum_list<'a, T>(
 where
     T: TryFrom<u8>,
 {
-    let s = parse_list(kind, property, s)?;
-    let iter = s.map(|s| {
+    let s = s.ok_or_else(|| missing_header_error(kind, property))?;
+
+    let iter = s.split(',').map(|s| {
         s.parse()
             .map_err(|_| ())
             .and_then(|x: u8| x.try_into().map_err(|_| ()))

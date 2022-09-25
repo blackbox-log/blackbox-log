@@ -1,5 +1,5 @@
 use super::{count_fields_with_same_encoding, Frame, FrameKind, FrameProperty};
-use crate::parser::{Config, Encoding, Headers, ParseResult, Predictor, Reader};
+use crate::parser::{Config, Encoding, Headers, ParseError, ParseResult, Predictor, Reader};
 use tracing::instrument;
 
 #[derive(Debug, Clone)]
@@ -111,9 +111,10 @@ impl<'data> SlowFrameDefBuilder<'data> {
             })
             .collect::<ParseResult<Vec<_>>>()?;
 
-        assert!(
-            names.next().is_none() && predictors.next().is_none() && encodings.next().is_none()
-        );
+        if names.next().is_none() || predictors.next().is_none() || encodings.next().is_none() {
+            tracing::error!("all `Field *` headers must have the same number of elements");
+            return Err(ParseError::Corrupted);
+        }
 
         Ok(SlowFrameDef(fields))
     }

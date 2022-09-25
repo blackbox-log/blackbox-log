@@ -40,15 +40,8 @@ impl<'data> Headers<'data> {
     pub(crate) fn parse(data: &mut Reader<'data>) -> ParseResult<Self> {
         let bytes = &mut data.bytes();
 
-        let (name, _product) = parse_header(bytes)?;
-        assert_eq!(name, "Product", "`Product` header must be first");
-
-        let (name, version) = parse_header(bytes)?;
-        assert_eq!(name, "Data version", "`Data version` header must be second");
-        let version = version.parse().map_err(|_| ParseError::InvalidHeader {
-            header: name.to_owned(),
-            value: version.to_owned(),
-        })?;
+        check_product(bytes)?;
+        let version = get_version(bytes)?;
 
         let mut state = State::new(version);
 
@@ -67,6 +60,29 @@ impl<'data> Headers<'data> {
     }
 }
 
+fn check_product(bytes: &mut ByteReader) -> Result<(), ParseError> {
+    let (product, _) = parse_header(bytes)?;
+    if product.to_ascii_lowercase() != "product" {
+        tracing::error!("`Product` header must be first");
+        return Err(ParseError::Corrupted);
+    };
+
+    Ok(())
+}
+
+fn get_version(bytes: &mut ByteReader) -> Result<LogVersion, ParseError> {
+    let (name, value) = parse_header(bytes)?;
+
+    if name.to_ascii_lowercase() != "data version" {
+        tracing::error!("`Data version` header must be second");
+        return Err(ParseError::UnsupportedVersion(value.to_owned()));
+    }
+
+    value
+        .parse()
+        .map_err(|_| ParseError::UnsupportedVersion(value.to_owned()))
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum FirmwareKind {
     Baseflight,
@@ -82,10 +98,7 @@ impl FromStr for FirmwareKind {
             "cleanflight" => Ok(Self::Cleanflight),
             "baseflight" => Ok(Self::Baseflight),
             "inav" => Ok(Self::INav),
-            _ => Err(ParseError::InvalidHeader {
-                header: "Firmware type".to_owned(),
-                value: s.to_owned(),
-            }),
+            _ => Err(ParseError::UnknownFirmware(s.to_owned())),
         }
     }
 }
@@ -163,21 +176,15 @@ impl<'data> State<'data> {
             "craft name" => self.craft_name = Some(value),
 
             "vbatref" => {
-                let vbat_reference = value
-                    .parse()
-                    .map_err(|_| ParseError::invalid_header(header, value))?;
+                let vbat_reference = value.parse().map_err(|_| ParseError::Corrupted)?;
                 self.vbat_reference = Some(vbat_reference);
             }
             "minthrottle" => {
-                let min_throttle = value
-                    .parse()
-                    .map_err(|_| ParseError::invalid_header(header, value))?;
+                let min_throttle = value.parse().map_err(|_| ParseError::Corrupted)?;
                 self.min_throttle = Some(min_throttle);
             }
             "motoroutput" => {
-                let range = value
-                    .parse()
-                    .map_err(|_| ParseError::invalid_header(header, value))?;
+                let range = value.parse().map_err(|_| ParseError::Corrupted)?;
                 self.motor_output_range = Some(range);
             }
 
@@ -203,15 +210,14 @@ impl<'data> State<'data> {
             main_frames: self.main_frames.parse()?,
             slow_frames: self.slow_frames.parse()?,
 
-            // TODO: return an error instead of unwrap
-            firmware_revision: self.firmware_revision.unwrap(),
-            firmware_kind: self.firmware_kind.unwrap(),
-            board_info: self.board_info.unwrap(),
-            craft_name: self.craft_name.unwrap(),
+            firmware_revision: self.firmware_revision.ok_or(ParseError::Corrupted)?,
+            firmware_kind: self.firmware_kind.ok_or(ParseError::Corrupted)?,
+            board_info: self.board_info.ok_or(ParseError::Corrupted)?,
+            craft_name: self.craft_name.ok_or(ParseError::Corrupted)?,
 
-            vbat_reference: self.vbat_reference.unwrap(),
-            min_throttle: self.min_throttle.unwrap(),
-            motor_output_range: self.motor_output_range.unwrap(),
+            vbat_reference: self.vbat_reference.ok_or(ParseError::Corrupted)?,
+            min_throttle: self.min_throttle.ok_or(ParseError::Corrupted)?,
+            motor_output_range: self.motor_output_range.ok_or(ParseError::Corrupted)?,
         })
     }
 }
@@ -226,9 +232,9 @@ fn parse_header<'data>(bytes: &mut ByteReader<'data, '_>) -> ParseResult<(&'data
 
     let line = bytes.read_line().ok_or(ParseError::UnexpectedEof)?;
 
-    let line = str::from_utf8(line)?;
+    let line = str::from_utf8(line).map_err(|_| ParseError::Corrupted)?;
     let line = line.strip_prefix(' ').unwrap_or(line);
-    let (name, value) = line.split_once(':').ok_or(ParseError::HeaderMissingColon)?;
+    let (name, value) = line.split_once(':').ok_or(ParseError::Corrupted)?;
 
     tracing::trace!("read header `{name}` = `{value}`");
 
