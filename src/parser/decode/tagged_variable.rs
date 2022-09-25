@@ -27,3 +27,54 @@ pub fn tagged_variable(data: &mut Reader, extra: usize) -> ParseResult<[i32; 8]>
 
     Ok(values)
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn one_value() {
+        let mut b = Reader::new(&[2]);
+
+        let expected = [1, 0, 0, 0, 0, 0, 0, 0];
+        assert_eq!(expected, tagged_variable(&mut b, 0).unwrap());
+        assert!(b.is_empty());
+    }
+
+    #[test]
+    fn simple_two_values() {
+        let b = [0b0000_0011, 2, 2];
+        let mut b = Reader::new(&b);
+
+        let expected = [1, 1, 0, 0, 0, 0, 0, 0];
+        assert_eq!(expected, tagged_variable(&mut b, 1).unwrap());
+        assert!(b.is_empty());
+    }
+
+    #[test]
+    fn fewer_in_tag_than_expected() {
+        let b = [0b0000_0010, 2];
+        let mut b = Reader::new(&b);
+
+        let expected = [0, 1, 0, 0, 0, 0, 0, 0];
+        assert_eq!(expected, tagged_variable(&mut b, 1).unwrap());
+        assert!(b.is_empty());
+    }
+
+    #[test]
+    #[should_panic(expected = "UnexpectedEof")]
+    fn multiple_expected_but_empty() {
+        let mut b = Reader::new(&[]);
+
+        tagged_variable(&mut b, 1).unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "Corrupted")]
+    fn more_in_tag_than_expected() {
+        let b = [0b0000_0111, 2, 2, 2];
+        let mut b = Reader::new(&b);
+
+        tagged_variable(&mut b, 1).unwrap();
+    }
+}
