@@ -36,17 +36,25 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - uses: baptiste0928/cargo-install@v1
+      - name: Install llvm-cov
+        uses: baptiste0928/cargo-install@v1
         with:
           crate: cargo-llvm-cov
           args: --locked
-      - uses: baptiste0928/cargo-install@v1
+      - name: Install nextest
+        uses: baptiste0928/cargo-install@v1
         with:
           crate: cargo-nextest
           args: --locked
 
-      - run: cargo llvm-cov nextest --lcov --output-path coverage.lcov
-      - uses: codecov/codecov-action@v3
+      - name: Run all tests
+        run: cargo nextest run --workspace
+
+      - name: Generate coverage for blackbox tests
+        run: cargo llvm-cov nextest --package blackbox --lcov --output-path coverage.lcov
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
         with:
           files: coverage.lcov
 
