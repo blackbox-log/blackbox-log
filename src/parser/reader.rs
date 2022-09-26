@@ -82,7 +82,7 @@ impl<'data, 'reader> ByteReader<'data, 'reader> {
     }
 
     pub fn read_line(&mut self) -> Option<&'data [u8]> {
-        let start = dbg!(self.0.index);
+        let start = self.0.index;
 
         let rest = self.0.data.get(start..).filter(|x| !x.is_empty())?;
 
