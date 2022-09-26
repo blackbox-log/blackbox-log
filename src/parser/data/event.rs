@@ -3,13 +3,10 @@ use num_enum::TryFromPrimitive;
 use std::io::Read;
 use tracing::instrument;
 
-pub type Time = u64;
-pub type DisarmReason = u32;
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Event {
-    SyncBeep(Time),
-    Disarm(DisarmReason),
+    SyncBeep(u64),
+    Disarm(u32),
     FlightMode { flags: u32, last_flags: u32 },
     End,
 }

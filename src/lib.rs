@@ -1,7 +1,14 @@
 #![warn(unsafe_code)]
 
+#[macro_use]
+pub mod common;
+
 pub mod betaflight;
+pub mod inav;
+
 pub mod parser;
+
+pub use common::{DisarmReason, DisarmReasonError};
 
 use memchr::memmem;
 use parser::{Config, Data, Event, Headers, MainFrame, ParseResult, Reader, SlowFrame};
