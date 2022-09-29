@@ -48,10 +48,10 @@ jobs:
           args: --locked
 
       - name: Run all tests
-        run: cargo nextest run --workspace
+        run: cargo nextest run --workspace --profile ci
 
       - name: Generate coverage for blackbox tests
-        run: cargo llvm-cov nextest --package blackbox --lcov --output-path coverage.lcov
+        run: cargo llvm-cov nextest --package blackbox --lcov --output-path coverage.lcov --profile ci
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
