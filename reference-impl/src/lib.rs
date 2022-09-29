@@ -4,3 +4,6 @@
 
 pub mod stream;
 pub mod tools;
+
+#[cfg(not(target_os = "linux"))]
+compile_error!("reference-impl only supports Linux");
