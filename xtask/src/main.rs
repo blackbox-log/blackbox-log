@@ -41,7 +41,7 @@ fn main() -> Result<()> {
             if coverage {
                 cmd!(sh, "cargo llvm-cov --package blackbox nextest --html").run()
             } else {
-                cmd!(sh, "cargo nextest run --package blackbox {args...}").run()
+                cmd!(sh, "cargo nextest run --workspace {args...}").run()
             }
         }
 
@@ -192,9 +192,9 @@ enum Args {
     },
 
     #[bpaf(command)]
-    /// Runs nextest tests for `blackbox` lib
+    /// Runs nextest tests
     Test {
-        /// Generates a coverage report while running tests
+        /// Generates a coverage report while running tests (only for `blackbox`)
         coverage: bool,
 
         #[bpaf(positional)]
@@ -355,5 +355,15 @@ impl Lints {
         }
 
         args
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn bpaf_invariants() {
+        args().check_invariants(true);
     }
 }
