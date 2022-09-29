@@ -22,7 +22,26 @@ jobs:
       - run: cargo xtask check --all
 
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        toolchain:
+          - 1.64 # MSRV
+          - beta
+          - nightly
+        include:
+          # Coverage reporting on Ubuntu with MSRV
+          - os: ubuntu-latest
+            toolchain: 1.64 # MSRV
+            coverage: true
+
+          # macOS & Windows only on MSRV
+          - os: macos-latest
+            toolchain: 1.64 # MSRV
+          - os: windows-latest
+            toolchain: 1.64 # MSRV
+
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -30,31 +49,34 @@ jobs:
 
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: ${{ matrix.toolchain }}
           profile: minimal
           components: llvm-tools-preview
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: Install llvm-cov
-        uses: baptiste0928/cargo-install@v1
-        with:
-          crate: cargo-llvm-cov
-          args: --locked
       - name: Install nextest
         uses: baptiste0928/cargo-install@v1
         with:
           crate: cargo-nextest
+          args: --locked
+      - name: Install llvm-cov
+        uses: baptiste0928/cargo-install@v1
+        if: ${{ matrix.coverage }}
+        with:
+          crate: cargo-llvm-cov
           args: --locked
 
       - name: Run all tests
         run: cargo nextest run --workspace --profile ci
 
       - name: Generate coverage for blackbox tests
+        if: ${{ matrix.coverage }}
         run: cargo llvm-cov nextest --package blackbox --lcov --output-path coverage.lcov --profile ci
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
+        if: ${{ matrix.coverage }}
         with:
           files: coverage.lcov
 
