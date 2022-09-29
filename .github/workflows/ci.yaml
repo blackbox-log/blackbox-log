@@ -26,6 +26,7 @@ jobs:
 
   test:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         toolchain:
@@ -45,6 +46,7 @@ jobs:
             toolchain: 1.64 # MSRV
 
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.toolchain == 'nightly' }}
     steps:
       - uses: actions/checkout@v3
         with:
