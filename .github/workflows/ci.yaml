@@ -1,6 +1,9 @@
 name: CI
 on: [push, pull_request]
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
   clippy:
     runs-on: ubuntu-latest
