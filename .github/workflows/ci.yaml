@@ -60,6 +60,8 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
+      - name: Build xtasks
+        run: cargo build --package xtask
       - name: Install nextest
         uses: baptiste0928/cargo-install@v1
         with:
@@ -73,11 +75,11 @@ jobs:
           args: --locked
 
       - name: Run all tests
-        run: cargo nextest run --workspace --profile ci
+        run: cargo xtask test
 
-      - name: Generate coverage for blackbox tests
+      - name: Generate coverage
         if: ${{ matrix.coverage }}
-        run: cargo llvm-cov nextest --package blackbox --lcov --output-path coverage.lcov --profile ci
+        run: cargo xtask test --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3

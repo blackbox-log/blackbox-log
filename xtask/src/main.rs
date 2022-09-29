@@ -11,7 +11,9 @@ fn main() -> Result<()> {
     let sh = Shell::new()?;
     let args = args().run();
 
-    if env::var("CI").is_err() {
+    let is_ci = env::var("CI").is_ok();
+
+    if !is_ci {
         let _push_dir = sh.push_dir(get_root(&sh)?);
 
         cmd!(sh, "cargo fmt").run()?;
@@ -40,11 +42,17 @@ fn main() -> Result<()> {
         }
 
         Args::Test { coverage, args } => {
+            let ci = if is_ci { "--profile=ci" } else { "" };
+
             if coverage {
-                cmd!(sh, "cargo llvm-cov --package blackbox nextest --html").run()
+                if is_ci {
+                    cmd!(sh, "cargo llvm-cov --package blackbox --lcov --output-path coverage.lcov nextest {ci}").run()
+                } else {
+                    cmd!(sh, "cargo llvm-cov --package blackbox --html nextest {ci}").run()
+                }
             } else {
                 let workspace = get_workspace_args(true);
-                cmd!(sh, "cargo nextest run {workspace...} {args...}").run()
+                cmd!(sh, "cargo nextest run {workspace...} {ci} {args...}").run()
             }
         }
 
