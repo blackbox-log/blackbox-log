@@ -22,7 +22,7 @@ jobs:
 
       - name: Build xtasks
         run: cargo build --package xtask
-      - run: cargo xtask check --all
+      - run: cargo ci check --all
 
   test:
     strategy:
@@ -75,11 +75,11 @@ jobs:
           args: --locked
 
       - name: Run all tests
-        run: cargo xtask test
+        run: cargo ci test
 
       - name: Generate coverage
         if: ${{ matrix.coverage }}
-        run: cargo xtask test --coverage
+        run: cargo ci test --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
