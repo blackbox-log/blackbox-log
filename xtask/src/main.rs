@@ -168,6 +168,7 @@ fn main() -> Result<()> {
                 "cargo-llvm-cov",
                 "cargo-nextest",
                 "flamegraph",
+                "typos-cli",
             ];
 
             cmd!(sh, "cargo install --locked -- {tools...}").run()

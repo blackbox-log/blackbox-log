@@ -1,0 +1,9 @@
+[files]
+extend-exclude = ["reference-impl/upstream"]
+
+[default]
+locale = "en-us"
+
+[default.extend-words]
+# French raison d’être
+raison = "raison"
