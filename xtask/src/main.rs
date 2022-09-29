@@ -33,7 +33,7 @@ fn main() -> Result<()> {
             let lints: Lints = toml::from_str(&lints).unwrap();
             let lints = lints.into_clippy_args();
 
-            let all = all.then_some("--workspace");
+            let all = get_workspace_args(all);
             run(cmd!(sh, "cargo clippy --all-targets {all...}"), &lints)?;
 
             run(cmd!(sh, "cargo clippy --no-default-features"), &lints)
@@ -43,7 +43,8 @@ fn main() -> Result<()> {
             if coverage {
                 cmd!(sh, "cargo llvm-cov --package blackbox nextest --html").run()
             } else {
-                cmd!(sh, "cargo nextest run --workspace {args...}").run()
+                let workspace = get_workspace_args(true);
+                cmd!(sh, "cargo nextest run {workspace...} {args...}").run()
             }
         }
 
@@ -323,6 +324,25 @@ fn get_unixtime() -> u64 {
         .duration_since(SystemTime::UNIX_EPOCH)
         .unwrap()
         .as_secs()
+}
+
+fn get_workspace_args(workspace: bool) -> Vec<&'static str> {
+    if workspace {
+        let mut args = vec!["--workspace"];
+
+        if cfg!(not(target_os = "linux")) {
+            let packages = ["reference-impl", "blackbox-fuzz"];
+
+            for package in packages {
+                args.push("--exclude");
+                args.push(package);
+            }
+        }
+
+        args
+    } else {
+        vec![]
+    }
 }
 
 #[derive(Debug, Deserialize)]
