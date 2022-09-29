@@ -20,11 +20,14 @@ license.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 
+[features]
+std = []
+default = ["std"]
+
 [dependencies]
 bitter = "0.6.0"
 memchr = "2.5.0"
 num_enum = "0.5.7"
-thiserror = "1.0.37"
 tracing.workspace = true
 
 [dev-dependencies]

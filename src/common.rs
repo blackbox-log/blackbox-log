@@ -1,12 +1,12 @@
 use core::fmt;
-use std::error;
 
 pub trait DisarmReason: TryFrom<u32, Error = DisarmReasonError> {}
 
 #[derive(Debug, Clone)]
 pub struct DisarmReasonError;
 
-impl error::Error for DisarmReasonError {}
+#[cfg(feature = "std")]
+impl std::error::Error for DisarmReasonError {}
 
 impl fmt::Display for DisarmReasonError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

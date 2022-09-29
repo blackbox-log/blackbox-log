@@ -3,7 +3,7 @@ mod event;
 pub use event::Event;
 
 use super::{Config, DataFrameKind, FrameKind, Headers, MainFrame, ParseResult, Reader, SlowFrame};
-use std::iter;
+use alloc::vec::Vec;
 
 // Reason: unfinished
 #[allow(dead_code)]
@@ -30,21 +30,26 @@ impl Data {
                 // eprintln!();
                 // eprintln!("consumed_bytes = 0x{:0>6x}", log.consumed_bytes());
 
-                let lines = 4;
-                let bytes_per_line = 8;
-                let bytes = iter::once(byte)
-                    .chain(data.bytes().iter())
-                    .take(lines * bytes_per_line)
-                    .collect::<Vec<u8>>();
+                #[cfg(feature = "std")]
+                {
+                    use std::iter;
 
-                for chunk in bytes.chunks_exact(bytes_per_line) {
-                    let line = chunk
-                        .iter()
-                        .map(|x| format!("0x{x:0>2x}"))
-                        .collect::<Vec<_>>();
-                    let line = line.join(" ");
+                    let lines = 4;
+                    let bytes_per_line = 8;
+                    let bytes = iter::once(byte)
+                        .chain(data.bytes().iter())
+                        .take(lines * bytes_per_line)
+                        .collect::<Vec<u8>>();
 
-                    eprintln!("{line}");
+                    for chunk in bytes.chunks_exact(bytes_per_line) {
+                        let line = chunk
+                            .iter()
+                            .map(|x| format!("0x{x:0>2x}"))
+                            .collect::<Vec<_>>();
+                        let line = line.join(" ");
+
+                        eprintln!("{line}");
+                    }
                 }
 
                 todo!();

@@ -98,6 +98,8 @@ pub fn tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use alloc::vec;
+    use alloc::vec::Vec;
 
     fn bytes(tag: u8, width: usize) -> Vec<u8> {
         assert_eq!(tag, tag & 3);

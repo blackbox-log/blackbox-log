@@ -64,7 +64,6 @@ dependencies = [
  "memchr",
  "num_enum",
  "test-case",
- "thiserror",
  "tracing",
 ]
 

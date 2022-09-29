@@ -1,4 +1,7 @@
 #![warn(unsafe_code)]
+#![cfg_attr(not(feature = "std"), no_std)]
+
+extern crate alloc;
 
 #[macro_use]
 pub mod common;
@@ -10,10 +13,11 @@ pub mod parser;
 
 pub use common::{DisarmReason, DisarmReasonError};
 
+use alloc::vec::Vec;
+use core::str::FromStr;
+use core::{slice, str};
 use memchr::memmem;
 use parser::{Config, Data, Event, Headers, MainFrame, ParseResult, Reader, SlowFrame};
-use std::str::FromStr;
-use std::{slice, str};
 use tracing::instrument;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]

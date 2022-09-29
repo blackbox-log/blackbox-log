@@ -1,5 +1,6 @@
 use super::{count_fields_with_same_encoding, Frame, FrameKind, FrameProperty};
 use crate::parser::{Config, Encoding, Headers, ParseError, ParseResult, Predictor, Reader};
+use alloc::vec::Vec;
 use tracing::instrument;
 
 #[derive(Debug, Clone)]

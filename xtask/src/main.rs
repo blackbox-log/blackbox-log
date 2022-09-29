@@ -22,18 +22,21 @@ fn main() -> Result<()> {
         Args::Fmt => Ok(()),
 
         Args::Check { all } => {
+            fn run(cmd: xshell::Cmd, lints: &[String]) -> Result<()> {
+                eprintln!("$ {cmd}");
+                let cmd = cmd.arg("--").args(lints);
+                cmd.quiet().run()
+            }
+
             let lints = get_root(&sh)?.join("Cranky.toml");
             let lints = sh.read_file(lints)?;
             let lints: Lints = toml::from_str(&lints).unwrap();
             let lints = lints.into_clippy_args();
 
-            let workspace = all.then_some("--workspace");
+            let all = all.then_some("--workspace");
+            run(cmd!(sh, "cargo clippy --all-targets {all...}"), &lints)?;
 
-            let clippy = cmd!(sh, "cargo clippy --all-targets {workspace...}");
-            eprintln!("$ {clippy}");
-
-            let clippy = clippy.arg("--").args(lints);
-            clippy.quiet().run()
+            run(cmd!(sh, "cargo clippy --no-default-features"), &lints)
         }
 
         Args::Test { coverage, args } => {

@@ -1,12 +1,11 @@
 mod main;
 mod slow;
 
-use std::iter::Peekable;
-
 pub use main::*;
 pub use slow::*;
 
 use super::{Encoding, ParseError, ParseResult, Predictor};
+use core::iter::Peekable;
 
 pub trait FieldDef {
     fn name(&self) -> &str;

@@ -1,3 +1,5 @@
+use alloc::vec::Vec;
+
 // flightLogDisarmReason_e in core.h
 generate_disarm_reason! {
     ArmingDisabled = 0,

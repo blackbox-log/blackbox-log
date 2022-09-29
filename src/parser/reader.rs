@@ -1,4 +1,6 @@
 use bitter::BitReader as _;
+
+#[cfg(feature = "std")]
 use std::io::{self, Read};
 
 pub use bitter::BigEndianReader as BitReader;
@@ -154,6 +156,7 @@ impl<'data, 'reader> ByteReader<'data, 'reader> {
     impl_read!(read_u32, u32, read_i32, i32);
 }
 
+#[cfg(feature = "std")]
 impl<'data, 'reader> Read for ByteReader<'data, 'reader> {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         let len = buf.len().min(self.remaining());
@@ -240,6 +243,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn bytes_read() {
         let input = [0, 1, 2, 3];
 
@@ -255,6 +259,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn bytes_read_exact() {
         let input = [0, 1, 2, 3];
 
@@ -269,6 +274,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn bytes_read_empty() {
         let mut reader = Reader::new(&[]);
         let mut bytes = reader.bytes();

@@ -5,6 +5,8 @@ mod headers;
 mod predictor;
 mod reader;
 
+use alloc::string::String;
+use core::fmt;
 pub use data::{Data, Event};
 pub use decode::Encoding;
 pub use frame::{Frame, MainFrame, SlowFrame};
@@ -17,17 +19,27 @@ use crate::Log;
 pub type ParseResult<T> = Result<T, ParseError>;
 pub(crate) const MARKER: &[u8] = b"H Product:Blackbox flight data recorder by Nicholas Sherlock\n";
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug)]
 pub enum ParseError {
-    #[error("unsupported or invalid version: `{0}`")]
     UnsupportedVersion(String),
-    #[error("unknown firmware: `{0}`")]
     UnknownFirmware(String),
-    #[error("invalid/corrupted data")]
     Corrupted,
-    #[error("unexpected end of file")]
     UnexpectedEof,
 }
+
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::UnsupportedVersion(v) => write!(f, "unsupported or invalid version: `{v}`"),
+            Self::UnknownFirmware(firmware) => write!(f, "unknown firmware: `{firmware}`"),
+            Self::Corrupted => write!(f, "invalid/corrupted data"),
+            Self::UnexpectedEof => write!(f, "unexpected end of file"),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for ParseError {}
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Config {

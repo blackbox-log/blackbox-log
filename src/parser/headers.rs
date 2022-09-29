@@ -5,8 +5,9 @@ use super::frame::{
 use super::reader::ByteReader;
 use super::{ParseError, ParseResult, Reader};
 use crate::LogVersion;
-use std::iter;
-use std::str::{self, FromStr};
+use alloc::borrow::ToOwned;
+use core::iter;
+use core::str::{self, FromStr};
 
 #[allow(dead_code)]
 #[derive(Debug)]

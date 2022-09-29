@@ -8,6 +8,8 @@ mod tagged_32;
 mod tagged_variable;
 mod variable;
 
+use alloc::vec;
+use alloc::vec::Vec;
 pub use elias_delta::{elias_delta, elias_delta_signed};
 pub use negative_14_bit::negative_14_bit;
 pub use tagged_16::tagged_16;

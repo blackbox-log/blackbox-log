@@ -1,6 +1,5 @@
 use crate::parser::{decode, ParseError, ParseResult, Reader};
 use num_enum::TryFromPrimitive;
-use std::io::Read;
 use tracing::instrument;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -42,13 +41,7 @@ impl Event {
             Ok(EventKind::End) => {
                 const END_MESSAGE: &str = "End of log\0";
 
-                if !data
-                    .bytes()
-                    .bytes()
-                    .filter_map(Result::ok)
-                    .take(11)
-                    .eq(END_MESSAGE.bytes())
-                {
+                if !data.bytes().iter().take(11).eq(END_MESSAGE.bytes()) {
                     return Err(ParseError::Corrupted);
                 }
 
