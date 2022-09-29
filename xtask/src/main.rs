@@ -29,12 +29,11 @@ fn main() -> Result<()> {
 
             let workspace = all.then_some("--workspace");
 
-            cmd!(
-                sh,
-                "cargo clippy {workspace...} --all-targets -- {lints...}"
-            )
-            .quiet()
-            .run()
+            let clippy = cmd!(sh, "cargo clippy --all-targets {workspace...}");
+            eprintln!("$ {clippy}");
+
+            let clippy = clippy.arg("--").args(lints);
+            clippy.quiet().run()
         }
 
         Args::Test { coverage, args } => {
