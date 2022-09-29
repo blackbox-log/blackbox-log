@@ -14,7 +14,7 @@ jobs:
 
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: 1.64 # MSRV
           profile: minimal
           components: clippy
           override: true
@@ -22,8 +22,16 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Build xtasks
-        run: cargo build --package xtask
-      - run: cargo ci check --all
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --package xtask
+
+      - name: Run clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: ci
+          args: check --all
 
   test:
     strategy:
@@ -62,8 +70,6 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: Build xtasks
-        run: cargo build --package xtask
       - name: Install nextest
         uses: baptiste0928/cargo-install@v1
         with:
@@ -76,12 +82,24 @@ jobs:
           crate: cargo-llvm-cov
           args: --locked
 
+      - name: Build xtasks
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --package xtask
+
       - name: Run all tests
-        run: cargo ci test
+        uses: actions-rs/cargo@v1
+        with:
+          command: ci
+          args: test
 
       - name: Generate coverage
+        uses: actions-rs/cargo@v1
         if: ${{ matrix.coverage }}
-        run: cargo ci test --coverage
+        with:
+          command: ci
+          args: test --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
@@ -96,12 +114,16 @@ jobs:
 
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: 1.64 # MSRV
           profile: minimal
           components: rustfmt
           override: true
 
-      - run: cargo fmt --all --check
+      - name: Check rustfmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all --check
 
   typos:
     runs-on: ubuntu-latest
