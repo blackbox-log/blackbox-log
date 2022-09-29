@@ -17,6 +17,7 @@ jobs:
           toolchain: stable
           profile: minimal
           components: clippy
+          override: true
 
       - uses: Swatinem/rust-cache@v2
 
@@ -57,6 +58,7 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           profile: minimal
           components: llvm-tools-preview
+          override: true
 
       - uses: Swatinem/rust-cache@v2
 
@@ -97,6 +99,7 @@ jobs:
           toolchain: stable
           profile: minimal
           components: rustfmt
+          override: true
 
       - run: cargo fmt --all --check
 
