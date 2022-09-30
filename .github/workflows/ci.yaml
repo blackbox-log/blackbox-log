@@ -65,22 +65,15 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
           profile: minimal
-          components: llvm-tools-preview
           override: true
 
       - uses: Swatinem/rust-cache@v2
 
       - name: Install nextest
-        uses: baptiste0928/cargo-install@v1
-        with:
-          crate: cargo-nextest
-          args: --locked
+        uses: taiki-e/install-action@nextest
       - name: Install llvm-cov
-        uses: baptiste0928/cargo-install@v1
+        uses: taiki-e/install-action@cargo-llvm-cov
         if: ${{ matrix.coverage }}
-        with:
-          crate: cargo-llvm-cov
-          args: --locked
 
       - name: Build xtasks
         uses: actions-rs/cargo@v1
