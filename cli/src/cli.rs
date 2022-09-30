@@ -391,3 +391,13 @@ impl Cli {
         Config { raw: self.raw }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn bpaf_invariants() {
+        cli().check_invariants(true);
+    }
+}
