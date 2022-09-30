@@ -30,15 +30,27 @@ fn main() -> Result<()> {
                 cmd.quiet().run()
             }
 
-            let lints = get_root(&sh)?.join("Cranky.toml");
+            let root = get_root(&sh)?;
+
+            let lints = root.join("Cranky.toml");
             let lints = sh.read_file(lints)?;
             let lints: Lints = toml::from_str(&lints).unwrap();
             let lints = lints.into_clippy_args();
 
-            let all = get_workspace_args(all);
-            run(cmd!(sh, "cargo clippy --all-targets {all...}"), &lints)?;
+            let workspace = get_workspace_args(all);
+            run(
+                cmd!(sh, "cargo clippy --all-targets {workspace...}"),
+                &lints,
+            )?;
 
-            run(cmd!(sh, "cargo clippy --no-default-features"), &lints)
+            if all || sh.current_dir() == root {
+                run(
+                    cmd!(sh, "cargo clippy --no-default-features --package blackbox"),
+                    &lints,
+                )
+            } else {
+                Ok(())
+            }
         }
 
         Args::Test { coverage, args } => {
