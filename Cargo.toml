@@ -9,6 +9,7 @@ rust-version = "1.64"
 
 [workspace.dependencies]
 blackbox = { path = "." }
+bpaf = { version = "0.6.0", features = ["derive"] }
 tracing = "0.1.36"
 
 [package]

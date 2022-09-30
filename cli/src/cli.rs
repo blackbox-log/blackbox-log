@@ -1,66 +1,108 @@
+#![allow(clippy::default_trait_access)]
+
 use blackbox::parser::Config;
-use clap::{ArgAction, Parser, ValueEnum, ValueHint};
+use bpaf::{construct, Bpaf, FromOsStr, Parser};
+use std::ffi::OsString;
 use std::path::PathBuf;
 use tracing_subscriber::filter::LevelFilter;
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, ValueEnum)]
+macro_rules! from_os_str_impl {
+    ($for:ident { $( $($s:literal)|+ => $value:expr, )+ _ => $err:literal $(,)? } $(,)?) => {
+        impl FromOsStr for $for {
+            type Out = Self;
+
+            fn from_os_str(mut s: OsString) -> Result<Self::Out, String> {
+                s.make_ascii_lowercase();
+
+                $(
+                    if $(s == $s)||+ {
+                         Ok($value)
+                    }
+                )else+
+
+                else { Err($err.to_owned()) }
+            }
+        }
+    };
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum AmperageUnit {
     #[default]
     Raw,
-    #[value(name = "mA", alias = "ma")]
     Milliamps,
-    #[value(name = "A", alias = "a")]
     Amps,
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, ValueEnum)]
+from_os_str_impl!(AmperageUnit {
+    "raw" => Self::Raw,
+    "ma" => Self::Milliamps,
+    "a" => Self::Amps,
+    _ => "expected raw, mA, or A",
+});
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum FrameTime {
     #[default]
-    #[value(name = "us", alias = "micros")]
     Microseconds,
-    #[value(name = "s")]
     Seconds,
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, ValueEnum)]
+from_os_str_impl!(FrameTime {
+    "us" | "micros" => Self::Microseconds,
+    "s" => Self::Seconds,
+    _ => "expected us or s",
+});
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum HeightUnit {
     #[default]
-    #[value(name = "cm")]
     Centimeters,
-    #[value(name = "m")]
     Meters,
-    #[value(name = "ft")]
     Feet,
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, ValueEnum)]
+from_os_str_impl!(HeightUnit {
+    "cm" => Self::Centimeters,
+    "m" => Self::Meters,
+    "ft" => Self::Feet,
+    _ => "expected cm, m, or ft",
+});
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum RotationUnit {
     #[default]
     Raw,
-
-    #[value(name = "deg/s", alias = "deg")]
     /// Degrees/second
     Degrees,
-
-    #[value(name = "rad/s", alias = "rad")]
     /// Radians/second
     Radians,
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, ValueEnum)]
+from_os_str_impl!(RotationUnit {
+    "raw" => Self::Raw,
+    "deg/s" | "deg" => Self::Degrees,
+    "rad/s" | "rad" => Self::Radians,
+    _ => "expected raw, deg/s, or rad/s",
+});
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum AccelerationUnit {
     #[default]
     Raw,
-
-    #[value(name = "g")]
     Gs,
-
-    #[value(name = "m/s2")]
     /// Meters per second squared
     Mps2,
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, ValueEnum)]
+from_os_str_impl!(AccelerationUnit {
+    "raw" => Self::Raw,
+    "g" => Self::Gs,
+    "m/s2" | "mps2" => Self::Mps2,
+    _ => "expected raw, g, or m/s2",
+});
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum GpsSpeedUnit {
     #[default]
     /// Meters per second
@@ -73,106 +115,78 @@ pub enum GpsSpeedUnit {
     Mph,
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, ValueEnum)]
+from_os_str_impl!(GpsSpeedUnit {
+    "m/s" | "mps" => Self::Mps,
+    "kph" | "k/h" => Self::Kph,
+    "mph" => Self::Mph,
+    _ => "expected m/s, kph, or mph",
+});
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum VBatUnit {
     #[default]
     Raw,
-
-    #[value(name = "mV", alias = "mv")]
     Millivolts,
-
-    #[value(name = "V", alias = "v")]
     Volts,
 }
 
-#[derive(Debug, Parser)]
-#[command(about, author, version)]
-pub(crate) struct Cli {
-    // TODO: accept - for stdin
-    #[arg(required(true), value_name = "log", value_hint = ValueHint::FilePath)]
-    /// One or more logs to parse
-    pub logs: Vec<PathBuf>,
+from_os_str_impl!(VBatUnit {
+    "raw" => Self::Raw,
+    "mv" => Self::Millivolts,
+    "v" => Self::Volts,
+    _ => "expected raw, mV, or V",
+});
 
-    // #[arg(short, long, action = ArgAction::Help)]
-    // /// Print this help message
-    // help: bool,
-    #[arg(short, long, value_name = "index")]
-    /// Choose which log from the file should be decoded or omit to decode all
+#[derive(Debug, Clone, Bpaf)]
+#[bpaf(options, private, version)]
+#[allow(unused, clippy::default_trait_access)]
+pub(crate) struct Cli {
+    #[bpaf(external)]
+    /// Chooses which log(s) should be decoded or omit to decode all (applies to all logs & can be repeated)
     pub index: Vec<usize>,
 
-    #[arg(long)]
-    /// Print the limits and range of each field
+    /// Prints the limits and range of each field
     pub limits: bool,
 
-    #[arg(long)]
-    /// Write log to stdout instead of a file
+    /// Writes log to stdout instead of a file
     pub stdout: bool,
 
-    #[arg(long, value_enum, default_value_t, value_name = "unit")]
+    #[bpaf(argument("unit"), fallback(Default::default()))]
     pub unit_amperage: AmperageUnit,
 
-    // TODO: --unit-frame-time
-    #[arg(long, value_enum, default_value_t, value_name = "unit")]
+    // TODO: --unit-flags
+    #[bpaf(argument("unit"), fallback(Default::default()))]
+    pub unit_frame_time: FrameTime,
+
+    #[bpaf(argument("unit"), fallback(Default::default()))]
     pub unit_height: HeightUnit,
 
-    #[arg(long, value_enum, default_value_t, value_name = "unit")]
+    #[bpaf(argument("unit"), fallback(Default::default()))]
     pub unit_rotation: RotationUnit,
 
-    #[arg(long, value_enum, default_value_t, value_name = "unit")]
+    #[bpaf(argument("unit"), fallback(Default::default()))]
     pub unit_acceleration: AccelerationUnit,
 
-    #[arg(long, value_enum, default_value_t, value_name = "unit")]
+    #[bpaf(argument("unit"), fallback(Default::default()))]
     pub unit_gps_speed: GpsSpeedUnit,
 
-    #[arg(long, value_enum, default_value_t, value_name = "unit")]
+    #[bpaf(argument("unit"), fallback(Default::default()))]
     pub unit_vbat: VBatUnit,
 
-    #[arg(long, default_value_t, value_name = "offset", alias = "alt-offset")]
-    /// Altitude offset in meters
-    pub altitude_offset: u16,
+    #[bpaf(external)]
+    pub altitude_offset: i16,
 
-    #[arg(long)]
-    /// Merge GPS data into the main CSV file instead of writing it separately
+    /// Merges GPS data into the main CSV file instead of writing it
+    /// separately
     pub merge_gps: bool,
 
-    #[arg(long, alias = "simulate-current-meter")]
-    /// Simulate a virtual current meter using throttle data
-    pub sim_current_meter: bool,
+    // TODO: alias: simulate-current-meter
+    #[bpaf(external)]
+    pub current_meter: Option<CurrentMeter>,
 
-    #[arg(
-        long,
-        requires = "sim_current_meter",
-        alias = "sim-current-meter-scale",
-        alias = "simulate-current-meter-scale"
-    )]
-    /// Override the flight controller's current scale when simulating the current meter
-    pub current_scale: bool,
-
-    #[arg(
-        long,
-        requires = "sim_current_meter",
-        alias = "sim-current-meter-offset",
-        alias = "simulate-current-meter-offset"
-    )]
-    /// Override the flight controller's current offset when simulating the current meter
-    pub current_offset: bool,
-
-    #[arg(long, alias = "simulate-imu")]
-    /// Compute tilt, roll, and heading information from gyro, accelerometer, and magnetometer data
-    pub sim_imu: bool,
-
-    #[arg(
-        long,
-        requires = "sim_imu",
-        alias = "include-imu-deg",
-        alias = "include-imu-degrees"
-    )]
-    /// Include (deg) in the tilt/roll/heading header
-    pub imu_deg: bool,
-
-    #[arg(long, requires = "sim_imu", alias = "imu-ignore-mag")]
-    /// Ignore magnetometer when computing heading
-    pub ignore_mag: bool,
+    // TODO: alias: simulate-imu
+    #[bpaf(external)]
+    pub imu: Option<Imu>,
 
     // TODO
     // #[arg(long)]
@@ -183,30 +197,194 @@ pub(crate) struct Cli {
     // #[arg(long)]
     // /// Set magnetic declination in decimal degrees (e.g. -12.97 for New York)
     // declination_dec: (),
-    #[arg(long)]
-    /// Show raw field values without applying predictions
+    //
+    //
+    /// Skips applying predictors and outputs raw field values
+    #[bpaf(long)]
     pub raw: bool,
 
-    #[arg(short, long, action = ArgAction::Count, conflicts_with = "verbose")]
-    /// Reduce output
-    pub quiet: u8,
+    #[bpaf(external)]
+    pub verbosity: LevelFilter,
 
-    #[arg(short, long, action = ArgAction::Count, alias = "debug")]
-    /// Increase output
-    pub verbose: u8,
+    // TODO: accept - for stdin
+    // TODO: complete file paths
+    /// One or more logs to parse
+    #[bpaf(
+        positional("file"),
+        guard(at_least_one, "at least one log file is required")
+    )]
+    pub logs: Vec<PathBuf>,
+}
+
+fn index() -> impl Parser<Vec<usize>> {
+    let help = "Chooses which log(s) should be decoded or omit to decode all\n(applies to all logs & can be repeated)";
+
+    bpaf::short('i')
+        .long("index")
+        .help(help)
+        .argument::<usize>("index")
+        .many()
+        .map(|mut v| {
+            v.sort_unstable();
+            v.dedup();
+            v
+        })
+}
+
+fn at_least_one(logs: &Vec<PathBuf>) -> bool {
+    !logs.is_empty()
+}
+
+fn altitude_offset() -> impl Parser<i16> {
+    let old = bpaf::long("alt-offset").argument::<i16>("").hide();
+    let new = bpaf::long("altitude-offset")
+        .help("Sets the altitude offset in meters")
+        .argument::<i16>("offset");
+
+    construct!([new, old]).fallback(0)
+}
+
+#[derive(Debug, Clone, Default)]
+#[allow(unused)]
+pub struct CurrentMeter {
+    scale: Option<i16>,
+    offset: Option<i16>,
+}
+
+fn current_meter() -> impl Parser<Option<CurrentMeter>> {
+    let meter = {
+        let help = "Simulates a virtual current meter using throttle data";
+
+        let old = bpaf::long("simulate-current-meter").switch().hide();
+        let new = bpaf::long("current-meter").help(help).switch();
+
+        construct!([new, old])
+    };
+
+    let scale = {
+        let help =
+            "Overrides the current meter scale for the simulation\n(implies --current-meter)";
+
+        let old = bpaf::long("sim-current-meter-scale")
+            .argument::<i16>("")
+            .hide();
+        let new = bpaf::long("current-scale")
+            .help(help)
+            .argument::<i16>("scale");
+
+        construct!([new, old]).map(Some).fallback(None)
+    };
+
+    let offset = {
+        let help =
+            "Overrides the current meter offset for the simulation\n(implies --current-meter)";
+
+        let old = bpaf::long("sim-current-meter-offset")
+            .argument::<i16>("")
+            .hide();
+        let new = bpaf::long("current-offset")
+            .help(help)
+            .argument::<i16>("offset");
+
+        construct!([new, old]).map(Some).fallback(None)
+    };
+
+    construct!(meter, scale, offset).map(|(meter, scale, offset)| {
+        (meter || scale.is_some() || offset.is_some()).then_some(CurrentMeter { scale, offset })
+    })
+}
+
+#[derive(Debug, Clone, Default)]
+#[allow(unused)]
+pub struct Imu {
+    deg_in_names: bool,
+    ignore_mag: bool,
+}
+
+fn imu() -> impl Parser<Option<Imu>> {
+    let help = "Computes tilt, roll, and heading information from gyro,\naccelerometer, and magnetometer data";
+
+    let imu = {
+        let old = bpaf::long("simulate-imu").switch().hide();
+        let new = bpaf::long("imu").help(help).switch();
+
+        construct!([new, old])
+    };
+
+    let deg = {
+        let old = bpaf::long("include-imu-degrees").switch().hide();
+        let new = bpaf::long("imu-deg")
+            .help("Includes (deg) in the tilt/roll/heading header (implies --imu)")
+            .switch();
+
+        construct!([new, old])
+    };
+
+    let ignore_mag = bpaf::long("imu-ignore-mag")
+        .help("Ignores magnetometer when computing heading (implies --imu)")
+        .switch();
+
+    construct!(imu, deg, ignore_mag).map(|(imu, deg, ignore_mag)| {
+        (imu || deg || ignore_mag).then_some(Imu {
+            deg_in_names: deg,
+            ignore_mag,
+        })
+    })
+}
+
+fn verbosity() -> impl Parser<LevelFilter> {
+    const DEFAULT: usize = if cfg!(debug_assertions) { 4 } else { 3 };
+    const LEVELS: [LevelFilter; 6] = [
+        LevelFilter::OFF,
+        LevelFilter::ERROR,
+        LevelFilter::WARN,
+        LevelFilter::INFO,
+        LevelFilter::DEBUG,
+        LevelFilter::TRACE,
+    ];
+
+    fn plural(x: usize) -> &'static str {
+        if x == 1 {
+            ""
+        } else {
+            "s"
+        }
+    }
+
+    let debug = bpaf::long("debug").switch().hide();
+
+    let max = DEFAULT;
+    let help = format!("Reduces debug output up to {max} time{}", plural(max));
+    let quiet = bpaf::short('q')
+        .long("quiet")
+        .help(help)
+        .req_flag(())
+        .many()
+        .map(|v| v.len());
+
+    let max = LEVELS.len() - DEFAULT - 1;
+    let help = format!("Increases debug output up to {max} time{}", plural(max));
+    let verbose = bpaf::short('v')
+        .long("verbose")
+        .help(help)
+        .req_flag(())
+        .many()
+        .map(|v| v.len());
+
+    construct!(debug, verbose, quiet).map(|(debug, v, q)| {
+        if debug {
+            LEVELS[LEVELS.len() - 1]
+        } else {
+            LEVELS[(v + DEFAULT).saturating_sub(q).min(LEVELS.len() - 1)]
+        }
+    })
 }
 
 impl Cli {
-    pub fn log_level_filter(&self) -> LevelFilter {
-        let default: u8 = if cfg!(debug_assertions) { 4 } else { 3 };
-        match default.saturating_sub(self.quiet) + self.verbose {
-            0 => LevelFilter::OFF,
-            1 => LevelFilter::ERROR,
-            2 => LevelFilter::WARN,
-            3 => LevelFilter::INFO,
-            4 => LevelFilter::DEBUG,
-            _ => LevelFilter::TRACE,
-        }
+    pub fn parse() -> Self {
+        cli()
+            .usage("Usage: blackbox_decode [options] <log>...")
+            .run()
     }
 
     pub fn to_blackbox_config(&self) -> Config {

@@ -2,7 +2,6 @@ mod cli;
 
 use blackbox::parser::Frame;
 use blackbox::Log;
-use clap::Parser;
 use cli::Cli;
 use std::fs::File;
 use std::io::{self, BufWriter, Read, Write};
@@ -45,7 +44,7 @@ fn main() -> QuietResult<()> {
     let cli = Cli::parse();
 
     tracing_subscriber::fmt()
-        .with_max_level(cli.log_level_filter())
+        .with_max_level(cli.verbosity)
         .init();
 
     if cli.logs.len() > 1 && cli.stdout {
