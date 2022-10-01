@@ -7,13 +7,13 @@ mod reader;
 
 use alloc::string::String;
 use core::fmt;
-pub use data::{Data, Event};
-pub use decode::Encoding;
-pub use frame::{Frame, MainFrame, SlowFrame};
-pub use headers::Headers;
-pub use predictor::Predictor;
-pub use reader::Reader;
 
+pub use self::data::{Data, Event};
+pub use self::decode::Encoding;
+pub use self::frame::{Frame, MainFrame, SlowFrame};
+pub use self::headers::Headers;
+pub use self::predictor::Predictor;
+pub use self::reader::Reader;
 use crate::Log;
 
 pub type ParseResult<T> = Result<T, ParseError>;

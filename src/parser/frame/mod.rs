@@ -1,11 +1,11 @@
 mod main;
 mod slow;
 
-pub use main::*;
-pub use slow::*;
-
-use super::{Encoding, ParseError, ParseResult, Predictor};
 use core::iter::Peekable;
+
+pub use self::main::*;
+pub use self::slow::*;
+use super::{Encoding, ParseError, ParseResult, Predictor};
 
 pub trait FieldDef {
     fn name(&self) -> &str;

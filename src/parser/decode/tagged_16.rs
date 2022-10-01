@@ -96,11 +96,13 @@ fn i4_to_i16(nibble: u8) -> i16 {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::LogVersion::{V1, V2};
     use alloc::vec::Vec;
     use core::iter;
+
     use test_case::case;
+
+    use super::*;
+    use crate::LogVersion::{V1, V2};
 
     fn bytes(first: u8, zeros: usize) -> Vec<u8> {
         iter::once(first)

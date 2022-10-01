@@ -11,14 +11,15 @@ pub mod inav;
 
 pub mod parser;
 
-pub use common::{DisarmReason, DisarmReasonError};
-
 use alloc::vec::Vec;
 use core::str::FromStr;
 use core::{slice, str};
+
 use memchr::memmem;
-use parser::{Config, Data, Event, Headers, MainFrame, ParseResult, Reader, SlowFrame};
 use tracing::instrument;
+
+pub use self::common::{DisarmReason, DisarmReasonError};
+use self::parser::{Config, Data, Event, Headers, MainFrame, ParseResult, Reader, SlowFrame};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum LogVersion {
@@ -106,7 +107,8 @@ impl<'data> File<'data> {
 
     /// # Panics
     ///
-    /// This panics if given an `index` greater than or equal to the number of logs in the file.
+    /// This panics if given an `index` greater than or equal to the number of
+    /// logs in the file.
     pub fn parse_index(&self, config: &Config, index: usize) -> ParseResult<Log<'data>> {
         let start = self.offsets[index];
         self.parse_offset(config, start)

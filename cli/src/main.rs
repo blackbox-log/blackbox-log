@@ -1,12 +1,14 @@
 mod cli;
 
-use blackbox::parser::Frame;
-use blackbox::Log;
-use cli::Cli;
 use std::fs::File;
 use std::io::{self, BufWriter, Read, Write};
 use std::path::Path;
 use std::process::{ExitCode, Termination};
+
+use blackbox::parser::Frame;
+use blackbox::Log;
+
+use self::cli::Cli;
 
 #[derive(Debug)]
 enum QuietResult<T> {

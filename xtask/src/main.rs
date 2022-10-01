@@ -1,10 +1,11 @@
 #![allow(clippy::print_stdout)]
 
-use bpaf::{Bpaf, Parser};
-use serde::Deserialize;
 use std::env;
 use std::ffi::OsString;
 use std::path::PathBuf;
+
+use bpaf::{Bpaf, Parser};
+use serde::Deserialize;
 use xshell::{cmd, Result, Shell};
 
 fn main() -> Result<()> {
@@ -16,7 +17,7 @@ fn main() -> Result<()> {
     if !is_ci {
         let _push_dir = sh.push_dir(get_root(&sh)?);
 
-        cmd!(sh, "cargo fmt").run()?;
+        cmd!(sh, "cargo +nightly fmt").run()?;
     }
 
     match args {
@@ -58,7 +59,9 @@ fn main() -> Result<()> {
 
             if coverage {
                 if is_ci {
-                    cmd!(sh, "cargo llvm-cov --package blackbox --lcov --output-path coverage.lcov nextest {ci}").run()
+                    #[rustfmt::skip]
+                    let cmd = cmd!(sh, "cargo llvm-cov --package blackbox --lcov --output-path coverage.lcov nextest {ci}");
+                    cmd.run()
                 } else {
                     cmd!(sh, "cargo llvm-cov --package blackbox --html nextest {ci}").run()
                 }
@@ -89,9 +92,12 @@ fn main() -> Result<()> {
 
             let time = time.to_string();
 
-            cmd!(sh, "cargo flamegraph --package blackbox --deterministic --palette rust --output {output} --bench {bench} -- --bench --profile-time {time} {filter}")
-                .env("CARGO_PROFILE_BENCH_DEBUG", "true")
-                .run()
+            #[rustfmt::skip]
+            let cmd = cmd!(
+                sh,
+                "cargo flamegraph --package blackbox --deterministic --palette rust --output {output} --bench {bench} -- --bench --profile-time {time} {filter}"
+            );
+            cmd.env("CARGO_PROFILE_BENCH_DEBUG", "true").run()
         }
 
         Args::Fuzz(fuzz) => {
@@ -117,6 +123,7 @@ fn main() -> Result<()> {
                     let total_time = time.map(|t| format!("-max_total_time={t}"));
                     let debug = backtrace.then_some("--dev");
 
+                    #[rustfmt::skip]
                     let cmd = cmd!(
                         sh,
                         "cargo +nightly fuzz run {debug...} {dir_args...} {target} {input...} -- {total_time...}"
@@ -156,9 +163,13 @@ fn main() -> Result<()> {
                     let bin = bin.join("coverage").join(triple);
                     let bin = bin.join("release").join(&target);
 
-                    cmd!(sh, "{cov} show --format=html --instr-profile={profdata} --output-dir={coverage_dir} --ignore-filename-regex=^/rustc|/\\.cargo/ {bin}")
-                        .quiet()
-                        .run()?;
+                    #[rustfmt::skip]
+                    cmd!(
+                        sh,
+                        "{cov} show --format=html --instr-profile={profdata} --output-dir={coverage_dir} --ignore-filename-regex=^/rustc|/\\.cargo/ {bin}"
+                    )
+                    .quiet()
+                    .run()?;
 
                     let index = coverage_dir.join("index.html");
                     println!("Saved coverage to {}", index.display());
@@ -218,7 +229,8 @@ enum Args {
     #[bpaf(command)]
     /// Runs nextest tests
     Test {
-        /// Generates a coverage report while running tests (only for `blackbox`)
+        /// Generates a coverage report while running tests (only for
+        /// `blackbox`)
         coverage: bool,
 
         #[bpaf(positional)]
@@ -229,7 +241,8 @@ enum Args {
     #[bpaf(command)]
     /// Runs benchmarks for `blackbox` lib
     Bench {
-        /// Tests all benchmarks run successfully, ignores any extra args for criterion
+        /// Tests all benchmarks run successfully, ignores any extra args for
+        /// criterion
         test: bool,
 
         #[bpaf(positional)]
@@ -307,7 +320,8 @@ enum Fuzz {
     },
 
     #[bpaf(command)]
-    /// Minimizes an input if provided, else minimizes the number of inputs in the corpus
+    /// Minimizes an input if provided, else minimizes the number of inputs in
+    /// the corpus
     Min {
         #[bpaf(positional("target"))]
         target: String,
@@ -318,8 +332,11 @@ enum Fuzz {
 }
 
 fn time_given() -> impl Parser<Option<u16>> {
+    let help = "Passes -max_total_time=<seconds> to libFuzzer, defaulting to 15 minutes if passed \
+                without a value";
+
     bpaf::long("time")
-        .help("Passes -max_total_time=<seconds> to libFuzzer, defaulting to 15 minutes if passed without a value")
+        .help(help)
         .argument::<u16>("seconds")
         .optional()
 }

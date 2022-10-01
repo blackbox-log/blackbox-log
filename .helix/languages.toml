@@ -1,0 +1,7 @@
+[[language]]
+name = "rust"
+formatter = { command = "rustfmt", args = ["+nightly"] }
+
+[language.config]
+cargo = { features = "all" }
+checkOnSave = { command = "cargo", args = ["xtask", "check"] }

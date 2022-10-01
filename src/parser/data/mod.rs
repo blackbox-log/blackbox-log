@@ -1,9 +1,9 @@
 mod event;
 
-pub use event::Event;
-
-use super::{Config, DataFrameKind, FrameKind, Headers, MainFrame, ParseResult, Reader, SlowFrame};
 use alloc::vec::Vec;
+
+pub use self::event::Event;
+use super::{Config, DataFrameKind, FrameKind, Headers, MainFrame, ParseResult, Reader, SlowFrame};
 
 // Reason: unfinished
 #[allow(dead_code)]

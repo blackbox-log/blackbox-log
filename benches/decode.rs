@@ -1,10 +1,13 @@
+use std::fmt::Display;
+use std::iter;
+
 use blackbox::parser::{decode, Reader};
 use blackbox::LogVersion;
 use criterion::measurement::WallTime;
-use criterion::{criterion_group, criterion_main};
-use criterion::{BatchSize, Bencher, BenchmarkGroup, BenchmarkId, Criterion, Throughput};
-use std::fmt::Display;
-use std::iter;
+use criterion::{
+    criterion_group, criterion_main, BatchSize, Bencher, BenchmarkGroup, BenchmarkId, Criterion,
+    Throughput,
+};
 
 fn get_optimized_input(input: &[u8]) -> Vec<u8> {
     let mut input = input.to_owned();

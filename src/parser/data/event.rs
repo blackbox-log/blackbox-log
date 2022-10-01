@@ -1,6 +1,7 @@
-use crate::parser::{decode, ParseError, ParseResult, Reader};
 use num_enum::TryFromPrimitive;
 use tracing::instrument;
+
+use crate::parser::{decode, ParseError, ParseResult, Reader};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Event {

@@ -14,8 +14,9 @@ pub fn negative_14_bit(data: &mut Reader) -> ParseResult<i32> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use test_case::case;
+
+    use super::*;
 
     #[case(0, &[0]; "zero")]
     #[case(-0x1FFF, &[0xFF, 0x3F]; "min")]

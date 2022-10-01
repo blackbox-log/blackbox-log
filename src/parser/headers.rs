@@ -1,3 +1,7 @@
+use alloc::borrow::ToOwned;
+use core::iter;
+use core::str::{self, FromStr};
+
 use super::frame::{
     is_frame_def_header, parse_frame_def_header, FrameKind, MainFrameDef, MainFrameDefBuilder,
     SlowFrameDef, SlowFrameDefBuilder,
@@ -5,9 +9,6 @@ use super::frame::{
 use super::reader::ByteReader;
 use super::{ParseError, ParseResult, Reader};
 use crate::LogVersion;
-use alloc::borrow::ToOwned;
-use core::iter;
-use core::str::{self, FromStr};
 
 #[allow(dead_code)]
 #[derive(Debug)]

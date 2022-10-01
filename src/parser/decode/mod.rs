@@ -10,16 +10,17 @@ mod variable;
 
 use alloc::vec;
 use alloc::vec::Vec;
-pub use elias_delta::{elias_delta, elias_delta_signed};
-pub use negative_14_bit::negative_14_bit;
-pub use tagged_16::tagged_16;
-pub use tagged_32::tagged_32;
-pub use tagged_variable::tagged_variable;
-pub use variable::{variable, variable_signed};
 
+use num_enum::TryFromPrimitive;
+
+pub use self::elias_delta::{elias_delta, elias_delta_signed};
+pub use self::negative_14_bit::negative_14_bit;
+pub use self::tagged_16::tagged_16;
+pub use self::tagged_32::tagged_32;
+pub use self::tagged_variable::tagged_variable;
+pub use self::variable::{variable, variable_signed};
 use super::{ParseResult, Reader};
 use crate::LogVersion;
-use num_enum::TryFromPrimitive;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, TryFromPrimitive)]
 #[repr(u8)]
@@ -28,7 +29,8 @@ pub enum Encoding {
     VariableSigned = 0,
     /// Unsigned variable byte
     Variable = 1,
-    /// Unsigned variable byte, but negated after decoding. Value fits in 14 bits
+    /// Unsigned variable byte, but negated after decoding. Value fits in 14
+    /// bits
     Negative14Bit = 3,
     EliasDelta = 4,
     EliasDeltaSigned = 5,

@@ -1,9 +1,10 @@
 #![allow(clippy::default_trait_access)]
 
-use blackbox::parser::Config;
-use bpaf::{construct, Bpaf, FromOsStr, Parser};
 use std::ffi::OsString;
 use std::path::PathBuf;
+
+use blackbox::parser::Config;
+use bpaf::{construct, Bpaf, FromOsStr, Parser};
 use tracing_subscriber::filter::LevelFilter;
 
 macro_rules! from_os_str_impl {
@@ -142,7 +143,6 @@ from_os_str_impl!(VBatUnit {
 #[allow(unused, clippy::default_trait_access)]
 pub(crate) struct Cli {
     #[bpaf(external)]
-    /// Chooses which log(s) should be decoded or omit to decode all (applies to all logs & can be repeated)
     pub index: Vec<usize>,
 
     /// Prints the limits and range of each field
@@ -180,7 +180,6 @@ pub(crate) struct Cli {
     /// separately
     pub merge_gps: bool,
 
-    // TODO: alias: simulate-current-meter
     #[bpaf(external)]
     pub current_meter: Option<CurrentMeter>,
 
@@ -197,8 +196,6 @@ pub(crate) struct Cli {
     // #[arg(long)]
     // /// Set magnetic declination in decimal degrees (e.g. -12.97 for New York)
     // declination_dec: (),
-    //
-    //
     /// Skips applying predictors and outputs raw field values
     #[bpaf(long)]
     pub raw: bool,
@@ -217,7 +214,8 @@ pub(crate) struct Cli {
 }
 
 fn index() -> impl Parser<Vec<usize>> {
-    let help = "Chooses which log(s) should be decoded or omit to decode all\n(applies to all logs & can be repeated)";
+    let help = "Chooses which log(s) should be decoded or omit to decode all\n(applies to all \
+                logs & can be repeated)";
 
     bpaf::short('i')
         .long("index")
@@ -302,7 +300,8 @@ pub struct Imu {
 }
 
 fn imu() -> impl Parser<Option<Imu>> {
-    let help = "Computes tilt, roll, and heading information from gyro,\naccelerometer, and magnetometer data";
+    let help = "Computes tilt, roll, and heading information from gyro,\naccelerometer, and \
+                magnetometer data";
 
     let imu = {
         let old = bpaf::long("simulate-imu").switch().hide();
@@ -344,11 +343,7 @@ fn verbosity() -> impl Parser<LevelFilter> {
     ];
 
     fn plural(x: usize) -> &'static str {
-        if x == 1 {
-            ""
-        } else {
-            "s"
-        }
+        if x == 1 { "" } else { "s" }
     }
 
     let debug = bpaf::long("debug").switch().hide();

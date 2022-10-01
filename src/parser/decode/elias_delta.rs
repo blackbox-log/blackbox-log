@@ -1,6 +1,7 @@
+use bitter::BitReader;
+
 use super::zig_zag_decode;
 use crate::parser::{ParseError, ParseResult, Reader};
-use bitter::BitReader;
 
 /// NB: May leave the bit stream unaligned
 pub fn elias_delta(data: &mut Reader) -> ParseResult<u32> {

@@ -1,14 +1,14 @@
-use bitter::BitReader as _;
-pub use blackbox::parser::{decode, Reader};
-pub use libfuzzer_sys::arbitrary::Arbitrary;
-pub use libfuzzer_sys::fuzz_target;
-
-use libfuzzer_sys::arbitrary;
-use memfile::MemFile;
-use reference_impl::stream::Stream;
 use std::io;
 use std::io::Write;
 use std::os::unix::io::AsRawFd;
+
+use bitter::BitReader as _;
+pub use blackbox::parser::{decode, Reader};
+use libfuzzer_sys::arbitrary;
+pub use libfuzzer_sys::arbitrary::Arbitrary;
+pub use libfuzzer_sys::fuzz_target;
+use memfile::MemFile;
+use reference_impl::stream::Stream;
 
 #[derive(Debug, Arbitrary)]
 pub struct AlignedBytes {

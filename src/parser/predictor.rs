@@ -1,6 +1,8 @@
-use super::{Headers, ParseResult};
 use core::ops::{Add, Sub};
+
 use num_enum::TryFromPrimitive;
+
+use super::{Headers, ParseResult};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive)]
 #[repr(u8)]

@@ -1,5 +1,6 @@
 use super::sign_extend;
-use crate::parser::{reader::ByteReader, ParseError, ParseResult, Reader};
+use crate::parser::reader::ByteReader;
+use crate::parser::{ParseError, ParseResult, Reader};
 
 const COUNT: usize = 3;
 
@@ -97,9 +98,10 @@ pub fn tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use alloc::vec;
     use alloc::vec::Vec;
+
+    use super::*;
 
     fn bytes(tag: u8, width: usize) -> Vec<u8> {
         assert_eq!(tag, tag & 3);

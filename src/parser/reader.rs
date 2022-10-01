@@ -1,9 +1,8 @@
-use bitter::BitReader as _;
-
 #[cfg(feature = "std")]
 use std::io::{self, Read};
 
 pub use bitter::BigEndianReader as BitReader;
+use bitter::BitReader as _;
 
 pub struct Reader<'data> {
     index: usize,
@@ -153,6 +152,7 @@ macro_rules! impl_read {
 
 impl<'data, 'reader> ByteReader<'data, 'reader> {
     impl_read!(read_u16, u16, read_i16, i16);
+
     impl_read!(read_u32, u32, read_i32, i32);
 }
 
