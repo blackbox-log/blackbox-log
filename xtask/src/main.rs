@@ -24,7 +24,7 @@ fn main() -> Result<()> {
         // Already done in above block
         Args::Fmt => Ok(()),
 
-        Args::Check { all, args } => {
+        Args::Check { workspace, args } => {
             fn run(cmd: xshell::Cmd, lints: &[String]) -> Result<()> {
                 eprintln!("$ {cmd}");
                 let cmd = cmd.arg("--").args(lints);
@@ -38,15 +38,14 @@ fn main() -> Result<()> {
             let lints: Lints = toml::from_str(&lints).unwrap();
             let lints = lints.into_clippy_args();
 
-            let workspace = get_workspace_args(all);
             run(
                 cmd!(sh, "cargo clippy --all-targets")
-                    .args(workspace)
+                    .args(get_workspace_args(workspace))
                     .args(&args),
                 &lints,
             )?;
 
-            if all || sh.current_dir() == root {
+            if workspace || sh.current_dir() == root {
                 run(
                     cmd!(sh, "cargo clippy --no-default-features --package blackbox").args(args),
                     &lints,
@@ -225,7 +224,7 @@ enum Args {
     Check {
         #[bpaf(short, long)]
         /// Lint entire workspace
-        all: bool,
+        workspace: bool,
 
         #[bpaf(positional)]
         /// Extra arguments for clippy
