@@ -64,11 +64,13 @@ fn main() -> Result<()> {
                     let cmd = cmd!(sh, "cargo llvm-cov --package blackbox --lcov --output-path coverage.lcov nextest {ci}");
                     cmd.run()
                 } else {
-                    cmd!(sh, "cargo llvm-cov --package blackbox --html nextest {ci}").run()
+                    cmd!(sh, "cargo llvm-cov --package blackbox --html nextest").run()
                 }
             } else {
                 let workspace = get_workspace_args(true);
-                cmd!(sh, "cargo nextest run {workspace...} {ci} {args...}").run()
+                cmd!(sh, "cargo nextest run {workspace...} {ci}")
+                    .args(args)
+                    .run()
             }
         }
 
@@ -76,7 +78,9 @@ fn main() -> Result<()> {
             if test {
                 cmd!(sh, "cargo criterion --package blackbox --benches -- --test").run()
             } else {
-                cmd!(sh, "cargo criterion --package blackbox --benches {args...}").run()
+                cmd!(sh, "cargo criterion --package blackbox --benches")
+                    .args(args)
+                    .run()
             }
         }
 
@@ -165,12 +169,11 @@ fn main() -> Result<()> {
                     let bin = bin.join("release").join(&target);
 
                     #[rustfmt::skip]
-                    cmd!(
+                    let cmd = cmd!(
                         sh,
                         "{cov} show --format=html --instr-profile={profdata} --output-dir={coverage_dir} --ignore-filename-regex=^/rustc|/\\.cargo/ {bin}"
-                    )
-                    .quiet()
-                    .run()?;
+                    );
+                    cmd.quiet().run()?;
 
                     let index = coverage_dir.join("index.html");
                     println!("Saved coverage to {}", index.display());
@@ -178,22 +181,21 @@ fn main() -> Result<()> {
                     Ok(())
                 }
 
-                Fuzz::Min { target, input } => {
-                    let corpus = fuzz_dir.join("corpus").join(&target);
-
-                    match input {
-                        Some(input) => cmd!(
-                            sh,
-                            "cargo +nightly fuzz tmin {dir_args...} {target} {input}"
-                        )
-                        .run(),
-                        None => cmd!(
+                Fuzz::Min { target, input } => match input {
+                    Some(input) => cmd!(
+                        sh,
+                        "cargo +nightly fuzz tmin {dir_args...} {target} {input}"
+                    )
+                    .run(),
+                    None => {
+                        let corpus = fuzz_dir.join("corpus").join(&target);
+                        cmd!(
                             sh,
                             "cargo +nightly fuzz cmin {dir_args...} {target} {corpus}"
                         )
-                        .run(),
+                        .run()
                     }
-                }
+                },
             }
         }
 
@@ -207,7 +209,7 @@ fn main() -> Result<()> {
                 "typos-cli",
             ];
 
-            cmd!(sh, "cargo install --locked -- {tools...}").run()
+            cmd!(sh, "cargo install --locked --").args(tools).run()
         }
     }
 }
