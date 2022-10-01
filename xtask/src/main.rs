@@ -24,7 +24,7 @@ fn main() -> Result<()> {
         // Already done in above block
         Args::Fmt => Ok(()),
 
-        Args::Check { all } => {
+        Args::Check { all, args } => {
             fn run(cmd: xshell::Cmd, lints: &[String]) -> Result<()> {
                 eprintln!("$ {cmd}");
                 let cmd = cmd.arg("--").args(lints);
@@ -40,13 +40,15 @@ fn main() -> Result<()> {
 
             let workspace = get_workspace_args(all);
             run(
-                cmd!(sh, "cargo clippy --all-targets {workspace...}"),
+                cmd!(sh, "cargo clippy --all-targets")
+                    .args(workspace)
+                    .args(&args),
                 &lints,
             )?;
 
             if all || sh.current_dir() == root {
                 run(
-                    cmd!(sh, "cargo clippy --no-default-features --package blackbox"),
+                    cmd!(sh, "cargo clippy --no-default-features --package blackbox").args(args),
                     &lints,
                 )
             } else {
@@ -224,6 +226,10 @@ enum Args {
         #[bpaf(short, long)]
         /// Lint entire workspace
         all: bool,
+
+        #[bpaf(positional)]
+        /// Extra arguments for clippy
+        args: Vec<OsString>,
     },
 
     #[bpaf(command)]
