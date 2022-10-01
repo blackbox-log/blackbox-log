@@ -114,7 +114,7 @@ impl<'data> SlowFrameDefBuilder<'data> {
             })
             .collect::<ParseResult<Vec<_>>>()?;
 
-        if names.next().is_none() || predictors.next().is_none() || encodings.next().is_none() {
+        if names.next().is_some() || predictors.next().is_some() || encodings.next().is_some() {
             tracing::error!("all `Field *` headers must have the same number of elements");
             return Err(ParseError::Corrupted);
         }

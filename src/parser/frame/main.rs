@@ -298,11 +298,11 @@ impl<'data> MainFrameDefBuilder<'data> {
         };
         let fields = fields.collect::<ParseResult<Vec<_>>>()?;
 
-        if names.next().is_none()
-            || predictors_intra.next().is_none()
-            || predictors_inter.next().is_none()
-            || encodings_intra.next().is_none()
-            || encodings_inter.next().is_none()
+        if names.next().is_some()
+            || predictors_intra.next().is_some()
+            || predictors_inter.next().is_some()
+            || encodings_intra.next().is_some()
+            || encodings_inter.next().is_some()
         {
             tracing::error!("all `Field *` headers must have the same number of elements");
             return Err(ParseError::Corrupted);
