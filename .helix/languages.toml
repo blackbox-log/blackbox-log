@@ -2,6 +2,6 @@
 name = "rust"
 
 [language.config]
-cargo = { features = "all" }
-checkOnSave = { command = "xcheck" }
-rustfmt = { extraArgs = ["+nightly"] }
+cargo.features = "all"
+checkOnSave.command = "xcheck"
+rustfmt.extraArgs = ["+nightly"]
