@@ -181,21 +181,18 @@ fn main() -> Result<()> {
                     Ok(())
                 }
 
-                Fuzz::Min { target, input } => match input {
-                    Some(input) => cmd!(
+                Fuzz::Min { target, input } => {
+                    let (command, final_arg) = input.map_or_else(
+                        || ("cmin", fuzz_dir.join("corpus").join(&target)),
+                        |input| ("tmin", input),
+                    );
+
+                    cmd!(
                         sh,
-                        "cargo +nightly fuzz tmin {dir_args...} {target} {input}"
+                        "cargo +nightly fuzz {command} {dir_args...} {target} {final_arg}"
                     )
-                    .run(),
-                    None => {
-                        let corpus = fuzz_dir.join("corpus").join(&target);
-                        cmd!(
-                            sh,
-                            "cargo +nightly fuzz cmin {dir_args...} {target} {corpus}"
-                        )
-                        .run()
-                    }
-                },
+                    .run()
+                }
             }
         }
 
