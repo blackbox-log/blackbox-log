@@ -76,7 +76,7 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: nightly
-          component: rustfmt
+          components: rustfmt
       - name: Check rustfmt
         run: cargo +nightly fmt --all --check
 
