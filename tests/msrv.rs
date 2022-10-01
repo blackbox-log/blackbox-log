@@ -21,6 +21,25 @@ fn readme() -> io::Result<()> {
 }
 
 #[test]
+fn toolchain_file() -> io::Result<()> {
+    let file = File::open("rust-toolchain.toml")?;
+    let file = BufReader::new(file);
+
+    let msrv = file
+        .lines()
+        .map(Result::unwrap)
+        .find(|line| line.starts_with("version"))
+        .expect("version line");
+
+    let (_, msrv) = msrv.split_once('=').unwrap();
+    let msrv = msrv.trim().trim_matches('"');
+
+    assert_eq!(get_msrv()?, msrv);
+
+    Ok(())
+}
+
+#[test]
 fn workflows() -> io::Result<()> {
     let msrv = get_msrv()?;
 
