@@ -1,5 +1,7 @@
+use std::env;
 use std::fs::{self, File};
 use std::io::{self, BufRead, BufReader};
+use std::path::PathBuf;
 
 #[test]
 fn readme() -> io::Result<()> {
@@ -22,7 +24,14 @@ fn readme() -> io::Result<()> {
 
 #[test]
 fn toolchain_file() -> io::Result<()> {
-    let file = File::open("rust-toolchain.toml")?;
+    let path = PathBuf::from("rust-toolchain.toml");
+
+    if env::var("CI").is_ok() && !path.exists() {
+        // Assume it was removed in CI to avoid overriding a >MSRV toolchain
+        return Ok(());
+    }
+
+    let file = File::open(path)?;
     let file = BufReader::new(file);
 
     let msrv = file
@@ -35,38 +44,6 @@ fn toolchain_file() -> io::Result<()> {
     let msrv = msrv.trim().trim_matches('"');
 
     assert_eq!(get_msrv()?, msrv);
-
-    Ok(())
-}
-
-#[test]
-fn workflows() -> io::Result<()> {
-    let msrv = get_msrv()?;
-
-    for entry in fs::read_dir(".github/workflows")? {
-        let path = entry?.path();
-        let workflow = File::open(&path)?;
-        let workflow = BufReader::new(workflow);
-
-        for (i, line) in workflow
-            .lines()
-            .map(Result::unwrap)
-            .enumerate()
-            .map(|(i, line)| (i + 1, line))
-            .filter(|(_, line)| line.contains("# MSRV"))
-        {
-            let (line, _) = line.split_once('#').unwrap();
-            let (_, line) = line.split_once(&['-', ':']).unwrap();
-            let line = line.trim();
-
-            assert_eq!(
-                msrv,
-                line,
-                "Incorrect MSRV on line {i} of {}",
-                path.display(),
-            );
-        }
-    }
 
     Ok(())
 }

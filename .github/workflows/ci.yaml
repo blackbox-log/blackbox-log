@@ -1,9 +1,6 @@
 name: CI
 on: [push, pull_request]
 
-env:
-  CARGO_TERM_COLOR: always
-
 jobs:
   clippy:
     runs-on: ubuntu-latest
@@ -11,27 +8,11 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: true
-
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.64 # MSRV
-          profile: minimal
-          components: clippy
-          override: true
-
-      - uses: Swatinem/rust-cache@v2
-
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Build xtasks
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --package xtask
-
+        run: cargo build --package xtask
       - name: Run clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: ci
-          args: check --all
+        run: cargo ci check --all
 
   test:
     strategy:
@@ -39,20 +20,17 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         toolchain:
-          - 1.64 # MSRV
+          - msrv
           - beta
           - nightly
         include:
-          # Coverage reporting on Ubuntu with MSRV
           - os: ubuntu-latest
-            toolchain: 1.64 # MSRV
+            toolchain: msrv
             coverage: true
-
-          # macOS & Windows only on MSRV
           - os: macos-latest
-            toolchain: 1.64 # MSRV
+            toolchain: msrv
           - os: windows-latest
-            toolchain: 1.64 # MSRV
+            toolchain: msrv
 
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.toolchain == 'nightly' }}
@@ -61,13 +39,13 @@ jobs:
         with:
           submodules: ${{ runner.os == 'Linux' }}
 
-      - uses: actions-rs/toolchain@v1
+      - name: Remove rust-toolchain file if not testing MSRV
+        run: rm rust-toolchain*
+        if: ${{ matrix.toolchain != 'msrv' }}
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
-          profile: minimal
-          override: true
-
-      - uses: Swatinem/rust-cache@v2
 
       - name: Install nextest
         uses: taiki-e/install-action@nextest
@@ -76,23 +54,13 @@ jobs:
         if: ${{ matrix.coverage }}
 
       - name: Build xtasks
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --package xtask
-
+        run: cargo build --package xtask
       - name: Run all tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: ci
-          args: test
+        run: cargo ci test
 
       - name: Generate coverage
-        uses: actions-rs/cargo@v1
+        run: cargo ci test --coverage
         if: ${{ matrix.coverage }}
-        with:
-          command: ci
-          args: test --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
@@ -104,19 +72,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.64 # MSRV
-          profile: minimal
-          components: rustfmt
-          override: true
-
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Check rustfmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all --check
+        run: cargo fmt --all --check
 
   typos:
     runs-on: ubuntu-latest
