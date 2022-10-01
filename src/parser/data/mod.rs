@@ -32,7 +32,7 @@ impl Data {
 
                 #[cfg(feature = "std")]
                 {
-                    use std::iter;
+                    use core::iter;
 
                     let lines = 4;
                     let bytes_per_line = 8;

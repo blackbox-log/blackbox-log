@@ -1,4 +1,4 @@
-#![warn(unsafe_code)]
+#![warn(unsafe_code, clippy::std_instead_of_alloc, clippy::std_instead_of_core)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 extern crate alloc;

@@ -13,6 +13,7 @@ warn = [
     "clippy::cast_possible_truncation",
     "clippy::cast_possible_wrap",
     "clippy::cast_sign_loss",
+    "clippy::alloc_instead_of_core",
     "clippy::cloned_instead_of_copied",
     "clippy::dbg_macro",
     "clippy::decimal_literal_representation",
@@ -55,9 +56,6 @@ warn = [
     "clippy::unnested_or_patterns",
     "clippy::unseparated_literal_suffix",
     "clippy::wildcard_enum_match_arm",
-
-    # TODO: enable after 1.64
-    # "clippy::arithmetic",
 
     # TODO: enable closer to 1.0
     # "clippy::print_stderr",
