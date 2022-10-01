@@ -1,3 +1,4 @@
+use alloc::vec::Vec;
 #[cfg(feature = "std")]
 use std::io::{self, Read};
 
@@ -96,6 +97,18 @@ impl<'data, 'reader> ByteReader<'data, 'reader> {
             self.0.index = self.0.data.len();
             self.0.data.get(start..)
         }
+    }
+
+    pub fn read_n_bytes(&mut self, n: usize) -> Vec<u8> {
+        let len = n.min(self.remaining());
+        let mut buffer = Vec::with_capacity(len);
+
+        let start = self.0.index;
+        let slice = &self.0.data[start..(start + len)];
+
+        buffer.extend_from_slice(slice);
+        self.0.index += len;
+        buffer
     }
 
     pub fn read_u8(&mut self) -> Option<u8> {
@@ -223,6 +236,42 @@ mod tests {
 
         assert_eq!(Some(b"a\0".as_ref()), bytes.read_line());
         assert_eq!(Some(b'b'), bytes.read_u8());
+    }
+
+    #[test]
+    fn bytes_read_n_bytes_exact() {
+        let input = [0, 1, 2, 3];
+
+        let mut reader = Reader::new(&input);
+        let mut bytes = reader.bytes();
+
+        let read = bytes.read_n_bytes(1);
+        assert_eq!(read.len(), 1);
+        assert_eq!(read, input[0..1]);
+
+        let read = bytes.read_n_bytes(0);
+        assert_eq!(read.len(), 0);
+        assert_eq!(read, &[]);
+
+        let read = bytes.read_n_bytes(3);
+        assert_eq!(read.len(), 3);
+        assert_eq!(read, input[1..]);
+
+        assert!(bytes.is_empty());
+    }
+
+    #[test]
+    fn bytes_read_n_bytes_overshoot() {
+        let input = [0];
+
+        let mut reader = Reader::new(&input);
+        let mut bytes = reader.bytes();
+
+        let read = bytes.read_n_bytes(2);
+        assert_eq!(read.len(), 1);
+        assert_eq!(read, input);
+
+        assert!(bytes.is_empty());
     }
 
     #[test]

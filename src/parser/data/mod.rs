@@ -57,11 +57,7 @@ impl Data {
 
             match kind {
                 FrameKind::Event => {
-                    let event = Event::parse(data)?;
-                    let is_end = event == Event::End;
-                    events.push(event);
-
-                    if is_end {
+                    if Event::parse_into(data, &mut events)? {
                         tracing::trace!("found the end event");
                         break;
                     }
