@@ -8,7 +8,7 @@ use super::frame::{
 };
 use super::reader::ByteReader;
 use super::{ParseError, ParseResult, Reader};
-use crate::common::LogVersion;
+use crate::common::{FirmwareKind, LogVersion};
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -83,26 +83,6 @@ fn get_version(bytes: &mut ByteReader) -> Result<LogVersion, ParseError> {
     value
         .parse()
         .map_err(|_| ParseError::UnsupportedVersion(value.to_owned()))
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum FirmwareKind {
-    Baseflight,
-    Cleanflight,
-    INav,
-}
-
-impl FromStr for FirmwareKind {
-    type Err = ParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_ascii_lowercase().as_str() {
-            "cleanflight" => Ok(Self::Cleanflight),
-            "baseflight" => Ok(Self::Baseflight),
-            "inav" => Ok(Self::INav),
-            _ => Err(ParseError::UnknownFirmware(s.to_owned())),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy)]
