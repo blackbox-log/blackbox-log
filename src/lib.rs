@@ -17,7 +17,7 @@ use core::iter;
 use memchr::memmem;
 use tracing::instrument;
 
-use self::parser::{Config, Data, Event, Headers, MainFrame, ParseResult, Reader, SlowFrame};
+use self::parser::{Data, Event, Headers, MainFrame, ParseResult, Reader, SlowFrame};
 use crate::parser::Frame;
 
 #[derive(Debug)]
@@ -43,7 +43,7 @@ impl<'data> File<'data> {
     #[instrument(level = "trace", skip(self, config), fields(offset))]
     pub fn parse_by_index<'config>(
         &self,
-        config: &'config Config,
+        config: &'config parser::Config,
         index: usize,
     ) -> ParseResult<Log<'data>> {
         tracing::trace!(?config);
@@ -62,7 +62,7 @@ pub struct Log<'data> {
 }
 
 impl<'data> Log<'data> {
-    pub fn parse<'config>(config: &'config Config, data: &'data [u8]) -> ParseResult<Self> {
+    pub fn parse<'config>(config: &'config parser::Config, data: &'data [u8]) -> ParseResult<Self> {
         let mut data = Reader::new(data);
         let headers = Headers::parse(&mut data)?;
 
