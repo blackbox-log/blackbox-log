@@ -56,6 +56,7 @@ impl fmt::Display for DisarmReasonError {
 
 macro_rules! generate_disarm_reason {
     ( $( $reason:ident = $value:literal ),+ $(,)? ) => {
+        #[non_exhaustive]
         pub enum DisarmReason {
             $( $reason = $value ),+
         }
