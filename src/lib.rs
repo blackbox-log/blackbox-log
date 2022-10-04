@@ -17,7 +17,6 @@ use core::iter;
 use memchr::memmem;
 use tracing::instrument;
 
-pub use self::common::{DisarmReason, DisarmReasonError, LogVersion};
 use self::parser::{Config, Data, Event, Headers, MainFrame, ParseResult, Reader, SlowFrame};
 use crate::parser::Frame;
 

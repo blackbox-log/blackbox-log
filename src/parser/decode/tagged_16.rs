@@ -1,17 +1,17 @@
 use bitter::BitReader;
 
 use super::sign_extend;
+use crate::common::Version;
 use crate::parser::{ParseError, ParseResult, Reader};
-use crate::LogVersion;
 
 const COUNT: usize = 4;
 
-pub fn tagged_16(version: LogVersion, data: &mut Reader) -> ParseResult<[i16; COUNT]> {
+pub fn tagged_16(version: Version, data: &mut Reader) -> ParseResult<[i16; COUNT]> {
     data.byte_align();
 
     match version {
-        LogVersion::V1 => tagged_16_v1(data),
-        LogVersion::V2 => tagged_16_v2(data),
+        Version::V1 => tagged_16_v1(data),
+        Version::V2 => tagged_16_v2(data),
     }
 }
 
@@ -101,8 +101,8 @@ mod test {
 
     use test_case::case;
 
+    use super::Version::{V1, V2};
     use super::*;
-    use crate::LogVersion::{V1, V2};
 
     fn bytes(first: u8, zeros: usize) -> Vec<u8> {
         iter::once(first)
@@ -112,7 +112,7 @@ mod test {
 
     #[case(V1 ; "v1")]
     #[case(V2 ; "v2")]
-    fn all_zeros(version: LogVersion) {
+    fn all_zeros(version: Version) {
         let bytes = bytes(0x00, 0);
         let bytes = bytes.as_slice();
 
@@ -124,7 +124,7 @@ mod test {
 
     #[case(V1 ; "v1")]
     #[case(V2 ; "v2")]
-    fn all_nibbles(version: LogVersion) {
+    fn all_nibbles(version: Version) {
         let bytes = bytes(0x55, 2);
         let bytes = bytes.as_slice();
 
@@ -136,7 +136,7 @@ mod test {
 
     #[case(V1 ; "v1")]
     #[case(V2 ; "v2")]
-    fn all_bytes(version: LogVersion) {
+    fn all_bytes(version: Version) {
         let bytes = bytes(0xAA, 4);
         let bytes = bytes.as_slice();
 
@@ -192,7 +192,7 @@ mod test {
     #[case(V1, &[1, 194] => [2, -4, 0, 0] ; "v1 low nibble first")]
     #[case(V1, &[10, 163, 10] => [-93, 10, 0, 0] ; "v1 8 bit sign extend")]
     #[case(V2, &[0x30, 181, 61] => [0, 0, -19139, 0] ; "v2 16 bit high byte first")]
-    fn regressions(version: LogVersion, bytes: &[u8]) -> [i16; 4] {
+    fn regressions(version: Version, bytes: &[u8]) -> [i16; 4] {
         let mut bits = Reader::new(bytes);
         super::tagged_16(version, &mut bits).unwrap()
     }

@@ -2,12 +2,12 @@ use core::fmt;
 use core::str::FromStr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum LogVersion {
+pub enum Version {
     V1,
     V2,
 }
 
-impl FromStr for LogVersion {
+impl FromStr for Version {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
