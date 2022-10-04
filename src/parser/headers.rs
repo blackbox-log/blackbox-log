@@ -29,13 +29,13 @@ pub struct Headers<'data> {
 }
 
 impl<'data> Headers<'data> {
-    pub fn main_fields(&self) -> impl Iterator<Item = &str> {
+    pub(crate) fn main_fields(&self) -> impl Iterator<Item = &str> {
         iter::once(self.main_frames.iteration.name)
             .chain(iter::once(self.main_frames.time.name))
             .chain(self.main_frames.fields.iter().map(|f| f.name))
     }
 
-    pub fn slow_fields(&self) -> impl Iterator<Item = &str> {
+    pub(crate) fn slow_fields(&self) -> impl Iterator<Item = &str> {
         self.slow_frames.0.iter().map(|f| f.name)
     }
 

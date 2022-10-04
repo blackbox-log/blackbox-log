@@ -1,4 +1,5 @@
 use alloc::vec::Vec;
+use core::iter;
 
 use tracing::instrument;
 
@@ -7,7 +8,7 @@ use crate::parser::{Config, Encoding, Headers, ParseError, ParseResult, Predicto
 
 #[derive(Debug, Clone)]
 pub struct SlowFrame {
-    values: Vec<i64>,
+    pub(crate) values: Vec<i64>,
 }
 
 impl Frame for SlowFrame {
@@ -66,6 +67,11 @@ impl<'data> SlowFrameDef<'data> {
         }
 
         Ok(SlowFrame { values })
+    }
+
+    pub(crate) fn default_frame(&self) -> SlowFrame {
+        let values = iter::repeat(0).take(self.0.len()).collect();
+        SlowFrame { values }
     }
 }
 

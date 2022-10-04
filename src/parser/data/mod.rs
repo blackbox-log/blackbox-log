@@ -3,33 +3,31 @@ mod event;
 use alloc::vec::Vec;
 
 pub use self::event::Event;
-use super::{Config, DataFrameKind, FrameKind, Headers, MainFrame, ParseResult, Reader, SlowFrame};
+use super::{Config, FrameKind, Headers, MainFrame, ParseResult, Reader, SlowFrame};
 
 // Reason: unfinished
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct Data {
     pub(crate) events: Vec<Event>,
-    pub(crate) main_frames: Vec<MainFrame>,
+    pub(crate) main_frames: Vec<(MainFrame, usize)>,
     // pub(crate) gps_frames: Vec<Frame>,
     // pub(crate) gps_home_frames: Vec<Frame>,
     pub(crate) slow_frames: Vec<SlowFrame>,
 }
 
 impl Data {
-    pub fn parse(data: &mut Reader, config: &Config, headers: &Headers) -> ParseResult<Self> {
+    pub fn parse(mut data: Reader, config: &Config, headers: &Headers) -> ParseResult<Self> {
         let mut events = Vec::new();
         let mut main_frames = Vec::new();
         // let gps_frames = Vec::new();
         // let gps_home_frames = Vec::new();
         let mut slow_frames = Vec::new();
 
-        // tracing::info!("data parsing starting at 0x{:0>6x}", log.consumed_bytes());
+        slow_frames.push(headers.slow_frames.default_frame());
+
         while let Some(byte) = data.bytes().read_u8() {
             let kind = FrameKind::from_byte(byte).unwrap_or_else(|| {
-                // eprintln!();
-                // eprintln!("consumed_bytes = 0x{:0>6x}", log.consumed_bytes());
-
                 #[cfg(feature = "std")]
                 {
                     use core::iter;
@@ -57,35 +55,33 @@ impl Data {
 
             match kind {
                 FrameKind::Event => {
-                    if Event::parse_into(data, &mut events)? {
+                    if Event::parse_into(&mut data, &mut events)? {
                         tracing::trace!("found the end event");
                         break;
                     }
                 }
-                FrameKind::Data(DataFrameKind::Intra) => {
-                    let current_idx = main_frames.len();
-                    let last = current_idx.checked_sub(1).and_then(|i| main_frames.get(i));
-                    let frame = headers
-                        .main_frames
-                        .parse_intra(data, config, headers, last)?;
-                    main_frames.push(frame);
-                }
-                FrameKind::Data(DataFrameKind::Inter) => {
-                    let current_idx = main_frames.len();
-                    let last = current_idx.checked_sub(1).and_then(|i| main_frames.get(i));
-                    let last_last = current_idx.checked_sub(2).and_then(|i| main_frames.get(i));
+                FrameKind::Intra | FrameKind::Inter => {
+                    let get_main_frame = |i| main_frames.get(i).map(|(frame, _)| frame);
 
-                    let skipped = 0; // FIXME
+                    let current_idx = main_frames.len();
+                    let last = current_idx.checked_sub(1).and_then(get_main_frame);
+                    let main = &headers.main_frames;
 
-                    let frame = headers
-                        .main_frames
-                        .parse_inter(data, config, headers, last, last_last, skipped)?;
-                    main_frames.push(frame);
+                    let frame = if kind == FrameKind::Intra {
+                        main.parse_intra(&mut data, config, headers, last)?
+                    } else {
+                        let last_last = current_idx.checked_sub(2).and_then(get_main_frame);
+                        let skipped = 0; // FIXME
+
+                        main.parse_inter(&mut data, config, headers, last, last_last, skipped)?
+                    };
+
+                    main_frames.push((frame, slow_frames.len() - 1));
                 }
-                FrameKind::Data(DataFrameKind::Gps) => todo!("handle gps frames"),
-                FrameKind::Data(DataFrameKind::GpsHome) => todo!("handle gps home frames"),
-                FrameKind::Data(DataFrameKind::Slow) => {
-                    let frame = headers.slow_frames.parse(data, config, headers)?;
+                FrameKind::Gps => todo!("handle gps frames"),
+                FrameKind::GpsHome => todo!("handle gps home frames"),
+                FrameKind::Slow => {
+                    let frame = headers.slow_frames.parse(&mut data, config, headers)?;
                     slow_frames.push(frame);
                 }
             }

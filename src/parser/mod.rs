@@ -56,21 +56,6 @@ impl Config {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 enum FrameKind {
     Event,
-    Data(DataFrameKind),
-}
-
-impl FrameKind {
-    pub(crate) fn from_byte(byte: u8) -> Option<Self> {
-        if byte == b'E' {
-            Some(Self::Event)
-        } else {
-            Some(Self::Data(DataFrameKind::from_byte(byte)?))
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub(crate) enum DataFrameKind {
     Intra,
     Inter,
     Gps,
@@ -78,9 +63,10 @@ pub(crate) enum DataFrameKind {
     Slow,
 }
 
-impl DataFrameKind {
+impl FrameKind {
     pub(crate) fn from_byte(byte: u8) -> Option<Self> {
         match byte {
+            b'E' => Some(Self::Event),
             b'I' => Some(Self::Intra),
             b'P' => Some(Self::Inter),
             b'G' => Some(Self::Gps),

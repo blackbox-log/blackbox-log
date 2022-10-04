@@ -23,19 +23,15 @@ impl MainFrame {
     pub fn time(&self) -> i64 {
         self.time
     }
-
-    pub const fn is_intra(&self) -> bool {
-        self.intra
-    }
-
-    pub const fn is_inter(&self) -> bool {
-        !self.intra
-    }
 }
 
 impl Frame for MainFrame {
     fn values(&self) -> &[i64] {
         &self.values
+    }
+
+    fn len(&self) -> usize {
+        2 + self.values.len()
     }
 }
 
@@ -146,7 +142,7 @@ impl<'data> MainFrameDef<'data> {
                 raw
             } else {
                 let last_last = last
-                    .filter(|f| f.is_inter())
+                    .filter(|f| !f.intra)
                     .and_then(|_| last_last.map(MainFrame::time));
 
                 let offset = predictor::straight_line(last.map(MainFrame::time), last_last);

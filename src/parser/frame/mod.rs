@@ -13,8 +13,13 @@ pub trait FieldDef {
     fn encoding(&self) -> Encoding;
 }
 
+#[allow(clippy::len_without_is_empty)]
 pub trait Frame {
     fn values(&self) -> &[i64];
+
+    fn len(&self) -> usize {
+        self.values().len()
+    }
 }
 
 pub(crate) fn is_frame_def_header(header: &str) -> bool {

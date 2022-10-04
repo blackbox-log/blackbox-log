@@ -1,4 +1,5 @@
 use alloc::vec::Vec;
+use core::fmt;
 #[cfg(feature = "std")]
 use std::io::{self, Read};
 
@@ -61,6 +62,16 @@ impl<'data> Reader<'data> {
     }
 }
 
+impl fmt::Debug for Reader<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Reader")
+            .field("index", &self.index)
+            .field("bits_mode", &self.bits.is_some())
+            .finish_non_exhaustive()
+    }
+}
+
+#[derive(Debug)]
 pub struct ByteReader<'data: 'reader, 'reader>(&'reader mut Reader<'data>);
 
 impl<'data, 'reader> ByteReader<'data, 'reader> {

@@ -5,7 +5,6 @@ use std::io::{self, BufWriter, Read, Write};
 use std::path::Path;
 use std::process::{ExitCode, Termination};
 
-use blackbox::parser::Frame;
 use blackbox::Log;
 
 use self::cli::Cli;
@@ -77,17 +76,17 @@ fn main() -> QuietResult<()> {
         }
 
         for i in 0..log_count {
-            let index = i + 1;
+            let human_i = i + 1;
 
-            let span = tracing::info_span!("log", index);
+            let span = tracing::info_span!("log", index = human_i);
             let _span = span.enter();
 
-            let log = match file.parse_index(&config, i) {
+            let log = match file.parse_by_index(&config, i) {
                 Ok(log) => log,
                 Err(_) => return QuietResult::err(exitcode::DATAERR),
             };
 
-            let mut out = match get_output(cli.stdout, &filename, index) {
+            let mut out = match get_output(cli.stdout, &filename, human_i) {
                 Ok(out) => BufWriter::new(out),
                 Err(error) => {
                     tracing::error!(%error, "failed to open output file");
@@ -124,31 +123,28 @@ fn get_output(stdout: bool, filename: &Path, index: usize) -> io::Result<Box<dyn
 }
 
 fn write_csv(out: &mut impl Write, log: &Log) -> io::Result<()> {
-    write_header(out, log)?;
+    write_csv_line(out, log.field_names())?;
 
-    for frame in log.main_frames() {
-        out.write_all(frame.iteration().to_string().as_bytes())?;
-        write!(out, ",")?;
-        out.write_all(frame.time().to_string().as_bytes())?;
-
-        for s in frame.values().iter().map(ToString::to_string) {
-            write!(out, ",")?;
-            out.write_all(s.as_bytes())?;
-        }
-
-        writeln!(out)?;
+    for frame in log.iter_frames() {
+        write_csv_line(out, frame)?;
     }
 
     out.flush()
 }
 
-fn write_header(out: &mut impl Write, log: &Log) -> io::Result<()> {
-    let mut fields = log.headers().main_fields();
-    out.write_all(fields.next().unwrap().as_bytes())?;
+fn write_csv_line(
+    out: &mut impl Write,
+    fields: impl Iterator<Item = impl ToString>,
+) -> io::Result<()> {
+    let mut fields = fields.map(|x| x.to_string());
 
-    for s in fields {
-        write!(out, ",")?;
-        out.write_all(s.as_bytes())?;
+    if let Some(first) = fields.next() {
+        out.write_all(first.as_bytes())?;
+
+        for s in fields {
+            write!(out, ",")?;
+            out.write_all(s.as_bytes())?;
+        }
     }
 
     writeln!(out)
