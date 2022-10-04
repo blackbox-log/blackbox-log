@@ -8,12 +8,12 @@ use super::frame::{
 };
 use super::reader::ByteReader;
 use super::{ParseError, ParseResult, Reader};
-use crate::common::Version;
+use crate::common::LogVersion;
 
 #[allow(dead_code)]
 #[derive(Debug)]
 pub struct Headers<'data> {
-    pub version: Version,
+    pub version: LogVersion,
     pub(crate) main_frames: MainFrameDef<'data>,
     pub(crate) slow_frames: SlowFrameDef<'data>,
 
@@ -72,7 +72,7 @@ fn check_product(bytes: &mut ByteReader) -> Result<(), ParseError> {
     Ok(())
 }
 
-fn get_version(bytes: &mut ByteReader) -> Result<Version, ParseError> {
+fn get_version(bytes: &mut ByteReader) -> Result<LogVersion, ParseError> {
     let (name, value) = parse_header(bytes)?;
 
     if name.to_ascii_lowercase() != "data version" {
@@ -138,7 +138,7 @@ impl FromStr for MotorOutputRange {
 
 #[derive(Debug)]
 struct State<'data> {
-    version: Version,
+    version: LogVersion,
     main_frames: MainFrameDefBuilder<'data>,
     slow_frames: SlowFrameDefBuilder<'data>,
 
@@ -153,7 +153,7 @@ struct State<'data> {
 }
 
 impl<'data> State<'data> {
-    fn new(version: Version) -> Self {
+    fn new(version: LogVersion) -> Self {
         Self {
             version,
             main_frames: MainFrameDef::builder(),

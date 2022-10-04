@@ -20,7 +20,7 @@ pub use self::tagged_32::tagged_32;
 pub use self::tagged_variable::tagged_variable;
 pub use self::variable::{variable, variable_signed};
 use super::{ParseResult, Reader};
-use crate::common::Version;
+use crate::common::LogVersion;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, TryFromPrimitive)]
 #[repr(u8)]
@@ -71,7 +71,7 @@ impl Encoding {
     pub(crate) fn decode(
         &self,
         data: &mut Reader,
-        version: Version,
+        version: LogVersion,
         extra: usize,
     ) -> ParseResult<Vec<i64>> {
         let range = 0..=extra;

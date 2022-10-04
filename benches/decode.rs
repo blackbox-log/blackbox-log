@@ -1,7 +1,7 @@
 use std::fmt::Display;
 use std::iter;
 
-use blackbox::common::Version;
+use blackbox::common::LogVersion;
 use blackbox::parser::{decode, Reader};
 use criterion::measurement::WallTime;
 use criterion::{
@@ -120,7 +120,7 @@ fn tagged_zeros(first: u8, zeros: usize) -> Vec<u8> {
 }
 
 fn tagged_16(c: &mut Criterion) {
-    use Version::{V1, V2};
+    use LogVersion::{V1, V2};
 
     get_bench!(bench_v1, bytes, |data| decode::tagged_16(V1, data));
     get_bench!(bench_v2, bits, |data| decode::tagged_16(V2, data));
