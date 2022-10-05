@@ -1,5 +1,5 @@
 [files]
-extend-exclude = ["reference-impl/upstream"]
+extend-exclude = ["blackbox-sys/upstream"]
 
 [default]
 locale = "en-us"

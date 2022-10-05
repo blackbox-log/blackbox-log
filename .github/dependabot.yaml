@@ -13,7 +13,7 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "cargo"
-    directory: "/reference-impl"
+    directory: "/blackbox-sys"
     schedule:
       interval: "daily"
   - package-ecosystem: "cargo"

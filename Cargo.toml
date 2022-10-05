@@ -1,5 +1,5 @@
 [workspace]
-members = ["cli", "fuzz", "reference-impl", "xtask"]
+members = ["blackbox-sys", "cli", "fuzz", "xtask"]
 default-members = [".", "cli"]
 
 [workspace.package]

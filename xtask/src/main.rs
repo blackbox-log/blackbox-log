@@ -372,7 +372,7 @@ fn get_workspace_args(workspace: bool) -> Vec<&'static str> {
         let mut args = vec!["--workspace"];
 
         if cfg!(not(target_os = "linux")) {
-            let packages = ["reference-impl", "blackbox-fuzz"];
+            let packages = ["blackbox-fuzz", "blackbox-sys"];
 
             for package in packages {
                 args.push("--exclude");

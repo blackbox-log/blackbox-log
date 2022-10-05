@@ -74,9 +74,16 @@ dependencies = [
  "arbitrary",
  "bitter",
  "blackbox",
+ "blackbox-sys",
  "libfuzzer-sys",
  "memfile",
- "reference-impl",
+]
+
+[[package]]
+name = "blackbox-sys"
+version = "0.1.0"
+dependencies = [
+ "cc",
 ]
 
 [[package]]
@@ -576,13 +583,6 @@ dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
  "num_cpus",
-]
-
-[[package]]
-name = "reference-impl"
-version = "0.1.0"
-dependencies = [
- "cc",
 ]
 
 [[package]]

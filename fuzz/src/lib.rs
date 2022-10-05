@@ -4,11 +4,11 @@ use std::os::unix::io::AsRawFd;
 
 use bitter::BitReader as _;
 pub use blackbox::parser::{decode, Reader};
+use blackbox_sys::stream::Stream;
 use libfuzzer_sys::arbitrary;
 pub use libfuzzer_sys::arbitrary::Arbitrary;
 pub use libfuzzer_sys::fuzz_target;
 use memfile::MemFile;
-use reference_impl::stream::Stream;
 
 #[derive(Debug, Arbitrary)]
 pub struct AlignedBytes {
@@ -60,7 +60,7 @@ impl UnalignedBytes {
 }
 
 fn get_streams(bytes: &[u8]) -> io::Result<(Stream, Reader)> {
-    let mut f = MemFile::create_default("reference-impl-input")?;
+    let mut f = MemFile::create_default("blackbox-sys-input")?;
     f.write_all(bytes)?;
     f.flush()?;
 
