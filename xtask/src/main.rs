@@ -55,8 +55,17 @@ fn main() -> Result<()> {
             }
         }
 
-        Args::Test { coverage, args } => {
+        Args::Test {
+            coverage,
+            quiet,
+            args,
+        } => {
             let ci = if is_ci { "--profile=ci" } else { "" };
+            let quiet = if !is_ci && quiet {
+                "--status-level=leak"
+            } else {
+                ""
+            };
 
             if coverage {
                 if is_ci {
@@ -64,11 +73,15 @@ fn main() -> Result<()> {
                     let cmd = cmd!(sh, "cargo llvm-cov --package blackbox --lcov --output-path coverage.lcov nextest {ci}");
                     cmd.run()
                 } else {
-                    cmd!(sh, "cargo llvm-cov --package blackbox --html nextest").run()
+                    cmd!(
+                        sh,
+                        "cargo llvm-cov --package blackbox --html nextest {quiet}"
+                    )
+                    .run()
                 }
             } else {
                 let workspace = get_workspace_args(true);
-                cmd!(sh, "cargo nextest run {workspace...} {ci}")
+                cmd!(sh, "cargo nextest run {workspace...} {ci} {quiet}")
                     .args(args)
                     .run()
             }
@@ -236,6 +249,10 @@ enum Args {
         /// Generates a coverage report while running tests (only for
         /// `blackbox`)
         coverage: bool,
+
+        #[bpaf(short, long)]
+        /// Hide output for successful tests
+        quiet: bool,
 
         #[bpaf(positional)]
         /// Arguments for nextest
