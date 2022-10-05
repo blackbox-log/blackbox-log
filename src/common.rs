@@ -3,6 +3,8 @@ use core::fmt;
 use core::marker::PhantomData;
 use core::str::FromStr;
 
+use crate::parser::ParseError;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum LogVersion {
     V1,
@@ -23,20 +25,22 @@ impl FromStr for LogVersion {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum FirmwareKind {
-    Baseflight,
-    Cleanflight,
+    Betaflight,
     INav,
 }
 
 impl FromStr for FirmwareKind {
-    type Err = crate::parser::ParseError;
+    type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_ascii_lowercase().as_str() {
-            "cleanflight" => Ok(Self::Cleanflight),
-            "baseflight" => Ok(Self::Baseflight),
+            "cleanflight" | "betaflight" => Ok(Self::Betaflight),
+            "baseflight" => {
+                tracing::error!("Baseflight logs are not supported");
+                Err(ParseError::UnknownFirmware(s.to_owned()))
+            }
             "inav" => Ok(Self::INav),
-            _ => Err(crate::parser::ParseError::UnknownFirmware(s.to_owned())),
+            _ => Err(ParseError::UnknownFirmware(s.to_owned())),
         }
     }
 }
