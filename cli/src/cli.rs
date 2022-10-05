@@ -12,26 +12,26 @@ use tracing_subscriber::filter::LevelFilter;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[allow(dead_code)]
 pub enum CliUnit {
-    Amperage(AmperageUnit),
     FrameTime(FrameTimeUnit),
-    Height(HeightUnit),
-    Rotation(RotationUnit),
-    Acceleration(AccelerationUnit),
-    GpsSpeed(GpsSpeedUnit),
+    Amperage(AmperageUnit),
     VBat(VBatUnit),
+    Acceleration(AccelerationUnit),
+    Rotation(RotationUnit),
+    Height(HeightUnit),
+    GpsSpeed(GpsSpeedUnit),
     Unitless,
 }
 
 impl CliUnit {
     pub fn is_raw(self) -> bool {
         match self {
-            Self::Amperage(a) => a == AmperageUnit::Raw,
             Self::FrameTime(_) => false,
-            Self::Height(_) => todo!(),
-            Self::Rotation(r) => r == RotationUnit::Raw,
-            Self::Acceleration(x) => x == AccelerationUnit::Raw,
-            Self::GpsSpeed(_) => todo!(),
+            Self::Amperage(a) => a == AmperageUnit::Raw,
             Self::VBat(v) => v == VBatUnit::Raw,
+            Self::Acceleration(x) => x == AccelerationUnit::Raw,
+            Self::Rotation(r) => r == RotationUnit::Raw,
+            Self::Height(_) => todo!(),
+            Self::GpsSpeed(_) => todo!(),
             Self::Unitless => true,
         }
     }
@@ -40,13 +40,13 @@ impl CliUnit {
 impl Display for CliUnit {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
-            Self::Amperage(a) => a.fmt(f),
             Self::FrameTime(t) => t.fmt(f),
-            Self::Height(h) => h.fmt(f),
-            Self::Rotation(r) => r.fmt(f),
-            Self::Acceleration(a) => a.fmt(f),
-            Self::GpsSpeed(s) => s.fmt(f),
+            Self::Amperage(a) => a.fmt(f),
             Self::VBat(v) => v.fmt(f),
+            Self::Acceleration(a) => a.fmt(f),
+            Self::Rotation(r) => r.fmt(f),
+            Self::Height(h) => h.fmt(f),
+            Self::GpsSpeed(s) => s.fmt(f),
             Self::Unitless => Ok(()),
         }
     }
@@ -562,11 +562,11 @@ impl Cli {
 
     pub fn get_unit(&self, unit: UnitKind) -> CliUnit {
         match unit {
-            UnitKind::Acceleration => CliUnit::Acceleration(self.unit_acceleration),
-            UnitKind::Amperage => CliUnit::Amperage(self.unit_amperage),
             UnitKind::FrameTime => CliUnit::FrameTime(self.unit_frame_time),
-            UnitKind::Rotation => CliUnit::Rotation(self.unit_rotation),
+            UnitKind::Amperage => CliUnit::Amperage(self.unit_amperage),
             UnitKind::Voltage => CliUnit::VBat(self.unit_vbat),
+            UnitKind::Acceleration => CliUnit::Acceleration(self.unit_acceleration),
+            UnitKind::Rotation => CliUnit::Rotation(self.unit_rotation),
             UnitKind::Unitless => CliUnit::Unitless,
         }
     }

@@ -323,8 +323,8 @@ fn unit_from_name(name: &str) -> UnitKind {
     let base = name.split_once('[').map_or(name, |(base, _)| base);
     match base.to_ascii_lowercase().as_str() {
         "time" => UnitKind::FrameTime,
-        "vbatlatest" => UnitKind::Voltage,
         "amperagelatest" => UnitKind::Amperage,
+        "vbatlatest" => UnitKind::Voltage,
         "accsmooth" => UnitKind::Acceleration,
         "gyroadc" => UnitKind::Rotation,
         _ => UnitKind::Unitless,

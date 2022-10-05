@@ -5,20 +5,20 @@ use crate::parser::Headers;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Unit {
-    Acceleration(Acceleration),
-    Amperage(Amperage),
     FrameTime(i64),
-    Rotation(Rotation),
+    Amperage(Amperage),
     Voltage(Voltage),
+    Acceleration(Acceleration),
+    Rotation(Rotation),
     Unitless(i64),
 }
 
 impl Unit {
     pub const fn as_raw(self) -> i64 {
         match self {
+            Self::FrameTime(t) => t,
             Self::Acceleration(a) => a.as_raw(),
             Self::Amperage(a) => a.as_raw(),
-            Self::FrameTime(t) => t,
             Self::Rotation(r) => r.as_raw(),
             Self::Voltage(v) => v.as_raw(),
             Self::Unitless(x) => x,
@@ -28,33 +28,67 @@ impl Unit {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum UnitKind {
-    Acceleration,
-    Amperage,
     FrameTime,
-    Rotation,
+    Amperage,
     Voltage,
+    Acceleration,
+    Rotation,
     Unitless,
 }
 
 impl UnitKind {
     pub(crate) fn with_value(self, value: i64, headers: &Headers) -> Unit {
         match self {
-            Self::Acceleration => Unit::Acceleration(Acceleration {
-                raw: value,
-                one_g: headers.acceleration_1g,
-            }),
+            Self::FrameTime => Unit::FrameTime(value),
             Self::Amperage => Unit::Amperage(Amperage {
                 raw: value,
                 current_meter: headers.current_meter,
             }),
-            Self::FrameTime => Unit::FrameTime(value),
-            Self::Rotation => Unit::Rotation(Rotation(value)),
             Self::Voltage => Unit::Voltage(Voltage {
                 raw: value,
                 scale: headers.vbat_scale,
             }),
+            Self::Acceleration => Unit::Acceleration(Acceleration {
+                raw: value,
+                one_g: headers.acceleration_1g,
+            }),
+            Self::Rotation => Unit::Rotation(Rotation(value)),
             Self::Unitless => Unit::Unitless(value),
         }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Amperage {
+    raw: i64,
+    current_meter: CurrentMeterConfig,
+}
+
+impl Amperage {
+    pub const fn as_raw(&self) -> i64 {
+        self.raw
+    }
+
+    pub fn as_milliamps(&self) -> f64 {
+        let milliamps = i64_to_f64(self.raw * 3300) / 4095.;
+        let milliamps = milliamps - f64::from(self.current_meter.offset);
+        (milliamps * 10_000.) / f64::from(self.current_meter.scale)
+    }
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Voltage {
+    pub(crate) raw: i64,
+    pub(crate) scale: u16,
+}
+
+impl Voltage {
+    pub const fn as_raw(&self) -> i64 {
+        self.raw
+    }
+
+    pub fn as_millivolts(&self) -> f64 {
+        i64_to_f64(self.raw * 330 * i64::from(self.scale)) / 4095.
     }
 }
 
@@ -78,24 +112,6 @@ impl Acceleration {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Amperage {
-    raw: i64,
-    current_meter: CurrentMeterConfig,
-}
-
-impl Amperage {
-    pub const fn as_raw(&self) -> i64 {
-        self.raw
-    }
-
-    pub fn as_milliamps(&self) -> f64 {
-        let milliamps = i64_to_f64(self.raw * 3300) / 4095.;
-        let milliamps = milliamps - f64::from(self.current_meter.offset);
-        (milliamps * 10_000.) / f64::from(self.current_meter.scale)
-    }
-}
-
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Rotation(i64);
 
@@ -110,22 +126,6 @@ impl Rotation {
 
     pub fn as_radians(&self) -> f64 {
         self.as_degrees() * f64::consts::PI / 180.
-    }
-}
-
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Voltage {
-    pub(crate) raw: i64,
-    pub(crate) scale: u16,
-}
-
-impl Voltage {
-    pub const fn as_raw(&self) -> i64 {
-        self.raw
-    }
-
-    pub fn as_millivolts(&self) -> f64 {
-        i64_to_f64(self.raw * 330 * i64::from(self.scale)) / 4095.
     }
 }
 

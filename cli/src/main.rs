@@ -142,11 +142,11 @@ fn write_csv(out: &mut impl Write, log: &Log, config: &Cli) -> io::Result<()> {
         write_csv_line(
             out,
             frame.map(|x| match x {
-                Unit::Acceleration(a) => config.unit_acceleration.format(a),
-                Unit::Amperage(a) => config.unit_amperage.format(a),
                 Unit::FrameTime(t) => config.unit_frame_time.format(t),
-                Unit::Rotation(r) => config.unit_rotation.format(r),
+                Unit::Amperage(a) => config.unit_amperage.format(a),
                 Unit::Voltage(v) => config.unit_vbat.format(v),
+                Unit::Acceleration(a) => config.unit_acceleration.format(a),
+                Unit::Rotation(r) => config.unit_rotation.format(r),
                 Unit::Unitless(x) => x.to_string(),
             }),
         )?;
