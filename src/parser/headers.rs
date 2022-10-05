@@ -9,6 +9,7 @@ use super::frame::{
 use super::reader::ByteReader;
 use super::{ParseError, ParseResult, Reader};
 use crate::common::{FirmwareKind, LogVersion};
+use crate::units::UnitKind;
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -24,19 +25,32 @@ pub struct Headers<'data> {
 
     /// Measured battery voltage at arm
     pub vbat_reference: u16,
+    pub vbat_scale: u16,
+    pub current_meter: CurrentMeterConfig,
+
+    pub acceleration_1g: u16,
+    pub gyro_scale: f32,
+
     pub min_throttle: u16,
     pub motor_output_range: MotorOutputRange,
 }
 
 impl<'data> Headers<'data> {
-    pub(crate) fn main_fields(&self) -> impl Iterator<Item = &str> {
-        iter::once(self.main_frames.iteration.name)
-            .chain(iter::once(self.main_frames.time.name))
-            .chain(self.main_frames.fields.iter().map(|f| f.name))
+    pub(crate) fn main_fields(&self) -> impl Iterator<Item = (&str, UnitKind)> {
+        let MainFrameDef {
+            iteration,
+            time,
+            fields,
+            ..
+        } = &self.main_frames;
+
+        iter::once((iteration.name, iteration.unit))
+            .chain(iter::once((time.name, time.unit)))
+            .chain(fields.iter().map(|f| (f.name, f.unit)))
     }
 
-    pub(crate) fn slow_fields(&self) -> impl Iterator<Item = &str> {
-        self.slow_frames.0.iter().map(|f| f.name)
+    pub(crate) fn slow_fields(&self) -> impl Iterator<Item = (&str, UnitKind)> {
+        self.slow_frames.0.iter().map(|f| (f.name, f.unit))
     }
 
     pub(crate) fn parse(data: &mut Reader<'data>) -> ParseResult<Self> {
@@ -85,6 +99,12 @@ fn get_version(bytes: &mut ByteReader) -> Result<LogVersion, ParseError> {
         .map_err(|_| ParseError::UnsupportedVersion(value.to_owned()))
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CurrentMeterConfig {
+    pub offset: u16,
+    pub scale: u16,
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct MotorOutputRange(u16, u16);
 
@@ -128,6 +148,12 @@ struct State<'data> {
     craft_name: Option<&'data str>,
 
     vbat_reference: Option<u16>,
+    vbat_scale: Option<u16>,
+    current_meter: Option<CurrentMeterConfig>,
+
+    acceleration_1g: Option<u16>,
+    gyro_scale: Option<f32>,
+
     min_throttle: Option<u16>,
     motor_output_range: Option<MotorOutputRange>,
 }
@@ -145,6 +171,12 @@ impl<'data> State<'data> {
             craft_name: None,
 
             vbat_reference: None,
+            vbat_scale: None,
+            current_meter: None,
+
+            acceleration_1g: None,
+            gyro_scale: None,
+
             min_throttle: None,
             motor_output_range: None,
         }
@@ -160,6 +192,30 @@ impl<'data> State<'data> {
             "vbatref" => {
                 let vbat_reference = value.parse().map_err(|_| ParseError::Corrupted)?;
                 self.vbat_reference = Some(vbat_reference);
+            }
+            "vbatscale" | "vbat_scale" => {
+                let vbat_scale = value.parse().map_err(|_| ParseError::Corrupted)?;
+                self.vbat_scale = Some(vbat_scale);
+            }
+            "currentmeter" | "currentsensor" => {
+                let (offset, scale) = value.split_once(',').ok_or(ParseError::Corrupted)?;
+                let offset = offset.parse().map_err(|_| ParseError::Corrupted)?;
+                let scale = scale.parse().map_err(|_| ParseError::Corrupted)?;
+
+                self.current_meter = Some(CurrentMeterConfig { offset, scale });
+            }
+            "acc_1g" => {
+                let one_g = value.parse().map_err(|_| ParseError::Corrupted)?;
+                self.acceleration_1g = Some(one_g);
+            }
+            "gyro.scale" | "gyro_scale" => {
+                let scale = if let Some(hex) = value.strip_prefix("0x") {
+                    u32::from_str_radix(hex, 16).map_err(|_| ParseError::Corrupted)?
+                } else {
+                    value.parse().map_err(|_| ParseError::Corrupted)?
+                };
+
+                self.gyro_scale = Some(f32::from_bits(scale));
             }
             "minthrottle" => {
                 let min_throttle = value.parse().map_err(|_| ParseError::Corrupted)?;
@@ -198,6 +254,12 @@ impl<'data> State<'data> {
             craft_name: self.craft_name.ok_or(ParseError::Corrupted)?,
 
             vbat_reference: self.vbat_reference.ok_or(ParseError::Corrupted)?,
+            vbat_scale: self.vbat_scale.ok_or(ParseError::Corrupted)?,
+            current_meter: self.current_meter.ok_or(ParseError::Corrupted)?,
+
+            acceleration_1g: self.acceleration_1g.ok_or(ParseError::Corrupted)?,
+            gyro_scale: self.gyro_scale.ok_or(ParseError::Corrupted)?,
+
             min_throttle: self.min_throttle.ok_or(ParseError::Corrupted)?,
             motor_output_range: self.motor_output_range.ok_or(ParseError::Corrupted)?,
         })

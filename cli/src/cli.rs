@@ -1,11 +1,56 @@
 #![allow(clippy::default_trait_access)]
 
 use std::ffi::OsString;
+use std::fmt::{self, Display};
 use std::path::PathBuf;
 
 use blackbox::parser::Config;
+use blackbox::units::{Acceleration, Amperage, Rotation, UnitKind, Voltage};
 use bpaf::{construct, Bpaf, FromOsStr, Parser};
 use tracing_subscriber::filter::LevelFilter;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(dead_code)]
+pub enum CliUnit {
+    Amperage(AmperageUnit),
+    FrameTime(FrameTimeUnit),
+    Height(HeightUnit),
+    Rotation(RotationUnit),
+    Acceleration(AccelerationUnit),
+    GpsSpeed(GpsSpeedUnit),
+    VBat(VBatUnit),
+    Unitless,
+}
+
+impl CliUnit {
+    pub fn is_raw(self) -> bool {
+        match self {
+            Self::Amperage(a) => a == AmperageUnit::Raw,
+            Self::FrameTime(_) => false,
+            Self::Height(_) => todo!(),
+            Self::Rotation(r) => r == RotationUnit::Raw,
+            Self::Acceleration(x) => x == AccelerationUnit::Raw,
+            Self::GpsSpeed(_) => todo!(),
+            Self::VBat(v) => v == VBatUnit::Raw,
+            Self::Unitless => true,
+        }
+    }
+}
+
+impl Display for CliUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            Self::Amperage(a) => a.fmt(f),
+            Self::FrameTime(t) => t.fmt(f),
+            Self::Height(h) => h.fmt(f),
+            Self::Rotation(r) => r.fmt(f),
+            Self::Acceleration(a) => a.fmt(f),
+            Self::GpsSpeed(s) => s.fmt(f),
+            Self::VBat(v) => v.fmt(f),
+            Self::Unitless => Ok(()),
+        }
+    }
+}
 
 macro_rules! from_os_str_impl {
     ($for:ident { $( $($s:literal)|+ => $value:expr, )+ _ => $err:literal $(,)? } $(,)?) => {
@@ -29,10 +74,20 @@ macro_rules! from_os_str_impl {
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum AmperageUnit {
-    #[default]
     Raw,
     Milliamps,
+    #[default]
     Amps,
+}
+
+impl AmperageUnit {
+    pub fn format(&self, amps: Amperage) -> String {
+        match self {
+            Self::Raw => amps.as_raw().to_string(),
+            Self::Milliamps => format!("{:.0}", amps.as_milliamps()),
+            Self::Amps => format!("{:.3}", amps.as_milliamps() / 1000.),
+        }
+    }
 }
 
 from_os_str_impl!(AmperageUnit {
@@ -42,18 +97,50 @@ from_os_str_impl!(AmperageUnit {
     _ => "expected raw, mA, or A",
 });
 
+impl fmt::Display for AmperageUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Self::Raw => "raw",
+            Self::Milliamps => "mA",
+            Self::Amps => "A",
+        };
+
+        f.write_str(s)
+    }
+}
+
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
-pub enum FrameTime {
+pub enum FrameTimeUnit {
     #[default]
     Microseconds,
     Seconds,
 }
 
-from_os_str_impl!(FrameTime {
+impl FrameTimeUnit {
+    pub fn format(&self, us: i64) -> String {
+        match self {
+            Self::Microseconds => us.to_string(),
+            Self::Seconds => format_decimal(us, 3),
+        }
+    }
+}
+
+from_os_str_impl!(FrameTimeUnit {
     "us" | "micros" => Self::Microseconds,
     "s" => Self::Seconds,
     _ => "expected us or s",
 });
+
+impl fmt::Display for FrameTimeUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Self::Microseconds => "us",
+            Self::Seconds => "s",
+        };
+
+        f.write_str(s)
+    }
+}
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum HeightUnit {
@@ -70,6 +157,18 @@ from_os_str_impl!(HeightUnit {
     _ => "expected cm, m, or ft",
 });
 
+impl fmt::Display for HeightUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Self::Centimeters => "cm",
+            Self::Meters => "m",
+            Self::Feet => "ft",
+        };
+
+        f.write_str(s)
+    }
+}
+
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum RotationUnit {
     #[default]
@@ -80,12 +179,34 @@ pub enum RotationUnit {
     Radians,
 }
 
+impl RotationUnit {
+    pub fn format(&self, rotation: Rotation) -> String {
+        match self {
+            Self::Raw => rotation.as_raw().to_string(),
+            Self::Degrees => format!("{:.2}", rotation.as_degrees()),
+            Self::Radians => format!("{:.2}", rotation.as_radians()),
+        }
+    }
+}
+
 from_os_str_impl!(RotationUnit {
     "raw" => Self::Raw,
     "deg/s" | "deg" => Self::Degrees,
     "rad/s" | "rad" => Self::Radians,
     _ => "expected raw, deg/s, or rad/s",
 });
+
+impl fmt::Display for RotationUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Self::Raw => "raw",
+            Self::Degrees => "deg/s",
+            Self::Radians => "rad/s",
+        };
+
+        f.write_str(s)
+    }
+}
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum AccelerationUnit {
@@ -96,13 +217,34 @@ pub enum AccelerationUnit {
     Mps2,
 }
 
+impl AccelerationUnit {
+    pub fn format(&self, accel: Acceleration) -> String {
+        match self {
+            Self::Raw => accel.as_raw().to_string(),
+            Self::Gs => format!("{:.3}", accel.as_gs()),
+            Self::Mps2 => format!("{:.3}", accel.as_meters_per_sec_sq()),
+        }
+    }
+}
+
 from_os_str_impl!(AccelerationUnit {
     "raw" => Self::Raw,
     "g" => Self::Gs,
-    "m/s2" | "mps2" => Self::Mps2,
-    _ => "expected raw, g, or m/s2",
+    "m/s2" | "m/s/s" | "mps2" => Self::Mps2,
+    _ => "expected raw, g, or m/s/s",
 });
 
+impl fmt::Display for AccelerationUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Self::Raw => "raw",
+            Self::Gs => "g",
+            Self::Mps2 => "m/s/s",
+        };
+
+        f.write_str(s)
+    }
+}
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum GpsSpeedUnit {
     #[default]
@@ -123,12 +265,33 @@ from_os_str_impl!(GpsSpeedUnit {
     _ => "expected m/s, kph, or mph",
 });
 
+impl fmt::Display for GpsSpeedUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Self::Mps => "mps",
+            Self::Kph => "kph",
+            Self::Mph => "mph",
+        };
+
+        f.write_str(s)
+    }
+}
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum VBatUnit {
-    #[default]
     Raw,
     Millivolts,
+    #[default]
     Volts,
+}
+
+impl VBatUnit {
+    pub fn format(&self, volts: Voltage) -> String {
+        match self {
+            Self::Raw => volts.as_raw().to_string(),
+            Self::Millivolts => format!("{:.0}", volts.as_millivolts()),
+            Self::Volts => format!("{:.3}", volts.as_millivolts() / 1000.),
+        }
+    }
 }
 
 from_os_str_impl!(VBatUnit {
@@ -138,6 +301,17 @@ from_os_str_impl!(VBatUnit {
     _ => "expected raw, mV, or V",
 });
 
+impl fmt::Display for VBatUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Self::Raw => "raw",
+            Self::Millivolts => "mV",
+            Self::Volts => "V",
+        };
+
+        f.write_str(s)
+    }
+}
 #[derive(Debug, Clone, Bpaf)]
 #[bpaf(options, private, version)]
 #[allow(unused, clippy::default_trait_access)]
@@ -156,7 +330,7 @@ pub(crate) struct Cli {
 
     // TODO: --unit-flags
     #[bpaf(argument("unit"), fallback(Default::default()))]
-    pub unit_frame_time: FrameTime,
+    pub unit_frame_time: FrameTimeUnit,
 
     #[bpaf(argument("unit"), fallback(Default::default()))]
     pub unit_height: HeightUnit,
@@ -385,6 +559,26 @@ impl Cli {
     pub fn to_blackbox_config(&self) -> Config {
         Config { raw: self.raw }
     }
+
+    pub fn get_unit(&self, unit: UnitKind) -> CliUnit {
+        match unit {
+            UnitKind::Acceleration => CliUnit::Acceleration(self.unit_acceleration),
+            UnitKind::Amperage => CliUnit::Amperage(self.unit_amperage),
+            UnitKind::FrameTime => CliUnit::FrameTime(self.unit_frame_time),
+            UnitKind::Rotation => CliUnit::Rotation(self.unit_rotation),
+            UnitKind::Voltage => CliUnit::VBat(self.unit_vbat),
+            UnitKind::Unitless => CliUnit::Unitless,
+        }
+    }
+}
+
+fn format_decimal(value: i64, decimals: u32) -> String {
+    let divisor = 10_i64.pow(decimals);
+    let mut s = String::new();
+    s.push_str(&(value / divisor).to_string());
+    s.push('.');
+    s.push_str(&(value % divisor).to_string());
+    s
 }
 
 #[cfg(test)]

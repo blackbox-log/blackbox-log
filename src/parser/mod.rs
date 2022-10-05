@@ -1,7 +1,7 @@
 mod data;
 pub mod decode;
 mod frame;
-mod headers;
+pub mod headers;
 mod predictor;
 mod reader;
 

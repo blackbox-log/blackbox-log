@@ -5,6 +5,7 @@ use tracing::instrument;
 
 use super::{count_fields_with_same_encoding, Frame, FrameKind, FrameProperty};
 use crate::parser::{Config, Encoding, Headers, ParseError, ParseResult, Predictor, Reader};
+use crate::units::UnitKind;
 
 #[derive(Debug, Clone)]
 pub struct SlowFrame {
@@ -80,6 +81,7 @@ pub(crate) struct SlowFieldDef<'data> {
     pub(crate) name: &'data str,
     pub(crate) predictor: Predictor,
     pub(crate) encoding: Encoding,
+    pub(crate) unit: UnitKind,
 }
 
 #[derive(Debug, Default)]
@@ -116,6 +118,7 @@ impl<'data> SlowFrameDefBuilder<'data> {
                     name,
                     predictor: predictor?,
                     encoding: encoding?,
+                    unit: unit_from_name(name),
                 })
             })
             .collect::<ParseResult<Vec<_>>>()?;
@@ -127,4 +130,12 @@ impl<'data> SlowFrameDefBuilder<'data> {
 
         Ok(SlowFrameDef(fields))
     }
+}
+
+fn unit_from_name(_name: &str) -> UnitKind {
+    // TODO:
+    // match name.to_ascii_lowercase().as_str() {
+    //     _ => UnitKind::Unitless,
+    // }
+    UnitKind::Unitless
 }

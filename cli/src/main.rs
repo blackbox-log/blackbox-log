@@ -5,6 +5,7 @@ use std::io::{self, BufWriter, Read, Write};
 use std::path::Path;
 use std::process::{ExitCode, Termination};
 
+use blackbox::units::Unit;
 use blackbox::Log;
 
 use self::cli::Cli;
@@ -55,11 +56,11 @@ fn main() -> QuietResult<()> {
 
     let config = cli.to_blackbox_config();
 
-    for filename in cli.logs {
+    for filename in &cli.logs {
         let span = tracing::info_span!("file", name = ?filename);
         let _span = span.enter();
 
-        let data = match read_log_file(&filename) {
+        let data = match read_log_file(filename) {
             Ok(data) => data,
             Err(error) => {
                 tracing::error!(%error, "failed to read log file");
@@ -70,8 +71,10 @@ fn main() -> QuietResult<()> {
         let file = blackbox::File::new(&data);
 
         let log_count = file.log_count();
-        if cli.stdout && log_count > 1 {
-            tracing::error!("found {log_count} logs, choose one to write to stdout with `--index`");
+        if cli.stdout && log_count > 1 && cli.index.len() != 1 {
+            tracing::error!(
+                "found {log_count} logs, choose exactly one to write to stdout with `--index`"
+            );
             return QuietResult::err(exitcode::USAGE);
         }
 
@@ -86,7 +89,7 @@ fn main() -> QuietResult<()> {
                 Err(_) => return QuietResult::err(exitcode::DATAERR),
             };
 
-            let mut out = match get_output(cli.stdout, &filename, human_i) {
+            let mut out = match get_output(cli.stdout, filename, human_i) {
                 Ok(out) => BufWriter::new(out),
                 Err(error) => {
                     tracing::error!(%error, "failed to open output file");
@@ -94,7 +97,7 @@ fn main() -> QuietResult<()> {
                 }
             };
 
-            if let Err(error) = write_csv(&mut out, &log) {
+            if let Err(error) = write_csv(&mut out, &log, &cli) {
                 tracing::error!(%error, "failed to write csv");
                 return QuietResult::err(exitcode::IOERR);
             }
@@ -122,11 +125,31 @@ fn get_output(stdout: bool, filename: &Path, index: usize) -> io::Result<Box<dyn
     }
 }
 
-fn write_csv(out: &mut impl Write, log: &Log) -> io::Result<()> {
-    write_csv_line(out, log.field_names())?;
+fn write_csv(out: &mut impl Write, log: &Log, config: &Cli) -> io::Result<()> {
+    write_csv_line(
+        out,
+        log.fields().map(|(name, unit)| {
+            let unit = config.get_unit(unit);
+            if config.raw || unit.is_raw() {
+                name.to_owned()
+            } else {
+                format!("{name} ({unit})")
+            }
+        }),
+    )?;
 
     for frame in log.iter_frames() {
-        write_csv_line(out, frame)?;
+        write_csv_line(
+            out,
+            frame.map(|x| match x {
+                Unit::Acceleration(a) => config.unit_acceleration.format(a),
+                Unit::Amperage(a) => config.unit_amperage.format(a),
+                Unit::FrameTime(t) => config.unit_frame_time.format(t),
+                Unit::Rotation(r) => config.unit_rotation.format(r),
+                Unit::Voltage(v) => config.unit_vbat.format(v),
+                Unit::Unitless(x) => x.to_string(),
+            }),
+        )?;
     }
 
     out.flush()
@@ -134,10 +157,8 @@ fn write_csv(out: &mut impl Write, log: &Log) -> io::Result<()> {
 
 fn write_csv_line(
     out: &mut impl Write,
-    fields: impl Iterator<Item = impl ToString>,
+    mut fields: impl Iterator<Item = String>,
 ) -> io::Result<()> {
-    let mut fields = fields.map(|x| x.to_string());
-
     if let Some(first) = fields.next() {
         out.write_all(first.as_bytes())?;
 

@@ -11,6 +11,7 @@ pub mod inav;
 
 pub mod log;
 pub mod parser;
+pub mod units;
 
 use alloc::vec::Vec;
 

@@ -6,6 +6,7 @@ use super::{count_fields_with_same_encoding, Frame, FrameKind, FrameProperty};
 use crate::parser::{
     decode, predictor, Config, Encoding, Headers, ParseError, ParseResult, Predictor, Reader,
 };
+use crate::units::UnitKind;
 
 #[derive(Debug, Clone)]
 pub struct MainFrame {
@@ -215,6 +216,7 @@ pub(crate) struct MainFieldDef<'data> {
     predictor_inter: Predictor,
     encoding_intra: Encoding,
     encoding_inter: Encoding,
+    pub(crate) unit: UnitKind,
 }
 
 #[derive(Debug, Default)]
@@ -264,6 +266,7 @@ impl<'data> MainFrameDefBuilder<'data> {
                         predictor_inter: predictor_inter?,
                         encoding_intra: encoding_intra?,
                         encoding_inter: encoding_inter?,
+                        unit: unit_from_name(name),
                     })
                 },
             );
@@ -313,5 +316,17 @@ impl<'data> MainFrameDefBuilder<'data> {
 
             index_motor_0,
         })
+    }
+}
+
+fn unit_from_name(name: &str) -> UnitKind {
+    let base = name.split_once('[').map_or(name, |(base, _)| base);
+    match base.to_ascii_lowercase().as_str() {
+        "time" => UnitKind::FrameTime,
+        "vbatlatest" => UnitKind::Voltage,
+        "amperagelatest" => UnitKind::Amperage,
+        "accsmooth" => UnitKind::Acceleration,
+        "gyroadc" => UnitKind::Rotation,
+        _ => UnitKind::Unitless,
     }
 }
