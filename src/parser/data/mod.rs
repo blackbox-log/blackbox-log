@@ -3,7 +3,7 @@ mod event;
 use alloc::vec::Vec;
 
 pub use self::event::Event;
-use super::{Config, FrameKind, Headers, MainFrame, ParseResult, Reader, SlowFrame};
+use super::{FrameKind, Headers, MainFrame, ParseResult, Reader, SlowFrame};
 
 // Reason: unfinished
 #[allow(dead_code)]
@@ -17,7 +17,7 @@ pub struct Data {
 }
 
 impl Data {
-    pub fn parse(mut data: Reader, config: &Config, headers: &Headers) -> ParseResult<Self> {
+    pub fn parse(mut data: Reader, headers: &Headers) -> ParseResult<Self> {
         let mut events = Vec::new();
         let mut main_frames = Vec::new();
         // let gps_frames = Vec::new();
@@ -68,12 +68,12 @@ impl Data {
                     let main = &headers.main_frames;
 
                     let frame = if kind == FrameKind::Intra {
-                        main.parse_intra(&mut data, config, headers, last)?
+                        main.parse_intra(&mut data, headers, last)?
                     } else {
                         let last_last = current_idx.checked_sub(2).and_then(get_main_frame);
                         let skipped = 0; // FIXME
 
-                        main.parse_inter(&mut data, config, headers, last, last_last, skipped)?
+                        main.parse_inter(&mut data, headers, last, last_last, skipped)?
                     };
 
                     main_frames.push((frame, slow_frames.len() - 1));
@@ -81,7 +81,7 @@ impl Data {
                 FrameKind::Gps => todo!("handle gps frames"),
                 FrameKind::GpsHome => todo!("handle gps home frames"),
                 FrameKind::Slow => {
-                    let frame = headers.slow_frames.parse(&mut data, config, headers)?;
+                    let frame = headers.slow_frames.parse(&mut data, headers)?;
                     slow_frames.push(frame);
                 }
             }

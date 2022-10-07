@@ -4,7 +4,7 @@ use tracing::instrument;
 
 use super::{count_fields_with_same_encoding, Frame, FrameKind, FrameProperty};
 use crate::parser::{
-    decode, predictor, Config, Encoding, Headers, ParseError, ParseResult, Predictor, Reader,
+    decode, predictor, Encoding, Headers, ParseError, ParseResult, Predictor, Reader,
 };
 use crate::units::UnitKind;
 
@@ -66,7 +66,6 @@ impl<'data> MainFrameDef<'data> {
     pub(crate) fn parse_intra(
         &self,
         data: &mut Reader,
-        config: &Config,
         headers: &Headers,
         last: Option<&MainFrame>,
     ) -> ParseResult<MainFrame> {
@@ -97,11 +96,9 @@ impl<'data> MainFrameDef<'data> {
 
             let last = last.map(|l| l.values[i]);
 
-            if !config.raw {
-                values[i] = field
-                    .predictor_intra
-                    .apply(headers, raw, &values, last, None, 0)?;
-            }
+            values[i] = field
+                .predictor_intra
+                .apply(headers, raw, &values, last, None, 0)?;
 
             tracing::trace!(
                 field = field.name,
@@ -126,7 +123,6 @@ impl<'data> MainFrameDef<'data> {
     pub(crate) fn parse_inter(
         &self,
         data: &mut Reader,
-        config: &Config,
         headers: &Headers,
         last: Option<&MainFrame>,
         last_last: Option<&MainFrame>,
@@ -135,24 +131,19 @@ impl<'data> MainFrameDef<'data> {
         let iteration = 1 + last.map_or(0, MainFrame::iteration) + skipped_frames;
         tracing::trace!(iteration);
 
-        let time: i64 = {
-            let raw = decode::variable_signed(data)?.into();
+        let time = {
+            let raw = i64::from(decode::variable_signed(data)?);
 
-            if config.raw {
-                tracing::trace!(time = raw);
-                raw
-            } else {
-                let last_last = last
-                    .filter(|f| !f.intra)
-                    .and_then(|_| last_last.map(MainFrame::time));
+            let last_last = last
+                .filter(|f| !f.intra)
+                .and_then(|_| last_last.map(MainFrame::time));
 
-                let offset = predictor::straight_line(last.map(MainFrame::time), last_last);
+            let offset = predictor::straight_line(last.map(MainFrame::time), last_last);
 
-                let time = raw.saturating_add(offset);
+            let time = raw.saturating_add(offset);
 
-                tracing::trace!(time, raw);
-                time
-            }
+            tracing::trace!(time, raw);
+            time
         };
 
         let mut fields = self.fields.iter().peekable();
@@ -178,16 +169,14 @@ impl<'data> MainFrameDef<'data> {
             let last = last.map(|l| l.values[i]);
             let last_last = last_last.map(|l| l.values[i]);
 
-            if !config.raw {
-                values[i] = field.predictor_inter.apply(
-                    headers,
-                    raw,
-                    &values,
-                    last,
-                    last_last,
-                    skipped_frames.into(),
-                )?;
-            }
+            values[i] = field.predictor_inter.apply(
+                headers,
+                raw,
+                &values,
+                last,
+                last_last,
+                skipped_frames.into(),
+            )?;
 
             tracing::trace!(
                 field = field.name,

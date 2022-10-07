@@ -41,17 +41,11 @@ impl<'data> File<'data> {
     ///
     /// This panics if given an `index` greater than or equal to the number of
     /// logs in the file.
-    #[instrument(level = "trace", skip(self, config), fields(offset))]
-    pub fn parse_by_index<'config>(
-        &self,
-        config: &'config parser::Config,
-        index: usize,
-    ) -> ParseResult<Log<'data>> {
-        tracing::trace!(?config);
-
+    #[instrument(level = "trace", skip(self), fields(offset))]
+    pub fn parse_by_index(&self, index: usize) -> ParseResult<Log<'data>> {
         let start = self.offsets[index];
         tracing::Span::current().record("offset", start);
 
-        Log::parse(config, &self.data[start..])
+        Log::parse(&self.data[start..])
     }
 }

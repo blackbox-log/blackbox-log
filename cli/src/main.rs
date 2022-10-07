@@ -54,8 +54,6 @@ fn main() -> QuietResult<()> {
         return QuietResult::err(exitcode::USAGE);
     }
 
-    let config = cli.to_blackbox_config();
-
     for filename in &cli.logs {
         let span = tracing::info_span!("file", name = ?filename);
         let _span = span.enter();
@@ -84,7 +82,7 @@ fn main() -> QuietResult<()> {
             let span = tracing::info_span!("log", index = human_i);
             let _span = span.enter();
 
-            let log = match file.parse_by_index(&config, i) {
+            let log = match file.parse_by_index(i) {
                 Ok(log) => log,
                 Err(_) => return QuietResult::err(exitcode::DATAERR),
             };
@@ -130,7 +128,7 @@ fn write_csv(out: &mut impl Write, log: &Log, config: &Cli) -> io::Result<()> {
         out,
         log.fields().map(|(name, unit)| {
             let unit = config.get_unit(unit);
-            if config.raw || unit.is_raw() {
+            if unit.is_raw() {
                 name.to_owned()
             } else {
                 format!("{name} ({unit})")

@@ -4,7 +4,6 @@ use std::ffi::OsString;
 use std::fmt::{self, Display};
 use std::path::PathBuf;
 
-use blackbox::parser::Config;
 use blackbox::units::{Acceleration, Amperage, Rotation, UnitKind, Voltage};
 use bpaf::{construct, Bpaf, FromOsStr, Parser};
 use tracing_subscriber::filter::LevelFilter;
@@ -370,10 +369,6 @@ pub(crate) struct Cli {
     // #[arg(long)]
     // /// Set magnetic declination in decimal degrees (e.g. -12.97 for New York)
     // declination_dec: (),
-    /// Skips applying predictors and outputs raw field values
-    #[bpaf(long)]
-    pub raw: bool,
-
     #[bpaf(external)]
     pub verbosity: LevelFilter,
 
@@ -554,10 +549,6 @@ impl Cli {
         cli()
             .usage("Usage: blackbox_decode [options] <log>...")
             .run()
-    }
-
-    pub fn to_blackbox_config(&self) -> Config {
-        Config { raw: self.raw }
     }
 
     pub fn get_unit(&self, unit: UnitKind) -> CliUnit {

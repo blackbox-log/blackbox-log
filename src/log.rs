@@ -1,6 +1,6 @@
 use core::iter;
 
-use crate::parser::{self, Data, Event, Frame, Headers, MainFrame, ParseResult, Reader, SlowFrame};
+use crate::parser::{Data, Event, Frame, Headers, MainFrame, ParseResult, Reader, SlowFrame};
 use crate::units::{Unit, UnitKind};
 
 #[derive(Debug)]
@@ -14,11 +14,11 @@ impl<'data> Log<'data> {
     ///
     /// **Note**: This assumes that `data` is already aligned to the start of
     /// the log and will return an error if it is not.
-    pub fn parse<'config>(config: &'config parser::Config, data: &'data [u8]) -> ParseResult<Self> {
+    pub fn parse(data: &'data [u8]) -> ParseResult<Self> {
         let mut data = Reader::new(data);
         let headers = Headers::parse(&mut data)?;
 
-        let data = Data::parse(data, config, &headers)?;
+        let data = Data::parse(data, &headers)?;
 
         Ok(Self { headers, data })
     }

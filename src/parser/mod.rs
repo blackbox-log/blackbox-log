@@ -14,7 +14,6 @@ pub use self::frame::{Frame, MainFrame, SlowFrame};
 pub use self::headers::Headers;
 pub use self::predictor::Predictor;
 pub use self::reader::Reader;
-use crate::Log;
 
 pub type ParseResult<T> = Result<T, ParseError>;
 pub(crate) const MARKER: &[u8] = b"H Product:Blackbox flight data recorder by Nicholas Sherlock\n";
@@ -40,18 +39,6 @@ impl fmt::Display for ParseError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for ParseError {}
-
-#[derive(Debug, Default, Clone, Copy)]
-pub struct Config {
-    /// Skip applying predictors to the parsed values
-    pub raw: bool,
-}
-
-impl Config {
-    pub fn parse<'data>(&self, data: &'data [u8]) -> ParseResult<Log<'data>> {
-        Log::parse(self, data)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 enum FrameKind {

@@ -4,7 +4,7 @@ use core::iter;
 use tracing::instrument;
 
 use super::{count_fields_with_same_encoding, Frame, FrameKind, FrameProperty};
-use crate::parser::{Config, Encoding, Headers, ParseError, ParseResult, Predictor, Reader};
+use crate::parser::{Encoding, Headers, ParseError, ParseResult, Predictor, Reader};
 use crate::units::UnitKind;
 
 #[derive(Debug, Clone)]
@@ -27,12 +27,7 @@ impl<'data> SlowFrameDef<'data> {
     }
 
     #[instrument(level = "trace", name = "SlowFrameDef::parse", skip_all)]
-    pub(crate) fn parse(
-        &self,
-        data: &mut Reader,
-        config: &Config,
-        headers: &Headers,
-    ) -> ParseResult<SlowFrame> {
+    pub(crate) fn parse(&self, data: &mut Reader, headers: &Headers) -> ParseResult<SlowFrame> {
         let mut fields = self.0.iter().peekable();
         let mut values = Vec::with_capacity(self.0.len());
 
@@ -50,11 +45,9 @@ impl<'data> SlowFrameDef<'data> {
             let field = &self.0[i];
             let raw = values[i];
 
-            if !config.raw {
-                values[i] = field
-                    .predictor
-                    .apply(headers, raw, &values, None, None, 0)?;
-            }
+            values[i] = field
+                .predictor
+                .apply(headers, raw, &values, None, None, 0)?;
 
             tracing::trace!(
                 field = field.name,
