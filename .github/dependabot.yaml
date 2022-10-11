@@ -4,24 +4,7 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-  - package-ecosystem: "cargo"
-    directory: "/cli"
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "cargo"
-    directory: "/fuzz"
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "cargo"
-    directory: "/blackbox-sys"
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "cargo"
-    directory: "/xtask"
-    schedule:
-      interval: "daily"
-
   - package-ecosystem: "gitsubmodule"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
