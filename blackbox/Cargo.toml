@@ -1,0 +1,29 @@
+[package]
+name = "blackbox"
+version = "0.1.0"
+publish = false
+
+license.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[features]
+std = []
+default = ["std"]
+
+[dependencies]
+bitter = "0.6.0"
+memchr = "2.5.0"
+num_enum = "0.5.7"
+tracing.workspace = true
+
+[dev-dependencies]
+criterion = { version = "0.4.0", features = ["html_reports"] }
+test-case = "2.2.2"
+
+[lib]
+bench = false
+
+[[bench]]
+name = "decode"
+harness = false
