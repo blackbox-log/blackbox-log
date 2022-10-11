@@ -13,15 +13,6 @@ pub trait FieldDef {
     fn encoding(&self) -> Encoding;
 }
 
-#[allow(clippy::len_without_is_empty)]
-pub trait Frame {
-    fn values(&self) -> &[i64];
-
-    fn len(&self) -> usize {
-        self.values().len()
-    }
-}
-
 pub(crate) fn is_frame_def_header(header: &str) -> bool {
     parse_frame_def_header(header).is_some()
 }
@@ -71,6 +62,7 @@ pub(crate) enum FrameProperty {
     Name,
     Predictor,
     Encoding,
+    Signed,
 }
 
 impl FrameProperty {
@@ -79,6 +71,7 @@ impl FrameProperty {
             "name" => Some(Self::Name),
             "predictor" => Some(Self::Predictor),
             "encoding" => Some(Self::Encoding),
+            "signed" => Some(Self::Signed),
             _ => None,
         }
     }
@@ -128,6 +121,14 @@ fn parse_encodings(
     encodings: Option<&'_ str>,
 ) -> ParseResult<impl Iterator<Item = ParseResult<Encoding>> + '_> {
     parse_enum_list(kind, "encoding", encodings)
+}
+
+fn parse_signs(
+    kind: FrameKind,
+    names: Option<&str>,
+) -> ParseResult<impl Iterator<Item = bool> + '_> {
+    let names = names.ok_or_else(|| missing_header_error(kind, "signed"))?;
+    Ok(names.split(',').map(|s| s.trim() != "0"))
 }
 
 fn count_fields_with_same_encoding<F>(

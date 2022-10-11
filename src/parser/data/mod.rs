@@ -24,7 +24,7 @@ impl Data {
         // let gps_home_frames = Vec::new();
         let mut slow_frames = Vec::new();
 
-        slow_frames.push(headers.slow_frames.default_frame());
+        slow_frames.push(headers.slow_frames.default_frame(headers));
 
         while let Some(byte) = data.bytes().read_u8() {
             let kind = FrameKind::from_byte(byte).unwrap_or_else(|| {

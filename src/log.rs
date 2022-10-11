@@ -1,7 +1,7 @@
-use core::iter;
-
-use crate::parser::{Data, Event, Frame, Headers, MainFrame, ParseResult, Reader, SlowFrame};
-use crate::units::{Unit, UnitKind};
+use crate::parser::{
+    Data, Event, Headers, MainFrame, MainUnit, MainValue, ParseResult, Reader, SlowFrame, SlowUnit,
+    SlowValue,
+};
 
 #[derive(Debug)]
 pub struct Log<'data> {
@@ -38,19 +38,23 @@ impl<'data> Log<'data> {
         }
     }
 
-    pub fn fields(&self) -> impl Iterator<Item = (&str, UnitKind)> {
-        self.headers.main_fields().chain(self.headers.slow_fields())
+    pub fn main_fields(&self) -> impl Iterator<Item = (&str, MainUnit)> {
+        self.headers.main_fields()
+    }
+
+    pub fn slow_fields(&self) -> impl Iterator<Item = (&str, SlowUnit)> {
+        self.headers.slow_fields()
     }
 }
 
 #[derive(Debug)]
-pub struct FrameIter<'a, 'data> {
-    log: &'a Log<'data>,
+pub struct FrameIter<'log, 'data> {
+    log: &'log Log<'data>,
     index: usize,
 }
 
 impl<'log, 'data> Iterator for FrameIter<'log, 'data> {
-    type Item = FieldIter<'log, 'data>;
+    type Item = FrameView<'log, 'data>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.index >= self.log.data.main_frames.len() {
@@ -61,55 +65,29 @@ impl<'log, 'data> Iterator for FrameIter<'log, 'data> {
         let slow = &self.log.data.slow_frames[*slow];
         self.index += 1;
 
-        Some(FieldIter {
-            headers: &self.log.headers,
+        Some(FrameView {
+            headers: self.log.headers(),
             main,
             slow,
-            field: 0,
         })
     }
 }
 
+impl<'log, 'data> core::iter::FusedIterator for FrameIter<'log, 'data> {}
+
 #[derive(Debug)]
-pub struct FieldIter<'a, 'data> {
-    headers: &'a Headers<'data>,
-    main: &'a MainFrame,
-    slow: &'a SlowFrame,
-    field: usize,
+pub struct FrameView<'log, 'data> {
+    headers: &'log Headers<'data>,
+    main: &'log MainFrame,
+    slow: &'log SlowFrame,
 }
 
-impl<'a, 'data> Iterator for FieldIter<'a, 'data> {
-    type Item = Unit;
+impl<'log, 'data> FrameView<'log, 'data> {
+    pub fn iter_main(&self) -> impl Iterator<Item = MainValue> + '_ {
+        self.main.iter(self.headers)
+    }
 
-    fn next(&mut self) -> Option<Self::Item> {
-        let main_len = self.main.len();
-        let slow_len = self.slow.len();
-
-        let (unit, value) = match self.field {
-            0 => (
-                self.headers.main_frames.iteration.unit,
-                self.main.iteration().into(),
-            ),
-            1 => (self.headers.main_frames.time.unit, self.main.time()),
-            i if i < main_len => {
-                let i = i - 2;
-                (
-                    self.headers.main_frames.fields[i].unit,
-                    self.main.values()[i],
-                )
-            }
-            i if i < (main_len + slow_len) => {
-                let i = i - main_len;
-                (self.headers.slow_frames.0[i].unit, self.slow.values()[i])
-            }
-            _ => {
-                return None;
-            }
-        };
-
-        self.field += 1;
-        Some(unit.with_value(value, self.headers))
+    pub fn iter_slow(&self) -> impl Iterator<Item = SlowValue> + '_ {
+        self.slow.iter()
     }
 }
-
-impl<'a, 'data> iter::FusedIterator for FieldIter<'a, 'data> {}

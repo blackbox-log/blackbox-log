@@ -1,15 +1,13 @@
 use alloc::borrow::ToOwned;
-use core::iter;
 use core::str::{self, FromStr};
 
 use super::frame::{
     is_frame_def_header, parse_frame_def_header, FrameKind, MainFrameDef, MainFrameDefBuilder,
-    SlowFrameDef, SlowFrameDefBuilder,
+    MainUnit, SlowFrameDef, SlowFrameDefBuilder, SlowUnit,
 };
 use super::reader::ByteReader;
 use super::{ParseError, ParseResult, Reader};
 use crate::common::{FirmwareKind, LogVersion};
-use crate::units::UnitKind;
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -36,21 +34,12 @@ pub struct Headers<'data> {
 }
 
 impl<'data> Headers<'data> {
-    pub(crate) fn main_fields(&self) -> impl Iterator<Item = (&str, UnitKind)> {
-        let MainFrameDef {
-            iteration,
-            time,
-            fields,
-            ..
-        } = &self.main_frames;
-
-        iter::once((iteration.name, iteration.unit))
-            .chain(iter::once((time.name, time.unit)))
-            .chain(fields.iter().map(|f| (f.name, f.unit)))
+    pub(crate) fn main_fields(&self) -> impl Iterator<Item = (&str, MainUnit)> {
+        self.main_frames.iter()
     }
 
-    pub(crate) fn slow_fields(&self) -> impl Iterator<Item = (&str, UnitKind)> {
-        self.slow_frames.0.iter().map(|f| (f.name, f.unit))
+    pub(crate) fn slow_fields(&self) -> impl Iterator<Item = (&str, SlowUnit)> {
+        self.slow_frames.iter()
     }
 
     pub(crate) fn parse(data: &mut Reader<'data>) -> ParseResult<Self> {
@@ -69,7 +58,10 @@ impl<'data> Headers<'data> {
             }
 
             let (name, value) = parse_header(bytes)?;
-            state.update(name, value)?;
+            state.update(name, value).map_err(|e| {
+                tracing::error!("state.update error: {e}");
+                e
+            })?;
         }
 
         state.finish()
@@ -99,7 +91,7 @@ fn get_version(bytes: &mut ByteReader) -> Result<LogVersion, ParseError> {
         .map_err(|_| ParseError::UnsupportedVersion(value.to_owned()))
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct CurrentMeterConfig {
     pub offset: u16,
     pub scale: u16,

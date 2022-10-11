@@ -21,6 +21,7 @@ pub use self::tagged_variable::tagged_variable;
 pub use self::variable::{variable, variable_signed};
 use super::{ParseResult, Reader};
 use crate::common::LogVersion;
+use crate::parser::as_unsigned;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, TryFromPrimitive)]
 #[repr(u8)]
@@ -52,7 +53,20 @@ pub enum Encoding {
 }
 
 impl Encoding {
-    pub(crate) fn max_chunk_size(&self) -> usize {
+    pub(crate) const fn is_signed(&self) -> bool {
+        match self {
+            Self::VariableSigned
+            | Self::Negative14Bit
+            | Self::EliasDeltaSigned
+            | Self::EliasGammaSigned
+            | Self::TaggedVariable
+            | Self::Tagged32
+            | Self::Tagged16 => true,
+            Self::Variable | Self::EliasDelta | Self::EliasGamma | Self::Null => false,
+        }
+    }
+
+    pub(crate) const fn max_chunk_size(&self) -> usize {
         match self {
             Self::TaggedVariable => 8,
             Self::Tagged32 => 3,
@@ -73,20 +87,22 @@ impl Encoding {
         data: &mut Reader,
         version: LogVersion,
         extra: usize,
-    ) -> ParseResult<Vec<i64>> {
+    ) -> ParseResult<Vec<u32>> {
         let range = 0..=extra;
         let values = match self {
-            Self::VariableSigned => vec![variable_signed(data)?.into()],
-            Self::Variable => vec![variable(data)?.into()],
+            Self::VariableSigned => vec![as_unsigned(variable_signed(data)?)],
+            Self::Variable => vec![variable(data)?],
 
-            Self::Negative14Bit => vec![negative_14_bit(data)?.into()],
+            Self::Negative14Bit => vec![as_unsigned(negative_14_bit(data)?)],
 
-            Self::EliasDelta => vec![elias_delta(data)?.into()],
-            Self::EliasDeltaSigned => vec![elias_delta_signed(data)?.into()],
+            Self::EliasDelta => vec![elias_delta(data)?],
+            Self::EliasDeltaSigned => vec![as_unsigned(elias_delta_signed(data)?)],
 
-            Self::TaggedVariable => tagged_variable(data, extra)?.map(Into::into)[range].to_vec(),
-            Self::Tagged32 => tagged_32(data)?.map(Into::into)[range].to_vec(),
-            Self::Tagged16 => tagged_16(version, data)?.map(Into::into)[range].to_vec(),
+            Self::TaggedVariable => tagged_variable(data, extra)?.map(as_unsigned)[range].to_vec(),
+            Self::Tagged32 => tagged_32(data)?.map(as_unsigned)[range].to_vec(),
+            Self::Tagged16 => {
+                tagged_16(version, data)?.map(|x| as_unsigned(x.into()))[range].to_vec()
+            }
 
             Self::Null => vec![0],
 

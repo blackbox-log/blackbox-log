@@ -4,7 +4,8 @@ use std::ffi::OsString;
 use std::fmt::{self, Display};
 use std::path::PathBuf;
 
-use blackbox::units::{Acceleration, Amperage, Rotation, UnitKind, Voltage};
+use blackbox::parser::{MainUnit, SlowUnit};
+use blackbox::units::{Acceleration, Amperage, FlagSet, Rotation, Voltage};
 use bpaf::{construct, Bpaf, FromOsStr, Parser};
 use tracing_subscriber::filter::LevelFilter;
 
@@ -18,19 +19,55 @@ pub enum CliUnit {
     Rotation(RotationUnit),
     Height(HeightUnit),
     GpsSpeed(GpsSpeedUnit),
+    Flag(FlagUnit),
     Unitless,
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum CliUnitKind {
+    FrameTime,
+    Amperage,
+    VBat,
+    Acceleration,
+    Rotation,
+    Height,
+    GpsSpeed,
+    Flag,
+    Unitless,
+}
+
+impl From<MainUnit> for CliUnitKind {
+    fn from(val: MainUnit) -> Self {
+        match val {
+            MainUnit::FrameTime => CliUnitKind::FrameTime,
+            MainUnit::Amperage => CliUnitKind::Amperage,
+            MainUnit::Voltage => CliUnitKind::VBat,
+            MainUnit::Acceleration => CliUnitKind::Acceleration,
+            MainUnit::Rotation => CliUnitKind::Rotation,
+            MainUnit::Unitless => CliUnitKind::Unitless,
+        }
+    }
+}
+
+impl From<SlowUnit> for CliUnitKind {
+    fn from(val: SlowUnit) -> Self {
+        match val {
+            SlowUnit::FlightMode => CliUnitKind::Flag,
+            SlowUnit::Unitless => CliUnitKind::Unitless,
+        }
+    }
 }
 
 impl CliUnit {
     pub fn is_raw(self) -> bool {
         match self {
-            Self::FrameTime(_) => false,
+            Self::FrameTime(_) | Self::Height(_) | Self::GpsSpeed(_) => false,
             Self::Amperage(a) => a == AmperageUnit::Raw,
             Self::VBat(v) => v == VBatUnit::Raw,
             Self::Acceleration(x) => x == AccelerationUnit::Raw,
             Self::Rotation(r) => r == RotationUnit::Raw,
-            Self::Height(_) => todo!(),
-            Self::GpsSpeed(_) => todo!(),
+            Self::Flag(f) => f == FlagUnit::Raw,
             Self::Unitless => true,
         }
     }
@@ -46,6 +83,7 @@ impl Display for CliUnit {
             Self::Rotation(r) => r.fmt(f),
             Self::Height(h) => h.fmt(f),
             Self::GpsSpeed(s) => s.fmt(f),
+            Self::Flag(flags) => flags.fmt(f),
             Self::Unitless => Ok(()),
         }
     }
@@ -316,6 +354,57 @@ impl fmt::Display for VBatUnit {
         f.write_str(s)
     }
 }
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub enum FlagUnit {
+    Raw,
+    #[default]
+    Flags,
+}
+
+impl FlagUnit {
+    pub fn format<F: FlagSet>(&self, flags: F) -> String {
+        match self {
+            Self::Raw => flags.as_raw().to_string(),
+            Self::Flags => {
+                let flags = flags.as_names();
+                if flags.is_empty() {
+                    "0".to_owned()
+                } else {
+                    flags
+                        .into_iter()
+                        .enumerate()
+                        .map(|(i, name)| {
+                            if i == 0 {
+                                name.to_owned()
+                            } else {
+                                format!("|{name}")
+                            }
+                        })
+                        .collect()
+                }
+            }
+        }
+    }
+}
+
+from_os_str_impl!(FlagUnit {
+    "raw" => Self::Raw,
+    "flags" | "flag" => Self::Flags,
+    _ => "expected raw or flags",
+});
+
+impl fmt::Display for FlagUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Self::Raw => "raw",
+            Self::Flags => "flags",
+        };
+
+        f.write_str(s)
+    }
+}
+
 #[derive(Debug, Clone, Bpaf)]
 #[bpaf(options, private, version)]
 #[allow(unused, clippy::default_trait_access)]
@@ -332,7 +421,9 @@ pub(crate) struct Cli {
     #[bpaf(argument("unit"), fallback(Default::default()))]
     pub unit_amperage: AmperageUnit,
 
-    // TODO: --unit-flags
+    #[bpaf(argument("unit"), fallback(Default::default()))]
+    pub unit_flags: FlagUnit,
+
     #[bpaf(argument("unit"), fallback(Default::default()))]
     pub unit_frame_time: FrameTimeUnit,
 
@@ -556,24 +647,27 @@ impl Cli {
             .run()
     }
 
-    pub fn get_unit(&self, unit: UnitKind) -> CliUnit {
+    pub fn get_unit(&self, unit: CliUnitKind) -> CliUnit {
         match unit {
-            UnitKind::FrameTime => CliUnit::FrameTime(self.unit_frame_time),
-            UnitKind::Amperage => CliUnit::Amperage(self.unit_amperage),
-            UnitKind::Voltage => CliUnit::VBat(self.unit_vbat),
-            UnitKind::Acceleration => CliUnit::Acceleration(self.unit_acceleration),
-            UnitKind::Rotation => CliUnit::Rotation(self.unit_rotation),
-            UnitKind::Unitless => CliUnit::Unitless,
+            CliUnitKind::FrameTime => CliUnit::FrameTime(self.unit_frame_time),
+            CliUnitKind::Amperage => CliUnit::Amperage(self.unit_amperage),
+            CliUnitKind::VBat => CliUnit::VBat(self.unit_vbat),
+            CliUnitKind::Acceleration => CliUnit::Acceleration(self.unit_acceleration),
+            CliUnitKind::Rotation => CliUnit::Rotation(self.unit_rotation),
+            CliUnitKind::Height => CliUnit::Height(self.unit_height),
+            CliUnitKind::GpsSpeed => CliUnit::GpsSpeed(self.unit_gps_speed),
+            CliUnitKind::Flag => CliUnit::Flag(self.unit_flags),
+            CliUnitKind::Unitless => CliUnit::Unitless,
         }
     }
 }
 
-fn format_decimal(value: i64, decimals: u32) -> String {
-    let divisor = 10_i64.pow(decimals);
+fn format_decimal<const DIVISOR: u64>(x: u64) -> String {
+    // let DIVISOR = 1_000_000;
     let mut s = String::new();
-    s.push_str(&(value / divisor).to_string());
+    s.push_str(&(x / DIVISOR).to_string());
     s.push('.');
-    s.push_str(&(value % divisor).to_string());
+    s.push_str(&(x % DIVISOR).to_string());
     s
 }
 

@@ -95,6 +95,12 @@ macro_rules! generate_flight_mode {
                     $( Self::$mode => $bit ),+
                 }
             }
+
+            pub const fn as_name(self) -> &'static str {
+                match self {
+                    $( Self::$mode => stringify!($mode) ),+
+                }
+            }
         }
 
         impl crate::common::FlightModeFlags<FlightMode> {
@@ -130,5 +136,10 @@ impl<T> FlightModeFlags<T> {
     #[inline]
     pub(crate) const fn is_bit_set(&self, bit: u32) -> bool {
         (self.0 & (1 << bit)) > 0
+    }
+
+    #[inline]
+    pub(crate) const fn as_raw(&self) -> u32 {
+        self.0
     }
 }

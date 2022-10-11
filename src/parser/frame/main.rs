@@ -1,39 +1,133 @@
 use alloc::vec::Vec;
+use core::iter;
 
 use tracing::instrument;
 
-use super::{count_fields_with_same_encoding, Frame, FrameKind, FrameProperty};
+use super::{count_fields_with_same_encoding, FrameKind, FrameProperty};
 use crate::parser::{
-    decode, predictor, Encoding, Headers, ParseError, ParseResult, Predictor, Reader,
+    as_signed, decode, predictor, Encoding, Headers, ParseError, ParseResult, Predictor, Reader,
 };
-use crate::units::UnitKind;
+use crate::units;
+
+macro_rules! trace_field {
+    (_impl pre $field:expr, $enc:expr, $signed:expr, $raw:expr) => {
+        tracing::trace!(
+            field = $field.name,
+            encoding = ?$enc,
+            signed_encoding = $signed,
+            raw = $raw,
+        );
+    };
+    (_impl post $field:expr, $pred:expr, $signed:expr, $final:expr) => {
+        tracing::trace!(
+            field = $field.name,
+            predictor = ?$pred,
+            signed = $signed,
+            value = $final,
+        );
+    };
+
+    (pre, field = $field:expr, enc = $enc:expr, raw = $raw:expr $(,)?) => {
+        if $enc.is_signed() {
+            trace_field!(_impl pre $field, $enc, $enc.is_signed(), crate::parser::as_signed($raw));
+        } else {
+            trace_field!(_impl pre $field, $enc, $enc.is_signed(), $raw);
+        }
+    };
+    (post, field = $field:expr, pred = $pred:expr, final = $final:expr $(,)?) => {
+        if $field.signed {
+            trace_field!(_impl post $field, $pred, $field.signed, crate::parser::as_signed($final));
+        } else {
+            trace_field!(_impl post $field, $pred, $field.signed, $final);
+        }
+    };
+}
 
 #[derive(Debug, Clone)]
 pub struct MainFrame {
     intra: bool,
-    iteration: u32,
-    time: i64,
-    values: Vec<i64>,
+    pub(crate) iteration: u32,
+    pub(crate) time: u64,
+    pub(crate) values: Vec<u32>,
 }
 
 impl MainFrame {
-    pub fn iteration(&self) -> u32 {
-        self.iteration
+    pub(crate) fn iter<'a: 'c, 'b: 'c, 'c>(
+        &'a self,
+        headers: &'b Headers,
+    ) -> impl Iterator<Item = MainValue> + 'c {
+        let mut i = 0;
+        iter::from_fn(move || {
+            let value = self.get(i, headers)?;
+            i += 1;
+            Some(value)
+        })
     }
 
-    pub fn time(&self) -> i64 {
-        self.time
+    pub(crate) fn get(&self, index: usize, headers: &Headers) -> Option<MainValue> {
+        let unit = match index {
+            0 => MainValue::Unsigned(self.iteration),
+            1 => MainValue::FrameTime(self.time),
+            _ => {
+                let index = index - 2;
+                let def = headers.main_frames.fields.get(index)?;
+                let raw = self.values[index];
+                match def.unit {
+                    MainUnit::Amperage => {
+                        debug_assert!(def.signed);
+                        MainValue::Amperage(units::Amperage::new(raw, headers))
+                    }
+                    MainUnit::Voltage => {
+                        debug_assert!(!def.signed);
+                        MainValue::Voltage(units::Voltage::new(raw, headers))
+                    }
+                    MainUnit::Acceleration => {
+                        debug_assert!(def.signed);
+                        MainValue::Acceleration(units::Acceleration::new(raw, headers))
+                    }
+                    MainUnit::Rotation => {
+                        debug_assert!(def.signed);
+                        MainValue::Rotation(units::Rotation::new(raw))
+                    }
+                    MainUnit::Unitless => MainValue::new_unitless(raw, def.signed),
+                    MainUnit::FrameTime => unreachable!(),
+                }
+            }
+        };
+
+        Some(unit)
     }
 }
 
-impl Frame for MainFrame {
-    fn values(&self) -> &[i64] {
-        &self.values
-    }
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum MainValue {
+    FrameTime(u64),
+    Amperage(units::Amperage),
+    Voltage(units::Voltage),
+    Acceleration(units::Acceleration),
+    Rotation(units::Rotation),
+    Unsigned(u32),
+    Signed(i32),
+}
 
-    fn len(&self) -> usize {
-        2 + self.values.len()
+impl MainValue {
+    fn new_unitless(value: u32, signed: bool) -> Self {
+        if signed {
+            Self::Signed(as_signed(value))
+        } else {
+            Self::Unsigned(value)
+        }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum MainUnit {
+    FrameTime,
+    Amperage,
+    Voltage,
+    Acceleration,
+    Rotation,
+    Unitless,
 }
 
 #[derive(Debug, Clone)]
@@ -46,11 +140,24 @@ pub(crate) struct MainFrameDef<'data> {
 }
 
 impl<'data> MainFrameDef<'data> {
+    pub(crate) fn iter(&self) -> impl Iterator<Item = (&str, MainUnit)> {
+        let Self {
+            iteration,
+            time,
+            fields,
+            ..
+        } = self;
+
+        iter::once((iteration.name, iteration.unit))
+            .chain(iter::once((time.name, time.unit)))
+            .chain(fields.iter().map(|f| (f.name, f.unit)))
+    }
+
     pub(crate) fn builder() -> MainFrameDefBuilder<'data> {
         MainFrameDefBuilder::default()
     }
 
-    pub(crate) fn get_motor_0_from(&self, frame: &[i64]) -> ParseResult<i64> {
+    pub(crate) fn get_motor_0_from(&self, frame: &[u32]) -> ParseResult<u32> {
         self.index_motor_0.map_or_else(
             || {
                 tracing::error!(
@@ -62,7 +169,7 @@ impl<'data> MainFrameDef<'data> {
         )
     }
 
-    #[instrument(level = "trace", name = "MainFrameDef::parse_intra", skip_all)]
+    #[instrument(level = "trace", skip_all)]
     pub(crate) fn parse_intra(
         &self,
         data: &mut Reader,
@@ -93,22 +200,22 @@ impl<'data> MainFrameDef<'data> {
         for i in 0..values.len() {
             let field = &self.fields[i];
             let raw = values[i];
+            let signed = field.encoding_intra.is_signed();
 
             let last = last.map(|l| l.values[i]);
 
+            trace_field!(pre, field = field, enc = field.encoding_intra, raw = raw);
+
             values[i] = field
                 .predictor_intra
-                .apply(headers, raw, &values, last, None, 0)?;
+                .apply(headers, raw, signed, &values, last, None, 0)?;
 
-            tracing::trace!(
-                field = field.name,
-                encoding = ?field.encoding_intra,
-                predictor = ?field.predictor_intra,
-                raw,
-                value = values[i],
+            trace_field!(
+                post,
+                field = field,
+                pred = field.predictor_intra,
+                final = values[i]
             );
-
-            // TODO: check field.signed
         }
 
         Ok(MainFrame {
@@ -119,7 +226,7 @@ impl<'data> MainFrameDef<'data> {
         })
     }
 
-    #[instrument(level = "trace", name = "MainFrameDef::parse_inter", skip_all)]
+    #[instrument(level = "trace", skip_all)]
     pub(crate) fn parse_inter(
         &self,
         data: &mut Reader,
@@ -128,21 +235,27 @@ impl<'data> MainFrameDef<'data> {
         last_last: Option<&MainFrame>,
         skipped_frames: u32,
     ) -> ParseResult<MainFrame> {
-        let iteration = 1 + last.map_or(0, MainFrame::iteration) + skipped_frames;
+        let iteration = 1 + last.map_or(0, |f| f.iteration) + skipped_frames;
         tracing::trace!(iteration);
 
         let time = {
-            let raw = i64::from(decode::variable_signed(data)?);
-
             let last_last = last
                 .filter(|f| !f.intra)
-                .and_then(|_| last_last.map(MainFrame::time));
+                .and_then(|_| last_last.map(|f| f.time));
 
-            let offset = predictor::straight_line(last.map(MainFrame::time), last_last);
+            let time = predictor::straight_line(last.map(|f| f.time), last_last);
+            let offset = decode::variable_signed(data)?;
 
-            let time = raw.saturating_add(offset);
+            // TODO (rust 1.66): replace with time.saturating_add_unsigned(offset.into())
+            let add = offset > 0;
+            let offset = offset.unsigned_abs().into();
+            let time = if add {
+                time.saturating_add(offset)
+            } else {
+                time.saturating_sub(offset)
+            };
 
-            tracing::trace!(time, raw);
+            tracing::trace!(time, offset);
             time
         };
 
@@ -165,28 +278,29 @@ impl<'data> MainFrameDef<'data> {
         for i in 0..values.len() {
             let field = &self.fields[i];
             let raw = values[i];
+            let signed = field.encoding_inter.is_signed();
 
             let last = last.map(|l| l.values[i]);
             let last_last = last_last.map(|l| l.values[i]);
 
+            trace_field!(pre, field = field, enc = field.encoding_inter, raw = raw);
+
             values[i] = field.predictor_inter.apply(
                 headers,
                 raw,
+                signed,
                 &values,
                 last,
                 last_last,
-                skipped_frames.into(),
+                skipped_frames,
             )?;
 
-            tracing::trace!(
-                field = field.name,
-                encoding = ?field.encoding_inter,
-                predictor = ?field.predictor_inter,
-                raw,
-                value = values[i],
+            trace_field!(
+                post,
+                field = field,
+                pred = field.predictor_inter,
+                final = values[i]
             );
-
-            // TODO: check field.signed
         }
 
         Ok(MainFrame {
@@ -205,16 +319,18 @@ pub(crate) struct MainFieldDef<'data> {
     predictor_inter: Predictor,
     encoding_intra: Encoding,
     encoding_inter: Encoding,
-    pub(crate) unit: UnitKind,
+    pub(crate) signed: bool,
+    pub(crate) unit: MainUnit,
 }
 
 #[derive(Debug, Default)]
 pub(crate) struct MainFrameDefBuilder<'data> {
-    pub(crate) names: Option<&'data str>,
-    pub(crate) predictors_intra: Option<&'data str>,
-    pub(crate) predictors_inter: Option<&'data str>,
-    pub(crate) encodings_intra: Option<&'data str>,
-    pub(crate) encodings_inter: Option<&'data str>,
+    names: Option<&'data str>,
+    predictors_intra: Option<&'data str>,
+    predictors_inter: Option<&'data str>,
+    encodings_intra: Option<&'data str>,
+    encodings_inter: Option<&'data str>,
+    signs: Option<&'data str>,
 }
 
 impl<'data> MainFrameDefBuilder<'data> {
@@ -223,6 +339,7 @@ impl<'data> MainFrameDefBuilder<'data> {
 
         match (kind, property) {
             (_, FrameProperty::Name) => self.names = value,
+            (_, FrameProperty::Signed) => self.signs = value,
 
             (FrameKind::Intra, FrameProperty::Predictor) => self.predictors_intra = value,
             (FrameKind::Inter, FrameProperty::Predictor) => self.predictors_inter = value,
@@ -242,19 +359,23 @@ impl<'data> MainFrameDefBuilder<'data> {
         let mut predictors_inter = super::parse_predictors(kind_inter, self.predictors_inter)?;
         let mut encodings_intra = super::parse_encodings(kind_intra, self.encodings_intra)?;
         let mut encodings_inter = super::parse_encodings(kind_inter, self.encodings_inter)?;
+        let mut signs = super::parse_signs(kind_intra, self.signs)?;
 
-        let mut fields = names
-            .by_ref()
+        let mut fields = (names.by_ref().zip(signs.by_ref()))
             .zip(predictors_intra.by_ref().zip(predictors_inter.by_ref()))
             .zip(encodings_intra.by_ref().zip(encodings_inter.by_ref()))
             .map(
-                |((name, (predictor_intra, predictor_inter)), (encoding_intra, encoding_inter))| {
+                |(
+                    ((name, signed), (predictor_intra, predictor_inter)),
+                    (encoding_intra, encoding_inter),
+                )| {
                     Ok(MainFieldDef {
                         name,
                         predictor_intra: predictor_intra?,
                         predictor_inter: predictor_inter?,
                         encoding_intra: encoding_intra?,
                         encoding_inter: encoding_inter?,
+                        signed,
                         unit: unit_from_name(name),
                     })
                 },
@@ -291,6 +412,7 @@ impl<'data> MainFrameDefBuilder<'data> {
             || predictors_inter.next().is_some()
             || encodings_intra.next().is_some()
             || encodings_inter.next().is_some()
+            || signs.next().is_some()
         {
             tracing::error!("all `Field *` headers must have the same number of elements");
             return Err(ParseError::Corrupted);
@@ -308,14 +430,14 @@ impl<'data> MainFrameDefBuilder<'data> {
     }
 }
 
-fn unit_from_name(name: &str) -> UnitKind {
+fn unit_from_name(name: &str) -> MainUnit {
     let base = name.split_once('[').map_or(name, |(base, _)| base);
     match base.to_ascii_lowercase().as_str() {
-        "time" => UnitKind::FrameTime,
-        "amperagelatest" => UnitKind::Amperage,
-        "vbatlatest" => UnitKind::Voltage,
-        "accsmooth" => UnitKind::Acceleration,
-        "gyroadc" => UnitKind::Rotation,
-        _ => UnitKind::Unitless,
+        "time" => MainUnit::FrameTime,
+        "amperagelatest" => MainUnit::Amperage,
+        "vbatlatest" => MainUnit::Voltage,
+        "accsmooth" => MainUnit::Acceleration,
+        "gyroadc" => MainUnit::Rotation,
+        _ => MainUnit::Unitless,
     }
 }
