@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 #[test]
 fn readme() -> io::Result<()> {
-    let readme = File::open("README.md")?;
+    let readme = File::open("../README.md")?;
     let readme = BufReader::new(readme);
 
     let msrv = readme
@@ -24,7 +24,7 @@ fn readme() -> io::Result<()> {
 
 #[test]
 fn toolchain_file() -> io::Result<()> {
-    let path = PathBuf::from("rust-toolchain.toml");
+    let path = PathBuf::from("../rust-toolchain.toml");
 
     if env::var("CI").is_ok() && !path.exists() {
         // Assume it was removed in CI to avoid overriding a >MSRV toolchain
@@ -49,7 +49,7 @@ fn toolchain_file() -> io::Result<()> {
 }
 
 fn get_msrv() -> io::Result<String> {
-    let manifest = File::open("Cargo.toml")?;
+    let manifest = File::open("../Cargo.toml")?;
     let manifest = BufReader::new(manifest);
 
     let msrv = manifest
