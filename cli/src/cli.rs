@@ -112,28 +112,32 @@ impl fmt::Display for AmperageUnit {
 pub enum FrameTimeUnit {
     #[default]
     Microseconds,
+    Milliseconds,
     Seconds,
 }
 
 impl FrameTimeUnit {
-    pub fn format(&self, us: i64) -> String {
+    pub fn format(&self, us: u64) -> String {
         match self {
             Self::Microseconds => us.to_string(),
-            Self::Seconds => format_decimal(us, 3),
+            Self::Milliseconds => format_decimal::<1000>(us),
+            Self::Seconds => format_decimal::<1_000_000>(us),
         }
     }
 }
 
 from_os_str_impl!(FrameTimeUnit {
     "us" | "micros" => Self::Microseconds,
-    "s" => Self::Seconds,
-    _ => "expected us or s",
+    "ms" | "millis" => Self::Milliseconds,
+    "s"| "sec" => Self::Seconds,
+    _ => "expected us, ms, or s",
 });
 
 impl fmt::Display for FrameTimeUnit {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
             Self::Microseconds => "us",
+            Self::Milliseconds => "ms",
             Self::Seconds => "s",
         };
 
@@ -275,6 +279,7 @@ impl fmt::Display for GpsSpeedUnit {
         f.write_str(s)
     }
 }
+
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum VBatUnit {
     Raw,
