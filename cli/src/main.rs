@@ -173,10 +173,10 @@ fn write_csv_line(
         out.write_all(first.as_bytes())?;
 
         for s in fields {
-            write!(out, ",")?;
+            out.write_all(b",")?;
             out.write_all(s.as_bytes())?;
         }
     }
 
-    writeln!(out)
+    out.write_all(b"\n")
 }
