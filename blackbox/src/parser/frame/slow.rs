@@ -45,6 +45,10 @@ pub enum SlowUnit {
 pub(crate) struct SlowFrameDef<'data>(pub(crate) Vec<SlowFieldDef<'data>>);
 
 impl<'data> SlowFrameDef<'data> {
+    pub(crate) fn len(&self) -> usize {
+        self.0.len()
+    }
+
     pub(crate) fn iter(&self) -> impl Iterator<Item = (&str, SlowUnit)> {
         self.0.iter().map(|f| (f.name, f.unit))
     }

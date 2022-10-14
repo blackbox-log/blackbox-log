@@ -75,3 +75,7 @@ pub(crate) const fn as_signed(x: u32) -> i32 {
 pub(crate) const fn as_unsigned(x: i32) -> u32 {
     x as u32
 }
+
+pub(crate) fn to_base_field(field: &str) -> &str {
+    field.split_once('[').map_or(field, |(base, _)| base)
+}

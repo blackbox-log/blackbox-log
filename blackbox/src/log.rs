@@ -1,12 +1,50 @@
+use alloc::vec::Vec;
+use core::iter;
+
 use crate::parser::{
-    Data, Event, Headers, MainFrame, MainUnit, MainValue, ParseResult, Reader, SlowFrame, SlowUnit,
-    SlowValue,
+    to_base_field, Data, Event, Headers, MainFrame, MainUnit, MainValue, ParseResult, Reader,
+    SlowFrame, SlowUnit, SlowValue,
 };
 
 #[derive(Debug)]
 pub struct Log<'data> {
     headers: Headers<'data>,
     data: Data,
+    filter: Filter,
+}
+
+#[derive(Debug)]
+struct Filter {
+    main: Vec<bool>,
+    slow: Vec<bool>,
+}
+
+impl Filter {
+    fn new<S: AsRef<str>>(fields: &[S], headers: &Headers) -> Self {
+        let mut fields = fields
+            .iter()
+            .map(|s| to_base_field(s.as_ref()))
+            .collect::<Vec<_>>();
+        fields.sort_unstable();
+
+        Self {
+            main: headers
+                .main_fields()
+                .map(|(field, _)| fields.binary_search(&to_base_field(field)).is_ok())
+                .collect(),
+            slow: headers
+                .slow_fields()
+                .map(|(field, _)| fields.binary_search(&to_base_field(field)).is_ok())
+                .collect(),
+        }
+    }
+
+    fn new_unfiltered(headers: &Headers) -> Self {
+        Self {
+            main: iter::repeat(true).take(headers.main_frames.len()).collect(),
+            slow: iter::repeat(true).take(headers.slow_frames.len()).collect(),
+        }
+    }
 }
 
 impl<'data> Log<'data> {
@@ -19,8 +57,21 @@ impl<'data> Log<'data> {
         let headers = Headers::parse(&mut data)?;
 
         let data = Data::parse(data, &headers)?;
+        let filter = Filter::new_unfiltered(&headers);
 
-        Ok(Self { headers, data })
+        Ok(Self {
+            headers,
+            data,
+            filter,
+        })
+    }
+
+    pub fn set_filter<S: AsRef<str>>(&mut self, filter: &[S]) {
+        self.filter = Filter::new(filter, self.headers());
+    }
+
+    pub fn unset_filter(&mut self) {
+        self.filter = Filter::new_unfiltered(self.headers());
     }
 
     pub fn headers(&self) -> &Headers<'data> {
@@ -32,18 +83,21 @@ impl<'data> Log<'data> {
     }
 
     pub fn iter_frames(&self) -> FrameIter {
-        FrameIter {
-            log: self,
-            index: 0,
-        }
+        FrameIter::new(self)
     }
 
     pub fn main_fields(&self) -> impl Iterator<Item = (&str, MainUnit)> {
-        self.headers.main_fields()
+        self.headers
+            .main_fields()
+            .enumerate()
+            .filter_map(|(i, field)| self.filter.main[i].then_some(field))
     }
 
     pub fn slow_fields(&self) -> impl Iterator<Item = (&str, SlowUnit)> {
-        self.headers.slow_fields()
+        self.headers
+            .slow_fields()
+            .enumerate()
+            .filter_map(|(i, field)| self.filter.slow[i].then_some(field))
     }
 }
 
@@ -51,6 +105,12 @@ impl<'data> Log<'data> {
 pub struct FrameIter<'log, 'data> {
     log: &'log Log<'data>,
     index: usize,
+}
+
+impl<'log, 'data> FrameIter<'log, 'data> {
+    fn new(log: &'log Log<'data>) -> Self {
+        Self { log, index: 0 }
+    }
 }
 
 impl<'log, 'data> Iterator for FrameIter<'log, 'data> {
@@ -66,7 +126,7 @@ impl<'log, 'data> Iterator for FrameIter<'log, 'data> {
         self.index += 1;
 
         Some(FrameView {
-            headers: self.log.headers(),
+            log: self.log,
             main,
             slow,
         })
@@ -77,17 +137,23 @@ impl<'log, 'data> core::iter::FusedIterator for FrameIter<'log, 'data> {}
 
 #[derive(Debug)]
 pub struct FrameView<'log, 'data> {
-    headers: &'log Headers<'data>,
+    log: &'log Log<'data>,
     main: &'log MainFrame,
     slow: &'log SlowFrame,
 }
 
 impl<'log, 'data> FrameView<'log, 'data> {
     pub fn iter_main(&self) -> impl Iterator<Item = MainValue> + '_ {
-        self.main.iter(self.headers)
+        self.main
+            .iter(self.log.headers())
+            .enumerate()
+            .filter_map(|(i, value)| self.log.filter.main[i].then_some(value))
     }
 
     pub fn iter_slow(&self) -> impl Iterator<Item = SlowValue> + '_ {
-        self.slow.iter()
+        self.slow
+            .iter()
+            .enumerate()
+            .filter_map(|(i, value)| self.log.filter.slow[i].then_some(value))
     }
 }

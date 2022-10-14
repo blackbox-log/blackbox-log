@@ -5,7 +5,8 @@ use tracing::instrument;
 
 use super::{count_fields_with_same_encoding, FrameKind, FrameProperty};
 use crate::parser::{
-    as_signed, decode, predictor, Encoding, Headers, ParseError, ParseResult, Predictor, Reader,
+    as_signed, decode, predictor, to_base_field, Encoding, Headers, ParseError, ParseResult,
+    Predictor, Reader,
 };
 use crate::units;
 
@@ -140,6 +141,10 @@ pub(crate) struct MainFrameDef<'data> {
 }
 
 impl<'data> MainFrameDef<'data> {
+    pub(crate) fn len(&self) -> usize {
+        2 + self.fields.len()
+    }
+
     pub(crate) fn iter(&self) -> impl Iterator<Item = (&str, MainUnit)> {
         let Self {
             iteration,
@@ -427,8 +432,7 @@ impl<'data> MainFrameDefBuilder<'data> {
 }
 
 fn unit_from_name(name: &str) -> MainUnit {
-    let base = name.split_once('[').map_or(name, |(base, _)| base);
-    match base.to_ascii_lowercase().as_str() {
+    match to_base_field(name).to_ascii_lowercase().as_str() {
         "time" => MainUnit::FrameTime,
         "amperagelatest" => MainUnit::Amperage,
         "vbatlatest" => MainUnit::Voltage,

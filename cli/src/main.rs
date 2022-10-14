@@ -87,10 +87,14 @@ fn main() -> QuietResult<()> {
             let span = tracing::info_span!("log", index = human_i);
             let _span = span.enter();
 
-            let log = match file.parse_by_index(i) {
+            let mut log = match file.parse_by_index(i) {
                 Ok(log) => log,
                 Err(_) => return QuietResult::err(exitcode::DATAERR),
             };
+
+            if let Some(ref filter) = cli.filter {
+                log.set_filter(filter);
+            }
 
             let mut out = match get_output(cli.stdout, filename, human_i) {
                 Ok(out) => BufWriter::new(out),

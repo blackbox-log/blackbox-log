@@ -61,6 +61,9 @@ pub(crate) struct Cli {
     // /// Set magnetic declination in decimal degrees (e.g. -12.97 for New York)
     // declination_dec: (),
     #[bpaf(external)]
+    pub filter: Option<Vec<String>>,
+
+    #[bpaf(external)]
     pub verbosity: LevelFilter,
 
     // TODO: accept - for stdin
@@ -99,6 +102,25 @@ fn altitude_offset() -> impl Parser<i16> {
         .argument::<i16>("offset");
 
     construct!([new, old]).fallback(0)
+}
+
+fn filter() -> impl Parser<Option<Vec<String>>> {
+    bpaf::short('f')
+        .long("filter")
+        .help("Selects fields to output by name, excluding any index or units\n(comma separated)")
+        .argument::<String>("fields")
+        .map(|s| {
+            s.split(',')
+                .into_iter()
+                .map(|s| s.trim().to_owned())
+                .filter(|s| !s.is_empty())
+                .collect::<Vec<_>>()
+        })
+        .guard(
+            |set| !set.is_empty(),
+            "filter must contain at least one field",
+        )
+        .optional()
 }
 
 fn verbosity() -> impl Parser<LevelFilter> {
