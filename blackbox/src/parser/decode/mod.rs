@@ -8,7 +8,6 @@ mod tagged_32;
 mod tagged_variable;
 mod variable;
 
-use alloc::vec;
 use alloc::vec::Vec;
 
 use num_enum::TryFromPrimitive;
@@ -82,34 +81,37 @@ impl Encoding {
         }
     }
 
-    pub(crate) fn decode(
+    pub(crate) fn decode_into(
         &self,
         data: &mut Reader,
         version: LogVersion,
         extra: usize,
-    ) -> ParseResult<Vec<u32>> {
+        into: &mut Vec<u32>,
+    ) -> ParseResult<()> {
         let range = 0..=extra;
-        let values = match self {
-            Self::VariableSigned => vec![as_unsigned(variable_signed(data)?)],
-            Self::Variable => vec![variable(data)?],
+        match self {
+            Self::VariableSigned => into.push(as_unsigned(variable_signed(data)?)),
+            Self::Variable => into.push(variable(data)?),
 
-            Self::Negative14Bit => vec![as_unsigned(negative_14_bit(data)?)],
+            Self::Negative14Bit => into.push(as_unsigned(negative_14_bit(data)?)),
 
-            Self::EliasDelta => vec![elias_delta(data)?],
-            Self::EliasDeltaSigned => vec![as_unsigned(elias_delta_signed(data)?)],
+            Self::EliasDelta => into.push(elias_delta(data)?),
+            Self::EliasDeltaSigned => into.push(as_unsigned(elias_delta_signed(data)?)),
 
-            Self::TaggedVariable => tagged_variable(data, extra)?.map(as_unsigned)[range].to_vec(),
-            Self::Tagged32 => tagged_32(data)?.map(as_unsigned)[range].to_vec(),
-            Self::Tagged16 => {
-                tagged_16(version, data)?.map(|x| as_unsigned(x.into()))[range].to_vec()
+            Self::TaggedVariable => {
+                into.extend_from_slice(&tagged_variable(data, extra)?.map(as_unsigned)[range]);
             }
+            Self::Tagged32 => into.extend_from_slice(&tagged_32(data)?.map(as_unsigned)[range]),
+            Self::Tagged16 => into.extend_from_slice(
+                &tagged_16(version, data)?.map(|x| as_unsigned(x.into()))[range],
+            ),
 
-            Self::Null => vec![0],
+            Self::Null => into.push(0),
 
             Self::EliasGamma | Self::EliasGammaSigned => todo!(),
         };
 
-        Ok(values)
+        Ok(())
     }
 }
 

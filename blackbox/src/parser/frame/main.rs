@@ -191,9 +191,7 @@ impl<'data> MainFrameDef<'data> {
                 field.encoding_intra == encoding
             });
 
-            let mut new = encoding.decode(data, headers.version, extra)?;
-            debug_assert_eq!(extra + 1, new.len());
-            values.append(&mut new);
+            encoding.decode_into(data, headers.version, extra, &mut values)?;
         }
 
         debug_assert_eq!(values.len(), self.fields.len());
@@ -269,9 +267,7 @@ impl<'data> MainFrameDef<'data> {
                 field.encoding_inter == encoding
             });
 
-            let mut new = encoding.decode(data, headers.version, extra)?;
-            debug_assert_eq!(extra + 1, new.len());
-            values.append(&mut new);
+            encoding.decode_into(data, headers.version, extra, &mut values)?;
         }
 
         debug_assert_eq!(values.len(), self.fields.len());

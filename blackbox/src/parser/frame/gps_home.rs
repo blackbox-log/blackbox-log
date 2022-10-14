@@ -34,7 +34,7 @@ impl<'data> GpsHomeFrameDef<'data> {
                 field.encoding == encoding
             });
 
-            raw.append(&mut encoding.decode(data, headers.version, extra)?);
+            encoding.decode_into(data, headers.version, extra, &mut raw)?;
         }
 
         debug_assert_eq!(raw.len(), self.0.len());
