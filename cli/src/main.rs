@@ -8,8 +8,12 @@ use std::process::{ExitCode, Termination};
 
 use blackbox::parser::{MainValue, SlowValue};
 use blackbox::Log;
+use mimalloc::MiMalloc;
 
 use self::cli::Cli;
+
+#[global_allocator]
+static ALLOC: MiMalloc = MiMalloc;
 
 #[derive(Debug)]
 enum QuietResult<T> {
