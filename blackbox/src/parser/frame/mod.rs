@@ -1,10 +1,12 @@
 mod gps;
+mod gps_home;
 mod main;
 mod slow;
 
 use core::iter::Peekable;
 
 pub use self::gps::*;
+pub use self::gps_home::*;
 pub use self::main::*;
 pub use self::slow::*;
 use super::{Encoding, ParseError, ParseResult, Predictor};
@@ -33,6 +35,7 @@ pub(crate) fn parse_frame_def_header(header: &str) -> Option<(FrameKind, FramePr
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum FrameKind {
     Gps,
+    GpsHome,
     Intra,
     Inter,
     Slow,
@@ -42,6 +45,7 @@ impl FrameKind {
     pub(crate) fn from_letter(s: &str) -> Option<Self> {
         match s {
             "G" => Some(Self::Gps),
+            "H" => Some(Self::GpsHome),
             "I" => Some(Self::Intra),
             "P" => Some(Self::Inter),
             "S" => Some(Self::Slow),
@@ -54,6 +58,7 @@ impl From<FrameKind> for char {
     fn from(kind: FrameKind) -> Self {
         match kind {
             FrameKind::Gps => 'G',
+            FrameKind::GpsHome => 'H',
             FrameKind::Intra => 'I',
             FrameKind::Inter => 'P',
             FrameKind::Slow => 'S',

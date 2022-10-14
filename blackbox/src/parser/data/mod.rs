@@ -86,7 +86,14 @@ impl Data {
                         return Err(ParseError::Corrupted);
                     }
                 }
-                FrameKind::GpsHome => todo!("handle gps home frames"),
+                FrameKind::GpsHome => {
+                    if let Some(ref gps_home) = headers.gps_home_frames {
+                        let _ = gps_home.parse(&mut data, headers)?;
+                    } else {
+                        tracing::error!("found GPS home frame without GPS frame definition");
+                        return Err(ParseError::Corrupted);
+                    }
+                }
                 FrameKind::Slow => {
                     let frame = headers.slow_frames.parse(&mut data, headers)?;
                     slow_frames.push(frame);
