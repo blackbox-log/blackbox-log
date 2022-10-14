@@ -14,7 +14,7 @@ pub(crate) struct Cli {
     #[bpaf(external)]
     pub index: Vec<usize>,
 
-    /// Prints the limits and range of each field
+    /// Prints the limits and range of each field (TODO)
     pub limits: bool,
 
     /// Writes log to stdout instead of a file
@@ -48,7 +48,7 @@ pub(crate) struct Cli {
     pub altitude_offset: i16,
 
     /// Merges GPS data into the main CSV file instead of writing it
-    /// separately
+    /// separately (TODO)
     pub merge_gps: bool,
 
     // TODO
@@ -95,7 +95,7 @@ fn at_least_one(logs: &Vec<PathBuf>) -> bool {
 fn altitude_offset() -> impl Parser<i16> {
     let old = bpaf::long("alt-offset").argument::<i16>("").hide();
     let new = bpaf::long("altitude-offset")
-        .help("Sets the altitude offset in meters")
+        .help("Sets the altitude offset in meters (TODO)")
         .argument::<i16>("offset");
 
     construct!([new, old]).fallback(0)
