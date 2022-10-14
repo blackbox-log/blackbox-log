@@ -71,10 +71,9 @@ pub(crate) struct Cli {
     pub verbosity: LevelFilter,
 
     // TODO: accept - for stdin
-    // TODO: complete file paths
     /// One or more logs to parse
     #[bpaf(
-        positional("file"),
+        positional("log"),
         guard(at_least_one, "at least one log file is required")
     )]
     pub logs: Vec<PathBuf>,
