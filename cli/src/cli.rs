@@ -51,13 +51,6 @@ pub(crate) struct Cli {
     /// separately
     pub merge_gps: bool,
 
-    #[bpaf(external)]
-    pub current_meter: Option<CurrentMeter>,
-
-    // TODO: alias: simulate-imu
-    #[bpaf(external)]
-    pub imu: Option<Imu>,
-
     // TODO
     // #[arg(long)]
     // /// Set magnetic declination in degrees.minutes format (e.g. -12.58 for New York)
@@ -106,95 +99,6 @@ fn altitude_offset() -> impl Parser<i16> {
         .argument::<i16>("offset");
 
     construct!([new, old]).fallback(0)
-}
-
-#[derive(Debug, Clone, Default)]
-#[allow(unused)]
-pub struct CurrentMeter {
-    scale: Option<i16>,
-    offset: Option<i16>,
-}
-
-fn current_meter() -> impl Parser<Option<CurrentMeter>> {
-    let meter = {
-        let help = "Simulates a virtual current meter using throttle data";
-
-        let old = bpaf::long("simulate-current-meter").switch().hide();
-        let new = bpaf::long("current-meter").help(help).switch();
-
-        construct!([new, old])
-    };
-
-    let scale = {
-        let help =
-            "Overrides the current meter scale for the simulation\n(implies --current-meter)";
-
-        let old = bpaf::long("sim-current-meter-scale")
-            .argument::<i16>("")
-            .hide();
-        let new = bpaf::long("current-scale")
-            .help(help)
-            .argument::<i16>("scale");
-
-        construct!([new, old]).map(Some).fallback(None)
-    };
-
-    let offset = {
-        let help =
-            "Overrides the current meter offset for the simulation\n(implies --current-meter)";
-
-        let old = bpaf::long("sim-current-meter-offset")
-            .argument::<i16>("")
-            .hide();
-        let new = bpaf::long("current-offset")
-            .help(help)
-            .argument::<i16>("offset");
-
-        construct!([new, old]).map(Some).fallback(None)
-    };
-
-    construct!(meter, scale, offset).map(|(meter, scale, offset)| {
-        (meter || scale.is_some() || offset.is_some()).then_some(CurrentMeter { scale, offset })
-    })
-}
-
-#[derive(Debug, Clone, Default)]
-#[allow(unused)]
-pub struct Imu {
-    deg_in_names: bool,
-    ignore_mag: bool,
-}
-
-fn imu() -> impl Parser<Option<Imu>> {
-    let help = "Computes tilt, roll, and heading information from gyro,\naccelerometer, and \
-                magnetometer data";
-
-    let imu = {
-        let old = bpaf::long("simulate-imu").switch().hide();
-        let new = bpaf::long("imu").help(help).switch();
-
-        construct!([new, old])
-    };
-
-    let deg = {
-        let old = bpaf::long("include-imu-degrees").switch().hide();
-        let new = bpaf::long("imu-deg")
-            .help("Includes (deg) in the tilt/roll/heading header (implies --imu)")
-            .switch();
-
-        construct!([new, old])
-    };
-
-    let ignore_mag = bpaf::long("imu-ignore-mag")
-        .help("Ignores magnetometer when computing heading (implies --imu)")
-        .switch();
-
-    construct!(imu, deg, ignore_mag).map(|(imu, deg, ignore_mag)| {
-        (imu || deg || ignore_mag).then_some(Imu {
-            deg_in_names: deg,
-            ignore_mag,
-        })
-    })
 }
 
 fn verbosity() -> impl Parser<LevelFilter> {
