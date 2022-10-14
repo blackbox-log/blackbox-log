@@ -2,8 +2,8 @@ use alloc::borrow::ToOwned;
 use core::str::{self, FromStr};
 
 use super::frame::{
-    is_frame_def_header, parse_frame_def_header, FrameKind, MainFrameDef, MainFrameDefBuilder,
-    MainUnit, SlowFrameDef, SlowFrameDefBuilder, SlowUnit,
+    is_frame_def_header, parse_frame_def_header, FrameKind, GpsFrameDef, GpsFrameDefBuilder,
+    MainFrameDef, MainFrameDefBuilder, MainUnit, SlowFrameDef, SlowFrameDefBuilder, SlowUnit,
 };
 use super::reader::ByteReader;
 use super::{ParseError, ParseResult, Reader};
@@ -13,6 +13,7 @@ use crate::common::{FirmwareKind, LogVersion};
 #[derive(Debug)]
 pub struct Headers<'data> {
     pub version: LogVersion,
+    pub(crate) gps_frames: Option<GpsFrameDef<'data>>,
     pub(crate) main_frames: MainFrameDef<'data>,
     pub(crate) slow_frames: SlowFrameDef<'data>,
 
@@ -131,6 +132,7 @@ impl FromStr for MotorOutputRange {
 #[derive(Debug)]
 struct State<'data> {
     version: LogVersion,
+    gps_frames: GpsFrameDefBuilder<'data>,
     main_frames: MainFrameDefBuilder<'data>,
     slow_frames: SlowFrameDefBuilder<'data>,
 
@@ -154,6 +156,7 @@ impl<'data> State<'data> {
     fn new(version: LogVersion) -> Self {
         Self {
             version,
+            gps_frames: GpsFrameDef::builder(),
             main_frames: MainFrameDef::builder(),
             slow_frames: SlowFrameDef::builder(),
 
@@ -222,6 +225,7 @@ impl<'data> State<'data> {
                 let (frame_kind, property) = parse_frame_def_header(header).unwrap();
 
                 match frame_kind {
+                    FrameKind::Gps => self.gps_frames.update(property, value),
                     FrameKind::Inter | FrameKind::Intra => {
                         self.main_frames.update(frame_kind, property, value);
                     }
@@ -237,6 +241,7 @@ impl<'data> State<'data> {
     fn finish(self) -> ParseResult<Headers<'data>> {
         Ok(Headers {
             version: self.version,
+            gps_frames: self.gps_frames.parse()?,
             main_frames: self.main_frames.parse()?,
             slow_frames: self.slow_frames.parse()?,
 

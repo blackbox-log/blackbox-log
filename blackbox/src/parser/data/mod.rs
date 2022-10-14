@@ -3,7 +3,7 @@ mod event;
 use alloc::vec::Vec;
 
 pub use self::event::Event;
-use super::{FrameKind, Headers, MainFrame, ParseResult, Reader, SlowFrame};
+use super::{FrameKind, Headers, MainFrame, ParseError, ParseResult, Reader, SlowFrame};
 
 // Reason: unfinished
 #[allow(dead_code)]
@@ -78,7 +78,14 @@ impl Data {
 
                     main_frames.push((frame, slow_frames.len() - 1));
                 }
-                FrameKind::Gps => todo!("handle gps frames"),
+                FrameKind::Gps => {
+                    if let Some(ref gps) = headers.gps_frames {
+                        let _ = gps.parse(&mut data, headers)?;
+                    } else {
+                        tracing::error!("found GPS frame without GPS frame definition");
+                        return Err(ParseError::Corrupted);
+                    }
+                }
                 FrameKind::GpsHome => todo!("handle gps home frames"),
                 FrameKind::Slow => {
                     let frame = headers.slow_frames.parse(&mut data, headers)?;
