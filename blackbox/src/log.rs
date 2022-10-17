@@ -74,7 +74,7 @@ impl<'data> Log<'data> {
         self.filter = Filter::new_unfiltered(self.headers());
     }
 
-    pub fn headers(&self) -> &Headers<'data> {
+    pub const fn headers(&self) -> &Headers<'data> {
         &self.headers
     }
 
@@ -82,7 +82,7 @@ impl<'data> Log<'data> {
         &self.data.events
     }
 
-    pub fn iter_frames(&self) -> FrameIter {
+    pub const fn iter_frames(&self) -> FrameIter {
         FrameIter::new(self)
     }
 
@@ -108,7 +108,7 @@ pub struct FrameIter<'log, 'data> {
 }
 
 impl<'log, 'data> FrameIter<'log, 'data> {
-    fn new(log: &'log Log<'data>) -> Self {
+    const fn new(log: &'log Log<'data>) -> Self {
         Self { log, index: 0 }
     }
 }
