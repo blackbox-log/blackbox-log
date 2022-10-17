@@ -61,30 +61,33 @@ impl<'data> SlowFrameDef<'data> {
     pub(crate) fn parse(&self, data: &mut Reader, headers: &Headers) -> ParseResult<SlowFrame> {
         let raw = read_field_values(data, headers, &self.0, |f| f.encoding)?;
 
-        let mut values = Vec::with_capacity(raw.len());
-        for i in 0..raw.len() {
-            let field = &self.0[i];
+        let values = raw
+            .iter()
+            .zip(self.0.iter())
+            .map(|(&raw_value, field)| {
+                let value =
+                    field
+                        .predictor
+                        .apply(headers, raw_value, field.signed, &raw, None, None, 0)?;
 
-            let value =
-                field
-                    .predictor
-                    .apply(headers, raw[i], field.signed, &raw, None, None, 0)?;
+                tracing::trace!(
+                    field = field.name,
+                    encoding = ?field.encoding,
+                    predictor = ?field.predictor,
+                    raw = raw_value,
+                    value,
+                );
 
-            values.push(match field.unit {
-                SlowUnit::FlightMode => {
-                    SlowValue::FlightMode(units::FlightMode::new(value, headers))
-                }
-                SlowUnit::Unitless => SlowValue::new_unitless(value, field.signed),
-            });
+                let value = match field.unit {
+                    SlowUnit::FlightMode => {
+                        SlowValue::FlightMode(units::FlightMode::new(value, headers))
+                    }
+                    SlowUnit::Unitless => SlowValue::new_unitless(value, field.signed),
+                };
 
-            tracing::trace!(
-                field = field.name,
-                encoding = ?field.encoding,
-                predictor = ?field.predictor,
-                raw = raw[i],
-                value,
-            );
-        }
+                Ok(value)
+            })
+            .collect::<ParseResult<Vec<_>>>()?;
 
         Ok(SlowFrame { values })
     }

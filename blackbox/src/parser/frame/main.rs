@@ -188,8 +188,7 @@ impl<'data> MainFrameDef<'data> {
 
         let mut values = read_field_values(data, headers, &self.fields, |f| f.encoding_intra)?;
 
-        for i in 0..values.len() {
-            let field = &self.fields[i];
+        for (i, field) in self.fields.iter().enumerate() {
             let raw = values[i];
             let signed = field.encoding_intra.is_signed();
 
@@ -252,8 +251,7 @@ impl<'data> MainFrameDef<'data> {
 
         let mut values = read_field_values(data, headers, &self.fields, |f| f.encoding_inter)?;
 
-        for i in 0..values.len() {
-            let field = &self.fields[i];
+        for (i, field) in self.fields.iter().enumerate() {
             let raw = values[i];
             let signed = field.encoding_inter.is_signed();
 
