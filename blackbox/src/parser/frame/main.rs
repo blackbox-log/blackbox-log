@@ -3,7 +3,7 @@ use core::iter;
 
 use tracing::instrument;
 
-use super::{count_fields_with_same_encoding, FrameKind, FrameProperty};
+use super::{read_field_values, FrameKind, FrameProperty};
 use crate::parser::{
     as_signed, decode, predictor, to_base_field, Encoding, Headers, ParseError, ParseResult,
     Predictor, Reader,
@@ -186,20 +186,8 @@ impl<'data> MainFrameDef<'data> {
         let time = decode::variable(data)?.into();
         tracing::trace!(time);
 
-        let mut fields = self.fields.iter().peekable();
-        let mut values = Vec::with_capacity(self.fields.len());
+        let mut values = read_field_values(data, headers, &self.fields, |f| f.encoding_intra)?;
 
-        while let Some(field) = fields.next() {
-            let encoding = field.encoding_intra;
-            let extra = encoding.max_chunk_size() - 1;
-            let extra = count_fields_with_same_encoding(&mut fields, extra, |&field| {
-                field.encoding_intra == encoding
-            });
-
-            encoding.decode_into(data, headers.version, extra, &mut values)?;
-        }
-
-        debug_assert_eq!(values.len(), self.fields.len());
         for i in 0..values.len() {
             let field = &self.fields[i];
             let raw = values[i];
@@ -262,20 +250,8 @@ impl<'data> MainFrameDef<'data> {
             time
         };
 
-        let mut fields = self.fields.iter().peekable();
-        let mut values = Vec::with_capacity(self.fields.len());
+        let mut values = read_field_values(data, headers, &self.fields, |f| f.encoding_inter)?;
 
-        while let Some(field) = fields.next() {
-            let encoding = field.encoding_inter;
-            let extra = encoding.max_chunk_size() - 1;
-            let extra = count_fields_with_same_encoding(&mut fields, extra, |&field| {
-                field.encoding_inter == encoding
-            });
-
-            encoding.decode_into(data, headers.version, extra, &mut values)?;
-        }
-
-        debug_assert_eq!(values.len(), self.fields.len());
         for i in 0..values.len() {
             let field = &self.fields[i];
             let raw = values[i];

@@ -3,7 +3,7 @@ use core::iter;
 
 use tracing::instrument;
 
-use super::{count_fields_with_same_encoding, FrameKind, FrameProperty};
+use super::{read_field_values, FrameKind, FrameProperty};
 use crate::parser::{as_signed, Encoding, Headers, ParseError, ParseResult, Predictor, Reader};
 use crate::units;
 
@@ -59,20 +59,8 @@ impl<'data> SlowFrameDef<'data> {
 
     #[instrument(level = "trace", name = "SlowFrameDef::parse", skip_all)]
     pub(crate) fn parse(&self, data: &mut Reader, headers: &Headers) -> ParseResult<SlowFrame> {
-        let mut fields = self.0.iter().peekable();
-        let mut raw = Vec::with_capacity(self.0.len());
+        let raw = read_field_values(data, headers, &self.0, |f| f.encoding)?;
 
-        while let Some(field) = fields.next() {
-            let encoding = field.encoding;
-            let extra = encoding.max_chunk_size() - 1;
-            let extra = count_fields_with_same_encoding(&mut fields, extra, |&field| {
-                field.encoding == encoding
-            });
-
-            encoding.decode_into(data, headers.version, extra, &mut raw)?;
-        }
-
-        debug_assert_eq!(raw.len(), self.0.len());
         let mut values = Vec::with_capacity(raw.len());
         for i in 0..raw.len() {
             let field = &self.0[i];

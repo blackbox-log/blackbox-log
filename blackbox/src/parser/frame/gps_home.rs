@@ -2,7 +2,7 @@ use alloc::vec::Vec;
 
 use tracing::instrument;
 
-use super::{count_fields_with_same_encoding, FrameKind, FrameProperty};
+use super::{read_field_values, FrameKind, FrameProperty};
 use crate::parser::{Encoding, Headers, ParseError, ParseResult, Predictor, Reader};
 
 #[derive(Debug, Clone)]
@@ -24,20 +24,7 @@ impl<'data> GpsHomeFrameDef<'data> {
 
     #[instrument(level = "trace", name = "GpsHomeFrameDef::parse", skip_all)]
     pub(crate) fn parse(&self, data: &mut Reader, headers: &Headers) -> ParseResult<GpsHomeFrame> {
-        let mut fields = self.0.iter().peekable();
-        let mut raw = Vec::with_capacity(self.0.len());
-
-        while let Some(field) = fields.next() {
-            let encoding = field.encoding;
-            let extra = encoding.max_chunk_size() - 1;
-            let extra = count_fields_with_same_encoding(&mut fields, extra, |&field| {
-                field.encoding == encoding
-            });
-
-            encoding.decode_into(data, headers.version, extra, &mut raw)?;
-        }
-
-        debug_assert_eq!(raw.len(), self.0.len());
+        let _ = read_field_values(data, headers, &self.0, |f| f.encoding)?;
 
         Ok(GpsHomeFrame)
     }

@@ -3,13 +3,14 @@ mod gps_home;
 mod main;
 mod slow;
 
+use alloc::vec::Vec;
 use core::iter::Peekable;
 
 pub use self::gps::*;
 pub use self::gps_home::*;
 pub use self::main::*;
 pub use self::slow::*;
-use super::{Encoding, ParseError, ParseResult, Predictor};
+use super::{Encoding, Headers, ParseError, ParseResult, Predictor, Reader};
 
 pub trait FieldDef {
     fn name(&self) -> &str;
@@ -141,14 +142,35 @@ fn parse_signs(
     Ok(names.split(',').map(|s| s.trim() != "0"))
 }
 
-fn count_fields_with_same_encoding<F>(
-    fields: &mut Peekable<impl Iterator<Item = F>>,
+fn count_fields_with_same_encoding(
+    fields: &mut Peekable<impl Iterator<Item = Encoding>>,
     max: usize,
-    filter: impl Fn(&F) -> bool,
+    encoding: Encoding,
 ) -> usize {
     let mut extra = 0;
-    while extra < max && fields.next_if(&filter).is_some() {
+    while extra < max && fields.next_if_eq(&encoding).is_some() {
         extra += 1;
     }
     extra
+}
+
+fn read_field_values<T>(
+    data: &mut Reader,
+    headers: &Headers,
+    fields: &[T],
+    get_encoding: impl Fn(&T) -> Encoding,
+) -> ParseResult<Vec<u32>> {
+    let mut encodings = fields.iter().map(get_encoding).peekable();
+    let mut values = Vec::with_capacity(encodings.len());
+
+    while let Some(encoding) = encodings.next() {
+        let extra = encoding.max_chunk_size() - 1;
+        let extra = count_fields_with_same_encoding(&mut encodings, extra, encoding);
+
+        encoding.decode_into(data, headers.version, extra, &mut values)?;
+    }
+
+    debug_assert_eq!(values.len(), fields.len());
+
+    Ok(values)
 }
