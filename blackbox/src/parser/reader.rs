@@ -28,7 +28,6 @@ impl<'data> Reader<'data> {
     /// Leave bits mode, skipping any remaining bits if not byte aligned
     pub fn bytes<'reader>(&'reader mut self) -> ByteReader<'data, 'reader> {
         if let Some(bits) = self.bits.take() {
-            // TODO: check how it handles partially read bytes
             self.index = self.data.len() - bits.bytes_remaining();
         }
 
@@ -222,6 +221,15 @@ mod tests {
         assert!(reader.is_byte_aligned());
 
         assert_eq!(Some(1), reader.bytes().read_u8());
+    }
+
+    #[test]
+    fn bytes_without_read() {
+        let mut reader = Reader::new(&[0]);
+        reader.bits().read_bit();
+        reader.bytes();
+        assert!(reader.is_byte_aligned());
+        assert_eq!(None, reader.bytes().read_u8());
     }
 
     #[test]
