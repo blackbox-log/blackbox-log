@@ -53,6 +53,7 @@ dependencies = [
  "bitter",
  "criterion",
  "memchr",
+ "num-traits",
  "num_enum",
  "test-case",
  "tracing",

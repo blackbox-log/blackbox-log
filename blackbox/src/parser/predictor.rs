@@ -1,6 +1,7 @@
-use core::ops::{Add, Shr, Sub};
+use core::ops::{Add, Shr};
 
 use num_enum::TryFromPrimitive;
+use num_traits::ops::checked::CheckedSub;
 
 use super::{as_signed, as_unsigned, Headers, ParseResult};
 
@@ -114,10 +115,10 @@ impl Predictor {
 #[inline]
 pub(crate) fn straight_line<T>(last: Option<T>, last_last: Option<T>) -> T
 where
-    T: Copy + Default + Add<Output = T> + Sub<Output = T>,
+    T: Copy + Default + Add<Output = T> + CheckedSub<Output = T>,
 {
     match (last, last_last) {
-        (Some(last), Some(last_last)) => (last - last_last) + last,
+        (Some(last), Some(last_last)) => last.checked_sub(&last_last).unwrap_or_default() + last,
         (Some(last), None) => last,
         _ => T::default(),
     }
@@ -141,6 +142,7 @@ mod tests {
     #[case(Some(-2), None => -2)]
     #[case(Some(12), Some(10) => 14)]
     #[case(Some(10), Some(12) => 8)]
+    #[case(Some(0), Some(i8::MIN) => 0 ; "underflow")]
     fn straight_line(last: Option<i8>, last_last: Option<i8>) -> i8 {
         super::straight_line(last, last_last)
     }
