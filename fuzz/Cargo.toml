@@ -19,6 +19,13 @@ libfuzzer-sys = "0.4.4"
 memfile = "0.2.1"
 
 [[bin]]
+name = "file"
+path = "fuzz_targets/file.rs"
+test = false
+bench = false
+doc = false
+
+[[bin]]
 name = "variable-signed"
 path = "fuzz_targets/variable_signed.rs"
 test = false
