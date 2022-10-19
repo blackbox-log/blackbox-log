@@ -135,16 +135,18 @@ fn main() -> Result<()> {
                 Fuzz::Run {
                     target,
                     time,
+                    jobs,
                     backtrace,
                     input,
                 } => {
                     let total_time = time.map(|t| format!("-max_total_time={t}"));
                     let debug = backtrace.then_some("--dev");
+                    let jobs = jobs.map(|jobs| format!("--jobs={jobs}"));
 
                     #[rustfmt::skip]
                     let cmd = cmd!(
                         sh,
-                        "cargo +nightly fuzz run {debug...} {dir_args...} {target} {input...} -- {total_time...}"
+                        "cargo +nightly fuzz run {debug...} {jobs...} {dir_args...} {target} {input...} -- {total_time...}"
                     );
 
                     let cmd = if backtrace {
@@ -312,6 +314,9 @@ enum Fuzz {
         #[bpaf(external)]
         time: Option<u16>,
 
+        #[bpaf(external)]
+        jobs: Option<usize>,
+
         /// Runs in debug mode and prints a backtrace on panic
         backtrace: bool,
 
@@ -352,22 +357,35 @@ enum Fuzz {
     },
 }
 
-fn time_given() -> impl Parser<Option<u16>> {
+fn time() -> impl Parser<Option<u16>> {
     let help = "Passes -max_total_time=<seconds> to libFuzzer, defaulting to 15 minutes if passed \
                 without a value";
 
-    bpaf::long("time")
+    let given = bpaf::long("time")
         .help(help)
         .argument::<u16>("seconds")
-        .optional()
+        .optional();
+
+    let default = bpaf::long("time").flag(Some(900), None).hide();
+
+    bpaf::construct!([given, default])
 }
 
-fn time_default() -> impl Parser<Option<u16>> {
-    bpaf::long("time").flag(Some(900), None).hide()
-}
+fn jobs() -> impl Parser<Option<usize>> {
+    let base = bpaf::short('j').long("jobs");
+    let help =
+        "Passes --jobs=<count> to cargo fuzz, defaulting to $(nproc) if passed without a value";
 
-fn time() -> impl Parser<Option<u16>> {
-    bpaf::construct!([time_given(), time_default()])
+    let with_value_or_missing = base
+        .clone()
+        .help(help)
+        .argument::<usize>("count")
+        .optional();
+
+    let nproc = std::thread::available_parallelism().unwrap().into();
+    let no_value = base.flag(Some(nproc), None).hide();
+
+    bpaf::construct!([with_value_or_missing, no_value])
 }
 
 fn get_root(sh: &Shell) -> Result<PathBuf> {
