@@ -1,4 +1,4 @@
-use core::ops::{Add, Shr};
+use core::ops::Add;
 
 use num_enum::TryFromPrimitive;
 use num_traits::ops::checked::CheckedSub;
@@ -36,11 +36,10 @@ impl Predictor {
         skipped_frames: u32,
     ) -> ParseResult<u32> {
         let _span = if signed {
-            let value = as_signed(value);
             tracing::trace_span!(
                 "Predictor::apply",
                 ?self,
-                value,
+                value = as_signed(value),
                 last = last.map(as_signed),
                 last_last = last_last.map(as_signed),
                 skipped_frames,
@@ -72,9 +71,12 @@ impl Predictor {
             }
             Self::Average2 => {
                 if signed {
-                    as_unsigned(average_2(last.map(as_signed), last_last.map(as_signed)))
+                    as_unsigned(average_2_signed(
+                        last.map(as_signed),
+                        last_last.map(as_signed),
+                    ))
                 } else {
-                    average_2(last, last_last)
+                    average_2_unsigned(last, last_last)
                 }
             }
             Self::MinThrottle => headers.min_throttle.into(),
@@ -124,14 +126,23 @@ where
     }
 }
 
-#[inline]
-pub(crate) fn average_2<T>(last: Option<T>, last_last: Option<T>) -> T
-where
-    T: Copy + Default + Add<Output = T> + Shr<usize, Output = T> + From<u8>,
-{
-    let last = last.unwrap_or_default();
-    last_last.map_or(last, |last_last| (last + last_last) >> 1)
+macro_rules! average_2 {
+    ($name:ident, $input:ty, $overflow:ty) => {
+        // REASON: Will not truncate since the average of two `$input`s is guaranteed to
+        // fit in $input
+        #[allow(clippy::cast_possible_truncation)]
+        #[inline]
+        fn $name(last: Option<$input>, last_last: Option<$input>) -> $input {
+            let last = last.unwrap_or_default();
+            last_last.map_or(last, |last_last| {
+                ((<$overflow>::from(last) + <$overflow>::from(last_last)) / 2) as $input
+            })
+        }
+    };
 }
+
+average_2!(average_2_signed, i32, i64);
+average_2!(average_2_unsigned, u32, u64);
 
 #[cfg(test)]
 mod tests {
@@ -145,5 +156,21 @@ mod tests {
     #[case(Some(0), Some(i8::MIN) => 0 ; "underflow")]
     fn straight_line(last: Option<i8>, last_last: Option<i8>) -> i8 {
         super::straight_line(last, last_last)
+    }
+
+    #[case(None, None => 0)]
+    #[case(Some(-1), None => -1)]
+    #[case(Some(2), Some(-1) => 0)]
+    #[case(Some(i32::MAX), Some(1) => 0x4000_0000 ; "overflow")]
+    fn average_2_signed(last: Option<i32>, last_last: Option<i32>) -> i32 {
+        super::average_2_signed(last, last_last)
+    }
+
+    #[case(None, None => 0)]
+    #[case(Some(1), None => 1)]
+    #[case(Some(2), Some(10) => 6)]
+    #[case(Some(u32::MAX), Some(1) => 0x8000_0000 ; "overflow")]
+    fn average_2_unsigned(last: Option<u32>, last_last: Option<u32>) -> u32 {
+        super::average_2_unsigned(last, last_last)
     }
 }
