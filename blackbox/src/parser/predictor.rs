@@ -1,7 +1,6 @@
-use core::ops::Add;
+use core::ops::{Add, Sub};
 
 use num_enum::TryFromPrimitive;
-use num_traits::ops::checked::CheckedSub;
 
 use super::{as_signed, as_unsigned, Headers, ParseResult};
 
@@ -61,12 +60,12 @@ impl Predictor {
             Self::Previous => last.unwrap_or(0),
             Self::StraightLine => {
                 if signed {
-                    as_unsigned(straight_line::<i32>(
+                    as_unsigned(straight_line::<i32, i64>(
                         last.map(as_signed),
                         last_last.map(as_signed),
                     ))
                 } else {
-                    straight_line::<u32>(last, last_last)
+                    straight_line::<u32, u64>(last, last_last)
                 }
             }
             Self::Average2 => {
@@ -115,12 +114,19 @@ impl Predictor {
 }
 
 #[inline]
-pub(crate) fn straight_line<T>(last: Option<T>, last_last: Option<T>) -> T
+pub(crate) fn straight_line<T, U>(last: Option<T>, last_last: Option<T>) -> T
 where
-    T: Copy + Default + Add<Output = T> + CheckedSub<Output = T>,
+    T: Copy + Default + TryFrom<U>,
+    U: Copy + Sub<Output = U> + Add<Output = U> + From<T>,
 {
     match (last, last_last) {
-        (Some(last), Some(last_last)) => last.checked_sub(&last_last).unwrap_or_default() + last,
+        (Some(last), Some(last_last)) => {
+            let result = {
+                let last = U::from(last);
+                (last - U::from(last_last)) + last
+            };
+            T::try_from(result).unwrap_or(last)
+        }
         (Some(last), None) => last,
         _ => T::default(),
     }
@@ -154,8 +160,9 @@ mod tests {
     #[case(Some(12), Some(10) => 14)]
     #[case(Some(10), Some(12) => 8)]
     #[case(Some(0), Some(i8::MIN) => 0 ; "underflow")]
+    #[case(Some(126), Some(0) => 126 ; "overflow")]
     fn straight_line(last: Option<i8>, last_last: Option<i8>) -> i8 {
-        super::straight_line(last, last_last)
+        super::straight_line::<i8, i16>(last, last_last)
     }
 
     #[case(None, None => 0)]

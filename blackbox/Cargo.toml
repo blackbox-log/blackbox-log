@@ -14,7 +14,6 @@ default = ["std"]
 [dependencies]
 bitter = "0.6.0"
 memchr = "2.5.0"
-num-traits = { version = "0.2.15", default-features = false }
 num_enum = "0.5.7"
 tracing.workspace = true
 

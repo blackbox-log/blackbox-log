@@ -233,7 +233,7 @@ impl<'data> MainFrameDef<'data> {
                 .filter(|f| !f.intra)
                 .and_then(|_| last_last.map(|f| f.time));
 
-            let time = predictor::straight_line(last.map(|f| f.time), last_last);
+            let time = predictor::straight_line::<u64, u128>(last.map(|f| f.time), last_last);
             let offset = decode::variable_signed(data)?;
 
             // TODO (rust 1.66): replace with time.saturating_add_unsigned(offset.into())
