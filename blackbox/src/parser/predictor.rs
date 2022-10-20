@@ -1,4 +1,4 @@
-use core::ops::{Add, Sub};
+use core::ops::{Add, Div, Sub};
 
 use num_enum::TryFromPrimitive;
 
@@ -60,22 +60,16 @@ impl Predictor {
             Self::Previous => last.unwrap_or(0),
             Self::StraightLine => {
                 if signed {
-                    as_unsigned(straight_line::<i32, i64>(
-                        last.map(as_signed),
-                        last_last.map(as_signed),
-                    ))
+                    as_unsigned(straight_line(last.map(as_signed), last_last.map(as_signed)))
                 } else {
-                    straight_line::<u32, u64>(last, last_last)
+                    straight_line(last, last_last)
                 }
             }
             Self::Average2 => {
                 if signed {
-                    as_unsigned(average_2_signed(
-                        last.map(as_signed),
-                        last_last.map(as_signed),
-                    ))
+                    as_unsigned(average(last.map(as_signed), last_last.map(as_signed)))
                 } else {
-                    average_2_unsigned(last, last_last)
+                    average(last, last_last)
                 }
             }
             Self::MinThrottle => headers.min_throttle.into(),
@@ -114,16 +108,16 @@ impl Predictor {
 }
 
 #[inline]
-pub(crate) fn straight_line<T, U>(last: Option<T>, last_last: Option<T>) -> T
+pub(crate) fn straight_line<T>(last: Option<T>, last_last: Option<T>) -> T
 where
-    T: Copy + Default + TryFrom<U>,
-    U: Copy + Sub<Output = U> + Add<Output = U> + From<T>,
+    T: TemporaryOverflow + Default,
+    T::Wide: Copy + Sub<Output = T::Wide> + Add<Output = T::Wide>,
 {
     match (last, last_last) {
         (Some(last), Some(last_last)) => {
             let result = {
-                let last = U::from(last);
-                (last - U::from(last_last)) + last
+                let last = last.widen();
+                (last - last_last.widen()) + last
             };
             T::try_from(result).unwrap_or(last)
         }
@@ -132,23 +126,51 @@ where
     }
 }
 
-macro_rules! average_2 {
-    ($name:ident, $input:ty, $overflow:ty) => {
-        // REASON: Will not truncate since the average of two `$input`s is guaranteed to
-        // fit in $input
-        #[allow(clippy::cast_possible_truncation)]
-        #[inline]
-        fn $name(last: Option<$input>, last_last: Option<$input>) -> $input {
-            let last = last.unwrap_or_default();
-            last_last.map_or(last, |last_last| {
-                ((<$overflow>::from(last) + <$overflow>::from(last_last)) / 2) as $input
-            })
-        }
-    };
+#[inline]
+fn average<T>(last: Option<T>, last_last: Option<T>) -> T
+where
+    T: TemporaryOverflow + Copy + Default,
+    T::Wide: Add<Output = T::Wide> + Div<Output = T::Wide> + From<u8>,
+{
+    let last = last.unwrap_or_default();
+    last_last.map_or(last, |last_last| {
+        T::truncate_from((last.widen() + last_last.widen()) / 2.into())
+    })
 }
 
-average_2!(average_2_signed, i32, i64);
-average_2!(average_2_unsigned, u32, u64);
+pub(crate) trait TemporaryOverflow
+where
+    Self: Copy + TryFrom<Self::Wide>,
+    Self::Wide: From<Self>,
+{
+    type Wide;
+    fn truncate_from(larger: Self::Wide) -> Self;
+
+    #[inline]
+    fn widen(self) -> Self::Wide {
+        self.into()
+    }
+}
+
+macro_rules! impl_next_larger {
+    ($($small:ident -> $large:ident),+ $(,)?) => {
+        $(
+            impl TemporaryOverflow for $small {
+                type Wide = $large;
+
+                #[inline]
+                fn truncate_from(larger: Self::Wide) -> Self {
+                    larger as $small
+                }
+            }
+        )+
+    }
+}
+
+impl_next_larger!(u8 -> u16, i8 -> i16);
+impl_next_larger!(u16 -> u32, i16 -> i32);
+impl_next_larger!(u32 -> u64, i32 -> i64);
+impl_next_larger!(u64 -> u128, i64 -> i128);
 
 #[cfg(test)]
 mod tests {
@@ -162,22 +184,22 @@ mod tests {
     #[case(Some(0), Some(i8::MIN) => 0 ; "underflow")]
     #[case(Some(126), Some(0) => 126 ; "overflow")]
     fn straight_line(last: Option<i8>, last_last: Option<i8>) -> i8 {
-        super::straight_line::<i8, i16>(last, last_last)
+        super::straight_line(last, last_last)
     }
 
     #[case(None, None => 0)]
     #[case(Some(-1), None => -1)]
     #[case(Some(2), Some(-1) => 0)]
     #[case(Some(i32::MAX), Some(1) => 0x4000_0000 ; "overflow")]
-    fn average_2_signed(last: Option<i32>, last_last: Option<i32>) -> i32 {
-        super::average_2_signed(last, last_last)
+    fn average_signed(last: Option<i32>, last_last: Option<i32>) -> i32 {
+        super::average(last, last_last)
     }
 
     #[case(None, None => 0)]
     #[case(Some(1), None => 1)]
     #[case(Some(2), Some(10) => 6)]
     #[case(Some(u32::MAX), Some(1) => 0x8000_0000 ; "overflow")]
-    fn average_2_unsigned(last: Option<u32>, last_last: Option<u32>) -> u32 {
-        super::average_2_unsigned(last, last_last)
+    fn average_unsigned(last: Option<u32>, last_last: Option<u32>) -> u32 {
+        super::average(last, last_last)
     }
 }
