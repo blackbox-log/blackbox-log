@@ -111,15 +111,25 @@ impl Predictor {
 pub(crate) fn straight_line<T>(last: Option<T>, last_last: Option<T>) -> T
 where
     T: TemporaryOverflow + Default,
-    T::Wide: Copy + Sub<Output = T::Wide> + Add<Output = T::Wide>,
+    T::Wide: Copy + Sub<Output = T::Wide> + Add<Output = T::Wide> + PartialOrd,
 {
     match (last, last_last) {
         (Some(last), Some(last_last)) => {
+            let fallback = last;
+
             let result = {
                 let last = last.widen();
-                (last - last_last.widen()) + last
+                let last_last = last_last.widen();
+                let sum = last + last;
+
+                // Work around not being able to use .checked_sub()
+                if !T::SIGNED && last_last > sum {
+                    return fallback;
+                }
+
+                sum - last_last
             };
-            T::try_from(result).unwrap_or(last)
+            T::try_from(result).unwrap_or(fallback)
         }
         (Some(last), None) => last,
         _ => T::default(),
@@ -143,6 +153,7 @@ where
     Self: Copy + TryFrom<Self::Wide>,
     Self::Wide: From<Self>,
 {
+    const SIGNED: bool;
     type Wide;
     fn truncate_from(larger: Self::Wide) -> Self;
 
@@ -153,24 +164,28 @@ where
 }
 
 macro_rules! impl_next_larger {
-    ($($small:ident -> $large:ident),+ $(,)?) => {
-        $(
-            impl TemporaryOverflow for $small {
-                type Wide = $large;
+    ($($sign:ident $base:ident -> $wide:ident),+ $(,)?) => {
+        $(impl_next_larger!($sign, $base, $wide);)+
+    };
+    (signed, $base:ident, $wide:ident) => { impl_next_larger!(true, $base, $wide); };
+    (unsigned, $base:ident, $wide:ident) => { impl_next_larger!(false, $base, $wide); };
+    ($sign:expr, $base:ident, $wide:ident) => {
+        impl TemporaryOverflow for $base {
+            const SIGNED: bool = $sign;
+            type Wide = $wide;
 
-                #[inline]
-                fn truncate_from(larger: Self::Wide) -> Self {
-                    larger as $small
-                }
+            #[inline]
+            fn truncate_from(wide: Self::Wide) -> Self {
+                wide as $base
             }
-        )+
+        }
     }
 }
 
-impl_next_larger!(u8 -> u16, i8 -> i16);
-impl_next_larger!(u16 -> u32, i16 -> i32);
-impl_next_larger!(u32 -> u64, i32 -> i64);
-impl_next_larger!(u64 -> u128, i64 -> i128);
+impl_next_larger!(unsigned u8 -> u16, signed i8 -> i16);
+impl_next_larger!(unsigned u16 -> u32, signed i16 -> i32);
+impl_next_larger!(unsigned u32 -> u64, signed i32 -> i64);
+impl_next_larger!(unsigned u64 -> u128, signed i64 -> i128);
 
 #[cfg(test)]
 mod tests {
@@ -181,9 +196,20 @@ mod tests {
     #[case(Some(-2), None => -2)]
     #[case(Some(12), Some(10) => 14)]
     #[case(Some(10), Some(12) => 8)]
+    #[case(Some(0), Some(i8::MAX) => -i8::MAX)]
     #[case(Some(0), Some(i8::MIN) => 0 ; "underflow")]
     #[case(Some(126), Some(0) => 126 ; "overflow")]
-    fn straight_line(last: Option<i8>, last_last: Option<i8>) -> i8 {
+    fn straight_line_signed(last: Option<i8>, last_last: Option<i8>) -> i8 {
+        super::straight_line(last, last_last)
+    }
+
+    #[case(Some(2),Some(2) => 2)]
+    #[case(Some(12), Some(10) => 14)]
+    #[case(Some(10), Some(12) => 8)]
+    #[case(Some(0), Some(u8::MIN) => 0 ; "underflow")]
+    #[case(Some(u8::MAX - 1), Some(0) => 254 ; "overflow")]
+    #[case(Some(0), Some(u8::MAX) => 0 ; "negative result")]
+    fn straight_line_unsigned(last: Option<u8>, last_last: Option<u8>) -> u8 {
         super::straight_line(last, last_last)
     }
 
