@@ -15,7 +15,7 @@ arbitrary = { version = "1.1.7", features = ["derive"] }
 bitter = "0.6.0"
 blackbox-sys = { version = "0.1.0", path = "../blackbox-sys" }
 blackbox.workspace = true
-libfuzzer-sys = "0.4.4"
+libfuzzer-sys = "0.4.5"
 memfile = "0.2.1"
 
 [[bin]]
