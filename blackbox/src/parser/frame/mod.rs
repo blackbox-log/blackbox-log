@@ -10,7 +10,7 @@ pub use self::gps::*;
 pub use self::gps_home::*;
 pub use self::main::*;
 pub use self::slow::*;
-use super::{Encoding, Headers, ParseError, ParseResult, Predictor, Reader};
+use super::{Encoding, ParseError, ParseResult, Predictor, Reader};
 
 pub trait FieldDef {
     fn name(&self) -> &str;
@@ -156,7 +156,6 @@ fn count_fields_with_same_encoding(
 
 fn read_field_values<T>(
     data: &mut Reader,
-    headers: &Headers,
     fields: &[T],
     get_encoding: impl Fn(&T) -> Encoding,
 ) -> ParseResult<Vec<u32>> {
@@ -167,7 +166,7 @@ fn read_field_values<T>(
         let extra = encoding.max_chunk_size() - 1;
         let extra = count_fields_with_same_encoding(&mut encodings, extra, encoding);
 
-        encoding.decode_into(data, headers.version, extra, &mut values)?;
+        encoding.decode_into(data, extra, &mut values)?;
     }
 
     debug_assert_eq!(values.len(), fields.len());

@@ -59,7 +59,7 @@ impl<'data> SlowFrameDef<'data> {
 
     #[instrument(level = "trace", name = "SlowFrameDef::parse", skip_all)]
     pub(crate) fn parse(&self, data: &mut Reader, headers: &Headers) -> ParseResult<SlowFrame> {
-        let raw = read_field_values(data, headers, &self.0, |f| f.encoding)?;
+        let raw = read_field_values(data, &self.0, |f| f.encoding)?;
 
         let values = raw
             .iter()

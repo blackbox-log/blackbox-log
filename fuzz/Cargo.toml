@@ -46,15 +46,8 @@ bench = false
 doc = false
 
 [[bin]]
-name = "tagged-16-v1"
-path = "fuzz_targets/tagged_16_v1.rs"
-test = false
-bench = false
-doc = false
-
-[[bin]]
-name = "tagged-16-v2"
-path = "fuzz_targets/tagged_16_v2.rs"
+name = "tagged-16"
+path = "fuzz_targets/tagged_16.rs"
 test = false
 bench = false
 doc = false

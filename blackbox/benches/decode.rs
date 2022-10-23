@@ -1,7 +1,6 @@
 use std::fmt::Display;
 use std::iter;
 
-use blackbox::common::LogVersion;
 use blackbox::parser::{decode, Reader};
 use criterion::measurement::WallTime;
 use criterion::{
@@ -91,10 +90,7 @@ fn tagged_zeros(first: u8, zeros: usize) -> Vec<u8> {
 }
 
 fn tagged_16(c: &mut Criterion) {
-    use LogVersion::{V1, V2};
-
-    get_bench!(bench_v1, |data| decode::tagged_16(V1, data));
-    get_bench!(bench_v2, |data| decode::tagged_16(V2, data));
+    get_bench!(decode::tagged_16);
 
     let mut group = c.benchmark_group("tagged 16");
 
@@ -109,11 +105,8 @@ fn tagged_16(c: &mut Criterion) {
 
         group.throughput(Throughput::Bytes(input.len() as u64));
 
-        let id = BenchmarkId::new("v1", name);
-        group.bench_with_input(id, input, bench_v1);
-
-        let id = BenchmarkId::new("v2", name);
-        group.bench_with_input(id, input, bench_v2);
+        let id = BenchmarkId::from_parameter(name);
+        group.bench_with_input(id, input, bench);
     }
 
     group.finish();

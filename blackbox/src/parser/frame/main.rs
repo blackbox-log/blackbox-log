@@ -186,7 +186,7 @@ impl<'data> MainFrameDef<'data> {
         let time = decode::variable(data)?.into();
         tracing::trace!(time);
 
-        let mut values = read_field_values(data, headers, &self.fields, |f| f.encoding_intra)?;
+        let mut values = read_field_values(data, &self.fields, |f| f.encoding_intra)?;
 
         for (i, field) in self.fields.iter().enumerate() {
             let raw = values[i];
@@ -249,7 +249,7 @@ impl<'data> MainFrameDef<'data> {
             time
         };
 
-        let mut values = read_field_values(data, headers, &self.fields, |f| f.encoding_inter)?;
+        let mut values = read_field_values(data, &self.fields, |f| f.encoding_inter)?;
 
         for (i, field) in self.fields.iter().enumerate() {
             let raw = values[i];

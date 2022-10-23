@@ -23,8 +23,8 @@ impl<'data> GpsHomeFrameDef<'data> {
     }
 
     #[instrument(level = "trace", name = "GpsHomeFrameDef::parse", skip_all)]
-    pub(crate) fn parse(&self, data: &mut Reader, headers: &Headers) -> ParseResult<GpsHomeFrame> {
-        let _ = read_field_values(data, headers, &self.0, |f| f.encoding)?;
+    pub(crate) fn parse(&self, data: &mut Reader, _headers: &Headers) -> ParseResult<GpsHomeFrame> {
+        let _ = read_field_values(data, &self.0, |f| f.encoding)?;
 
         Ok(GpsHomeFrame)
     }

@@ -17,7 +17,6 @@ pub use self::tagged_32::tagged_32;
 pub use self::tagged_variable::tagged_variable;
 pub use self::variable::{variable, variable_signed};
 use super::{ParseResult, Reader};
-use crate::common::LogVersion;
 use crate::parser::as_unsigned;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, TryFromPrimitive)]
@@ -69,7 +68,6 @@ impl Encoding {
     pub(crate) fn decode_into(
         &self,
         data: &mut Reader,
-        version: LogVersion,
         extra: usize,
         into: &mut Vec<u32>,
     ) -> ParseResult<()> {
@@ -84,9 +82,9 @@ impl Encoding {
                 into.extend_from_slice(&tagged_variable(data, extra)?.map(as_unsigned)[range]);
             }
             Self::Tagged32 => into.extend_from_slice(&tagged_32(data)?.map(as_unsigned)[range]),
-            Self::Tagged16 => into.extend_from_slice(
-                &tagged_16(version, data)?.map(|x| as_unsigned(x.into()))[range],
-            ),
+            Self::Tagged16 => {
+                into.extend_from_slice(&tagged_16(data)?.map(|x| as_unsigned(x.into()))[range]);
+            }
 
             Self::Null => into.push(0),
         };
