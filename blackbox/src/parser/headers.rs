@@ -6,7 +6,6 @@ use super::frame::{
     GpsHomeFrameDef, GpsHomeFrameDefBuilder, MainFrameDef, MainFrameDefBuilder, MainUnit,
     SlowFrameDef, SlowFrameDefBuilder, SlowUnit,
 };
-use super::reader::ByteReader;
 use super::{ParseError, ParseResult, Reader};
 use crate::common::{FirmwareKind, LogVersion};
 
@@ -46,21 +45,19 @@ impl<'data> Headers<'data> {
     }
 
     pub(crate) fn parse(data: &mut Reader<'data>) -> ParseResult<Self> {
-        let bytes = &mut data.bytes();
-
-        check_product(bytes)?;
-        let version = get_version(bytes)?;
+        check_product(data)?;
+        let version = get_version(data)?;
 
         let mut state = State::new(version);
 
         loop {
-            match bytes.peek() {
+            match data.peek() {
                 Some(b'H') => {}
                 Some(_) => break,
                 None => return Err(ParseError::UnexpectedEof),
             }
 
-            let (name, value) = parse_header(bytes)?;
+            let (name, value) = parse_header(data)?;
             state.update(name, value).map_err(|e| {
                 tracing::error!("state.update error: {e}");
                 e
@@ -71,7 +68,7 @@ impl<'data> Headers<'data> {
     }
 }
 
-fn check_product(bytes: &mut ByteReader) -> Result<(), ParseError> {
+fn check_product(bytes: &mut Reader) -> Result<(), ParseError> {
     let (product, _) = parse_header(bytes)?;
     if product.to_ascii_lowercase() != "product" {
         tracing::error!("`Product` header must be first");
@@ -81,7 +78,7 @@ fn check_product(bytes: &mut ByteReader) -> Result<(), ParseError> {
     Ok(())
 }
 
-fn get_version(bytes: &mut ByteReader) -> Result<LogVersion, ParseError> {
+fn get_version(bytes: &mut Reader) -> Result<LogVersion, ParseError> {
     let (name, value) = parse_header(bytes)?;
 
     if name.to_ascii_lowercase() != "data version" {
@@ -270,7 +267,7 @@ impl<'data> State<'data> {
 }
 
 /// Expects the next character to be the leading H
-fn parse_header<'data>(bytes: &mut ByteReader<'data, '_>) -> ParseResult<(&'data str, &'data str)> {
+fn parse_header<'data>(bytes: &mut Reader<'data>) -> ParseResult<(&'data str, &'data str)> {
     match bytes.read_u8() {
         Some(b'H') => {}
         Some(_) => return Err(ParseError::Corrupted),
@@ -296,6 +293,6 @@ mod tests {
     #[should_panic(expected = "Corrupted")]
     fn invalid_utf8() {
         let mut b = Reader::new(b"H \xFF:\xFF\n");
-        parse_header(&mut b.bytes()).unwrap();
+        parse_header(&mut b).unwrap();
     }
 }

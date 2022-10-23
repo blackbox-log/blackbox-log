@@ -3,7 +3,6 @@ use alloc::vec::Vec;
 use num_enum::TryFromPrimitive;
 use tracing::instrument;
 
-use crate::parser::reader::ByteReader;
 use crate::parser::{decode, ParseError, ParseResult, Reader};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -18,7 +17,6 @@ impl Event {
     #[instrument(level = "debug", name = "Event::parse", skip_all, fields(kind))]
     pub fn parse_into(data: &mut Reader, events: &mut Vec<Self>) -> ParseResult<bool> {
         let kind = data
-            .bytes()
             .read_u8()
             .map(EventKind::try_from)
             .ok_or(ParseError::UnexpectedEof)?;
@@ -46,25 +44,23 @@ impl Event {
             }
 
             Ok(EventKind::End) => {
-                let mut bytes = data.bytes();
+                check_message(data, b"End of log")?;
 
-                check_message(&mut bytes, b"End of log")?;
-
-                if bytes.peek() == Some(b' ') {
+                if data.peek() == Some(b' ') {
                     // Assume INAV's new format:
                     // `End of log (disarm reason:x)\0`
 
-                    check_message(&mut bytes, b" (disarm reason:")?;
+                    check_message(data, b" (disarm reason:")?;
 
-                    let reason = bytes.read_u8().ok_or(ParseError::UnexpectedEof)?;
+                    let reason = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
                     events.push(Self::Disarm(reason.into()));
 
-                    if bytes.read_u8() != Some(b')') {
+                    if data.read_u8() != Some(b')') {
                         return Err(ParseError::Corrupted);
                     }
                 }
 
-                if bytes.read_u8() != Some(0) {
+                if data.read_u8() != Some(0) {
                     return Err(ParseError::Corrupted);
                 }
 
@@ -93,7 +89,7 @@ enum EventKind {
     End = 255,
 }
 
-fn check_message(bytes: &mut ByteReader, message: &[u8]) -> ParseResult<()> {
+fn check_message(bytes: &mut Reader, message: &[u8]) -> ParseResult<()> {
     let bytes = bytes.read_n_bytes(message.len());
 
     if bytes.len() != message.len() {

@@ -1,20 +1,17 @@
 use super::sign_extend;
-use crate::parser::reader::ByteReader;
 use crate::parser::{ParseError, ParseResult, Reader};
 
 const COUNT: usize = 3;
 
 #[allow(clippy::assertions_on_constants)]
 pub fn tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
-    fn read_u8_or_eof(bytes: &mut ByteReader) -> ParseResult<u8> {
+    fn read_u8_or_eof(bytes: &mut Reader) -> ParseResult<u8> {
         bytes.read_u8().ok_or(ParseError::UnexpectedEof)
     }
 
-    let mut bytes = data.bytes();
-
     let mut result = [0; COUNT];
 
-    let byte = read_u8_or_eof(&mut bytes)?;
+    let byte = read_u8_or_eof(data)?;
     match (byte & 0xC0) >> 6 {
         // 2 bits
         0 => {
@@ -37,7 +34,7 @@ pub fn tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
 
             result[0] = convert(byte & 0x0F);
 
-            let byte = read_u8_or_eof(&mut bytes)?;
+            let byte = read_u8_or_eof(data)?;
             result[1] = convert(byte >> 4);
             result[2] = convert(byte & 0x0F);
         }
@@ -51,10 +48,10 @@ pub fn tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
 
             result[0] = convert(byte);
 
-            let byte = read_u8_or_eof(&mut bytes)?;
+            let byte = read_u8_or_eof(data)?;
             result[1] = convert(byte);
 
-            let byte = read_u8_or_eof(&mut bytes)?;
+            let byte = read_u8_or_eof(data)?;
             result[2] = convert(byte);
         }
 
@@ -67,25 +64,25 @@ pub fn tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
                 *x = match tag {
                     // 8 bits
                     0 => {
-                        let x = read_u8_or_eof(&mut bytes)?;
+                        let x = read_u8_or_eof(data)?;
                         sign_extend::<8>(x.into()) as i32
                     }
 
                     // 16 bits
                     1 => {
-                        let value = bytes.read_u16().ok_or(ParseError::UnexpectedEof)?;
+                        let value = data.read_u16().ok_or(ParseError::UnexpectedEof)?;
                         (value as i16).into()
                     }
 
                     // 24 bits
                     2 => {
-                        let x = bytes.read_u24().ok_or(ParseError::UnexpectedEof)?;
+                        let x = data.read_u24().ok_or(ParseError::UnexpectedEof)?;
                         sign_extend::<24>(x)
                     }
 
                     // 32 bits
                     3.. => {
-                        let value = bytes.read_u32().ok_or(ParseError::UnexpectedEof)?;
+                        let value = data.read_u32().ok_or(ParseError::UnexpectedEof)?;
                         value as i32
                     }
                 }

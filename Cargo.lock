@@ -41,16 +41,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
-name = "bitter"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71df88e035e57f5e424e3683aaea5310eed572ff9754b566c62b32ee568b2ce1"
-
-[[package]]
 name = "blackbox"
 version = "0.1.0"
 dependencies = [
- "bitter",
  "criterion",
  "memchr",
  "num_enum",
@@ -63,7 +56,6 @@ name = "blackbox-fuzz"
 version = "0.0.0"
 dependencies = [
  "arbitrary",
- "bitter",
  "blackbox",
  "blackbox-sys",
  "libfuzzer-sys",

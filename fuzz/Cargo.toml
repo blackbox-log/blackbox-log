@@ -12,7 +12,6 @@ cargo-fuzz = true
 
 [dependencies]
 arbitrary = { version = "1.2.0", features = ["derive"] }
-bitter = "0.6.0"
 blackbox-sys = { version = "0.1.0", path = "../blackbox-sys" }
 blackbox.workspace = true
 libfuzzer-sys = "0.4.5"

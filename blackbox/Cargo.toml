@@ -12,7 +12,6 @@ std = []
 default = ["std"]
 
 [dependencies]
-bitter = "0.6.0"
 memchr = "2.5.0"
 num_enum = "0.5.7"
 tracing.workspace = true

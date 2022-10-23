@@ -3,13 +3,9 @@ use core::fmt;
 #[cfg(feature = "std")]
 use std::io::{self, Read};
 
-pub use bitter::BigEndianReader as BitReader;
-use bitter::BitReader as _;
-
 pub struct Reader<'data> {
     index: usize,
     data: &'data [u8],
-    bits: Option<BitReader<'data>>,
 }
 
 impl<'data> Reader<'data> {
@@ -18,66 +14,13 @@ impl<'data> Reader<'data> {
             panic!("cannot create a Reader containing usize::MAX bytes");
         }
 
-        Self {
-            index: 0,
-            data,
-            bits: None,
-        }
+        Self { index: 0, data }
     }
 
-    /// Leave bits mode, skipping any remaining bits if not byte aligned
-    pub fn bytes<'reader>(&'reader mut self) -> ByteReader<'data, 'reader> {
-        if let Some(bits) = self.bits.take() {
-            self.index = self.data.len() - bits.bytes_remaining();
-        }
-
-        ByteReader(self)
-    }
-
-    pub fn bits<'reader: 'bits, 'bits>(&'reader mut self) -> &'bits mut BitReader<'data> {
-        self.bits
-            .get_or_insert_with(|| BitReader::new(&self.data[self.index..]))
-    }
-
-    #[must_use]
-    pub fn is_byte_aligned(&self) -> bool {
-        self.bits.as_ref().map_or(true, BitReader::byte_aligned)
-    }
-
-    pub fn byte_align(&mut self) {
-        if let Some(ref mut bits) = self.bits {
-            while !bits.byte_aligned() {
-                bits.read_bit();
-            }
-        }
-    }
-
-    #[must_use]
-    pub fn is_empty(&self) -> bool {
-        self.bits.as_ref().map_or(
-            (self.data.len() - self.index) == 0,
-            bitter::BitReader::is_empty,
-        )
-    }
-}
-
-impl fmt::Debug for Reader<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("Reader")
-            .field("index", &self.index)
-            .field("bits_mode", &self.bits.is_some())
-            .finish_non_exhaustive()
-    }
-}
-
-#[derive(Debug)]
-pub struct ByteReader<'data: 'reader, 'reader>(&'reader mut Reader<'data>);
-
-impl<'data, 'reader> ByteReader<'data, 'reader> {
     #[must_use]
     /// Counts the current byte if it has only been partially read
     fn remaining(&self) -> usize {
-        self.0.data.len() - self.0.index
+        self.data.len() - self.index
     }
 
     #[must_use]
@@ -85,27 +28,27 @@ impl<'data, 'reader> ByteReader<'data, 'reader> {
         self.remaining() == 0
     }
 
-    pub fn iter<'me>(&'me mut self) -> Bytes<'data, 'reader, 'me> {
+    pub fn iter<'me>(&'me mut self) -> Bytes<'data, 'me> {
         Bytes(self)
     }
 
     pub fn peek(&self) -> Option<u8> {
-        self.0.data.get(self.0.index).copied()
+        self.data.get(self.index).copied()
     }
 
     pub fn read_line(&mut self) -> Option<&'data [u8]> {
-        let start = self.0.index;
+        let start = self.index;
 
-        let rest = self.0.data.get(start..).filter(|x| !x.is_empty())?;
+        let rest = self.data.get(start..).filter(|x| !x.is_empty())?;
 
         if let Some(len) = rest.iter().position(|b| *b == b'\n') {
-            self.0.index += len + 1; // Skip the '\n'
+            self.index += len + 1; // Skip the '\n'
 
             let end = start + len;
-            self.0.data.get(start..end)
+            self.data.get(start..end)
         } else {
-            self.0.index = self.0.data.len();
-            self.0.data.get(start..)
+            self.index = self.data.len();
+            self.data.get(start..)
         }
     }
 
@@ -113,18 +56,18 @@ impl<'data, 'reader> ByteReader<'data, 'reader> {
         let len = n.min(self.remaining());
         let mut buffer = Vec::with_capacity(len);
 
-        let start = self.0.index;
-        let slice = &self.0.data[start..(start + len)];
+        let start = self.index;
+        let slice = &self.data[start..(start + len)];
 
         buffer.extend_from_slice(slice);
-        self.0.index += len;
+        self.index += len;
         buffer
     }
 
     pub fn read_u8(&mut self) -> Option<u8> {
         let byte = self.peek();
         if byte.is_some() {
-            self.0.index += 1;
+            self.index += 1;
         }
         byte
     }
@@ -142,9 +85,9 @@ impl<'data, 'reader> ByteReader<'data, 'reader> {
         let mut bytes = [0; 4];
         let slice = &mut bytes[0..3];
 
-        let start = self.0.index;
-        slice.copy_from_slice(&self.0.data[start..(start + 3)]);
-        self.0.index += 3;
+        let start = self.index;
+        slice.copy_from_slice(&self.data[start..(start + 3)]);
+        self.index += 3;
 
         Some(u32::from_le_bytes(bytes))
     }
@@ -160,9 +103,9 @@ macro_rules! impl_read {
             }
 
             let mut bytes = [0; BYTES];
-            let start = self.0.index;
-            bytes.copy_from_slice(&self.0.data[start..(start + BYTES)]);
-            self.0.index += BYTES;
+            let start = self.index;
+            bytes.copy_from_slice(&self.data[start..(start + BYTES)]);
+            self.index += BYTES;
 
             Some(<$type>::from_le_bytes(bytes))
         }
@@ -173,29 +116,37 @@ macro_rules! impl_read {
     };
 }
 
-impl<'data, 'reader> ByteReader<'data, 'reader> {
+impl<'data> Reader<'data> {
     impl_read!(read_u16, u16, read_i16, i16);
 
     impl_read!(read_u32, u32, read_i32, i32);
 }
 
+impl fmt::Debug for Reader<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Reader")
+            .field("index", &self.index)
+            .finish_non_exhaustive()
+    }
+}
+
 #[cfg(feature = "std")]
-impl<'data, 'reader> Read for ByteReader<'data, 'reader> {
+impl<'data> Read for Reader<'data> {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         let len = buf.len().min(self.remaining());
 
-        let start = self.0.index;
-        let slice = &self.0.data[start..(start + len)];
+        let start = self.index;
+        let slice = &self.data[start..(start + len)];
         buf[0..len].copy_from_slice(slice);
 
-        self.0.index += len;
+        self.index += len;
         Ok(len)
     }
 }
 
-pub struct Bytes<'data: 'reader, 'reader: 'bytes, 'bytes>(&'bytes mut ByteReader<'data, 'reader>);
+pub struct Bytes<'data: 'reader, 'reader>(&'reader mut Reader<'data>);
 
-impl Iterator for Bytes<'_, '_, '_> {
+impl Iterator for Bytes<'_, '_> {
     type Item = u8;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -208,50 +159,37 @@ mod tests {
     use super::*;
 
     #[test]
-    fn byte_align() {
-        let mut reader = Reader::new(&[0, 1]);
-
-        {
-            let bits = reader.bits();
-            bits.read_bit();
-        }
-
-        assert!(!reader.is_byte_aligned());
-        reader.byte_align();
-        assert!(reader.is_byte_aligned());
-
-        assert_eq!(Some(1), reader.bytes().read_u8());
+    fn read_u16() {
+        let mut bytes = Reader::new(&[0x39, 0x05]);
+        assert_eq!(Some(0x0539), bytes.read_u16());
     }
 
     #[test]
-    fn bytes_without_read() {
-        let mut reader = Reader::new(&[0]);
-        reader.bits().read_bit();
-        reader.bytes();
-        assert!(reader.is_byte_aligned());
-        assert_eq!(None, reader.bytes().read_u8());
+    fn read_i16() {
+        let mut bytes = Reader::new(&[0xC7, 0xFA]);
+        assert_eq!(Some(-0x0539), bytes.read_i16());
     }
 
     #[test]
-    fn implicit_byte_align() {
-        let mut reader = Reader::new(&[0, 1]);
-
-        {
-            let bits = reader.bits();
-            bits.read_bit();
-        }
-
-        assert!(!reader.is_byte_aligned());
-        assert_eq!(Some(1), reader.bytes().read_u8());
-        assert!(reader.is_byte_aligned());
-
-        assert_eq!(None, reader.bytes().read_u8());
+    fn read_u24() {
+        let mut bytes = Reader::new(&[0x56, 0x34, 0x12]);
+        assert_eq!(Some(0x123456), bytes.read_u24());
     }
 
+    #[test]
+    fn read_u32() {
+        let mut bytes = Reader::new(&[0xEF, 0xCD, 0x34, 0x12]);
+        assert_eq!(Some(0x1234_CDEF), bytes.read_u32());
+    }
+
+    #[test]
+    fn read_i32() {
+        let mut bytes = Reader::new(&[0x11, 0x32, 0xCB, 0xED]);
+        assert_eq!(Some(-0x1234_CDEF), bytes.read_i32());
+    }
     #[test]
     fn bytes_read_line() {
-        let mut reader = Reader::new(&[b'a', 0, b'\n', b'b']);
-        let mut bytes = reader.bytes();
+        let mut bytes = Reader::new(&[b'a', 0, b'\n', b'b']);
 
         assert_eq!(Some(b"a\0".as_ref()), bytes.read_line());
         assert_eq!(Some(b'b'), bytes.read_u8());
@@ -261,8 +199,7 @@ mod tests {
     fn bytes_read_n_bytes_exact() {
         let input = [0, 1, 2, 3];
 
-        let mut reader = Reader::new(&input);
-        let mut bytes = reader.bytes();
+        let mut bytes = Reader::new(&input);
 
         let read = bytes.read_n_bytes(1);
         assert_eq!(read.len(), 1);
@@ -283,8 +220,7 @@ mod tests {
     fn bytes_read_n_bytes_overshoot() {
         let input = [0];
 
-        let mut reader = Reader::new(&input);
-        let mut bytes = reader.bytes();
+        let mut bytes = Reader::new(&input);
 
         let read = bytes.read_n_bytes(2);
         assert_eq!(read.len(), 1);
@@ -295,8 +231,7 @@ mod tests {
 
     #[test]
     fn bytes_read_line_without_newline() {
-        let mut reader = Reader::new(&[b'a', 0]);
-        let mut bytes = reader.bytes();
+        let mut bytes = Reader::new(&[b'a', 0]);
 
         assert_eq!(Some(b"a\0".as_ref()), bytes.read_line());
         assert_eq!(None, bytes.read_u8());
@@ -304,9 +239,7 @@ mod tests {
 
     #[test]
     fn bytes_read_line_empty() {
-        let mut reader = Reader::new(&[]);
-        let mut bytes = reader.bytes();
-
+        let mut bytes = Reader::new(&[]);
         assert_eq!(None, bytes.read_line());
     }
 
@@ -315,8 +248,7 @@ mod tests {
     fn bytes_read() {
         let input = [0, 1, 2, 3];
 
-        let mut reader = Reader::new(&input);
-        let mut bytes = reader.bytes();
+        let mut bytes = Reader::new(&input);
 
         let mut buf = [0; 4];
         let read = bytes.read(&mut buf).unwrap();
@@ -331,8 +263,7 @@ mod tests {
     fn bytes_read_exact() {
         let input = [0, 1, 2, 3];
 
-        let mut reader = Reader::new(&input);
-        let mut bytes = reader.bytes();
+        let mut bytes = Reader::new(&input);
 
         let mut buf = [0; 4];
         bytes.read_exact(&mut buf).unwrap();
@@ -344,8 +275,7 @@ mod tests {
     #[test]
     #[cfg(feature = "std")]
     fn bytes_read_empty() {
-        let mut reader = Reader::new(&[]);
-        let mut bytes = reader.bytes();
+        let mut bytes = Reader::new(&[]);
 
         let mut buf = [0; 1];
         let read = bytes.read(&mut buf).unwrap();
@@ -356,8 +286,7 @@ mod tests {
 
     #[test]
     fn bytes_iter() {
-        let mut reader = Reader::new(&[0]);
-        let mut bytes = reader.bytes();
+        let mut bytes = Reader::new(&[0]);
         let mut iter = bytes.iter();
 
         assert_eq!(Some(0), iter.next());

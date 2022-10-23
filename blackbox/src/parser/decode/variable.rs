@@ -3,12 +3,10 @@ use crate::parser::{ParseError, ParseResult, Reader};
 
 #[allow(clippy::assertions_on_constants)]
 pub fn variable(data: &mut Reader) -> ParseResult<u32> {
-    let mut bytes = data.bytes();
-
     let mut uvar: u32 = 0;
     let mut offset: u32 = 0;
     loop {
-        let byte = bytes.read_u8().ok_or(ParseError::UnexpectedEof)?;
+        let byte = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
         let is_last_byte = (byte & 0x80) == 0;
 
         let byte = u32::from(byte & !0x80);

@@ -1,5 +1,3 @@
-use bitter::BitReader;
-
 use super::sign_extend;
 use crate::common::LogVersion;
 use crate::parser::{ParseError, ParseResult, Reader};
@@ -7,23 +5,20 @@ use crate::parser::{ParseError, ParseResult, Reader};
 const COUNT: usize = 4;
 
 pub fn tagged_16(version: LogVersion, data: &mut Reader) -> ParseResult<[i16; COUNT]> {
-    data.byte_align();
+    let tags = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
+
+    if tags == 0 {
+        return Ok([0; COUNT]);
+    }
 
     match version {
-        LogVersion::V1 => tagged_16_v1(data),
-        LogVersion::V2 => tagged_16_v2(data),
+        LogVersion::V1 => tagged_16_v1(data, tags),
+        LogVersion::V2 => tagged_16_v2(data, tags),
     }
 }
 
-fn tagged_16_v1(data: &mut Reader) -> ParseResult<[i16; 4]> {
-    let mut bytes = data.bytes();
-
+fn tagged_16_v1(data: &mut Reader, tags: u8) -> ParseResult<[i16; 4]> {
     let mut result = [0; COUNT];
-    let tags = bytes.read_u8().ok_or(ParseError::UnexpectedEof)?;
-
-    if tags == 0 {
-        return Ok(result);
-    }
 
     let mut i = 0;
     while i < COUNT {
@@ -37,15 +32,15 @@ fn tagged_16_v1(data: &mut Reader) -> ParseResult<[i16; 4]> {
                     return Err(ParseError::Corrupted);
                 }
 
-                let byte = bytes.read_u8().ok_or(ParseError::UnexpectedEof)?;
+                let byte = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
 
                 // Lower nibble first...
                 result[i] = i4_to_i16(byte & 0xF);
                 i += 1;
                 result[i] = i4_to_i16(byte >> 4);
             }
-            2 => result[i] = bytes.read_i8().ok_or(ParseError::UnexpectedEof)?.into(),
-            3.. => result[i] = bytes.read_i16().ok_or(ParseError::UnexpectedEof)?,
+            2 => result[i] = data.read_i8().ok_or(ParseError::UnexpectedEof)?.into(),
+            3.. => result[i] = data.read_i16().ok_or(ParseError::UnexpectedEof)?,
         }
 
         i += 1;
@@ -54,42 +49,60 @@ fn tagged_16_v1(data: &mut Reader) -> ParseResult<[i16; 4]> {
     Ok(result)
 }
 
-fn tagged_16_v2(data: &mut Reader) -> ParseResult<[i16; 4]> {
-    let bits = data.bits();
-
+fn tagged_16_v2(data: &mut Reader, tags: u8) -> ParseResult<[i16; 4]> {
     let mut result = [0; COUNT];
-    let tags = bits.read_u8().ok_or(ParseError::UnexpectedEof)?;
 
-    if tags == 0 {
-        return Ok(result);
-    }
+    let mut aligned = true;
+    let mut buffer = 0;
 
-    let mut i = 0;
-    while i < COUNT {
-        let tag = (tags >> (i * 2)) & 3;
-
-        match tag {
-            0 => result[i] = 0,
+    for (i, result) in result.iter_mut().enumerate() {
+        *result = match (tags >> (i * 2)) & 3 {
+            0 => 0,
             1 => {
-                let nibble = bits.read_bits(4).ok_or(ParseError::UnexpectedEof)?;
-                result[i] = i4_to_i16(nibble as u8);
+                let nibble = if aligned {
+                    buffer = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
+                    buffer >> 4
+                } else {
+                    buffer & 0xF
+                };
+
+                aligned = !aligned;
+                i4_to_i16(nibble)
             }
             2 => {
-                let byte = bits.read_u8().ok_or(ParseError::UnexpectedEof)?;
-                result[i] = (byte as i8).into();
+                let byte = if aligned {
+                    data.read_i8().ok_or(ParseError::UnexpectedEof)?
+                } else {
+                    let upper = buffer << 4;
+                    buffer = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
+                    (upper | buffer >> 4) as i8
+                };
+
+                byte.into()
             }
             3.. => {
-                let bytes = bits.read_i16().ok_or(ParseError::UnexpectedEof)?;
-                result[i] = bytes;
+                if aligned {
+                    data.read_i16()
+                        .ok_or(ParseError::UnexpectedEof)?
+                        .swap_bytes()
+                } else {
+                    let upper = u16::from(buffer) << 12;
+                    let [middle, lower] = data
+                        .read_u16()
+                        .ok_or(ParseError::UnexpectedEof)?
+                        .to_le_bytes();
+
+                    buffer = lower;
+                    (upper | u16::from(middle) << 4 | u16::from(lower >> 4)) as i16
+                }
             }
         }
-
-        i += 1;
     }
 
     Ok(result)
 }
 
+#[inline]
 fn i4_to_i16(nibble: u8) -> i16 {
     sign_extend::<4>(nibble.into()) as i16
 }

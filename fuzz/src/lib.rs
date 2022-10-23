@@ -2,7 +2,6 @@ use std::io;
 use std::io::Write;
 use std::os::unix::io::AsRawFd;
 
-use bitter::BitReader as _;
 pub use blackbox::parser::{decode, Reader};
 use blackbox_sys::stream::Stream;
 use libfuzzer_sys::arbitrary;
@@ -17,55 +16,11 @@ pub struct AlignedBytes {
 
 impl AlignedBytes {
     pub fn to_streams(&self) -> io::Result<(Stream, Reader)> {
-        get_streams(&self.bytes)
+        let bytes: &[u8] = &self.bytes;
+        let mut f = MemFile::create_default("blackbox-sys-input")?;
+        f.write_all(bytes)?;
+        f.flush()?;
+
+        Ok((Stream::new(f.as_raw_fd()), Reader::new(bytes)))
     }
-}
-
-#[derive(Debug)]
-pub struct UnalignedBytes {
-    offset: u8,
-    bytes: Vec<u8>,
-}
-
-impl<'a> Arbitrary<'a> for UnalignedBytes {
-    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
-        let bytes: Vec<u8> = u.arbitrary()?;
-        let offset = if bytes.is_empty() {
-            0
-        } else {
-            u.choose_index(8)?.try_into().unwrap()
-        };
-
-        Ok(Self { offset, bytes })
-    }
-
-    fn size_hint(_depth: usize) -> (usize, Option<usize>) {
-        (1, None)
-    }
-}
-
-impl UnalignedBytes {
-    pub fn to_streams(&self) -> io::Result<(Stream, Reader)> {
-        let (mut reference, mut bitter) = get_streams(&self.bytes)?;
-
-        let offset = self.offset;
-        if offset > 0 {
-            let reference_bits = reference.read_bits(offset);
-            let bitter_bits = bitter.bits().read_bits(offset.into()).unwrap_or(0);
-            assert_eq!(u64::from(reference_bits), bitter_bits);
-        }
-
-        Ok((reference, bitter))
-    }
-}
-
-fn get_streams(bytes: &[u8]) -> io::Result<(Stream, Reader)> {
-    let mut f = MemFile::create_default("blackbox-sys-input")?;
-    f.write_all(bytes)?;
-    f.flush()?;
-
-    let reference = Stream::new(f.as_raw_fd());
-    let bitter = Reader::new(bytes);
-
-    Ok((reference, bitter))
 }

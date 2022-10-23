@@ -26,7 +26,7 @@ impl Data {
 
         slow_frames.push(headers.slow_frames.default_frame(headers));
 
-        while let Some(byte) = data.bytes().read_u8() {
+        while let Some(byte) = data.read_u8() {
             let kind = FrameKind::from_byte(byte).unwrap_or_else(|| {
                 #[cfg(feature = "std")]
                 {
@@ -35,7 +35,7 @@ impl Data {
                     let lines = 4;
                     let bytes_per_line = 8;
                     let bytes = iter::once(byte)
-                        .chain(data.bytes().iter())
+                        .chain(data.iter())
                         .take(lines * bytes_per_line)
                         .collect::<Vec<u8>>();
 
