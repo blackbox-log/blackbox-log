@@ -34,16 +34,6 @@ impl Stream {
     }
 
     #[inline]
-    pub fn read_elias_delta(&mut self) -> u32 {
-        unsafe { ffi::streamReadEliasDeltaU32(self.stream) }
-    }
-
-    #[inline]
-    pub fn read_elias_delta_signed(&mut self) -> i32 {
-        unsafe { ffi::streamReadEliasDeltaS32(self.stream) }
-    }
-
-    #[inline]
     pub fn read_tagged_variable(&mut self, count: i32) -> [i64; 8] {
         let mut result = [0; 8];
         let pointer = ptr::addr_of_mut!(result[0]);
@@ -748,11 +738,6 @@ mod ffi {
             values: *mut i64,
             valueCount: c_int,
         );
-
-        pub(super) fn streamReadEliasDeltaU32(stream: *mut mmapStream_t) -> u32;
-        pub(super) fn streamReadEliasDeltaS32(stream: *mut mmapStream_t) -> i32;
-        // pub(super) fn streamReadEliasGammaU32(stream: *mut mmapStream_t) -> u32;
-        // pub(super) fn streamReadEliasGammaS32(stream: *mut mmapStream_t) -> i32;
 
         pub(super) fn streamReadNeg14Bit(stream: *mut mmapStream_t) -> i32;
     }

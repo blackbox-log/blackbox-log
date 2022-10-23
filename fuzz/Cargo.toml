@@ -40,20 +40,6 @@ bench = false
 doc = false
 
 [[bin]]
-name = "elias-delta-signed"
-path = "fuzz_targets/elias_delta_signed.rs"
-test = false
-bench = false
-doc = false
-
-[[bin]]
-name = "elias-delta"
-path = "fuzz_targets/elias_delta.rs"
-test = false
-bench = false
-doc = false
-
-[[bin]]
 name = "tagged-variable"
 path = "fuzz_targets/tagged_variable.rs"
 test = false
@@ -86,3 +72,4 @@ name = "negative-14-bit"
 path = "fuzz_targets/negative_14_bit.rs"
 test = false
 doc = false
+

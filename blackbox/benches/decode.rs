@@ -98,21 +98,6 @@ fn negative_14_bit(c: &mut Criterion) {
     group.finish();
 }
 
-fn elias_delta(c: &mut Criterion) {
-    get_bench!(ubench, bits, decode::elias_delta);
-    get_bench!(ibench, bits, decode::elias_delta_signed);
-
-    let mut group = c.benchmark_group("Elias delta");
-
-    let min: &[u8] = &[0x80];
-    let max: &[u8] = &[0x04, 0x1F, 0xFF, 0xFF, 0xFF, 0xC0];
-    for (input, name) in [(min, "minimum"), (max, "maximum")] {
-        run_bench_pair(&mut group, input, name, ubench, ibench);
-    }
-
-    group.finish();
-}
-
 fn tagged_zeros(first: u8, zeros: usize) -> Vec<u8> {
     iter::once(first)
         .chain(iter::repeat(0).take(zeros))
@@ -172,12 +157,5 @@ fn tagged_32(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(
-    benches,
-    variable,
-    negative_14_bit,
-    elias_delta,
-    tagged_16,
-    tagged_32
-);
+criterion_group!(benches, variable, negative_14_bit, tagged_16, tagged_32);
 criterion_main!(benches);
