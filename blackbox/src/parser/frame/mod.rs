@@ -102,20 +102,11 @@ fn parse_enum_list<'a, T>(
     kind: FrameKind,
     property: &'static str,
     s: Option<&'a str>,
-) -> ParseResult<impl Iterator<Item = ParseResult<T>> + 'a>
-where
-    T: TryFrom<u8>,
-{
+    parse: impl Fn(&str) -> Option<T> + 'a,
+) -> ParseResult<impl Iterator<Item = ParseResult<T>> + 'a> {
     let s = s.ok_or_else(|| missing_header_error(kind, property))?;
-
-    let iter = s.split(',').map(|s| {
-        s.parse()
-            .map_err(|_| ())
-            .and_then(|x: u8| x.try_into().map_err(|_| ()))
-            .map_err(|()| ParseError::Corrupted)
-    });
-
-    Ok(iter)
+    Ok(s.split(',')
+        .map(move |s| parse(s).ok_or(ParseError::Corrupted)))
 }
 
 #[inline]
@@ -123,7 +114,7 @@ fn parse_predictors(
     kind: FrameKind,
     predictors: Option<&'_ str>,
 ) -> ParseResult<impl Iterator<Item = ParseResult<Predictor>> + '_> {
-    parse_enum_list(kind, "predictor", predictors)
+    parse_enum_list(kind, "predictor", predictors, Predictor::from_num_str)
 }
 
 #[inline]
@@ -131,7 +122,7 @@ fn parse_encodings(
     kind: FrameKind,
     encodings: Option<&'_ str>,
 ) -> ParseResult<impl Iterator<Item = ParseResult<Encoding>> + '_> {
-    parse_enum_list(kind, "encoding", encodings)
+    parse_enum_list(kind, "encoding", encodings, Encoding::from_num_str)
 }
 
 fn parse_signs(

@@ -9,8 +9,6 @@ mod variable;
 
 use alloc::vec::Vec;
 
-use num_enum::TryFromPrimitive;
-
 pub use self::negative_14_bit::negative_14_bit;
 pub use self::tagged_16::tagged_16;
 pub use self::tagged_32::tagged_32;
@@ -19,7 +17,7 @@ pub use self::variable::{variable, variable_signed};
 use super::{ParseResult, Reader};
 use crate::parser::as_unsigned;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, TryFromPrimitive)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Encoding {
     /// Signed variable byte
@@ -90,6 +88,19 @@ impl Encoding {
         };
 
         Ok(())
+    }
+
+    pub(crate) fn from_num_str(s: &str) -> Option<Self> {
+        match s {
+            "0" => Some(Self::VariableSigned),
+            "1" => Some(Self::Variable),
+            "3" => Some(Self::Negative14Bit),
+            "6" => Some(Self::TaggedVariable),
+            "7" => Some(Self::Tagged32),
+            "8" => Some(Self::Tagged16),
+            "9" => Some(Self::Null),
+            _ => None,
+        }
     }
 }
 

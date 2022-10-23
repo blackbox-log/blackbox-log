@@ -1,10 +1,8 @@
 use core::ops::{Add, Div, Sub};
 
-use num_enum::TryFromPrimitive;
-
 use super::{as_signed, as_unsigned, Headers, ParseResult};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(u8)]
 pub enum Predictor {
     Zero = 0,
@@ -104,6 +102,24 @@ impl Predictor {
             tracing::trace!(return = x);
             x
         })
+    }
+
+    pub(crate) fn from_num_str(s: &str) -> Option<Self> {
+        match s {
+            "0" => Some(Self::Zero),
+            "1" => Some(Self::Previous),
+            "2" => Some(Self::StraightLine),
+            "3" => Some(Self::Average2),
+            "4" => Some(Self::MinThrottle),
+            "5" => Some(Self::Motor0),
+            "6" => Some(Self::Increment),
+            "7" => Some(Self::HomeLat), // TODO: check that lat = 0, lon = 1
+            "8" => Some(Self::FifteenHundred),
+            "9" => Some(Self::VBatReference),
+            "10" => Some(Self::LastMainFrameTime),
+            "11" => Some(Self::MinMotor),
+            _ => None,
+        }
     }
 }
 

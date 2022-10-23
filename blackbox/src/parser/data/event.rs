@@ -1,6 +1,5 @@
 use alloc::vec::Vec;
 
-use num_enum::TryFromPrimitive;
 use tracing::instrument;
 
 use crate::parser::{decode, ParseError, ParseResult, Reader};
@@ -16,13 +15,10 @@ pub enum Event {
 impl Event {
     #[instrument(level = "debug", name = "Event::parse", skip_all, fields(kind))]
     pub fn parse_into(data: &mut Reader, events: &mut Vec<Self>) -> ParseResult<bool> {
-        let kind = data
-            .read_u8()
-            .map(EventKind::try_from)
-            .ok_or(ParseError::UnexpectedEof)?;
+        let byte = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
 
-        match kind {
-            Ok(EventKind::SyncBeep) => {
+        match EventKind::from_byte(byte) {
+            Some(EventKind::SyncBeep) => {
                 // TODO: SyncBeep handle time rollover
 
                 let time = decode::variable(data)?;
@@ -30,20 +26,20 @@ impl Event {
                 Ok(false)
             }
 
-            Ok(EventKind::Disarm) => {
+            Some(EventKind::Disarm) => {
                 let reason = decode::variable(data)?;
                 events.push(Self::Disarm(reason));
                 Ok(false)
             }
 
-            Ok(EventKind::FlightMode) => {
+            Some(EventKind::FlightMode) => {
                 let flags = decode::variable(data)?;
                 let last_flags = decode::variable(data)?;
                 events.push(Self::FlightMode { flags, last_flags });
                 Ok(false)
             }
 
-            Ok(EventKind::End) => {
+            Some(EventKind::End) => {
                 check_message(data, b"End of log")?;
 
                 if data.peek() == Some(b' ') {
@@ -68,13 +64,13 @@ impl Event {
                 Ok(true)
             }
 
-            Ok(event) => todo!("unsupported event: {:?}", event),
-            Err(err) => todo!("invalid event: {err}"),
+            Some(event) => todo!("unsupported event: {:?}", event),
+            None => todo!("invalid event: {byte}"),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, TryFromPrimitive)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 enum EventKind {
     SyncBeep = 0,
@@ -87,6 +83,24 @@ enum EventKind {
     GTuneCycleResult = 20,
     FlightMode = 30,
     End = 255,
+}
+
+impl EventKind {
+    pub(crate) fn from_byte(byte: u8) -> Option<Self> {
+        match byte {
+            0 => Some(Self::SyncBeep),
+            10 => Some(Self::AutotuneCycleStart),
+            11 => Some(Self::AutotuneCycleResult),
+            12 => Some(Self::AutotuneTargets),
+            13 => Some(Self::InflightAdjustment),
+            14 => Some(Self::Resume),
+            15 => Some(Self::Disarm),
+            20 => Some(Self::GTuneCycleResult),
+            30 => Some(Self::FlightMode),
+            255 => Some(Self::End),
+            _ => None,
+        }
+    }
 }
 
 fn check_message(bytes: &mut Reader, message: &[u8]) -> ParseResult<()> {
