@@ -17,29 +17,31 @@ pub use self::variable::{variable, variable_signed};
 use super::{ParseResult, Reader};
 use crate::parser::as_unsigned;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-pub enum Encoding {
-    /// Signed variable byte
-    VariableSigned = 0,
-    /// Unsigned variable byte
-    Variable = 1,
-    /// Unsigned variable byte, but negated after decoding. Value fits in 14
-    /// bits
-    Negative14Bit = 3,
-    TaggedVariable = 6,
-    Tagged32 = 7,
-    /// 1 tag byte containing 4 2 bit tags, followed by 4 fields
-    ///
-    /// | Tag | Field width         |
-    /// |-----|---------------------|
-    /// | 0   | 0 (field value = 0) |
-    /// | 1   | 4                   |
-    /// | 2   | 8                   |
-    /// | 3   | 16                  |
-    Tagged16 = 8,
-    /// Nothing is written to the log, assume value is 0
-    Null = 9,
+byte_enum! {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    #[repr(u8)]
+    pub enum Encoding {
+        /// Signed variable byte
+        VariableSigned = 0,
+        /// Unsigned variable byte
+        Variable = 1,
+        /// Unsigned variable byte, but negated after decoding. Value fits in 14
+        /// bits
+        Negative14Bit = 3,
+        TaggedVariable = 6,
+        Tagged32 = 7,
+        /// 1 tag byte containing 4 2 bit tags, followed by 4 fields
+        ///
+        /// | Tag | Field width         |
+        /// |-----|---------------------|
+        /// | 0   | 0 (field value = 0) |
+        /// | 1   | 4                   |
+        /// | 2   | 8                   |
+        /// | 3   | 16                  |
+        Tagged16 = 8,
+        /// Nothing is written to the log, assume value is 0
+        Null = 9,
+    }
 }
 
 impl Encoding {
@@ -88,19 +90,6 @@ impl Encoding {
         };
 
         Ok(())
-    }
-
-    pub(crate) fn from_num_str(s: &str) -> Option<Self> {
-        match s {
-            "0" => Some(Self::VariableSigned),
-            "1" => Some(Self::Variable),
-            "3" => Some(Self::Negative14Bit),
-            "6" => Some(Self::TaggedVariable),
-            "7" => Some(Self::Tagged32),
-            "8" => Some(Self::Tagged16),
-            "9" => Some(Self::Null),
-            _ => None,
-        }
     }
 }
 

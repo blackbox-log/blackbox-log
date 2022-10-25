@@ -40,27 +40,16 @@ impl fmt::Display for ParseError {
 #[cfg(feature = "std")]
 impl std::error::Error for ParseError {}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-enum FrameKind {
-    Event,
-    Intra,
-    Inter,
-    Gps,
-    GpsHome,
-    Slow,
-}
-
-impl FrameKind {
-    pub(crate) fn from_byte(byte: u8) -> Option<Self> {
-        match byte {
-            b'E' => Some(Self::Event),
-            b'I' => Some(Self::Intra),
-            b'P' => Some(Self::Inter),
-            b'G' => Some(Self::Gps),
-            b'H' => Some(Self::GpsHome),
-            b'S' => Some(Self::Slow),
-            _ => None,
-        }
+byte_enum! {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    #[repr(u8)]
+    enum FrameKind {
+        Event = b'E',
+        Intra = b'I',
+        Inter = b'P',
+        Gps = b'G',
+        GpsHome = b'H',
+        Slow = b'S',
     }
 }
 

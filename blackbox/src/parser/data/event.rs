@@ -70,36 +70,20 @@ impl Event {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-enum EventKind {
-    SyncBeep = 0,
-    AutotuneCycleStart = 10,
-    AutotuneCycleResult = 11,
-    AutotuneTargets = 12,
-    InflightAdjustment = 13,
-    Resume = 14,
-    Disarm = 15,
-    GTuneCycleResult = 20,
-    FlightMode = 30,
-    End = 255,
-}
-
-impl EventKind {
-    pub(crate) fn from_byte(byte: u8) -> Option<Self> {
-        match byte {
-            0 => Some(Self::SyncBeep),
-            10 => Some(Self::AutotuneCycleStart),
-            11 => Some(Self::AutotuneCycleResult),
-            12 => Some(Self::AutotuneTargets),
-            13 => Some(Self::InflightAdjustment),
-            14 => Some(Self::Resume),
-            15 => Some(Self::Disarm),
-            20 => Some(Self::GTuneCycleResult),
-            30 => Some(Self::FlightMode),
-            255 => Some(Self::End),
-            _ => None,
-        }
+byte_enum! {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    #[repr(u8)]
+    enum EventKind {
+        SyncBeep = 0,
+        AutotuneCycleStart = 10,
+        AutotuneCycleResult = 11,
+        AutotuneTargets = 12,
+        InflightAdjustment = 13,
+        Resume = 14,
+        Disarm = 15,
+        GTuneCycleResult = 20,
+        FlightMode = 30,
+        End = 255,
     }
 }
 
