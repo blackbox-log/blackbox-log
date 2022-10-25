@@ -9,6 +9,7 @@ use std::process::{ExitCode, Termination};
 use blackbox::parser::{MainValue, SlowValue};
 use blackbox::Log;
 use mimalloc::MiMalloc;
+use rayon::prelude::*;
 
 use self::cli::Cli;
 
@@ -21,20 +22,9 @@ enum QuietResult<T> {
     Err(ExitCode),
 }
 
-impl<T> QuietResult<T> {
-    const FAILURE: Self = Self::Err(ExitCode::FAILURE);
-
-    fn err(code: exitcode::ExitCode) -> Self {
+impl<T> From<exitcode::ExitCode> for QuietResult<T> {
+    fn from(code: exitcode::ExitCode) -> Self {
         Self::Err(ExitCode::from(u8::try_from(code).unwrap()))
-    }
-}
-
-impl<T> From<blackbox::parser::ParseResult<T>> for QuietResult<T> {
-    fn from(result: blackbox::parser::ParseResult<T>) -> Self {
-        match result {
-            Ok(ok) => Self::Ok(ok),
-            Err(_) => Self::FAILURE,
-        }
     }
 }
 
@@ -56,20 +46,17 @@ fn main() -> QuietResult<()> {
 
     if cli.logs.len() > 1 && cli.stdout {
         tracing::error!("cannot write multiple logs to stdout");
-        return QuietResult::err(exitcode::USAGE);
+        return QuietResult::from(exitcode::USAGE);
     }
 
-    for filename in &cli.logs {
+    let result = cli.logs.par_iter().try_for_each(|filename| {
         let span = tracing::info_span!("file", name = ?filename);
         let _span = span.enter();
 
-        let data = match read_log_file(filename) {
-            Ok(data) => data,
-            Err(error) => {
-                tracing::error!(%error, "failed to read log file");
-                return QuietResult::err(exitcode::IOERR);
-            }
-        };
+        let data = read_log_file(filename).map_err(|error| {
+            tracing::error!(%error, "failed to read log file");
+            exitcode::IOERR
+        })?;
 
         let file = blackbox::File::new(&data);
 
@@ -78,19 +65,16 @@ fn main() -> QuietResult<()> {
             tracing::error!(
                 "found {log_count} logs, choose exactly one to write to stdout with `--index`"
             );
-            return QuietResult::err(exitcode::USAGE);
+            return Err(exitcode::USAGE);
         }
 
-        for i in 0..log_count {
+        (0..log_count).into_par_iter().try_for_each(|i| {
             let human_i = i + 1;
 
             let span = tracing::info_span!("log", index = human_i);
             let _span = span.enter();
 
-            let mut log = match file.parse_by_index(i) {
-                Ok(log) => log,
-                Err(_) => return QuietResult::err(exitcode::DATAERR),
-            };
+            let mut log = file.parse_by_index(i).map_err(|_| exitcode::DATAERR)?;
 
             if let Some(ref filter) = cli.filter {
                 log.set_filter(filter);
@@ -100,18 +84,24 @@ fn main() -> QuietResult<()> {
                 Ok(out) => BufWriter::new(out),
                 Err(error) => {
                     tracing::error!(%error, "failed to open output file");
-                    return QuietResult::err(exitcode::CANTCREAT);
+                    return Err(exitcode::CANTCREAT);
                 }
             };
 
             if let Err(error) = write_csv(&mut out, &log, &cli) {
                 tracing::error!(%error, "failed to write csv");
-                return QuietResult::err(exitcode::IOERR);
+                return Err(exitcode::IOERR);
             }
-        }
-    }
 
-    QuietResult::Ok(())
+            Ok(())
+        })
+    });
+
+    if let Err(code) = result {
+        QuietResult::from(code)
+    } else {
+        QuietResult::Ok(())
+    }
 }
 
 fn read_log_file(filename: &Path) -> io::Result<Vec<u8>> {

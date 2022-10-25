@@ -76,6 +76,7 @@ dependencies = [
  "bpaf",
  "exitcode",
  "mimalloc",
+ "rayon",
  "tracing",
  "tracing-subscriber",
 ]
