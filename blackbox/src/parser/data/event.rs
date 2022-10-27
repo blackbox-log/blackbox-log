@@ -75,14 +75,11 @@ byte_enum! {
     #[repr(u8)]
     enum EventKind {
         SyncBeep = 0,
-        AutotuneCycleStart = 10,
-        AutotuneCycleResult = 11,
-        AutotuneTargets = 12,
         InflightAdjustment = 13,
         Resume = 14,
         Disarm = 15,
-        GTuneCycleResult = 20,
         FlightMode = 30,
+        ImuFailure = 40,
         End = 255,
     }
 }
