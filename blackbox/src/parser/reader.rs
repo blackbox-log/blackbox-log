@@ -91,6 +91,14 @@ impl<'data> Reader<'data> {
 
         Some(u32::from_le_bytes(bytes))
     }
+
+    pub fn read_f32(&mut self) -> Option<f32> {
+        self.read_u32().map(f32::from_bits)
+    }
+
+    pub fn read_f64(&mut self) -> Option<f64> {
+        self.read_u64().map(f64::from_bits)
+    }
 }
 
 macro_rules! impl_read {
@@ -120,6 +128,10 @@ impl<'data> Reader<'data> {
     impl_read!(read_u16, u16, read_i16, i16);
 
     impl_read!(read_u32, u32, read_i32, i32);
+
+    impl_read!(read_u64, u64, read_i64, i64);
+
+    impl_read!(read_u128, u128, read_i128, i128);
 }
 
 impl fmt::Debug for Reader<'_> {
@@ -187,6 +199,34 @@ mod tests {
         let mut bytes = Reader::new(&[0x11, 0x32, 0xCB, 0xED]);
         assert_eq!(Some(-0x1234_CDEF), bytes.read_i32());
     }
+
+    #[test]
+    fn read_u64() {
+        let mut bytes = Reader::new(&[0xEF, 0xCD, 0xAB, 0x89, 0x67, 0x45, 0x23, 0x01]);
+        assert_eq!(Some(0x0123_4567_89AB_CDEF), bytes.read_u64());
+    }
+
+    #[test]
+    fn read_i64() {
+        let mut bytes = Reader::new(&[1, 0, 0, 0, 0, 0, 0, 0x80]);
+        assert_eq!(Some(i64::MIN + 1), bytes.read_i64());
+    }
+
+    #[test]
+    fn read_u128() {
+        let mut bytes = Reader::new(&[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF]);
+        assert_eq!(
+            Some(0x0F0E_0D0C_0B0A_0908_0706_0504_0302_0100),
+            bytes.read_u128()
+        );
+    }
+
+    #[test]
+    fn read_i128() {
+        let mut bytes = Reader::new(&[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x80]);
+        assert_eq!(Some(i128::MIN + 1), bytes.read_i128());
+    }
+
     #[test]
     fn bytes_read_line() {
         let mut bytes = Reader::new(&[b'a', 0, b'\n', b'b']);
