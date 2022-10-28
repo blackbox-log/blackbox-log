@@ -55,11 +55,11 @@ impl Data {
 
             let result = match kind {
                 FrameKind::Event => match Event::parse_into(&mut data, &mut events) {
-                    Ok(true) => {
+                    Ok(event::EventKind::End) => {
                         tracing::trace!("found the end event");
                         break;
                     }
-                    Ok(false) => Ok(()),
+                    Ok(_) => Ok(()),
                     Err(err) => Err(err),
                 },
                 FrameKind::Intra | FrameKind::Inter => {

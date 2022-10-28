@@ -4,42 +4,90 @@ use tracing::instrument;
 
 use crate::parser::{decode, ParseError, ParseResult, Reader};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Event {
     SyncBeep(u64),
+    InflightAdjustment {
+        function: u8,
+        new_value: AdjustedValue,
+    },
+    Resume {
+        log_iteration: u32,
+        time: u32,
+    },
     Disarm(u32),
-    FlightMode { flags: u32, last_flags: u32 },
+    FlightMode {
+        flags: u32,
+        last_flags: u32,
+    },
+    ImuFailure {
+        error: u32,
+    },
     End,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum AdjustedValue {
+    Float(f32),
+    Int(i32),
 }
 
 impl Event {
     #[instrument(level = "debug", name = "Event::parse", skip_all, fields(kind))]
-    pub fn parse_into(data: &mut Reader, events: &mut Vec<Self>) -> ParseResult<bool> {
+    pub(crate) fn parse_into(data: &mut Reader, events: &mut Vec<Self>) -> ParseResult<EventKind> {
         let byte = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
+        let kind = EventKind::from_byte(byte).unwrap_or_else(|| todo!("invalid event: {byte}"));
 
-        match EventKind::from_byte(byte) {
-            Some(EventKind::SyncBeep) => {
+        match kind {
+            EventKind::SyncBeep => {
                 // TODO: SyncBeep handle time rollover
 
                 let time = decode::variable(data)?;
                 events.push(Self::SyncBeep(time.into()));
-                Ok(false)
             }
 
-            Some(EventKind::Disarm) => {
+            EventKind::InflightAdjustment => {
+                let function = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
+
+                let new_value = if (function & 0x80) > 0 {
+                    AdjustedValue::Float(data.read_f32().ok_or(ParseError::UnexpectedEof)?)
+                } else {
+                    AdjustedValue::Int(decode::variable_signed(data)?)
+                };
+
+                events.push(Self::InflightAdjustment {
+                    function: function & 0x7F,
+                    new_value,
+                });
+            }
+
+            EventKind::Resume => {
+                let log_iteration = decode::variable(data)?;
+                let time = decode::variable(data)?;
+
+                events.push(Self::Resume {
+                    log_iteration,
+                    time,
+                });
+            }
+
+            EventKind::Disarm => {
                 let reason = decode::variable(data)?;
                 events.push(Self::Disarm(reason));
-                Ok(false)
             }
 
-            Some(EventKind::FlightMode) => {
+            EventKind::FlightMode => {
                 let flags = decode::variable(data)?;
                 let last_flags = decode::variable(data)?;
                 events.push(Self::FlightMode { flags, last_flags });
-                Ok(false)
             }
 
-            Some(EventKind::End) => {
+            EventKind::ImuFailure => {
+                let error = decode::variable(data)?;
+                events.push(Self::ImuFailure { error });
+            }
+
+            EventKind::End => {
                 check_message(data, b"End of log")?;
 
                 if data.peek() == Some(b' ') {
@@ -61,19 +109,17 @@ impl Event {
                 }
 
                 events.push(Self::End);
-                Ok(true)
             }
-
-            Some(event) => todo!("unsupported event: {:?}", event),
-            None => todo!("invalid event: {byte}"),
         }
+
+        Ok(kind)
     }
 }
 
 byte_enum! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     #[repr(u8)]
-    enum EventKind {
+    pub(crate) enum EventKind {
         SyncBeep = 0,
         InflightAdjustment = 13,
         Resume = 14,
