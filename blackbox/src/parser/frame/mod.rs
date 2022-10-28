@@ -22,19 +22,18 @@ pub(crate) fn is_frame_def_header(header: &str) -> bool {
     parse_frame_def_header(header).is_some()
 }
 
-pub(crate) fn parse_frame_def_header(header: &str) -> Option<(FrameKind, FrameProperty)> {
+pub(crate) fn parse_frame_def_header(header: &str) -> Option<(DataFrameKind, DataFrameProperty)> {
     let header = header.strip_prefix("Field ")?;
     let (kind, property) = header.split_once(' ')?;
 
     Some((
-        FrameKind::from_letter(kind)?,
-        FrameProperty::from_name(property)?,
+        DataFrameKind::from_letter(kind)?,
+        DataFrameProperty::from_name(property)?,
     ))
 }
 
-// TODO: gps & gps home
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum FrameKind {
+pub(crate) enum DataFrameKind {
     Gps,
     GpsHome,
     Intra,
@@ -42,7 +41,7 @@ pub(crate) enum FrameKind {
     Slow,
 }
 
-impl FrameKind {
+impl DataFrameKind {
     pub(crate) fn from_letter(s: &str) -> Option<Self> {
         match s {
             "G" => Some(Self::Gps),
@@ -55,28 +54,28 @@ impl FrameKind {
     }
 }
 
-impl From<FrameKind> for char {
-    fn from(kind: FrameKind) -> Self {
+impl From<DataFrameKind> for char {
+    fn from(kind: DataFrameKind) -> Self {
         match kind {
-            FrameKind::Gps => 'G',
-            FrameKind::GpsHome => 'H',
-            FrameKind::Intra => 'I',
-            FrameKind::Inter => 'P',
-            FrameKind::Slow => 'S',
+            DataFrameKind::Gps => 'G',
+            DataFrameKind::GpsHome => 'H',
+            DataFrameKind::Intra => 'I',
+            DataFrameKind::Inter => 'P',
+            DataFrameKind::Slow => 'S',
         }
     }
 }
 
 // TODO: signed & width?
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum FrameProperty {
+pub(crate) enum DataFrameProperty {
     Name,
     Predictor,
     Encoding,
     Signed,
 }
 
-impl FrameProperty {
+impl DataFrameProperty {
     pub(crate) fn from_name(s: &str) -> Option<Self> {
         match s {
             "name" => Some(Self::Name),
@@ -88,18 +87,21 @@ impl FrameProperty {
     }
 }
 
-fn missing_header_error(kind: FrameKind, property: &'static str) -> ParseError {
+fn missing_header_error(kind: DataFrameKind, property: &'static str) -> ParseError {
     tracing::error!("missing header `Field {} {property}`", char::from(kind));
     ParseError::Corrupted
 }
 
-fn parse_names(kind: FrameKind, names: Option<&str>) -> ParseResult<impl Iterator<Item = &'_ str>> {
+fn parse_names(
+    kind: DataFrameKind,
+    names: Option<&str>,
+) -> ParseResult<impl Iterator<Item = &'_ str>> {
     let names = names.ok_or_else(|| missing_header_error(kind, "name"))?;
     Ok(names.split(','))
 }
 
 fn parse_enum_list<'a, T>(
-    kind: FrameKind,
+    kind: DataFrameKind,
     property: &'static str,
     s: Option<&'a str>,
     parse: impl Fn(&str) -> Option<T> + 'a,
@@ -111,7 +113,7 @@ fn parse_enum_list<'a, T>(
 
 #[inline]
 fn parse_predictors(
-    kind: FrameKind,
+    kind: DataFrameKind,
     predictors: Option<&'_ str>,
 ) -> ParseResult<impl Iterator<Item = ParseResult<Predictor>> + '_> {
     parse_enum_list(kind, "predictor", predictors, Predictor::from_num_str)
@@ -119,14 +121,14 @@ fn parse_predictors(
 
 #[inline]
 fn parse_encodings(
-    kind: FrameKind,
+    kind: DataFrameKind,
     encodings: Option<&'_ str>,
 ) -> ParseResult<impl Iterator<Item = ParseResult<Encoding>> + '_> {
     parse_enum_list(kind, "encoding", encodings, Encoding::from_num_str)
 }
 
 fn parse_signs(
-    kind: FrameKind,
+    kind: DataFrameKind,
     names: Option<&str>,
 ) -> ParseResult<impl Iterator<Item = bool> + '_> {
     let names = names.ok_or_else(|| missing_header_error(kind, "signed"))?;

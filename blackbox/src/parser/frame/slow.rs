@@ -3,7 +3,7 @@ use core::iter;
 
 use tracing::instrument;
 
-use super::{read_field_values, FrameKind, FrameProperty};
+use super::{read_field_values, DataFrameKind, DataFrameProperty};
 use crate::parser::{as_signed, Encoding, Headers, ParseError, ParseResult, Predictor, Reader};
 use crate::units;
 
@@ -130,19 +130,19 @@ pub(crate) struct SlowFrameDefBuilder<'data> {
 }
 
 impl<'data> SlowFrameDefBuilder<'data> {
-    pub(crate) fn update(&mut self, property: FrameProperty, value: &'data str) {
+    pub(crate) fn update(&mut self, property: DataFrameProperty, value: &'data str) {
         let value = Some(value);
 
         match property {
-            FrameProperty::Name => self.names = value,
-            FrameProperty::Predictor => self.predictors = value,
-            FrameProperty::Encoding => self.encodings = value,
-            FrameProperty::Signed => self.signs = value,
+            DataFrameProperty::Name => self.names = value,
+            DataFrameProperty::Predictor => self.predictors = value,
+            DataFrameProperty::Encoding => self.encodings = value,
+            DataFrameProperty::Signed => self.signs = value,
         }
     }
 
     pub(crate) fn parse(self) -> ParseResult<SlowFrameDef<'data>> {
-        let kind = FrameKind::Slow;
+        let kind = DataFrameKind::Slow;
 
         let mut names = super::parse_names(kind, self.names)?;
         let mut predictors = super::parse_predictors(kind, self.predictors)?;

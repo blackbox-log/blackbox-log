@@ -2,7 +2,7 @@ use alloc::borrow::ToOwned;
 use core::str::{self, FromStr};
 
 use super::frame::{
-    is_frame_def_header, parse_frame_def_header, FrameKind, GpsFrameDef, GpsFrameDefBuilder,
+    is_frame_def_header, parse_frame_def_header, DataFrameKind, GpsFrameDef, GpsFrameDefBuilder,
     GpsHomeFrameDef, GpsHomeFrameDefBuilder, MainFrameDef, MainFrameDefBuilder, MainUnit,
     SlowFrameDef, SlowFrameDefBuilder, SlowUnit,
 };
@@ -226,12 +226,12 @@ impl<'data> State<'data> {
                 let (frame_kind, property) = parse_frame_def_header(header).unwrap();
 
                 match frame_kind {
-                    FrameKind::Gps => self.gps_frames.update(property, value),
-                    FrameKind::GpsHome => self.gps_home_frames.update(property, value),
-                    FrameKind::Inter | FrameKind::Intra => {
+                    DataFrameKind::Gps => self.gps_frames.update(property, value),
+                    DataFrameKind::GpsHome => self.gps_home_frames.update(property, value),
+                    DataFrameKind::Inter | DataFrameKind::Intra => {
                         self.main_frames.update(frame_kind, property, value);
                     }
-                    FrameKind::Slow => self.slow_frames.update(property, value),
+                    DataFrameKind::Slow => self.slow_frames.update(property, value),
                 }
             }
             header => tracing::debug!("skipping unknown header: `{header}` = `{value}`"),

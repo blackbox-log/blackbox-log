@@ -2,7 +2,7 @@ use alloc::vec::Vec;
 
 use tracing::instrument;
 
-use super::{read_field_values, FrameKind, FrameProperty};
+use super::{read_field_values, DataFrameKind, DataFrameProperty};
 use crate::parser::{Encoding, Headers, ParseError, ParseResult, Predictor, Reader};
 
 #[derive(Debug, Clone)]
@@ -49,19 +49,19 @@ pub(crate) struct GpsFrameDefBuilder<'data> {
 }
 
 impl<'data> GpsFrameDefBuilder<'data> {
-    pub(crate) fn update(&mut self, property: FrameProperty, value: &'data str) {
+    pub(crate) fn update(&mut self, property: DataFrameProperty, value: &'data str) {
         let value = Some(value);
 
         match property {
-            FrameProperty::Name => self.names = value,
-            FrameProperty::Predictor => self.predictors = value,
-            FrameProperty::Encoding => self.encodings = value,
-            FrameProperty::Signed => self.signs = value,
+            DataFrameProperty::Name => self.names = value,
+            DataFrameProperty::Predictor => self.predictors = value,
+            DataFrameProperty::Encoding => self.encodings = value,
+            DataFrameProperty::Signed => self.signs = value,
         }
     }
 
     pub(crate) fn parse(self) -> ParseResult<Option<GpsFrameDef<'data>>> {
-        let kind = FrameKind::Gps;
+        let kind = DataFrameKind::Gps;
 
         if self.names.is_none()
             && self.predictors.is_none()

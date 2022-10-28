@@ -3,7 +3,7 @@ use core::iter;
 
 use tracing::instrument;
 
-use super::{read_field_values, FrameKind, FrameProperty};
+use super::{read_field_values, DataFrameKind, DataFrameProperty};
 use crate::parser::{
     as_signed, decode, predictor, to_base_field, Encoding, Headers, ParseError, ParseResult,
     Predictor, Reader,
@@ -309,25 +309,30 @@ pub(crate) struct MainFrameDefBuilder<'data> {
 }
 
 impl<'data> MainFrameDefBuilder<'data> {
-    pub(crate) fn update(&mut self, kind: FrameKind, property: FrameProperty, value: &'data str) {
+    pub(crate) fn update(
+        &mut self,
+        kind: DataFrameKind,
+        property: DataFrameProperty,
+        value: &'data str,
+    ) {
         let value = Some(value);
 
         match (kind, property) {
-            (_, FrameProperty::Name) => self.names = value,
-            (_, FrameProperty::Signed) => self.signs = value,
+            (_, DataFrameProperty::Name) => self.names = value,
+            (_, DataFrameProperty::Signed) => self.signs = value,
 
-            (FrameKind::Intra, FrameProperty::Predictor) => self.predictors_intra = value,
-            (FrameKind::Inter, FrameProperty::Predictor) => self.predictors_inter = value,
+            (DataFrameKind::Intra, DataFrameProperty::Predictor) => self.predictors_intra = value,
+            (DataFrameKind::Inter, DataFrameProperty::Predictor) => self.predictors_inter = value,
 
-            (FrameKind::Intra, FrameProperty::Encoding) => self.encodings_intra = value,
-            (FrameKind::Inter, FrameProperty::Encoding) => self.encodings_inter = value,
+            (DataFrameKind::Intra, DataFrameProperty::Encoding) => self.encodings_intra = value,
+            (DataFrameKind::Inter, DataFrameProperty::Encoding) => self.encodings_inter = value,
             _ => unreachable!(),
         }
     }
 
     pub(crate) fn parse(self) -> ParseResult<MainFrameDef<'data>> {
-        let kind_intra = FrameKind::Intra;
-        let kind_inter = FrameKind::Inter;
+        let kind_intra = DataFrameKind::Intra;
+        let kind_inter = DataFrameKind::Inter;
 
         let mut names = super::parse_names(kind_intra, self.names)?;
         let mut predictors_intra = super::parse_predictors(kind_intra, self.predictors_intra)?;
