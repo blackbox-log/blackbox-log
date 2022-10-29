@@ -3,7 +3,3 @@ extend-exclude = ["blackbox-sys/upstream"]
 
 [default]
 locale = "en-us"
-
-[default.extend-words]
-# French raison d’être
-raison = "raison"
