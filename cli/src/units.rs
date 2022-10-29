@@ -1,8 +1,8 @@
 use std::ffi::OsString;
 use std::fmt::{self, Display};
 
-use blackbox::parser::{MainUnit, SlowUnit};
-use blackbox::units::{Acceleration, Amperage, FlagSet, Rotation, Voltage};
+use blackbox_log::parser::{MainUnit, SlowUnit};
+use blackbox_log::units::{Acceleration, Amperage, FlagSet, Rotation, Voltage};
 use bpaf::FromOsStr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

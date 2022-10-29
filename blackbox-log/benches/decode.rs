@@ -1,7 +1,7 @@
 use std::fmt::Display;
 use std::iter;
 
-use blackbox::parser::{decode, Reader};
+use blackbox_log::parser::{decode, Reader};
 use criterion::measurement::WallTime;
 use criterion::{
     criterion_group, criterion_main, BatchSize, Bencher, BenchmarkGroup, BenchmarkId, Criterion,

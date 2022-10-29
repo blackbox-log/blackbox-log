@@ -6,8 +6,8 @@ use std::io::{self, BufWriter, Read, Write};
 use std::path::Path;
 use std::process::{ExitCode, Termination};
 
-use blackbox::parser::{MainValue, SlowValue};
-use blackbox::Log;
+use blackbox_log::parser::{MainValue, SlowValue};
+use blackbox_log::Log;
 use mimalloc::MiMalloc;
 use rayon::prelude::*;
 
@@ -58,7 +58,7 @@ fn main() -> QuietResult<()> {
             exitcode::IOERR
         })?;
 
-        let file = blackbox::File::new(&data);
+        let file = blackbox_log::File::new(&data);
 
         let log_count = file.log_count();
         if cli.stdout && log_count > 1 && cli.index.len() != 1 {

@@ -2,7 +2,7 @@ use std::io;
 use std::io::Write;
 use std::os::unix::io::AsRawFd;
 
-pub use blackbox::parser::{decode, Reader};
+pub use blackbox_log::parser::{decode, Reader};
 use blackbox_sys::stream::Stream;
 use libfuzzer_sys::arbitrary;
 pub use libfuzzer_sys::arbitrary::Arbitrary;

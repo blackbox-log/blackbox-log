@@ -9,7 +9,7 @@ edition.workspace = true
 rust-version.workspace = true
 
 [dependencies]
-blackbox.workspace = true
+blackbox-log.workspace = true
 bpaf.workspace = true
 exitcode = "1.1.2"
 mimalloc = { version = "0.1.30", default-features = false }

@@ -47,7 +47,11 @@ fn main() -> Result<()> {
 
             if workspace || sh.current_dir() == root {
                 run(
-                    cmd!(sh, "cargo clippy --no-default-features --package blackbox").args(args),
+                    cmd!(
+                        sh,
+                        "cargo clippy --no-default-features --package blackbox-log"
+                    )
+                    .args(args),
                     &lints,
                 )
             } else {
@@ -70,12 +74,12 @@ fn main() -> Result<()> {
             if coverage {
                 if is_ci {
                     #[rustfmt::skip]
-                    let cmd = cmd!(sh, "cargo llvm-cov --package blackbox --lcov --output-path coverage.lcov nextest {ci}");
+                    let cmd = cmd!(sh, "cargo llvm-cov --package blackbox-log --lcov --output-path coverage.lcov nextest {ci}");
                     cmd.run()
                 } else {
                     cmd!(
                         sh,
-                        "cargo llvm-cov --package blackbox --html nextest {quiet}"
+                        "cargo llvm-cov --package blackbox-log --html nextest {quiet}"
                     )
                     .run()
                 }
@@ -89,9 +93,13 @@ fn main() -> Result<()> {
 
         Args::Bench { test, args } => {
             if test {
-                cmd!(sh, "cargo criterion --package blackbox --benches -- --test").run()
+                cmd!(
+                    sh,
+                    "cargo criterion --package blackbox-log --benches -- --test"
+                )
+                .run()
             } else {
-                cmd!(sh, "cargo criterion --package blackbox --benches")
+                cmd!(sh, "cargo criterion --package blackbox-log --benches")
                     .args(args)
                     .run()
             }
@@ -113,7 +121,7 @@ fn main() -> Result<()> {
             #[rustfmt::skip]
             let cmd = cmd!(
                 sh,
-                "cargo flamegraph --package blackbox --deterministic --palette rust --output {output} --bench {bench} -- --bench --profile-time {time} {filter}"
+                "cargo flamegraph --package blackbox-log --deterministic --palette rust --output {output} --bench {bench} -- --bench --profile-time {time} {filter}"
             );
             cmd.env("CARGO_PROFILE_BENCH_DEBUG", "true").run()
         }
@@ -249,7 +257,7 @@ enum Args {
     /// Runs nextest tests
     Test {
         /// Generates a coverage report while running tests (only for
-        /// `blackbox`)
+        /// `blackbox-log`)
         coverage: bool,
 
         #[bpaf(short, long)]
@@ -262,7 +270,7 @@ enum Args {
     },
 
     #[bpaf(command)]
-    /// Runs benchmarks for `blackbox` lib
+    /// Runs benchmarks for `blackbox-log` lib
     Bench {
         /// Tests all benchmarks run successfully, ignores any extra args for
         /// criterion
