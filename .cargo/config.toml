@@ -1,5 +1,5 @@
 [alias]
 x = "run --release --package xtask --"
 xtask = "run --release --package xtask --"
-xcheck = "run --release --package xtask -- check --"
+xcheck = "run --release --package xtask -- check -- --all-features"
 ci = "run --package xtask --"
