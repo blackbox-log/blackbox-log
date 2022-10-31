@@ -16,8 +16,8 @@ for `blackbox_decode`, with a WASM/JavaScript interface Coming Soon™.
   - [ ] Spec-compliant error recovery
   - [ ] Handle outputting GPS data
 - [ ] `blackbox_decode` replacement
-- [ ] Snapshot testing with [`insta`](https://insta.rs)
-  - [ ] [`fc-blackbox` test files](https://github.com/ilya-epifanov/fc-blackbox/tree/main/src/test-data)
+- [x] Snapshot testing with [`insta`](https://insta.rs)
+  - [x] [`fc-blackbox` test files](https://github.com/ilya-epifanov/fc-blackbox/tree/main/src/test-data)
 - [ ] INAV support
 - [ ] EmuFlight support
 - [ ] JavaScript interface using WebAssembly
