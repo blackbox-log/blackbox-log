@@ -223,6 +223,7 @@ fn main() -> Result<()> {
             let tools = [
                 "cargo-criterion",
                 "cargo-fuzz",
+                "cargo-insta",
                 "cargo-llvm-cov",
                 "cargo-nextest",
                 "flamegraph",

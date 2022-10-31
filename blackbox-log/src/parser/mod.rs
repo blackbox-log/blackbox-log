@@ -19,6 +19,7 @@ pub type ParseResult<T> = Result<T, ParseError>;
 pub(crate) const MARKER: &[u8] = b"H Product:Blackbox flight data recorder by Nicholas Sherlock\n";
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum ParseError {
     UnsupportedVersion(String),
     UnknownFirmware(String),

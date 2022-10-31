@@ -5,6 +5,7 @@ use tracing::instrument;
 use crate::parser::{decode, ParseError, ParseResult, Reader};
 
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum Event {
     SyncBeep(u64),
     InflightAdjustment {
@@ -27,6 +28,7 @@ pub enum Event {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum AdjustedValue {
     Float(f32),
     Int(i32),

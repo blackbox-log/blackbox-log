@@ -86,14 +86,14 @@ impl<'data> Log<'data> {
         FrameIter::new(self)
     }
 
-    pub fn main_fields(&self) -> impl Iterator<Item = (&str, MainUnit)> {
+    pub fn main_fields<'a: 'data>(&'a self) -> impl Iterator<Item = (&'data str, MainUnit)> + 'a {
         self.headers
             .main_fields()
             .enumerate()
             .filter_map(|(i, field)| self.filter.main[i].then_some(field))
     }
 
-    pub fn slow_fields(&self) -> impl Iterator<Item = (&str, SlowUnit)> {
+    pub fn slow_fields<'a: 'data>(&'a self) -> impl Iterator<Item = (&'data str, SlowUnit)> + 'a {
         self.headers
             .slow_fields()
             .enumerate()

@@ -1,0 +1,8 @@
+---
+source: blackbox-log/tests/snapshots.rs
+expression: logs
+input_file: blackbox-log/tests/logs/LOG00004.TXT
+---
+[
+  Err(Corrupted),
+]

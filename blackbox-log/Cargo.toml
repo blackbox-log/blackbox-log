@@ -8,15 +8,18 @@ edition.workspace = true
 rust-version.workspace = true
 
 [features]
-std = []
 default = ["std"]
+std = ["serde/std"]
+serde = ["dep:serde"]
 
 [dependencies]
 memchr = "2.5.0"
+serde = { version = "1.0.147", default-features = false, optional = true }
 tracing.workspace = true
 
 [dev-dependencies]
 criterion = { version = "0.4.0", features = ["html_reports"] }
+insta = { version = "1.21.0", default-features = false, features = ["colors", "glob", "ron"] }
 test-case = "2.2.2"
 
 [lib]

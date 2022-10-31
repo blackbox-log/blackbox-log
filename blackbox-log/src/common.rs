@@ -7,6 +7,7 @@ use crate::parser::ParseError;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[non_exhaustive]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum LogVersion {
     V2,
 }
@@ -23,6 +24,7 @@ impl FromStr for LogVersion {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum FirmwareKind {
     Betaflight,
     INav,

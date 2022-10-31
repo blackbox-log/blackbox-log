@@ -37,6 +37,11 @@ impl<'data> File<'data> {
         self.offsets.len()
     }
 
+    /// Returns an iterator over all the (lazily) parsed logs in the file
+    pub fn parse_iter<'a>(&'a self) -> impl Iterator<Item = ParseResult<Log<'data>>> + 'a {
+        (0..self.log_count()).map(|i| self.parse_by_index(i))
+    }
+
     /// # Panics
     ///
     /// This panics if given an `index` greater than or equal to the number of

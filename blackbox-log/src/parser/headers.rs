@@ -10,12 +10,18 @@ use super::{ParseError, ParseResult, Reader};
 use crate::common::{FirmwareKind, LogVersion};
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Headers<'data> {
     pub version: LogVersion,
+
+    #[cfg_attr(feature = "serde", serde(skip))]
     pub(crate) gps_frames: Option<GpsFrameDef<'data>>,
+    #[cfg_attr(feature = "serde", serde(skip))]
     pub(crate) gps_home_frames: Option<GpsHomeFrameDef<'data>>,
+    #[cfg_attr(feature = "serde", serde(skip))]
     pub(crate) main_frames: MainFrameDef<'data>,
+    #[cfg_attr(feature = "serde", serde(skip))]
     pub(crate) slow_frames: SlowFrameDef<'data>,
 
     pub firmware_revision: &'data str,
@@ -92,12 +98,14 @@ fn get_version(bytes: &mut Reader) -> Result<LogVersion, ParseError> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CurrentMeterConfig {
     pub offset: u16,
     pub scale: u16,
 }
 
 #[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct MotorOutputRange(u16, u16);
 
 impl MotorOutputRange {
