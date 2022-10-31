@@ -89,7 +89,7 @@ fn get_version(bytes: &mut Reader) -> Result<LogVersion, ParseError> {
 
     if name.to_ascii_lowercase() != "data version" {
         tracing::error!("`Data version` header must be second");
-        return Err(ParseError::UnsupportedVersion(value.to_owned()));
+        return Err(ParseError::Corrupted);
     }
 
     value
