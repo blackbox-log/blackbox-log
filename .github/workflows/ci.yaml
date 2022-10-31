@@ -41,6 +41,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          lfs: true
           submodules: ${{ runner.os == 'Linux' }}
 
       - name: Remove rust-toolchain file if not testing MSRV
