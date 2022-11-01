@@ -15,8 +15,16 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Build xtasks
         run: cargo build --package xtask
-      - name: Run clippy
+      - name: Clippy (workspace)
         run: cargo ci check --workspace
+      - name: Clippy (none)
+        run: cargo ci check -- --package blackbox-log --no-default-features
+      - name: Clippy (std only)
+        run: cargo ci check -- --package blackbox-log --no-default-features --features std
+      - name: Clippy (serde only)
+        run: cargo ci check -- --package blackbox-log --no-default-features --features serde
+      - name: Clippy (all)
+        run: cargo ci check -- --package blackbox-log --all-features
 
   test:
     strategy:

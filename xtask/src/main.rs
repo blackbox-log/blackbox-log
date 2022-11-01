@@ -45,11 +45,11 @@ fn main() -> Result<()> {
                 &lints,
             )?;
 
-            if workspace || sh.current_dir() == root {
+            if !is_ci && (workspace || sh.current_dir() == root) {
                 run(
                     cmd!(
                         sh,
-                        "cargo clippy --no-default-features --package blackbox-log"
+                        "cargo clippy --package blackbox-log --no-default-features"
                     )
                     .args(args),
                     &lints,
