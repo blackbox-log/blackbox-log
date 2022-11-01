@@ -1,1 +1,8 @@
 *.rs diff=rust
+
+*.bbl binary
+*.BBL binary
+*.bfl binary
+*.BFL binary
+log*.txt binary
+LOG*.TXT binary
