@@ -178,5 +178,13 @@ macro_rules! byte_enum {
                 }
             }
         }
+
+        impl From<$name> for u8 {
+            fn from(from: $name) -> u8 {
+                match from {
+                    $( $name::$variant => $value ),+
+                }
+            }
+        }
     }
 }

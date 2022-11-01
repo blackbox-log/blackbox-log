@@ -9,12 +9,33 @@ pub struct Reader<'data> {
 }
 
 impl<'data> Reader<'data> {
+    #[must_use]
     pub fn new(data: &'data [u8]) -> Self {
         if data.len() == usize::MAX {
             panic!("cannot create a Reader containing usize::MAX bytes");
         }
 
         Self { index: 0, data }
+    }
+
+    /// Advances past all bytes not matching any of the needles, returning
+    /// `true` if any are found.
+    pub fn skip_until_any(&mut self, needles: &[u8]) -> bool {
+        debug_assert_ne!(
+            needles.len(),
+            0,
+            "searching for any of 0 bytes makes no sense"
+        );
+
+        let position = self.data[self.index..]
+            .iter()
+            .position(|x| needles.contains(x));
+
+        if let Some(position) = position {
+            self.index += position;
+        }
+
+        position.is_some()
     }
 
     #[must_use]
@@ -156,6 +177,7 @@ impl<'data> Read for Reader<'data> {
     }
 }
 
+#[must_use]
 pub struct Bytes<'data: 'reader, 'reader>(&'reader mut Reader<'data>);
 
 impl Iterator for Bytes<'_, '_> {
@@ -169,6 +191,20 @@ impl Iterator for Bytes<'_, '_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn skip_until_any() {
+        let mut bytes = Reader::new(&[10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        bytes.read_u8();
+        assert!(bytes.skip_until_any(&[10, 9]));
+        assert_eq!(Some(9), bytes.read_u8());
+    }
+
+    #[test]
+    fn skip_until_any_not_found() {
+        let mut bytes = Reader::new(&[2, 3, 4]);
+        assert!(!bytes.skip_until_any(&[0, 1]));
+    }
 
     #[test]
     fn read_u16() {

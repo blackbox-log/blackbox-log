@@ -26,32 +26,39 @@ impl Data {
 
         slow_frames.push(headers.slow_frames.default_frame(headers));
 
-        while let Some(byte) = data.read_u8() {
-            let kind = FrameKind::from_byte(byte).unwrap_or_else(|| {
-                #[cfg(feature = "std")]
-                {
-                    use core::iter;
-
-                    let lines = 4;
-                    let bytes_per_line = 8;
-                    let bytes = iter::once(byte)
-                        .chain(data.iter())
-                        .take(lines * bytes_per_line)
-                        .collect::<Vec<u8>>();
-
-                    for chunk in bytes.chunks_exact(bytes_per_line) {
-                        let line = chunk
-                            .iter()
-                            .map(|x| format!("0x{x:0>2x}"))
-                            .collect::<Vec<_>>();
-                        let line = line.join(" ");
-
-                        eprintln!("{line}");
+        let mut last_kind = None;
+        while let Some(kind) = data.read_u8().map(FrameKind::from_byte) {
+            // TODO (rust 1.65): let-else
+            let kind = if let Some(kind) = kind {
+                kind
+            } else {
+                tracing::error!("found invalid frame byte");
+                match last_kind.take() {
+                    Some(FrameKind::Event) => {
+                        events.pop();
                     }
-                }
+                    Some(FrameKind::Intra | FrameKind::Inter) => {
+                        main_frames.pop();
+                    }
+                    Some(FrameKind::Slow) => {
+                        slow_frames.pop();
+                    }
+                    Some(FrameKind::Gps | FrameKind::GpsHome) | None => {}
+                };
 
-                todo!();
-            });
+                data.skip_until_any(
+                    &[
+                        FrameKind::Event,
+                        FrameKind::Intra,
+                        FrameKind::Slow,
+                        FrameKind::Gps,
+                        FrameKind::GpsHome,
+                    ]
+                    .map(u8::from),
+                );
+
+                continue;
+            };
 
             let result = match kind {
                 FrameKind::Event => match Event::parse_into(&mut data, &mut events) {
@@ -63,21 +70,7 @@ impl Data {
                     Err(err) => Err(err),
                 },
                 FrameKind::Intra | FrameKind::Inter => {
-                    let get_main_frame = |i| main_frames.get(i).map(|(frame, _)| frame);
-
-                    let current_idx = main_frames.len();
-                    let last = current_idx.checked_sub(1).and_then(get_main_frame);
-                    let main = &headers.main_frames;
-
-                    let frame = if kind == FrameKind::Intra {
-                        main.parse_intra(&mut data, headers, last)
-                    } else {
-                        let last_last = current_idx.checked_sub(2).and_then(get_main_frame);
-                        let skipped = 0; // FIXME
-
-                        main.parse_inter(&mut data, headers, last, last_last, skipped)
-                    };
-
+                    let frame = MainFrame::parse(&mut data, kind, &main_frames, headers);
                     frame.map(|frame| main_frames.push((frame, slow_frames.len() - 1)))
                 }
                 FrameKind::Gps => {
@@ -103,7 +96,9 @@ impl Data {
             };
 
             match result {
-                Ok(()) => {}
+                Ok(()) => {
+                    last_kind = Some(kind);
+                }
                 Err(ParseError::UnexpectedEof) => {
                     tracing::warn!("found unexpected end of file");
                     break;

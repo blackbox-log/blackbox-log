@@ -9,7 +9,7 @@ rust-version.workspace = true
 
 [features]
 default = ["std"]
-std = ["memchr/std", "serde/std"]
+std = ["memchr/std", "serde?/std"]
 serde = ["dep:serde"]
 
 [dependencies]
@@ -28,3 +28,7 @@ bench = false
 [[bench]]
 name = "decode"
 harness = false
+
+[[test]]
+name = "snapshots"
+required-features = ["serde"]

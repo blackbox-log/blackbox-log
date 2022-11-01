@@ -5,8 +5,8 @@ use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty};
 use crate::parser::{
-    as_signed, decode, predictor, to_base_field, Encoding, Headers, ParseError, ParseResult,
-    Predictor, Reader,
+    as_signed, decode, predictor, to_base_field, Encoding, FrameKind, Headers, ParseError,
+    ParseResult, Predictor, Reader,
 };
 use crate::units;
 
@@ -53,6 +53,28 @@ pub struct MainFrame {
 }
 
 impl MainFrame {
+    pub(crate) fn parse(
+        data: &mut Reader,
+        kind: FrameKind,
+        main_frames: &[(MainFrame, usize)],
+        headers: &Headers,
+    ) -> Result<Self, ParseError> {
+        let get_main_frame = |i| main_frames.get(i).map(|(frame, _)| frame);
+
+        let current_idx = main_frames.len();
+        let last = current_idx.checked_sub(1).and_then(get_main_frame);
+        let main = &headers.main_frames;
+
+        if kind == FrameKind::Intra {
+            main.parse_intra(data, headers, last)
+        } else {
+            let last_last = current_idx.checked_sub(2).and_then(get_main_frame);
+            let skipped = 0; // FIXME
+
+            main.parse_inter(data, headers, last, last_last, skipped)
+        }
+    }
+
     pub(crate) fn iter<'a: 'c, 'b: 'c, 'c>(
         &'a self,
         headers: &'b Headers,

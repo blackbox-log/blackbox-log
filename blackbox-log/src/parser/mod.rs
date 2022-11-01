@@ -44,7 +44,7 @@ impl std::error::Error for ParseError {}
 byte_enum! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
     #[repr(u8)]
-    enum FrameKind {
+    pub(crate) enum FrameKind {
         Event = b'E',
         Intra = b'I',
         Inter = b'P',
