@@ -72,22 +72,22 @@ fn main() -> Result<()> {
             };
 
             if coverage {
+                let base = cmd!(sh, "cargo llvm-cov --package blackbox-log --all-features");
+
                 if is_ci {
-                    #[rustfmt::skip]
-                    let cmd = cmd!(sh, "cargo llvm-cov --package blackbox-log --lcov --output-path coverage.lcov nextest {ci}");
-                    cmd.run()
+                    base.args(&["--lcov", "--output-path=coverage.lcov", "nextest", ci])
+                        .run()
                 } else {
-                    cmd!(
-                        sh,
-                        "cargo llvm-cov --package blackbox-log --html nextest {quiet}"
-                    )
-                    .run()
+                    base.args(&["--html", "nextest", quiet]).run()
                 }
             } else {
                 let workspace = get_workspace_args(true);
-                cmd!(sh, "cargo nextest run {workspace...} {ci} {quiet}")
-                    .args(args)
-                    .run()
+                cmd!(
+                    sh,
+                    "cargo nextest run --all-features {workspace...} {ci} {quiet}"
+                )
+                .args(args)
+                .run()
             }
         }
 
