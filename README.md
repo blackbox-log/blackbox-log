@@ -13,7 +13,7 @@ for `blackbox_decode`, with a WASM/JavaScript interface Coming Soon™.
 ## Roadmap
 
 - [ ] Betaflight log parsing
-  - [ ] Spec-compliant error recovery
+  - [x] Spec-compliant error recovery
   - [ ] Handle outputting GPS data
 - [ ] `blackbox_decode` replacement
 - [x] Snapshot testing with [`insta`](https://insta.rs)
