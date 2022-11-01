@@ -1,1 +1,8 @@
-logs/* filter=lfs diff=lfs merge=lfs -text
+btfl_001.bbl filter=lfs diff=lfs merge=lfs -text
+btfl_002.bbl filter=lfs diff=lfs merge=lfs -text
+btfl_all.bbl filter=lfs diff=lfs merge=lfs -text
+crashing-LOG00002.BFL filter=lfs diff=lfs merge=lfs -text
+LOG00002.BFL filter=lfs diff=lfs merge=lfs -text
+LOG00004.TXT filter=lfs diff=lfs merge=lfs -text
+LOG00007.BFL filter=lfs diff=lfs merge=lfs -text
+LOG00037.BFL filter=lfs diff=lfs merge=lfs -text
