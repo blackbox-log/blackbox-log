@@ -9,11 +9,11 @@ rust-version.workspace = true
 
 [features]
 default = ["std"]
-std = ["serde/std"]
+std = ["memchr/std", "serde/std"]
 serde = ["dep:serde"]
 
 [dependencies]
-memchr = "2.5.0"
+memchr = { version = "2.5.0", default-features = false }
 serde = { version = "1.0.147", default-features = false, optional = true }
 tracing.workspace = true
 
