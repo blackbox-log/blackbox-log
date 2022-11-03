@@ -22,6 +22,12 @@ input_file: blackbox-log/tests/logs/LOG00037.BFL
       min_throttle: 1070,
       motor_output_range: MotorOutputRange(158, 2047),
     ),
+    stats: Stats(
+      counts: FrameCounts(
+        main: 16774,
+        slow: 4,
+      ),
+    ),
     events: [
       SyncBeep(451840837),
       Disarm(4),

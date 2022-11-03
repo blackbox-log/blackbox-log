@@ -3,7 +3,7 @@ use core::iter;
 
 use crate::parser::{
     to_base_field, Data, Event, Headers, MainFrame, MainUnit, MainValue, ParseResult, Reader,
-    SlowFrame, SlowUnit, SlowValue,
+    SlowFrame, SlowUnit, SlowValue, Stats,
 };
 
 #[derive(Debug)]
@@ -80,6 +80,10 @@ impl<'data> Log<'data> {
 
     pub fn events(&self) -> &[Event] {
         &self.data.events
+    }
+
+    pub fn stats(&self) -> Stats {
+        self.data.to_stats()
     }
 
     pub const fn iter_frames(&self) -> FrameIter {

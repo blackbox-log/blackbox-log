@@ -5,8 +5,6 @@ use alloc::vec::Vec;
 pub use self::event::Event;
 use super::{FrameKind, Headers, MainFrame, ParseError, ParseResult, Reader, SlowFrame};
 
-// Reason: unfinished
-#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct Data {
     pub(crate) events: Vec<Event>,
@@ -16,7 +14,29 @@ pub struct Data {
     pub(crate) slow_frames: Vec<SlowFrame>,
 }
 
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+pub struct Stats {
+    pub counts: FrameCounts,
+}
+
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+pub struct FrameCounts {
+    pub main: usize,
+    pub slow: usize,
+}
+
 impl Data {
+    pub(crate) fn to_stats(&self) -> Stats {
+        Stats {
+            counts: FrameCounts {
+                main: self.main_frames.len(),
+                slow: self.slow_frames.len(),
+            },
+        }
+    }
+
     pub fn parse(mut data: Reader, headers: &Headers) -> ParseResult<Self> {
         let mut events = Vec::new();
         let mut main_frames = Vec::new();

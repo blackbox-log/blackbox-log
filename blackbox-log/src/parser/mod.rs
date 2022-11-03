@@ -8,7 +8,7 @@ mod reader;
 use alloc::string::String;
 use core::fmt;
 
-pub use self::data::{Data, Event};
+pub use self::data::{Data, Event, Stats};
 pub use self::decode::Encoding;
 pub use self::frame::{MainFrame, MainUnit, MainValue, SlowFrame, SlowUnit, SlowValue};
 pub use self::headers::Headers;

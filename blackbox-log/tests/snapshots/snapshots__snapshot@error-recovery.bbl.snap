@@ -22,6 +22,12 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
       min_throttle: 1070,
       motor_output_range: MotorOutputRange(158, 2047),
     ),
+    stats: Stats(
+      counts: FrameCounts(
+        main: 2,
+        slow: 1,
+      ),
+    ),
     events: [
       SyncBeep(32887122),
       Disarm(4),

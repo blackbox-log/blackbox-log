@@ -1,7 +1,7 @@
 use std::fs;
 use std::io::Read;
 
-use blackbox_log::parser::{Event, Headers, MainValue, SlowValue};
+use blackbox_log::parser::{Event, Headers, MainValue, SlowValue, Stats};
 use blackbox_log::units::FlagSet;
 use blackbox_log::Log;
 use serde::ser::{SerializeStruct, Serializer};
@@ -27,6 +27,7 @@ fn snapshot() {
 #[derive(Debug, Serialize)]
 struct LogSnapshot<'a> {
     headers: Headers<'a>,
+    stats: Stats,
     events: Vec<Event>,
     main: FrameSnapshot,
     slow: FrameSnapshot,
@@ -54,6 +55,7 @@ impl<'a> From<Log<'a>> for LogSnapshot<'a> {
 
         Self {
             headers: log.headers().clone(),
+            stats: log.stats(),
             events: log.events().to_owned(),
             main,
             slow,
@@ -63,7 +65,6 @@ impl<'a> From<Log<'a>> for LogSnapshot<'a> {
 
 #[derive(Debug, Serialize)]
 struct FrameSnapshot {
-    // TODO: add count
     fields: Vec<FieldSnapshot>,
 }
 
