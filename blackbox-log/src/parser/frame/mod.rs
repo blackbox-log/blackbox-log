@@ -66,7 +66,7 @@ impl From<DataFrameKind> for char {
     }
 }
 
-// TODO: signed & width?
+// TODO: width?
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum DataFrameProperty {
     Name,
