@@ -76,7 +76,7 @@ impl<'data> Headers<'data> {
 
 fn check_product(bytes: &mut Reader) -> Result<(), ParseError> {
     let (product, _) = parse_header(bytes)?;
-    if product.to_ascii_lowercase() != "product" {
+    if product != "Product" {
         tracing::error!("`Product` header must be first");
         return Err(ParseError::Corrupted);
     };
@@ -87,7 +87,7 @@ fn check_product(bytes: &mut Reader) -> Result<(), ParseError> {
 fn get_version(bytes: &mut Reader) -> Result<LogVersion, ParseError> {
     let (name, value) = parse_header(bytes)?;
 
-    if name.to_ascii_lowercase() != "data version" {
+    if name != "Data version" {
         tracing::error!("`Data version` header must be second");
         return Err(ParseError::Corrupted);
     }
@@ -187,11 +187,11 @@ impl<'data> State<'data> {
     }
 
     fn update(&mut self, header: &'data str, value: &'data str) -> ParseResult<()> {
-        match header.to_ascii_lowercase().as_str() {
-            "firmware revision" => self.firmware_revision = Some(value),
-            "firmware type" => self.firmware_kind = Some(value.parse()?),
-            "board information" => self.board_info = Some(value),
-            "craft name" => self.craft_name = Some(value),
+        match header {
+            "Firmware revision" => self.firmware_revision = Some(value),
+            "Firmware type" => self.firmware_kind = Some(value.parse()?),
+            "Board information" => self.board_info = Some(value),
+            "Craft name" => self.craft_name = Some(value),
 
             "vbatref" => {
                 let vbat_reference = value.parse().map_err(|_| ParseError::Corrupted)?;
@@ -201,14 +201,14 @@ impl<'data> State<'data> {
                 let vbat_scale = value.parse().map_err(|_| ParseError::Corrupted)?;
                 self.vbat_scale = Some(vbat_scale);
             }
-            "currentmeter" | "currentsensor" => {
+            "currentMeter" | "currentSensor" => {
                 let (offset, scale) = value.split_once(',').ok_or(ParseError::Corrupted)?;
                 let offset = offset.parse().map_err(|_| ParseError::Corrupted)?;
                 let scale = scale.parse().map_err(|_| ParseError::Corrupted)?;
 
                 self.current_meter = Some(CurrentMeterConfig { offset, scale });
             }
-            "acc_1g" => {
+            "acc_1G" => {
                 let one_g = value.parse().map_err(|_| ParseError::Corrupted)?;
                 self.acceleration_1g = Some(one_g);
             }
@@ -225,7 +225,7 @@ impl<'data> State<'data> {
                 let min_throttle = value.parse().map_err(|_| ParseError::Corrupted)?;
                 self.min_throttle = Some(min_throttle);
             }
-            "motoroutput" => {
+            "motorOutput" => {
                 let range = value.parse().map_err(|_| ParseError::Corrupted)?;
                 self.motor_output_range = Some(range);
             }

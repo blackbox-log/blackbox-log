@@ -176,8 +176,8 @@ impl<'data> SlowFrameDefBuilder<'data> {
 }
 
 fn unit_from_name(name: &str) -> SlowUnit {
-    match name.to_ascii_lowercase().as_str() {
-        "flightmodeflags" => SlowUnit::FlightMode,
+    match name {
+        "flightModeFlags" => SlowUnit::FlightMode,
         _ => SlowUnit::Unitless,
     }
 }

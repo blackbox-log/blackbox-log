@@ -16,7 +16,7 @@ impl FromStr for LogVersion {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_ascii_lowercase().as_str() {
+        match s {
             "2" | "v2" => Ok(Self::V2),
             _ => Err(()),
         }

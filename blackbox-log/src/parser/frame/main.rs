@@ -392,7 +392,7 @@ impl<'data> MainFrameDefBuilder<'data> {
                     encoding_inter: Encoding::Null,
                     ..
                 },
-            )) if field.name.to_ascii_lowercase() == "loopiteration" => field,
+            )) if field.name == "loopIteration" => field,
             _ => return Err(ParseError::Corrupted),
         };
         let time = match fields.next() {
@@ -404,7 +404,7 @@ impl<'data> MainFrameDefBuilder<'data> {
                     encoding_inter: Encoding::VariableSigned,
                     ..
                 },
-            )) if field.name.to_ascii_lowercase() == "time" => field,
+            )) if field.name == "time" => field,
             _ => return Err(ParseError::Corrupted),
         };
         let fields = fields.collect::<ParseResult<Vec<_>>>()?;
@@ -433,12 +433,12 @@ impl<'data> MainFrameDefBuilder<'data> {
 }
 
 fn unit_from_name(name: &str) -> MainUnit {
-    match to_base_field(name).to_ascii_lowercase().as_str() {
+    match to_base_field(name) {
         "time" => MainUnit::FrameTime,
-        "amperagelatest" => MainUnit::Amperage,
-        "vbatlatest" => MainUnit::Voltage,
-        "accsmooth" => MainUnit::Acceleration,
-        "gyroadc" => MainUnit::Rotation,
+        "vbatLatest" => MainUnit::Voltage,
+        "amperageLatest" => MainUnit::Amperage,
+        "accSmooth" => MainUnit::Acceleration,
+        "gyroADC" => MainUnit::Rotation,
         _ => MainUnit::Unitless,
     }
 }
