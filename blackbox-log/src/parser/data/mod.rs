@@ -47,12 +47,12 @@ impl Data {
         slow_frames.push(headers.slow_frames.default_frame(headers));
 
         let mut last_kind = None;
-        while let Some(kind) = data.read_u8().map(FrameKind::from_byte) {
+        while let Some(byte) = data.read_u8() {
             // TODO (rust 1.65): let-else
-            let kind = if let Some(kind) = kind {
+            let kind = if let Some(kind) = FrameKind::from_byte(byte) {
                 kind
             } else {
-                tracing::error!("found invalid frame byte");
+                tracing::debug!("found invalid frame byte: {byte}");
                 match last_kind.take() {
                     Some(FrameKind::Event) => {
                         events.pop();
@@ -120,7 +120,7 @@ impl Data {
                     last_kind = Some(kind);
                 }
                 Err(ParseError::UnexpectedEof) => {
-                    tracing::warn!("found unexpected end of file");
+                    tracing::debug!("found unexpected end of file in data section");
                     break;
                 }
                 Err(err) => return Err(err),
