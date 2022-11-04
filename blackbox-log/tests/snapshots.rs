@@ -7,21 +7,37 @@ use blackbox_log::Log;
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 
+macro_rules! run {
+    () => {
+        |path| {
+            let mut file = fs::File::open(path).unwrap();
+            let mut data = Vec::new();
+            file.read_to_end(&mut data).unwrap();
+
+            let file = blackbox_log::File::new(&data);
+            let logs = file
+                .parse_iter()
+                .map(|r| r.map(LogSnapshot::from))
+                .collect::<Vec<_>>();
+
+            insta::assert_ron_snapshot!(logs);
+        }
+    };
+}
+
 #[test]
-fn snapshot() {
-    insta::glob!("logs/*", |path| {
-        let mut file = fs::File::open(path).unwrap();
-        let mut data = Vec::new();
-        file.read_to_end(&mut data).unwrap();
+fn own() {
+    insta::glob!("logs/*.bbl", run!());
+}
 
-        let file = blackbox_log::File::new(&data);
-        let logs = file
-            .parse_iter()
-            .map(|r| r.map(LogSnapshot::from))
-            .collect::<Vec<_>>();
+#[test]
+fn fc_blackbox() {
+    insta::glob!("logs/fc-blackbox/*", run!());
+}
 
-        insta::assert_ron_snapshot!(logs);
-    });
+#[test]
+fn gimbal_ghost() {
+    insta::glob!("logs/gimbal-ghost/*", run!());
 }
 
 #[derive(Debug, Serialize)]

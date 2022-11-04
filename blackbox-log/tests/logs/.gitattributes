@@ -1,0 +1,14 @@
+*.bbl binary
+fc-blackbox/* binary
+gimbal-ghost/* binary
+
+fc-blackbox/btfl_001.bbl filter=lfs diff=lfs merge=lfs -text
+fc-blackbox/btfl_002.bbl filter=lfs diff=lfs merge=lfs -text
+fc-blackbox/btfl_all.bbl filter=lfs diff=lfs merge=lfs -text
+fc-blackbox/crashing-LOG00002.BFL filter=lfs diff=lfs merge=lfs -text
+fc-blackbox/LOG00002.BFL filter=lfs diff=lfs merge=lfs -text
+fc-blackbox/LOG00004.TXT filter=lfs diff=lfs merge=lfs -text
+fc-blackbox/LOG00007.BFL filter=lfs diff=lfs merge=lfs -text
+fc-blackbox/LOG00037.BFL filter=lfs diff=lfs merge=lfs -text
+gimbal-ghost/btfl_001.bbl filter=lfs diff=lfs merge=lfs -text
+gimbal-ghost/LOG00001.BFL filter=lfs diff=lfs merge=lfs -text
