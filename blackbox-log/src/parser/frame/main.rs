@@ -383,30 +383,28 @@ impl<'data> MainFrameDefBuilder<'data> {
                 },
             );
 
-        let iteration = match fields.next() {
-            Some(Ok(
-                field @ MainFieldDef {
-                    predictor_intra: Predictor::Zero,
-                    predictor_inter: Predictor::Increment,
-                    encoding_intra: Encoding::Variable,
-                    encoding_inter: Encoding::Null,
-                    ..
-                },
-            )) if field.name == "loopIteration" => field,
-            _ => return Err(ParseError::Corrupted),
+        let Some(Ok(iteration @ MainFieldDef {
+            name: "loopIteration",
+            predictor_intra: Predictor::Zero,
+            predictor_inter: Predictor::Increment,
+            encoding_intra: Encoding::Variable,
+            encoding_inter: Encoding::Null,
+            ..
+        })) = fields.next() else {
+            return Err(ParseError::Corrupted);
         };
-        let time = match fields.next() {
-            Some(Ok(
-                field @ MainFieldDef {
-                    predictor_intra: Predictor::Zero,
-                    predictor_inter: Predictor::StraightLine,
-                    encoding_intra: Encoding::Variable,
-                    encoding_inter: Encoding::VariableSigned,
-                    ..
-                },
-            )) if field.name == "time" => field,
-            _ => return Err(ParseError::Corrupted),
+
+        let Some(Ok(time @ MainFieldDef {
+            name: "time",
+            predictor_intra: Predictor::Zero,
+            predictor_inter: Predictor::StraightLine,
+            encoding_intra: Encoding::Variable,
+            encoding_inter: Encoding::VariableSigned,
+            ..
+        })) = fields.next() else {
+            return Err(ParseError::Corrupted);
         };
+
         let fields = fields.collect::<ParseResult<Vec<_>>>()?;
 
         if names.next().is_some()

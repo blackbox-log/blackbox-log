@@ -3,7 +3,7 @@
 [![CI](https://github.com/wetheredge/blackbox/actions/workflows/ci.yaml/badge.svg)](https://github.com/wetheredge/blackbox/actions/workflows/ci.yaml)
 [![codecov](https://codecov.io/gh/wetheredge/blackbox/branch/main/graph/badge.svg)](https://codecov.io/gh/wetheredge/blackbox)
 [![dependency status](https://deps.rs/repo/github/wetheredge/blackbox/status.svg)](https://deps.rs/repo/github/wetheredge/blackbox)
-[![MSRV](https://img.shields.io/static/v1?logo=rust&label=MSRV&color=dea584&message=1.64)](https://github.com/rust-lang/rust/blob/master/RELEASES.md)
+[![MSRV](https://img.shields.io/static/v1?logo=rust&label=MSRV&color=dea584&message=1.65)](https://github.com/rust-lang/rust/blob/master/RELEASES.md)
 [![license](https://img.shields.io/github/license/wetheredge/blackbox)](https://github.com/wetheredge/blackbox/blob/main/COPYING)
 
 This is a WIP Rust port of the Betaflight & INAV blackbox tools. It provides a

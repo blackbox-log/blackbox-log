@@ -105,7 +105,7 @@ fn main() -> QuietResult<()> {
 }
 
 fn read_log_file(filename: &Path) -> io::Result<Vec<u8>> {
-    let mut log = File::open(&filename)?;
+    let mut log = File::open(filename)?;
     let mut data = Vec::new();
     log.read_to_end(&mut data)?;
     Ok(data)

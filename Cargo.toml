@@ -5,7 +5,7 @@ default-members = ["blackbox-log", "cli"]
 [workspace.package]
 edition = "2021"
 license = "GPL-3.0-only"
-rust-version = "1.64"
+rust-version = "1.65"
 
 [workspace.dependencies]
 blackbox-log.path = "blackbox-log"

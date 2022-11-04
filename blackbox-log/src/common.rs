@@ -51,6 +51,8 @@ pub trait DisarmReason: TryFrom<u32, Error = DisarmReasonError> {}
 #[derive(Debug, Clone)]
 pub struct DisarmReasonError;
 
+// TODO: waiting on https://github.com/rust-lang/rust-clippy/pull/9545 to land
+#[allow(clippy::std_instead_of_core)]
 #[cfg(feature = "std")]
 impl std::error::Error for DisarmReasonError {}
 

@@ -8,12 +8,12 @@ deny = [
 ]
 
 warn = [
+    "clippy::alloc_instead_of_core",
     "clippy::allow_attributes_without_reason",
     "clippy::borrow_as_ptr",
     "clippy::cast_possible_truncation",
     "clippy::cast_possible_wrap",
     "clippy::cast_sign_loss",
-    "clippy::alloc_instead_of_core",
     "clippy::cloned_instead_of_copied",
     "clippy::dbg_macro",
     "clippy::decimal_literal_representation",
@@ -32,6 +32,7 @@ warn = [
     "clippy::inconsistent_struct_constructor",
     "clippy::items_after_statements",
     "clippy::manual_ok_or",
+    "clippy::manual_string_new",
     "clippy::map_unwrap_or",
     "clippy::match_on_vec_items",
     "clippy::match_same_arms",
@@ -56,6 +57,9 @@ warn = [
     "clippy::unnested_or_patterns",
     "clippy::unseparated_literal_suffix",
     "clippy::wildcard_enum_match_arm",
+
+    # TODO(rust 1.66):
+    # "clippy::uninlined_format_args",
 
     # TODO: enable closer to 1.0
     # "clippy::print_stderr",

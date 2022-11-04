@@ -48,10 +48,7 @@ impl Data {
 
         let mut last_kind = None;
         while let Some(byte) = data.read_u8() {
-            // TODO (rust 1.65): let-else
-            let kind = if let Some(kind) = FrameKind::from_byte(byte) {
-                kind
-            } else {
+            let Some(kind) = FrameKind::from_byte(byte) else {
                 tracing::debug!("found invalid frame byte: {byte}");
                 match last_kind.take() {
                     Some(FrameKind::Event) => {
