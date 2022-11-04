@@ -38,7 +38,10 @@ impl Event {
     #[instrument(level = "debug", name = "Event::parse", skip_all, fields(kind))]
     pub(crate) fn parse_into(data: &mut Reader, events: &mut Vec<Self>) -> ParseResult<EventKind> {
         let byte = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
-        let kind = EventKind::from_byte(byte).unwrap_or_else(|| todo!("invalid event: {byte}"));
+        let kind = EventKind::from_byte(byte).ok_or_else(|| {
+            tracing::debug!("found invalid event: {byte}");
+            ParseError::Corrupted
+        })?;
 
         match kind {
             EventKind::SyncBeep => {
