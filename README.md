@@ -7,7 +7,7 @@
 [![license](https://img.shields.io/github/license/wetheredge/blackbox)](https://github.com/wetheredge/blackbox/blob/main/COPYING)
 
 This is a WIP Rust port of the Betaflight & INAV blackbox tools. It provides a
-Rust library crate and a (mostly, [see below][comparison]) drop-in replacement
+Rust library crate and a ([mostly][comparison]) drop-in replacement
 for `blackbox_decode`, with a WASM/JavaScript interface Coming Soon™.
 
 ## Roadmap
