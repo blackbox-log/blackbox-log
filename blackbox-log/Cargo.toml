@@ -13,6 +13,7 @@ std = ["memchr/std", "serde?/std"]
 serde = ["dep:serde"]
 
 [dependencies]
+bitvec = { version = "1.0.1", default-features = false }
 memchr = { version = "2.5.0", default-features = false }
 serde = { workspace = true, optional = true }
 tracing.workspace = true

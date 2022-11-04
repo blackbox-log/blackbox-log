@@ -49,7 +49,10 @@ impl From<MainUnit> for CliUnitKind {
 impl From<SlowUnit> for CliUnitKind {
     fn from(val: SlowUnit) -> Self {
         match val {
-            SlowUnit::FlightMode => CliUnitKind::Flag,
+            SlowUnit::FlightMode
+            | SlowUnit::State
+            | SlowUnit::FailsafePhase
+            | SlowUnit::Boolean => CliUnitKind::Flag,
             SlowUnit::Unitless => CliUnitKind::Unitless,
         }
     }
@@ -379,6 +382,16 @@ impl FlagUnit {
                         })
                         .collect()
                 }
+            }
+        }
+    }
+
+    pub fn format_bool(&self, b: bool) -> String {
+        match self {
+            Self::Raw => u8::from(b).to_string(),
+            Self::Flags => {
+                let s = if b { "y" } else { "n" };
+                s.to_owned()
             }
         }
     }

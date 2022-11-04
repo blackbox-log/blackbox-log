@@ -1,6 +1,5 @@
 use alloc::borrow::ToOwned;
 use core::fmt;
-use core::marker::PhantomData;
 use core::str::FromStr;
 
 use crate::parser::ParseError;
@@ -81,69 +80,6 @@ macro_rules! generate_disarm_reason {
                 }
             }
         }
-    }
-}
-
-macro_rules! generate_flight_mode {
-    ( $( $mode:ident / $mode_fn:ident = $bit:expr ),+ $(,)? ) => {
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-        #[repr(u32)]
-        pub enum FlightMode {
-            $( $mode = 1 << $bit ),+
-        }
-
-        impl FlightMode {
-            const fn to_bit(self) -> u32 {
-                match self {
-                    $( Self::$mode => $bit ),+
-                }
-            }
-
-            pub const fn as_name(self) -> &'static str {
-                match self {
-                    $( Self::$mode => stringify!($mode) ),+
-                }
-            }
-        }
-
-        impl crate::common::FlightModeFlags<FlightMode> {
-            #[inline]
-            pub const fn is_mode_set(self, mode: FlightMode) -> bool {
-                self.is_bit_set(mode.to_bit())
-            }
-
-            $(
-                pub const fn $mode_fn(self) -> bool {
-                    self.is_mode_set(FlightMode::$mode)
-                }
-            )+
-
-            pub fn to_modes(self) -> alloc::vec::Vec<FlightMode> {
-                [ $( FlightMode::$mode ),+ ]
-                    .into_iter()
-                    .filter(|&mode| self.is_mode_set(mode))
-                    .collect()
-            }
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct FlightModeFlags<T>(u32, PhantomData<T>);
-
-impl<T> FlightModeFlags<T> {
-    pub const fn new(flags: u32) -> Self {
-        Self(flags, PhantomData)
-    }
-
-    #[inline]
-    pub(crate) const fn is_bit_set(&self, bit: u32) -> bool {
-        (self.0 & (1 << bit)) > 0
-    }
-
-    #[inline]
-    pub(crate) const fn as_raw(&self) -> u32 {
-        self.0
     }
 }
 

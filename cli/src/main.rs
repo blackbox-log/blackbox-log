@@ -154,6 +154,9 @@ fn write_csv(out: &mut impl Write, log: &Log, config: &Cli) -> io::Result<()> {
                 })
                 .chain(frame.iter_slow().map(|x| match x {
                     SlowValue::FlightMode(m) => config.unit_flags.format(m),
+                    SlowValue::State(s) => config.unit_flags.format(s),
+                    SlowValue::FailsafePhase(p) => config.unit_flags.format(p),
+                    SlowValue::Boolean(b) => config.unit_flags.format_bool(b),
                     SlowValue::Unsigned(x) => x.to_string(),
                     SlowValue::Signed(x) => x.to_string(),
                 })),

@@ -168,6 +168,9 @@ impl Serialize for FieldSnapshot {
 fn slow_to_int(value: SlowValue) -> i128 {
     match value {
         SlowValue::FlightMode(x) => x.as_raw().into(),
+        SlowValue::State(x) => x.as_raw().into(),
+        SlowValue::FailsafePhase(x) => x.as_raw().into(),
+        SlowValue::Boolean(x) => x.into(),
         SlowValue::Unsigned(x) => x.into(),
         SlowValue::Signed(x) => x.into(),
     }

@@ -20,7 +20,10 @@ impl SlowFrame {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum SlowValue {
-    FlightMode(units::FlightMode),
+    FlightMode(units::FlightModeSet),
+    State(units::StateSet),
+    FailsafePhase(units::FailsafePhaseSet),
+    Boolean(bool),
     Unsigned(u32),
     Signed(i32),
 }
@@ -38,6 +41,9 @@ impl SlowValue {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum SlowUnit {
     FlightMode,
+    State,
+    FailsafePhase,
+    Boolean,
     Unitless,
 }
 
@@ -78,10 +84,23 @@ impl<'data> SlowFrameDef<'data> {
                     value,
                 );
 
+                let firmware = headers.firmware_kind;
                 let value = match field.unit {
                     SlowUnit::FlightMode => {
-                        SlowValue::FlightMode(units::FlightMode::new(value, headers))
+                        SlowValue::FlightMode(units::FlightModeSet::new(value, firmware))
                     }
+                    SlowUnit::State => SlowValue::State(units::StateSet::new(value, firmware)),
+                    SlowUnit::FailsafePhase => {
+                        SlowValue::FailsafePhase(units::FailsafePhaseSet::new(value, firmware))
+                    }
+                    SlowUnit::Boolean => SlowValue::Boolean(match value {
+                        0 => false,
+                        1 => true,
+                        _ => {
+                            tracing::debug!("invalid boolean ({value})");
+                            return Err(ParseError::Corrupted);
+                        }
+                    }),
                     SlowUnit::Unitless => SlowValue::new_unitless(value, field.signed),
                 };
 
@@ -98,10 +117,16 @@ impl<'data> SlowFrameDef<'data> {
             self.0.get(i).map(|def| {
                 i += 1;
 
+                let firmware = headers.firmware_kind;
                 match def.unit {
                     SlowUnit::FlightMode => {
-                        SlowValue::FlightMode(units::FlightMode::new(0, headers))
+                        SlowValue::FlightMode(units::FlightModeSet::new(0, firmware))
                     }
+                    SlowUnit::State => SlowValue::State(units::StateSet::new(0, firmware)),
+                    SlowUnit::FailsafePhase => {
+                        SlowValue::FailsafePhase(units::FailsafePhaseSet::new(0, firmware))
+                    }
+                    SlowUnit::Boolean => SlowValue::Boolean(false),
                     SlowUnit::Unitless => SlowValue::new_unitless(0, def.signed),
                 }
             })
@@ -178,6 +203,9 @@ impl<'data> SlowFrameDefBuilder<'data> {
 fn unit_from_name(name: &str) -> SlowUnit {
     match name {
         "flightModeFlags" => SlowUnit::FlightMode,
+        "stateFlags" => SlowUnit::State,
+        "failsafePhase" => SlowUnit::FailsafePhase,
+        "rxSignalReceived" | "rxFlightChannelsValid" => SlowUnit::Boolean,
         _ => SlowUnit::Unitless,
     }
 }
