@@ -46,11 +46,16 @@ impl Data {
 
         slow_frames.push(headers.slow_frames.default_frame(headers));
 
+        let mut restore;
         let mut last_kind = None;
         while let Some(byte) = data.read_u8() {
+            restore = data.get_restore_point();
+
             let Some(kind) = FrameKind::from_byte(byte) else {
-                tracing::debug!("found invalid frame byte: {byte}");
-                match last_kind.take() {
+                tracing::debug!("found invalid frame byte: 0x{byte:0>2x}");
+
+                let last_kind = last_kind.take();
+                match last_kind {
                     Some(FrameKind::Event) => {
                         events.pop();
                     }
@@ -63,17 +68,11 @@ impl Data {
                     Some(FrameKind::Gps | FrameKind::GpsHome) | None => {}
                 };
 
-                data.skip_until_any(
-                    &[
-                        FrameKind::Event,
-                        FrameKind::Intra,
-                        FrameKind::Slow,
-                        FrameKind::Gps,
-                        FrameKind::GpsHome,
-                    ]
-                    .map(u8::from),
-                );
+                if last_kind.is_some() {
+                    data.restore(restore);
+                }
 
+                skip_to_frame(&mut data);
                 continue;
             };
 
@@ -90,22 +89,20 @@ impl Data {
                     let frame = MainFrame::parse(&mut data, kind, &main_frames, headers);
                     frame.map(|frame| main_frames.push((frame, slow_frames.len() - 1)))
                 }
-                FrameKind::Gps => {
-                    if let Some(ref gps) = headers.gps_frames {
-                        gps.parse(&mut data, headers).map(|_| ())
-                    } else {
+                FrameKind::Gps => headers.gps_frames.as_ref().map_or_else(
+                    || {
                         tracing::error!("found GPS frame without GPS frame definition");
-                        return Err(ParseError::Corrupted);
-                    }
-                }
-                FrameKind::GpsHome => {
-                    if let Some(ref gps_home) = headers.gps_home_frames {
-                        gps_home.parse(&mut data, headers).map(|_| ())
-                    } else {
+                        Err(ParseError::Corrupted)
+                    },
+                    |gps| gps.parse(&mut data, headers).map(|_| ()),
+                ),
+                FrameKind::GpsHome => headers.gps_home_frames.as_ref().map_or_else(
+                    || {
                         tracing::error!("found GPS home frame without GPS frame definition");
-                        return Err(ParseError::Corrupted);
-                    }
-                }
+                        Err(ParseError::Corrupted)
+                    },
+                    |gps_home| gps_home.parse(&mut data, headers).map(|_| ()),
+                ),
                 FrameKind::Slow => headers
                     .slow_frames
                     .parse(&mut data, headers)
@@ -115,6 +112,11 @@ impl Data {
             match result {
                 Ok(()) => {
                     last_kind = Some(kind);
+                }
+                Err(ParseError::Corrupted) => {
+                    tracing::debug!("found corrupted {kind:?} frame");
+                    data.restore(restore);
+                    skip_to_frame(&mut data);
                 }
                 Err(ParseError::UnexpectedEof) => {
                     tracing::debug!("found unexpected end of file in data section");
@@ -132,4 +134,18 @@ impl Data {
             slow_frames,
         })
     }
+}
+
+#[cold]
+fn skip_to_frame(data: &mut Reader) {
+    data.skip_until_any(
+        &[
+            FrameKind::Event,
+            FrameKind::Intra,
+            FrameKind::Slow,
+            FrameKind::Gps,
+            FrameKind::GpsHome,
+        ]
+        .map(u8::from),
+    );
 }

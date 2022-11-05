@@ -8,6 +8,9 @@ pub struct Reader<'data> {
     data: &'data [u8],
 }
 
+#[derive(Debug, Clone)]
+pub struct RestorePoint(usize);
+
 impl<'data> Reader<'data> {
     #[must_use]
     pub fn new(data: &'data [u8]) -> Self {
@@ -16,6 +19,14 @@ impl<'data> Reader<'data> {
         }
 
         Self { index: 0, data }
+    }
+
+    pub fn get_restore_point(&self) -> RestorePoint {
+        RestorePoint(self.index)
+    }
+
+    pub fn restore(&mut self, restore: RestorePoint) {
+        self.index = restore.0;
     }
 
     /// Advances past all bytes not matching any of the needles, returning
@@ -193,6 +204,17 @@ mod tests {
     use super::*;
 
     #[test]
+    fn restore() {
+        let mut bytes = Reader::new(&[0, 1, 2]);
+        bytes.read_u8();
+        let restore = bytes.get_restore_point();
+        bytes.read_u16();
+        assert!(bytes.is_empty());
+        bytes.restore(restore);
+        assert_eq!(Some(1), bytes.read_u8());
+    }
+
+    #[test]
     fn skip_until_any() {
         let mut bytes = Reader::new(&[10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
         bytes.read_u8();
@@ -204,6 +226,14 @@ mod tests {
     fn skip_until_any_not_found() {
         let mut bytes = Reader::new(&[2, 3, 4]);
         assert!(!bytes.skip_until_any(&[0, 1]));
+    }
+
+    #[test]
+    fn skip_until_any_no_skip() {
+        let mut bytes = Reader::new(&[0]);
+        assert!(bytes.skip_until_any(&[0]));
+        assert_eq!(Some(0), bytes.read_u8());
+        assert!(bytes.is_empty());
     }
 
     #[test]

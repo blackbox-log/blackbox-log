@@ -39,7 +39,7 @@ impl Event {
     pub(crate) fn parse_into(data: &mut Reader, events: &mut Vec<Self>) -> ParseResult<EventKind> {
         let byte = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
         let kind = EventKind::from_byte(byte).ok_or_else(|| {
-            tracing::debug!("found invalid event: {byte}");
+            tracing::debug!("found invalid event: 0x{byte:0>2x}");
             ParseError::Corrupted
         })?;
 
