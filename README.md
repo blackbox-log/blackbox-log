@@ -26,21 +26,44 @@ for `blackbox_decode`, with a WASM/JavaScript interface Coming Soon™.
 
 ## `blackbox_decode` feature comparison
 
-|                            |   `blackbox-log`   |     Betaflight     |
-|----------------------------|:------------------:|:------------------:|
-| Log format v1              |         :x:        | :heavy_check_mark: |
-| Recent Betaflight versions | :heavy_check_mark: |         :x:        |
-| Raw log output             |         :x:        | :heavy_check_mark: |
-| Current meter simulation   |         :x:        | :heavy_check_mark: |
-| IMU simulation             |         :x:        | :heavy_check_mark: |
-| Output field filter        | :heavy_check_mark: |         :x:        |
-| Parallel log parsing       | :heavy_check_mark: |         :x:        |
+|                            | [wetheredge/blackbox][repo] | [betaflight/blackbox-tools][bf-tools] |
+|----------------------------|:---------------------------:|:-------------------------------------:|
+| Log format v1              |              :x:            |           :heavy_check_mark:          |
+| Recent Betaflight versions |      :heavy_check_mark:     |                   :x:                 |
+| Raw log output             |              :x:            |           :heavy_check_mark:          |
+| Current meter simulation   |              :x:            |           :heavy_check_mark:          |
+| IMU simulation             |              :x:            |           :heavy_check_mark:          |
+| Output field filter        |      :heavy_check_mark:     |                   :x:                 |
+| Parallel log parsing       |      :heavy_check_mark:     |                   :x:                 |
 
 ## Benchmarks
 
-Needs more formal benchmarks, but initial tests show it to be significantly
-faster than `blackbox_decode`, especially as the number of logs/files
-increases.
+As of [ce71c9a](https://github.com/wetheredge/blackbox/tree/ce71c9a3a7f7218328f1162b2f33e32fab4ea24d):
+
+```shell
+$ exa -lbs size --no-permissions --no-time --no-user blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
+6.6Mi blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
+
+$ hyperfine -w 10 -L version ce71c9a,betaflight './blackbox_decode-{version} blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL'
+Benchmark #1: ./blackbox_decode-ce71c9a blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
+  Time (mean ± σ):     613.5 ms ±   9.1 ms    [User: 566.2 ms, System: 48.1 ms]
+  Range (min … max):   601.2 ms … 630.1 ms    10 runs
+
+Benchmark #2: ./blackbox_decode-betaflight blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
+  Time (mean ± σ):      1.035 s ±  0.005 s    [User: 994.1 ms, System: 38.2 ms]
+  Range (min … max):    1.030 s …  1.048 s    10 runs
+
+Summary
+  './blackbox_decode-ce71c9a blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL' ran
+    1.69 ± 0.03 times faster than './blackbox_decode-betaflight blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL'
+```
+
+`…/gimbal-ghost/LOG00001.BFL` contains only one log. Files with multiple logs
+will see even larger improvements since logs are decoded in parallel using
+[`rayon`](https://lib.rs/crates/rayon).
+
+> **Note**: Adding GPS support and fixing the remaining bugs may impact
+performance. Benchmarks will be updated before 1.0.
 
 ## Prior art
 
@@ -56,6 +79,7 @@ In accordance with the [GNU FAQ][gpl-ports]'s guidance that ports are
 derivative works, all code is licensed under the GPLv3 to match the Betaflight
 and INAV projects.
 
+[repo]: https://github.com/wetheredge/blackbox
 [betaflight]: https://github.com/betaflight/betaflight
 [inav]: https://github.com/iNavFlight/inav
 [emuflight]: https://github.com/emuflight/EmuFlight
