@@ -1,7 +1,7 @@
 ---
 source: blackbox-log/tests/snapshots.rs
 expression: logs
-input_file: blackbox-log/tests/logs/crashing-LOG00002.BFL
+input_file: blackbox-log/tests/logs/fc-blackbox/crashing-LOG00002.BFL
 ---
 [
   Err(Corrupted),
