@@ -6,11 +6,12 @@ mod slow;
 use alloc::vec::Vec;
 use core::iter::Peekable;
 
-pub use self::gps::*;
-pub use self::gps_home::*;
-pub use self::main::*;
-pub use self::slow::*;
+pub(crate) use self::gps::*;
+pub(crate) use self::gps_home::*;
+pub(crate) use self::main::*;
+pub(crate) use self::slow::*;
 use super::{Encoding, ParseError, ParseResult, Predictor, Reader};
+use crate::units;
 
 pub trait FieldDef {
     fn name(&self) -> &str;

@@ -8,12 +8,12 @@ use crate::parser::{as_signed, Encoding, Headers, ParseError, ParseResult, Predi
 use crate::units;
 
 #[derive(Debug, Clone)]
-pub struct SlowFrame {
+pub(crate) struct SlowFrame {
     pub(crate) values: Vec<SlowValue>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum SlowValue {
+pub(crate) enum SlowValue {
     FlightMode(units::FlightModeSet),
     State(units::StateSet),
     FailsafePhase(units::FailsafePhaseSet),
@@ -33,7 +33,7 @@ impl SlowValue {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum SlowUnit {
+pub(crate) enum SlowUnit {
     FlightMode,
     State,
     FailsafePhase,

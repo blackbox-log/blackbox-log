@@ -45,7 +45,7 @@ macro_rules! trace_field {
 }
 
 #[derive(Debug, Clone)]
-pub struct MainFrame {
+pub(crate) struct MainFrame {
     intra: bool,
     pub(crate) iteration: u32,
     pub(crate) time: u64,
@@ -111,7 +111,7 @@ impl MainFrame {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum MainValue {
+pub(crate) enum MainValue {
     FrameTime(u64),
     Amperage(units::Amperage),
     Voltage(units::Voltage),
@@ -132,7 +132,7 @@ impl MainValue {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum MainUnit {
+pub(crate) enum MainUnit {
     FrameTime,
     Amperage,
     Voltage,

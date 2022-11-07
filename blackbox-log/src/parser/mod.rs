@@ -8,11 +8,13 @@ mod reader;
 use alloc::string::String;
 use core::fmt;
 
-pub use self::data::{Data, Event, Stats};
+pub(crate) use self::data::Data;
+pub use self::data::{Event, Stats};
 pub use self::decode::Encoding;
-pub use self::frame::{MainFrame, SlowFrame, Unit, Value};
+pub(crate) use self::frame::{MainFrame, SlowFrame};
+pub use self::frame::{Unit, Value};
 pub use self::headers::Headers;
-pub use self::predictor::Predictor;
+pub(crate) use self::predictor::Predictor;
 pub use self::reader::Reader;
 
 pub type ParseResult<T> = Result<T, ParseError>;
