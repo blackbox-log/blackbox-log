@@ -18,6 +18,87 @@ pub trait FieldDef {
     fn encoding(&self) -> Encoding;
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Unit {
+    FrameTime,
+    Amperage,
+    Voltage,
+    Acceleration,
+    Rotation,
+    FlightMode,
+    State,
+    FailsafePhase,
+    Boolean,
+    Unitless,
+}
+
+impl From<MainUnit> for Unit {
+    fn from(unit: MainUnit) -> Self {
+        match unit {
+            MainUnit::FrameTime => Self::FrameTime,
+            MainUnit::Amperage => Self::Amperage,
+            MainUnit::Voltage => Self::Voltage,
+            MainUnit::Acceleration => Self::Acceleration,
+            MainUnit::Rotation => Self::Rotation,
+            MainUnit::Unitless => Self::Unitless,
+        }
+    }
+}
+
+impl From<SlowUnit> for Unit {
+    fn from(unit: SlowUnit) -> Self {
+        match unit {
+            SlowUnit::FlightMode => Self::FlightMode,
+            SlowUnit::State => Self::State,
+            SlowUnit::FailsafePhase => Self::FailsafePhase,
+            SlowUnit::Boolean => Self::Boolean,
+            SlowUnit::Unitless => Self::Unitless,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Value {
+    FrameTime(u64),
+    Amperage(units::Amperage),
+    Voltage(units::Voltage),
+    Acceleration(units::Acceleration),
+    Rotation(units::Rotation),
+    FlightMode(units::FlightModeSet),
+    State(units::StateSet),
+    FailsafePhase(units::FailsafePhaseSet),
+    Boolean(bool),
+    Unsigned(u32),
+    Signed(i32),
+}
+
+impl From<MainValue> for Value {
+    fn from(value: MainValue) -> Self {
+        match value {
+            MainValue::FrameTime(t) => Self::FrameTime(t),
+            MainValue::Amperage(a) => Self::Amperage(a),
+            MainValue::Voltage(v) => Self::Voltage(v),
+            MainValue::Acceleration(a) => Self::Acceleration(a),
+            MainValue::Rotation(r) => Self::Rotation(r),
+            MainValue::Unsigned(x) => Self::Unsigned(x),
+            MainValue::Signed(x) => Self::Signed(x),
+        }
+    }
+}
+
+impl From<SlowValue> for Value {
+    fn from(value: SlowValue) -> Self {
+        match value {
+            SlowValue::FlightMode(m) => Self::FlightMode(m),
+            SlowValue::State(s) => Self::State(s),
+            SlowValue::FailsafePhase(p) => Self::FailsafePhase(p),
+            SlowValue::Boolean(b) => Self::Boolean(b),
+            SlowValue::Unsigned(x) => Self::Unsigned(x),
+            SlowValue::Signed(x) => Self::Signed(x),
+        }
+    }
+}
+
 pub(crate) fn is_frame_def_header(header: &str) -> bool {
     parse_frame_def_header(header).is_some()
 }

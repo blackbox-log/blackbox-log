@@ -1,9 +1,9 @@
 use alloc::vec::Vec;
-use core::iter;
+use core::iter::FusedIterator;
 
 use crate::parser::{
-    to_base_field, Data, Event, Headers, MainFrame, MainUnit, MainValue, ParseResult, Reader,
-    SlowFrame, SlowUnit, SlowValue, Stats,
+    to_base_field, Data, Event, Headers, MainFrame, ParseResult, Reader, SlowFrame, Stats, Unit,
+    Value,
 };
 
 #[derive(Debug)]
@@ -15,8 +15,8 @@ pub struct Log<'data> {
 
 #[derive(Debug)]
 struct Filter {
-    main: Vec<bool>,
-    slow: Vec<bool>,
+    main: Vec<usize>,
+    slow: Vec<usize>,
 }
 
 impl Filter {
@@ -27,22 +27,33 @@ impl Filter {
             .collect::<Vec<_>>();
         fields.sort_unstable();
 
+        let filter = |(i, field)| {
+            fields
+                .binary_search(&to_base_field(field))
+                .is_ok()
+                .then_some(i)
+        };
+
         Self {
             main: headers
                 .main_fields()
-                .map(|(field, _)| fields.binary_search(&to_base_field(field)).is_ok())
+                .map(|(name, _)| name)
+                .enumerate()
+                .filter_map(filter)
                 .collect(),
             slow: headers
                 .slow_fields()
-                .map(|(field, _)| fields.binary_search(&to_base_field(field)).is_ok())
+                .map(|(name, _)| name)
+                .enumerate()
+                .filter_map(filter)
                 .collect(),
         }
     }
 
     fn new_unfiltered(headers: &Headers) -> Self {
         Self {
-            main: iter::repeat(true).take(headers.main_frames.len()).collect(),
-            slow: iter::repeat(true).take(headers.slow_frames.len()).collect(),
+            main: (0..headers.main_frames.len()).collect(),
+            slow: (0..headers.slow_frames.len()).collect(),
         }
     }
 }
@@ -90,20 +101,50 @@ impl<'data> Log<'data> {
         FrameIter::new(self)
     }
 
-    pub fn main_fields<'a: 'data>(&'a self) -> impl Iterator<Item = (&'data str, MainUnit)> + 'a {
-        self.headers
-            .main_fields()
-            .enumerate()
-            .filter_map(|(i, field)| self.filter.main[i].then_some(field))
-    }
-
-    pub fn slow_fields<'a: 'data>(&'a self) -> impl Iterator<Item = (&'data str, SlowUnit)> + 'a {
-        self.headers
-            .slow_fields()
-            .enumerate()
-            .filter_map(|(i, field)| self.filter.slow[i].then_some(field))
+    pub const fn iter_fields(&self) -> FieldIter {
+        FieldIter::new(self)
     }
 }
+
+#[derive(Debug)]
+pub struct FieldIter<'log, 'data> {
+    log: &'log Log<'data>,
+    index: usize,
+}
+
+impl<'log, 'data> FieldIter<'log, 'data> {
+    const fn new(log: &'log Log<'data>) -> Self {
+        Self { log, index: 0 }
+    }
+}
+
+impl<'log: 'data, 'data> Iterator for FieldIter<'log, 'data> {
+    type Item = (&'data str, Unit);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let Log {
+            headers, filter, ..
+        } = self.log;
+
+        let next = get_next(
+            self.index,
+            filter,
+            |index| {
+                let (name, unit) = headers.main_frames.get(index).unwrap();
+                (name, unit.into())
+            },
+            |index| {
+                let (name, unit) = headers.slow_frames.get(index).unwrap();
+                (name, unit.into())
+            },
+        )?;
+
+        self.index += 1;
+        Some(next)
+    }
+}
+
+impl<'log: 'data, 'data> FusedIterator for FieldIter<'log, 'data> {}
 
 #[derive(Debug)]
 pub struct FrameIter<'log, 'data> {
@@ -118,7 +159,7 @@ impl<'log, 'data> FrameIter<'log, 'data> {
 }
 
 impl<'log, 'data> Iterator for FrameIter<'log, 'data> {
-    type Item = FrameView<'log, 'data>;
+    type Item = FieldValueIter<'log, 'data>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.index >= self.log.data.main_frames.len() {
@@ -129,35 +170,66 @@ impl<'log, 'data> Iterator for FrameIter<'log, 'data> {
         let slow = &self.log.data.slow_frames[*slow];
         self.index += 1;
 
-        Some(FrameView {
+        Some(FieldValueIter {
             log: self.log,
             main,
             slow,
+            index: 0,
         })
     }
 }
 
-impl<'log, 'data> core::iter::FusedIterator for FrameIter<'log, 'data> {}
+impl<'log, 'data> FusedIterator for FrameIter<'log, 'data> {}
 
 #[derive(Debug)]
-pub struct FrameView<'log, 'data> {
+pub struct FieldValueIter<'log, 'data> {
     log: &'log Log<'data>,
     main: &'log MainFrame,
     slow: &'log SlowFrame,
+    index: usize,
 }
 
-impl<'log, 'data> FrameView<'log, 'data> {
-    pub fn iter_main(&self) -> impl Iterator<Item = MainValue> + '_ {
-        self.main
-            .iter(self.log.headers())
-            .enumerate()
-            .filter_map(|(i, value)| self.log.filter.main[i].then_some(value))
-    }
+impl<'log, 'data> Iterator for FieldValueIter<'log, 'data> {
+    type Item = Value;
 
-    pub fn iter_slow(&self) -> impl Iterator<Item = SlowValue> + '_ {
-        self.slow
-            .iter()
-            .enumerate()
-            .filter_map(|(i, value)| self.log.filter.slow[i].then_some(value))
+    fn next(&mut self) -> Option<Self::Item> {
+        let Log {
+            headers, filter, ..
+        } = self.log;
+
+        let next = get_next(
+            self.index,
+            filter,
+            |index| self.main.get(index, headers).unwrap().into(),
+            |index| self.slow.values[index].into(),
+        )?;
+
+        self.index += 1;
+        Some(next)
     }
+}
+
+impl<'log, 'data> FusedIterator for FieldValueIter<'log, 'data> {}
+
+#[inline]
+fn get_next<T>(
+    index: usize,
+    filter: &Filter,
+    get_main: impl Fn(usize) -> T,
+    get_slow: impl Fn(usize) -> T,
+) -> Option<T> {
+    let slow = filter.main.len();
+    let done = slow + filter.slow.len();
+
+    let next = if index < slow {
+        let index = filter.main[index];
+        get_main(index)
+    } else if index < done {
+        let index = filter.slow[index - slow];
+        get_slow(index)
+    } else {
+        return None;
+    };
+
+    Some(next)
 }

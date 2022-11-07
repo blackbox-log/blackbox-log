@@ -1,7 +1,7 @@
 use std::ffi::OsString;
 use std::fmt::{self, Display};
 
-use blackbox_log::parser::{MainUnit, SlowUnit};
+use blackbox_log::parser::Unit;
 use blackbox_log::units::{Acceleration, Amperage, FlagSet, Rotation, Voltage};
 use bpaf::FromOsStr;
 
@@ -33,27 +33,18 @@ pub enum CliUnitKind {
     Unitless,
 }
 
-impl From<MainUnit> for CliUnitKind {
-    fn from(val: MainUnit) -> Self {
-        match val {
-            MainUnit::FrameTime => CliUnitKind::FrameTime,
-            MainUnit::Amperage => CliUnitKind::Amperage,
-            MainUnit::Voltage => CliUnitKind::VBat,
-            MainUnit::Acceleration => CliUnitKind::Acceleration,
-            MainUnit::Rotation => CliUnitKind::Rotation,
-            MainUnit::Unitless => CliUnitKind::Unitless,
-        }
-    }
-}
-
-impl From<SlowUnit> for CliUnitKind {
-    fn from(val: SlowUnit) -> Self {
-        match val {
-            SlowUnit::FlightMode
-            | SlowUnit::State
-            | SlowUnit::FailsafePhase
-            | SlowUnit::Boolean => CliUnitKind::Flag,
-            SlowUnit::Unitless => CliUnitKind::Unitless,
+impl From<Unit> for CliUnitKind {
+    fn from(unit: Unit) -> Self {
+        match unit {
+            Unit::FrameTime => CliUnitKind::FrameTime,
+            Unit::Amperage => CliUnitKind::Amperage,
+            Unit::Voltage => CliUnitKind::VBat,
+            Unit::Acceleration => CliUnitKind::Acceleration,
+            Unit::Rotation => CliUnitKind::Rotation,
+            Unit::FlightMode | Unit::State | Unit::FailsafePhase | Unit::Boolean => {
+                CliUnitKind::Flag
+            }
+            Unit::Unitless => CliUnitKind::Unitless,
         }
     }
 }

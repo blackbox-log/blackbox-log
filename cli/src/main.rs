@@ -6,7 +6,7 @@ use std::io::{self, BufWriter, Read, Write};
 use std::path::Path;
 use std::process::{ExitCode, Termination};
 
-use blackbox_log::parser::{MainValue, SlowValue};
+use blackbox_log::parser::Value;
 use blackbox_log::Log;
 use mimalloc::MiMalloc;
 use rayon::prelude::*;
@@ -125,41 +125,32 @@ fn get_output(stdout: bool, filename: &Path, index: usize) -> io::Result<Box<dyn
 fn write_csv(out: &mut impl Write, log: &Log, config: &Cli) -> io::Result<()> {
     write_csv_line(
         out,
-        log.main_fields()
-            .map(|(name, unit)| (name, unit.into()))
-            .chain(log.slow_fields().map(|(name, unit)| (name, unit.into())))
-            .map(|(name, unit)| {
-                let unit = config.get_unit(unit);
-                if unit.is_raw() {
-                    name.to_owned()
-                } else {
-                    format!("{name} ({unit})")
-                }
-            }),
+        log.iter_fields().map(|(name, unit)| {
+            let unit = config.get_unit(unit.into());
+            if unit.is_raw() {
+                name.to_owned()
+            } else {
+                format!("{name} ({unit})")
+            }
+        }),
     )?;
 
     for frame in log.iter_frames() {
         write_csv_line(
             out,
-            frame
-                .iter_main()
-                .map(|x| match x {
-                    MainValue::FrameTime(t) => config.unit_frame_time.format(t),
-                    MainValue::Amperage(a) => config.unit_amperage.format(a),
-                    MainValue::Voltage(v) => config.unit_vbat.format(v),
-                    MainValue::Acceleration(a) => config.unit_acceleration.format(a),
-                    MainValue::Rotation(r) => config.unit_rotation.format(r),
-                    MainValue::Unsigned(x) => x.to_string(),
-                    MainValue::Signed(x) => x.to_string(),
-                })
-                .chain(frame.iter_slow().map(|x| match x {
-                    SlowValue::FlightMode(m) => config.unit_flags.format(m),
-                    SlowValue::State(s) => config.unit_flags.format(s),
-                    SlowValue::FailsafePhase(p) => config.unit_flags.format(p),
-                    SlowValue::Boolean(b) => config.unit_flags.format_bool(b),
-                    SlowValue::Unsigned(x) => x.to_string(),
-                    SlowValue::Signed(x) => x.to_string(),
-                })),
+            frame.map(|value| match value {
+                Value::FrameTime(t) => config.unit_frame_time.format(t),
+                Value::Amperage(a) => config.unit_amperage.format(a),
+                Value::Voltage(v) => config.unit_vbat.format(v),
+                Value::Acceleration(a) => config.unit_acceleration.format(a),
+                Value::Rotation(r) => config.unit_rotation.format(r),
+                Value::FlightMode(m) => config.unit_flags.format(m),
+                Value::State(s) => config.unit_flags.format(s),
+                Value::FailsafePhase(p) => config.unit_flags.format(p),
+                Value::Boolean(b) => config.unit_flags.format_bool(b),
+                Value::Unsigned(x) => x.to_string(),
+                Value::Signed(x) => x.to_string(),
+            }),
         )?;
     }
 

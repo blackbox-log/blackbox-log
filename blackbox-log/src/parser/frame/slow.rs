@@ -12,12 +12,6 @@ pub struct SlowFrame {
     pub(crate) values: Vec<SlowValue>,
 }
 
-impl SlowFrame {
-    pub(crate) fn iter(&self) -> impl Iterator<Item = SlowValue> + '_ {
-        self.values.iter().copied()
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum SlowValue {
     FlightMode(units::FlightModeSet),
@@ -53,6 +47,10 @@ pub(crate) struct SlowFrameDef<'data>(pub(crate) Vec<SlowFieldDef<'data>>);
 impl<'data> SlowFrameDef<'data> {
     pub(crate) fn len(&self) -> usize {
         self.0.len()
+    }
+
+    pub(crate) fn get(&self, index: usize) -> Option<(&str, SlowUnit)> {
+        self.0.get(index).map(|f| (f.name, f.unit))
     }
 
     pub(crate) fn iter(&self) -> impl Iterator<Item = (&str, SlowUnit)> {

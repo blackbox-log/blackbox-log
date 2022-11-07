@@ -75,18 +75,6 @@ impl MainFrame {
         }
     }
 
-    pub(crate) fn iter<'a: 'c, 'b: 'c, 'c>(
-        &'a self,
-        headers: &'b Headers,
-    ) -> impl Iterator<Item = MainValue> + 'c {
-        let mut i = 0;
-        iter::from_fn(move || {
-            let value = self.get(i, headers)?;
-            i += 1;
-            Some(value)
-        })
-    }
-
     pub(crate) fn get(&self, index: usize, headers: &Headers) -> Option<MainValue> {
         let unit = match index {
             0 => MainValue::Unsigned(self.iteration),
@@ -165,6 +153,16 @@ pub(crate) struct MainFrameDef<'data> {
 impl<'data> MainFrameDef<'data> {
     pub(crate) fn len(&self) -> usize {
         2 + self.fields.len()
+    }
+
+    pub(crate) fn get(&self, index: usize) -> Option<(&str, MainUnit)> {
+        let field = match index {
+            0 => &self.iteration,
+            1 => &self.time,
+            _ => self.fields.get(index - 2)?,
+        };
+
+        Some((field.name, field.unit))
     }
 
     pub(crate) fn iter(&self) -> impl Iterator<Item = (&str, MainUnit)> {

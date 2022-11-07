@@ -10,7 +10,7 @@ use core::fmt;
 
 pub use self::data::{Data, Event, Stats};
 pub use self::decode::Encoding;
-pub use self::frame::{MainFrame, MainUnit, MainValue, SlowFrame, SlowUnit, SlowValue};
+pub use self::frame::{MainFrame, SlowFrame, Unit, Value};
 pub use self::headers::Headers;
 pub use self::predictor::Predictor;
 pub use self::reader::Reader;

@@ -1,7 +1,7 @@
 use std::fs;
 use std::io::Read;
 
-use blackbox_log::parser::{Event, Headers, MainValue, SlowValue, Stats};
+use blackbox_log::parser::{Event, Headers, Stats, Value};
 use blackbox_log::units::FlagSet;
 use blackbox_log::Log;
 use serde::ser::{SerializeStruct, Serializer};
@@ -45,61 +45,44 @@ struct LogSnapshot<'a> {
     headers: Headers<'a>,
     stats: Stats,
     events: Vec<Event>,
-    main: FrameSnapshot,
-    slow: FrameSnapshot,
+    fields: Fields,
 }
 
 impl<'a> From<Log<'a>> for LogSnapshot<'a> {
     fn from(log: Log<'a>) -> Self {
-        let main = log
-            .main_fields()
-            .map(|(name, _)| name)
-            .collect::<FrameSnapshot>();
-        let slow = log
-            .slow_fields()
-            .map(|(name, _)| name)
-            .collect::<FrameSnapshot>();
+        let fields = log.iter_fields().map(|(name, _)| name).collect::<Fields>();
 
-        let (main, slow) = log
-            .iter_frames()
-            .fold((main, slow), |(mut main, mut slow), frame| {
-                main.update(frame.iter_main().map(main_to_int));
-                slow.update(frame.iter_slow().map(slow_to_int));
-
-                (main, slow)
-            });
+        let fields = log.iter_frames().fold(fields, |mut fields, frame| {
+            fields.update(frame.map(value_to_int));
+            fields
+        });
 
         Self {
             headers: log.headers().clone(),
             stats: log.stats(),
             events: log.events().to_owned(),
-            main,
-            slow,
+            fields,
         }
     }
 }
 
 #[derive(Debug, Serialize)]
-struct FrameSnapshot {
-    fields: Vec<FieldSnapshot>,
-}
+struct Fields(Vec<FieldSnapshot>);
 
-impl FrameSnapshot {
+impl Fields {
     fn update(&mut self, frame: impl Iterator<Item = i128>) {
-        for (field, value) in self.fields.iter_mut().zip(frame) {
+        for (field, value) in self.0.iter_mut().zip(frame) {
             field.update(value);
         }
     }
 }
 
-impl<T> FromIterator<T> for FrameSnapshot
+impl<T> FromIterator<T> for Fields
 where
     T: Into<String>,
 {
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
-        Self {
-            fields: iter.into_iter().map(FieldSnapshot::new).collect(),
-        }
+        Self(iter.into_iter().map(FieldSnapshot::new).collect())
     }
 }
 
@@ -165,25 +148,18 @@ impl Serialize for FieldSnapshot {
     }
 }
 
-fn slow_to_int(value: SlowValue) -> i128 {
+fn value_to_int(value: Value) -> i128 {
     match value {
-        SlowValue::FlightMode(x) => x.as_raw().into(),
-        SlowValue::State(x) => x.as_raw().into(),
-        SlowValue::FailsafePhase(x) => x.as_raw().into(),
-        SlowValue::Boolean(x) => x.into(),
-        SlowValue::Unsigned(x) => x.into(),
-        SlowValue::Signed(x) => x.into(),
-    }
-}
-
-fn main_to_int(value: MainValue) -> i128 {
-    match value {
-        MainValue::FrameTime(x) => x.into(),
-        MainValue::Amperage(x) => x.as_raw().into(),
-        MainValue::Voltage(x) => x.as_raw().into(),
-        MainValue::Acceleration(x) => x.as_raw().into(),
-        MainValue::Rotation(x) => x.as_raw().into(),
-        MainValue::Unsigned(x) => x.into(),
-        MainValue::Signed(x) => x.into(),
+        Value::FrameTime(x) => x.into(),
+        Value::Amperage(x) => x.as_raw().into(),
+        Value::Voltage(x) => x.as_raw().into(),
+        Value::Acceleration(x) => x.as_raw().into(),
+        Value::Rotation(x) => x.as_raw().into(),
+        Value::FlightMode(x) => x.as_raw().into(),
+        Value::State(x) => x.as_raw().into(),
+        Value::FailsafePhase(x) => x.as_raw().into(),
+        Value::Boolean(x) => x.into(),
+        Value::Unsigned(x) => x.into(),
+        Value::Signed(x) => x.into(),
     }
 }
