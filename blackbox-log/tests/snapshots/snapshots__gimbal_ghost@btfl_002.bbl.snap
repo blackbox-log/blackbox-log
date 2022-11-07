@@ -26,6 +26,7 @@ input_file: blackbox-log/tests/logs/gimbal-ghost/btfl_002.bbl
       counts: FrameCounts(
         main: 1136,
         slow: 3,
+        gps_home: 1,
       ),
     ),
     events: [
@@ -353,6 +354,7 @@ input_file: blackbox-log/tests/logs/gimbal-ghost/btfl_002.bbl
       counts: FrameCounts(
         main: 38,
         slow: 3,
+        gps_home: 1,
       ),
     ),
     events: [
@@ -674,6 +676,7 @@ input_file: blackbox-log/tests/logs/gimbal-ghost/btfl_002.bbl
       counts: FrameCounts(
         main: 11615,
         slow: 8,
+        gps_home: 1,
       ),
     ),
     events: [

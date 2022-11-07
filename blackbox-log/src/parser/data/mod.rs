@@ -3,15 +3,17 @@ mod event;
 use alloc::vec::Vec;
 
 pub use self::event::Event;
-use super::{FrameKind, Headers, MainFrame, ParseError, ParseResult, Reader, SlowFrame};
+use super::{
+    FrameKind, GpsHomeFrame, Headers, MainFrame, ParseError, ParseResult, Reader, SlowFrame,
+};
 
 #[derive(Debug, Clone)]
 pub struct Data {
     pub(crate) events: Vec<Event>,
     pub(crate) main_frames: Vec<(MainFrame, usize)>,
-    // pub(crate) gps_frames: Vec<Frame>,
-    // pub(crate) gps_home_frames: Vec<Frame>,
     pub(crate) slow_frames: Vec<SlowFrame>,
+    // pub(crate) gps_frames: Vec<Frame>,
+    pub(crate) gps_home_frames: Vec<GpsHomeFrame>,
 }
 
 #[derive(Debug, Clone)]
@@ -25,6 +27,7 @@ pub struct Stats {
 pub struct FrameCounts {
     pub main: usize,
     pub slow: usize,
+    pub gps_home: usize,
 }
 
 impl Data {
@@ -33,6 +36,7 @@ impl Data {
             counts: FrameCounts {
                 main: self.main_frames.len(),
                 slow: self.slow_frames.len(),
+                gps_home: self.gps_home_frames.len(),
             },
         }
     }
@@ -40,9 +44,9 @@ impl Data {
     pub fn parse(mut data: Reader, headers: &Headers) -> ParseResult<Self> {
         let mut events = Vec::new();
         let mut main_frames = Vec::new();
-        // let gps_frames = Vec::new();
-        // let gps_home_frames = Vec::new();
         let mut slow_frames = Vec::new();
+        // let gps_frames = Vec::new();
+        let mut gps_home_frames = Vec::new();
 
         slow_frames.push(headers.slow_frames.default_frame(headers));
 
@@ -65,7 +69,10 @@ impl Data {
                     Some(FrameKind::Slow) => {
                         slow_frames.pop();
                     }
-                    Some(FrameKind::Gps | FrameKind::GpsHome) | None => {}
+                    Some(FrameKind::GpsHome) => {
+                        gps_home_frames.pop();
+                    }
+                    Some(FrameKind::Gps) | None => {}
                 };
 
                 if last_kind.is_some() {
@@ -101,7 +108,11 @@ impl Data {
                         tracing::error!("found GPS home frame without GPS frame definition");
                         Err(ParseError::Corrupted)
                     },
-                    |gps_home| gps_home.parse(&mut data, headers).map(|_| ()),
+                    |gps_home| {
+                        gps_home
+                            .parse(&mut data, headers)
+                            .map(|frame| gps_home_frames.push(frame))
+                    },
                 ),
                 FrameKind::Slow => headers
                     .slow_frames
@@ -129,9 +140,9 @@ impl Data {
         Ok(Self {
             events,
             main_frames,
-            // gps_frames,
-            // gps_home_frames,
             slow_frames,
+            // gps_frames,
+            gps_home_frames,
         })
     }
 }

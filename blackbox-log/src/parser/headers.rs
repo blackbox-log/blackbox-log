@@ -16,13 +16,13 @@ pub struct Headers<'data> {
     pub version: LogVersion,
 
     #[cfg_attr(feature = "serde", serde(skip))]
-    pub(crate) gps_frames: Option<GpsFrameDef<'data>>,
-    #[cfg_attr(feature = "serde", serde(skip))]
-    pub(crate) gps_home_frames: Option<GpsHomeFrameDef<'data>>,
-    #[cfg_attr(feature = "serde", serde(skip))]
     pub(crate) main_frames: MainFrameDef<'data>,
     #[cfg_attr(feature = "serde", serde(skip))]
     pub(crate) slow_frames: SlowFrameDef<'data>,
+    #[cfg_attr(feature = "serde", serde(skip))]
+    pub(crate) gps_frames: Option<GpsFrameDef<'data>>,
+    #[cfg_attr(feature = "serde", serde(skip))]
+    pub(crate) gps_home_frames: Option<GpsHomeFrameDef<'data>>,
 
     pub firmware_revision: &'data str,
     pub firmware_kind: FirmwareKind,
@@ -139,10 +139,10 @@ impl FromStr for MotorOutputRange {
 #[derive(Debug)]
 struct State<'data> {
     version: LogVersion,
-    gps_frames: GpsFrameDefBuilder<'data>,
-    gps_home_frames: GpsHomeFrameDefBuilder<'data>,
     main_frames: MainFrameDefBuilder<'data>,
     slow_frames: SlowFrameDefBuilder<'data>,
+    gps_frames: GpsFrameDefBuilder<'data>,
+    gps_home_frames: GpsHomeFrameDefBuilder<'data>,
 
     firmware_revision: Option<&'data str>,
     firmware_kind: Option<FirmwareKind>,
@@ -164,10 +164,10 @@ impl<'data> State<'data> {
     fn new(version: LogVersion) -> Self {
         Self {
             version,
-            gps_frames: GpsFrameDef::builder(),
-            gps_home_frames: GpsHomeFrameDef::builder(),
             main_frames: MainFrameDef::builder(),
             slow_frames: SlowFrameDef::builder(),
+            gps_frames: GpsFrameDef::builder(),
+            gps_home_frames: GpsHomeFrameDef::builder(),
 
             firmware_revision: None,
             firmware_kind: None,
@@ -234,12 +234,12 @@ impl<'data> State<'data> {
                 let (frame_kind, property) = parse_frame_def_header(header).unwrap();
 
                 match frame_kind {
-                    DataFrameKind::Gps => self.gps_frames.update(property, value),
-                    DataFrameKind::GpsHome => self.gps_home_frames.update(property, value),
                     DataFrameKind::Inter | DataFrameKind::Intra => {
                         self.main_frames.update(frame_kind, property, value);
                     }
                     DataFrameKind::Slow => self.slow_frames.update(property, value),
+                    DataFrameKind::Gps => self.gps_frames.update(property, value),
+                    DataFrameKind::GpsHome => self.gps_home_frames.update(property, value),
                 }
             }
             header => tracing::debug!("skipping unknown header: `{header}` = `{value}`"),
@@ -251,10 +251,10 @@ impl<'data> State<'data> {
     fn finish(self) -> ParseResult<Headers<'data>> {
         Ok(Headers {
             version: self.version,
-            gps_frames: self.gps_frames.parse()?,
-            gps_home_frames: self.gps_home_frames.parse()?,
             main_frames: self.main_frames.parse()?,
             slow_frames: self.slow_frames.parse()?,
+            gps_frames: self.gps_frames.parse()?,
+            gps_home_frames: self.gps_home_frames.parse()?,
 
             firmware_revision: self.firmware_revision.ok_or(ParseError::Corrupted)?,
             firmware_kind: self.firmware_kind.ok_or(ParseError::Corrupted)?,

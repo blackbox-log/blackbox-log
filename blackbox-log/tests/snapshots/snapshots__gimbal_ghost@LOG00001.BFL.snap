@@ -26,6 +26,7 @@ input_file: blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
       counts: FrameCounts(
         main: 229265,
         slow: 35,
+        gps_home: 0,
       ),
     ),
     events: [

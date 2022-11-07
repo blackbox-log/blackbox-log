@@ -26,6 +26,7 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
       counts: FrameCounts(
         main: 2,
         slow: 1,
+        gps_home: 0,
       ),
     ),
     events: [

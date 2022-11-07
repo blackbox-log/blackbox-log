@@ -26,6 +26,7 @@ input_file: blackbox-log/tests/logs/fc-blackbox/btfl_001.bbl
       counts: FrameCounts(
         main: 98,
         slow: 3,
+        gps_home: 0,
       ),
     ),
     events: [
@@ -325,6 +326,7 @@ input_file: blackbox-log/tests/logs/fc-blackbox/btfl_001.bbl
       counts: FrameCounts(
         main: 24893,
         slow: 9,
+        gps_home: 0,
       ),
     ),
     events: [

@@ -12,7 +12,7 @@ pub enum Predictor {
     MinThrottle,
     Motor0,
     Increment,
-    HomeLat, // TODO: check that lat = 0, lon = 1
+    HomeLat,
     FifteenHundred,
     VBatReference,
     LastMainFrameTime,
@@ -81,7 +81,7 @@ impl Predictor {
                     as_unsigned(1 + skipped_frames + as_signed(last.unwrap_or(0)))
                 }
             }
-            // Self::HomeLat => todo!(), // TODO: check that lat = 0, lon = 1
+            // Self::HomeLat => todo!(),
             Self::FifteenHundred => 1500,
             Self::VBatReference => headers.vbat_reference.into(),
             // Self::LastMainFrameTime => todo!(),

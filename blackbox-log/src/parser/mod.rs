@@ -11,7 +11,7 @@ use core::fmt;
 pub(crate) use self::data::Data;
 pub use self::data::{Event, Stats};
 pub use self::decode::Encoding;
-pub(crate) use self::frame::{MainFrame, SlowFrame};
+pub(crate) use self::frame::{GpsHomeFrame, MainFrame, SlowFrame};
 pub use self::frame::{Unit, Value};
 pub use self::headers::Headers;
 pub(crate) use self::predictor::Predictor;

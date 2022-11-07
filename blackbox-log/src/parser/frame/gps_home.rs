@@ -6,16 +6,16 @@ use super::{read_field_values, DataFrameKind, DataFrameProperty};
 use crate::parser::{Encoding, Headers, ParseError, ParseResult, Predictor, Reader};
 
 #[derive(Debug, Clone)]
-pub struct GpsHomeFrame;
+pub struct GpsHomeFrame(GpsPosition);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum GpsHomeValue {}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum GpsHomeUnit {}
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct GpsPosition {
+    latitude: i32,
+    longitude: i32,
+}
 
 #[derive(Debug, Clone)]
-pub(crate) struct GpsHomeFrameDef<'data>(pub(crate) Vec<GpsHomeFieldDef<'data>>);
+pub(crate) struct GpsHomeFrameDef<'data>([GpsHomeFieldDef<'data>; 2], Vec<Encoding>);
 
 impl<'data> GpsHomeFrameDef<'data> {
     pub(crate) fn builder() -> GpsHomeFrameDefBuilder<'data> {
@@ -23,10 +23,38 @@ impl<'data> GpsHomeFrameDef<'data> {
     }
 
     #[instrument(level = "trace", name = "GpsHomeFrameDef::parse", skip_all)]
-    pub(crate) fn parse(&self, data: &mut Reader, _headers: &Headers) -> ParseResult<GpsHomeFrame> {
-        let _ = read_field_values(data, &self.0, |f| f.encoding)?;
+    pub(crate) fn parse(&self, data: &mut Reader, headers: &Headers) -> ParseResult<GpsHomeFrame> {
+        let raw = read_field_values(data, &self.0, |f| f.encoding)?;
+        let _ = read_field_values(data, &self.1, |&f| f)?;
 
-        Ok(GpsHomeFrame)
+        let values = raw
+            .iter()
+            .zip(self.0.iter())
+            .map(|(&raw_value, field)| {
+                let value = field
+                    .predictor
+                    .apply(headers, raw_value, true, &raw, None, None, 0)?;
+
+                tracing::trace!(
+                    field = field.name,
+                    encoding = ?field.encoding,
+                    predictor = ?field.predictor,
+                    raw = raw_value,
+                    value,
+                );
+
+                #[allow(clippy::cast_possible_wrap)]
+                Ok(value as i32)
+            })
+            .collect::<ParseResult<Vec<_>>>()?;
+
+        // `values` can only have two elements thanks to zipping with `self.0`
+        let [latitude, longitude, ..] = values[..] else { unreachable!() };
+
+        Ok(GpsHomeFrame(GpsPosition {
+            latitude,
+            longitude,
+        }))
     }
 }
 
@@ -36,8 +64,6 @@ pub(crate) struct GpsHomeFieldDef<'data> {
     pub(crate) name: &'data str,
     pub(crate) predictor: Predictor,
     pub(crate) encoding: Encoding,
-    // pub(crate) unit: GpsHomeUnit,
-    pub(crate) signed: bool,
 }
 
 #[derive(Debug, Default)]
@@ -76,18 +102,43 @@ impl<'data> GpsHomeFrameDefBuilder<'data> {
         let mut encodings = super::parse_encodings(kind, self.encodings)?;
         let mut signs = super::parse_signs(kind, self.signs)?;
 
-        let fields = (names.by_ref().zip(signs.by_ref()))
-            .zip(predictors.by_ref().zip(encodings.by_ref()))
-            .map(|((name, signed), (predictor, encoding))| {
-                Ok(GpsHomeFieldDef {
+        let mut fields =
+            (names.by_ref().zip(signs.by_ref())).zip(predictors.by_ref().zip(encodings.by_ref()));
+
+        let latitude =
+            if let Some(((name @ "GPS_home[0]", true), (predictor, encoding))) = fields.next() {
+                GpsHomeFieldDef {
                     name,
                     predictor: predictor?,
                     encoding: encoding?,
-                    // unit: unit_from_name(name),
-                    signed,
-                })
-            })
+                }
+            } else {
+                tracing::error!("missing GPS_home[0] field definition");
+                return Err(ParseError::Corrupted);
+            };
+
+        let longitude =
+            if let Some(((name @ "GPS_home[1]", true), (predictor, encoding))) = fields.next() {
+                GpsHomeFieldDef {
+                    name,
+                    predictor: predictor?,
+                    encoding: encoding?,
+                }
+            } else {
+                tracing::error!("missing GPS_home[1] field definition");
+                return Err(ParseError::Corrupted);
+            };
+
+        let rest = fields
+            .map(|(_, (_, encoding))| encoding)
             .collect::<ParseResult<Vec<_>>>()?;
+
+        if !rest.is_empty() {
+            tracing::warn!(
+                "expected only GPS_home[0] & GPS_home[1] fields in gps home frames, found {} more",
+                rest.len()
+            );
+        }
 
         if names.next().is_some()
             || predictors.next().is_some()
@@ -98,6 +149,6 @@ impl<'data> GpsHomeFrameDefBuilder<'data> {
             return Err(ParseError::Corrupted);
         }
 
-        Ok(Some(GpsHomeFrameDef(fields)))
+        Ok(Some(GpsHomeFrameDef([latitude, longitude], rest)))
     }
 }
