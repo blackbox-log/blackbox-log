@@ -105,7 +105,7 @@ impl Data {
                 ),
                 FrameKind::GpsHome => headers.gps_home_frames.as_ref().map_or_else(
                     || {
-                        tracing::error!("found GPS home frame without GPS frame definition");
+                        tracing::error!("found GPS home frame without GPS home frame definition");
                         Err(ParseError::Corrupted)
                     },
                     |gps_home| {
