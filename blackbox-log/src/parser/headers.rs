@@ -63,7 +63,17 @@ impl<'data> Headers<'data> {
                 None => return Err(ParseError::UnexpectedEof),
             }
 
-            let (name, value) = parse_header(data)?;
+            let restore = data.get_restore_point();
+            let (name, value) = match parse_header(data) {
+                Ok(x) => x,
+                Err(ParseError::Corrupted) => {
+                    tracing::debug!("found corrupted header");
+                    data.restore(restore);
+                    break;
+                }
+                Err(e) => return Err(e),
+            };
+
             state.update(name, value).map_err(|e| {
                 tracing::error!("state.update error: {e}");
                 e
