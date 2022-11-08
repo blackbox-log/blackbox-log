@@ -27,7 +27,7 @@ fuzz_target!(|input: Input| {
     let expected = reference.read_tagged_variable(count.into());
     let got = decode::tagged_variable(&mut bits, (count - 1).into());
 
-    if let Ok(got) = got {
+    if let Some(got) = got {
         let got = got.map(Into::into);
         assert_eq!(expected, got);
     }

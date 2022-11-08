@@ -1,6 +1,6 @@
 use crate::parser::{ParseError, ParseResult, Reader};
 
-pub fn tagged_variable(data: &mut Reader, extra: usize) -> ParseResult<[i32; 8]> {
+pub(crate) fn tagged_variable(data: &mut Reader, extra: usize) -> ParseResult<[i32; 8]> {
     debug_assert!(extra < 8);
 
     let mut values = [0; 8];

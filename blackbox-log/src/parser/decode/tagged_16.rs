@@ -3,7 +3,7 @@ use crate::parser::{ParseError, ParseResult, Reader};
 
 const COUNT: usize = 4;
 
-pub fn tagged_16(data: &mut Reader) -> ParseResult<[i16; COUNT]> {
+pub(crate) fn tagged_16(data: &mut Reader) -> ParseResult<[i16; COUNT]> {
     let tags = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
 
     if tags == 0 {

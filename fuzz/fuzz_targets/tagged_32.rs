@@ -8,7 +8,7 @@ fuzz_target!(|data: AlignedBytes| {
     let expected = reference.read_tagged_32();
     let got = decode::tagged_32(&mut bits);
 
-    if let Ok(got) = got {
+    if let Some(got) = got {
         let got = got.map(Into::into);
         assert_eq!(expected, got);
     }

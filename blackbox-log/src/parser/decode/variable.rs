@@ -1,8 +1,7 @@
 use super::zig_zag_decode;
 use crate::parser::{ParseError, ParseResult, Reader};
 
-#[allow(clippy::assertions_on_constants)]
-pub fn variable(data: &mut Reader) -> ParseResult<u32> {
+pub(crate) fn variable(data: &mut Reader) -> ParseResult<u32> {
     let mut uvar: u32 = 0;
     let mut offset: u32 = 0;
     loop {
@@ -25,7 +24,7 @@ pub fn variable(data: &mut Reader) -> ParseResult<u32> {
     Ok(uvar)
 }
 
-pub fn variable_signed(data: &mut Reader) -> ParseResult<i32> {
+pub(crate) fn variable_signed(data: &mut Reader) -> ParseResult<i32> {
     variable(data).map(zig_zag_decode)
 }
 

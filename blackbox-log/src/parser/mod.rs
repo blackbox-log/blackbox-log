@@ -1,5 +1,8 @@
-mod data;
+// Need it `pub` to run benchmarks and fuzz test
+#[doc(hidden)]
 pub mod decode;
+
+mod data;
 mod frame;
 pub mod headers;
 mod predictor;

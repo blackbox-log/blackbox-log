@@ -3,8 +3,7 @@ use crate::parser::{ParseError, ParseResult, Reader};
 
 const COUNT: usize = 3;
 
-#[allow(clippy::assertions_on_constants)]
-pub fn tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
+pub(crate) fn tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
     fn read_u8_or_eof(bytes: &mut Reader) -> ParseResult<u8> {
         bytes.read_u8().ok_or(ParseError::UnexpectedEof)
     }
