@@ -1,6 +1,6 @@
 use core::ops::{Add, Div, Sub};
 
-use super::{as_signed, as_unsigned, Headers, ParseResult};
+use super::{as_signed, as_unsigned, Headers};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(u8)]
@@ -22,7 +22,7 @@ pub enum Predictor {
 
 impl Predictor {
     #[allow(clippy::too_many_arguments)]
-    pub fn apply(
+    pub(crate) fn apply(
         self,
         headers: &Headers,
         value: u32,
@@ -31,7 +31,7 @@ impl Predictor {
         last: Option<u32>,
         last_last: Option<u32>,
         skipped_frames: u32,
-    ) -> ParseResult<u32> {
+    ) -> u32 {
         let _span = if signed {
             tracing::trace_span!(
                 "Predictor::apply",
@@ -70,8 +70,8 @@ impl Predictor {
                     average(last, last_last)
                 }
             }
-            Self::MinThrottle => headers.min_throttle.into(),
-            Self::Motor0 => headers.main_frames.get_motor_0_from(current)?,
+            Self::MinThrottle => headers.min_throttle.unwrap().into(),
+            Self::Motor0 => headers.main_frames.get_motor_0_from(current),
             Self::Increment => {
                 if signed {
                     skipped_frames
@@ -89,9 +89,9 @@ impl Predictor {
             }
             // Self::HomeLat => todo!(),
             Self::FifteenHundred => 1500,
-            Self::VBatReference => headers.vbat_reference.into(),
+            Self::VBatReference => headers.vbat.unwrap().reference.into(),
             // Self::LastMainFrameTime => todo!(),
-            Self::MinMotor => headers.motor_output_range.min().into(),
+            Self::MinMotor => headers.motor_output_range.unwrap().min().into(),
             // Self::HomeLon => todo!(),
             Self::HomeLat | Self::LastMainFrameTime => {
                 tracing::warn!("found unimplemented predictor: {self:?}");
@@ -99,7 +99,7 @@ impl Predictor {
             }
         };
 
-        Ok(if signed {
+        if signed {
             let signed = as_signed(value).wrapping_add(as_signed(diff));
             tracing::trace!(return = signed);
             as_unsigned(signed)
@@ -107,7 +107,7 @@ impl Predictor {
             let x = value.wrapping_add(diff);
             tracing::trace!(return = x);
             x
-        })
+        }
     }
 
     pub(crate) fn from_num_str(s: &str) -> Option<Self> {

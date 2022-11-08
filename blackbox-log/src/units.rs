@@ -14,10 +14,10 @@ pub struct Amperage {
 }
 
 impl Amperage {
-    pub const fn new(raw: u32, headers: &Headers) -> Self {
+    pub fn new(raw: u32, headers: &Headers) -> Self {
         Self {
             raw: as_signed(raw),
-            current_meter: headers.current_meter,
+            current_meter: headers.current_meter.unwrap(),
         }
     }
 
@@ -39,10 +39,10 @@ pub struct Voltage {
 }
 
 impl Voltage {
-    pub const fn new(raw: u32, headers: &Headers) -> Self {
+    pub fn new(raw: u32, headers: &Headers) -> Self {
         Self {
             raw,
-            scale: headers.vbat_scale,
+            scale: headers.vbat.unwrap().scale,
         }
     }
 
@@ -65,7 +65,7 @@ impl Acceleration {
     pub(crate) fn new(raw: u32, headers: &Headers) -> Self {
         Self {
             raw: as_signed(raw),
-            one_g: headers.acceleration_1g,
+            one_g: headers.acceleration_1g.unwrap(),
         }
     }
 

@@ -6,7 +6,7 @@ use super::frame::{
     GpsHomeFrameDef, GpsHomeFrameDefBuilder, MainFrameDef, MainFrameDefBuilder, MainUnit,
     SlowFrameDef, SlowFrameDefBuilder, SlowUnit,
 };
-use super::{ParseError, ParseResult, Reader};
+use super::{ParseError, ParseResult, Predictor, Reader, Unit};
 use crate::common::{FirmwareKind, LogVersion};
 
 #[allow(dead_code)]
@@ -26,19 +26,17 @@ pub struct Headers<'data> {
 
     pub firmware_revision: &'data str,
     pub firmware_kind: FirmwareKind,
-    pub board_info: &'data str,
-    pub craft_name: &'data str,
+    pub board_info: Option<&'data str>,
+    pub craft_name: Option<&'data str>,
 
-    /// Measured battery voltage at arm
-    pub vbat_reference: u16,
-    pub vbat_scale: u16,
-    pub current_meter: CurrentMeterConfig,
+    pub vbat: Option<VbatConfig>,
+    pub current_meter: Option<CurrentMeterConfig>,
 
-    pub acceleration_1g: u16,
-    pub gyro_scale: f32,
+    pub acceleration_1g: Option<u16>,
+    pub gyro_scale: Option<f32>,
 
-    pub min_throttle: u16,
-    pub motor_output_range: MotorOutputRange,
+    pub min_throttle: Option<u16>,
+    pub motor_output_range: Option<MotorOutputRange>,
 }
 
 impl<'data> Headers<'data> {
@@ -82,6 +80,75 @@ impl<'data> Headers<'data> {
 
         state.finish()
     }
+
+    fn validate(&self) -> ParseResult<()> {
+        let has_accel = self.acceleration_1g.is_some();
+        let has_current_meter = self.current_meter.is_some();
+        let has_min_throttle = self.min_throttle.is_some();
+        let has_motor_0 = self.main_frames.has_motor_0();
+        let has_vbat = self.vbat.is_some();
+        let has_min_motor = self.motor_output_range.is_some();
+        let has_gps_home = self.gps_home_frames.is_some();
+
+        let predictor = |field, predictor| {
+            let ok = match predictor {
+                Predictor::MinThrottle => has_min_throttle,
+                Predictor::Motor0 => has_motor_0,
+                Predictor::HomeLat => has_gps_home,
+                Predictor::VBatReference => has_vbat,
+                Predictor::MinMotor => has_min_motor,
+                Predictor::Zero
+                | Predictor::Previous
+                | Predictor::StraightLine
+                | Predictor::Average2
+                | Predictor::Increment
+                | Predictor::FifteenHundred
+                | Predictor::LastMainFrameTime => true,
+            };
+
+            if ok {
+                Ok(())
+            } else {
+                tracing::error!(field, ?predictor, "missing required headers");
+                Err(ParseError::MissingHeader)
+            }
+        };
+
+        let unit = |field, unit| {
+            let ok = match unit {
+                Unit::Amperage => has_current_meter,
+                Unit::Voltage => has_vbat,
+                Unit::Acceleration => has_accel,
+                Unit::FrameTime
+                | Unit::Rotation
+                | Unit::FlightMode
+                | Unit::State
+                | Unit::FailsafePhase
+                | Unit::Boolean
+                | Unit::Unitless => true,
+            };
+
+            if ok {
+                Ok(())
+            } else {
+                tracing::error!(field, ?unit, "missing required headers");
+                Err(ParseError::MissingHeader)
+            }
+        };
+
+        self.main_frames.validate(predictor, unit)?;
+        self.slow_frames.validate(predictor, unit)?;
+
+        if let Some(ref def) = self.gps_frames {
+            def.validate(predictor, unit)?;
+        }
+
+        if let Some(ref def) = self.gps_home_frames {
+            def.validate(predictor, unit)?;
+        }
+
+        Ok(())
+    }
 }
 
 fn check_product(bytes: &mut Reader) -> Result<(), ParseError> {
@@ -105,6 +172,14 @@ fn get_version(bytes: &mut Reader) -> Result<LogVersion, ParseError> {
     value
         .parse()
         .map_err(|_| ParseError::UnsupportedVersion(value.to_owned()))
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+pub struct VbatConfig {
+    /// Measured battery voltage at arm
+    pub reference: u16,
+    pub scale: u16,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -259,28 +334,40 @@ impl<'data> State<'data> {
     }
 
     fn finish(self) -> ParseResult<Headers<'data>> {
-        Ok(Headers {
+        let not_empty = |s: &&str| !s.is_empty();
+
+        let vbat = if let (Some(reference), Some(scale)) = (self.vbat_reference, self.vbat_scale) {
+            Some(VbatConfig { reference, scale })
+        } else {
+            None
+        };
+
+        // TODO: log where each error comes from
+        let headers = Headers {
             version: self.version,
             main_frames: self.main_frames.parse()?,
             slow_frames: self.slow_frames.parse()?,
             gps_frames: self.gps_frames.parse()?,
             gps_home_frames: self.gps_home_frames.parse()?,
 
-            firmware_revision: self.firmware_revision.ok_or(ParseError::Corrupted)?,
-            firmware_kind: self.firmware_kind.ok_or(ParseError::Corrupted)?,
-            board_info: self.board_info.ok_or(ParseError::Corrupted)?,
-            craft_name: self.craft_name.ok_or(ParseError::Corrupted)?,
+            firmware_revision: self.firmware_revision.ok_or(ParseError::MissingHeader)?,
+            firmware_kind: self.firmware_kind.ok_or(ParseError::MissingHeader)?,
+            board_info: self.board_info.map(str::trim).filter(not_empty),
+            craft_name: self.craft_name.map(str::trim).filter(not_empty),
 
-            vbat_reference: self.vbat_reference.ok_or(ParseError::Corrupted)?,
-            vbat_scale: self.vbat_scale.ok_or(ParseError::Corrupted)?,
-            current_meter: self.current_meter.ok_or(ParseError::Corrupted)?,
+            vbat,
+            current_meter: self.current_meter,
 
-            acceleration_1g: self.acceleration_1g.ok_or(ParseError::Corrupted)?,
-            gyro_scale: self.gyro_scale.ok_or(ParseError::Corrupted)?,
+            acceleration_1g: self.acceleration_1g,
+            gyro_scale: self.gyro_scale,
 
-            min_throttle: self.min_throttle.ok_or(ParseError::Corrupted)?,
-            motor_output_range: self.motor_output_range.ok_or(ParseError::Corrupted)?,
-        })
+            min_throttle: self.min_throttle,
+            motor_output_range: self.motor_output_range,
+        };
+
+        headers.validate()?;
+
+        Ok(headers)
     }
 }
 

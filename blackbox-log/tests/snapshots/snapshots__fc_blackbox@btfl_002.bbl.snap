@@ -4,5 +4,5 @@ expression: logs
 input_file: blackbox-log/tests/logs/fc-blackbox/btfl_002.bbl
 ---
 [
-  Err(Corrupted),
+  Err(MissingHeader),
 ]

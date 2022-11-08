@@ -9,18 +9,20 @@ input_file: blackbox-log/tests/logs/gimbal-ghost/btfl_002.bbl
       version: V2,
       firmware_revision: "Betaflight 4.2.9 (e097f4ab7) STM32F7X2",
       firmware_kind: Betaflight,
-      board_info: " MAMBA F722 I2C",
-      craft_name: "DIATONE ROMA F5",
-      vbat_reference: 2490,
-      vbat_scale: 110,
-      current_meter: CurrentMeterConfig(
+      board_info: Some("MAMBA F722 I2C"),
+      craft_name: Some("DIATONE ROMA F5"),
+      vbat: Some(VbatConfig(
+        reference: 2490,
+        scale: 110,
+      )),
+      current_meter: Some(CurrentMeterConfig(
         offset: 0,
         scale: 115,
-      ),
-      acceleration_1g: 2048,
-      gyro_scale: 1.0,
-      min_throttle: 1070,
-      motor_output_range: MotorOutputRange(158, 2047),
+      )),
+      acceleration_1g: Some(2048),
+      gyro_scale: Some(1.0),
+      min_throttle: Some(1070),
+      motor_output_range: Some(MotorOutputRange(158, 2047)),
     ),
     stats: Stats(
       counts: FrameCounts(
@@ -337,18 +339,20 @@ input_file: blackbox-log/tests/logs/gimbal-ghost/btfl_002.bbl
       version: V2,
       firmware_revision: "Betaflight 4.2.9 (e097f4ab7) STM32F7X2",
       firmware_kind: Betaflight,
-      board_info: " MAMBA F722 I2C",
-      craft_name: "DIATONE ROMA F5",
-      vbat_reference: 2489,
-      vbat_scale: 110,
-      current_meter: CurrentMeterConfig(
+      board_info: Some("MAMBA F722 I2C"),
+      craft_name: Some("DIATONE ROMA F5"),
+      vbat: Some(VbatConfig(
+        reference: 2489,
+        scale: 110,
+      )),
+      current_meter: Some(CurrentMeterConfig(
         offset: 0,
         scale: 115,
-      ),
-      acceleration_1g: 2048,
-      gyro_scale: 1.0,
-      min_throttle: 1070,
-      motor_output_range: MotorOutputRange(158, 2047),
+      )),
+      acceleration_1g: Some(2048),
+      gyro_scale: Some(1.0),
+      min_throttle: Some(1070),
+      motor_output_range: Some(MotorOutputRange(158, 2047)),
     ),
     stats: Stats(
       counts: FrameCounts(
@@ -659,18 +663,20 @@ input_file: blackbox-log/tests/logs/gimbal-ghost/btfl_002.bbl
       version: V2,
       firmware_revision: "Betaflight 4.2.9 (e097f4ab7) STM32F7X2",
       firmware_kind: Betaflight,
-      board_info: " MAMBA F722 I2C",
-      craft_name: "DIATONE ROMA F5",
-      vbat_reference: 2482,
-      vbat_scale: 110,
-      current_meter: CurrentMeterConfig(
+      board_info: Some("MAMBA F722 I2C"),
+      craft_name: Some("DIATONE ROMA F5"),
+      vbat: Some(VbatConfig(
+        reference: 2482,
+        scale: 110,
+      )),
+      current_meter: Some(CurrentMeterConfig(
         offset: 0,
         scale: 115,
-      ),
-      acceleration_1g: 2048,
-      gyro_scale: 1.0,
-      min_throttle: 1070,
-      motor_output_range: MotorOutputRange(158, 2047),
+      )),
+      acceleration_1g: Some(2048),
+      gyro_scale: Some(1.0),
+      min_throttle: Some(1070),
+      motor_output_range: Some(MotorOutputRange(158, 2047)),
     ),
     stats: Stats(
       counts: FrameCounts(

@@ -22,6 +22,21 @@ impl<'data> GpsFrameDef<'data> {
         GpsFrameDefBuilder::default()
     }
 
+    pub(crate) fn validate(
+        &self,
+        check_predictor: impl Fn(&'data str, Predictor) -> ParseResult<()>,
+        _check_unit: impl Fn(&'data str, super::Unit) -> ParseResult<()>,
+    ) -> ParseResult<()> {
+        for GpsFieldDef {
+            name, predictor, ..
+        } in &self.0
+        {
+            check_predictor(name, *predictor)?;
+        }
+
+        Ok(())
+    }
+
     #[instrument(level = "trace", name = "GpsFrameDef::parse", skip_all)]
     pub(crate) fn parse(&self, data: &mut Reader, _headers: &Headers) -> ParseResult<GpsFrame> {
         let _ = read_field_values(data, &self.0, |f| f.encoding)?;

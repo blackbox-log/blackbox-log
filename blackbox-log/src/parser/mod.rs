@@ -25,6 +25,7 @@ pub(crate) const MARKER: &[u8] = b"H Product:Blackbox flight data recorder by Ni
 pub enum ParseError {
     UnsupportedVersion(String),
     UnknownFirmware(String),
+    MissingHeader,
     Corrupted,
     UnexpectedEof,
 }
@@ -34,6 +35,9 @@ impl fmt::Display for ParseError {
         match self {
             Self::UnsupportedVersion(v) => write!(f, "unsupported or invalid version: `{v}`"),
             Self::UnknownFirmware(firmware) => write!(f, "unknown firmware: `{firmware}`"),
+            Self::MissingHeader => {
+                write!(f, "one or more headers required for parsing are missing")
+            }
             Self::Corrupted => write!(f, "invalid/corrupted data"),
             Self::UnexpectedEof => write!(f, "unexpected end of file"),
         }

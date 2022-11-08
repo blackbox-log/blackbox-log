@@ -3,7 +3,7 @@ use core::iter;
 
 use tracing::instrument;
 
-use super::{read_field_values, DataFrameKind, DataFrameProperty};
+use super::{read_field_values, DataFrameKind, DataFrameProperty, Unit};
 use crate::parser::{
     as_signed, decode, predictor, to_base_field, Encoding, FrameKind, Headers, ParseError,
     ParseResult, Predictor, Reader,
@@ -182,16 +182,38 @@ impl<'data> MainFrameDef<'data> {
         MainFrameDefBuilder::default()
     }
 
-    pub(crate) fn get_motor_0_from(&self, frame: &[u32]) -> ParseResult<u32> {
-        self.index_motor_0.map_or_else(
-            || {
-                tracing::error!(
-                    "tried to get a value for motor[0] but it is missing from the frame definition"
-                );
-                Err(ParseError::Corrupted)
-            },
-            |index| Ok(frame[index]),
-        )
+    pub(crate) fn has_motor_0(&self) -> bool {
+        self.index_motor_0.is_some()
+    }
+
+    /// # Panics
+    ///
+    /// Panics if there is no motor[0] field in the frame
+    pub(crate) fn get_motor_0_from(&self, frame: &[u32]) -> u32 {
+        frame[self.index_motor_0.unwrap()]
+    }
+
+    pub(crate) fn validate(
+        &self,
+        check_predictor: impl Fn(&'data str, Predictor) -> ParseResult<()>,
+        check_unit: impl Fn(&'data str, Unit) -> ParseResult<()>,
+    ) -> ParseResult<()> {
+        for MainFieldDef {
+            name,
+            predictor_intra,
+            predictor_inter,
+            unit,
+            ..
+        } in iter::once(&self.iteration)
+            .chain(iter::once(&self.time))
+            .chain(self.fields.iter())
+        {
+            check_predictor(name, *predictor_intra)?;
+            check_predictor(name, *predictor_inter)?;
+            check_unit(name, Unit::from(*unit))?;
+        }
+
+        Ok(())
     }
 
     #[instrument(level = "trace", skip_all)]
@@ -218,7 +240,7 @@ impl<'data> MainFrameDef<'data> {
 
             values[i] = field
                 .predictor_intra
-                .apply(headers, raw, signed, &values, last, None, 0)?;
+                .apply(headers, raw, signed, &values, last, None, 0);
 
             trace_field!(
                 post,
@@ -288,7 +310,7 @@ impl<'data> MainFrameDef<'data> {
                 last,
                 last_last,
                 skipped_frames,
-            )?;
+            );
 
             trace_field!(
                 post,

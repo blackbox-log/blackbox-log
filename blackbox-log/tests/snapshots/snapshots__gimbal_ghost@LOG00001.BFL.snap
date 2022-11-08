@@ -9,18 +9,20 @@ input_file: blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
       version: V2,
       firmware_revision: "Betaflight 4.3.0 (fc8318f54) STM32F405",
       firmware_kind: Betaflight,
-      board_info: "MTKS MATEKF405CTR",
-      craft_name: "",
-      vbat_reference: 1629,
-      vbat_scale: 110,
-      current_meter: CurrentMeterConfig(
+      board_info: Some("MTKS MATEKF405CTR"),
+      craft_name: None,
+      vbat: Some(VbatConfig(
+        reference: 1629,
+        scale: 110,
+      )),
+      current_meter: Some(CurrentMeterConfig(
         offset: 0,
         scale: 179,
-      ),
-      acceleration_1g: 2048,
-      gyro_scale: 1.0,
-      min_throttle: 1070,
-      motor_output_range: MotorOutputRange(158, 2047),
+      )),
+      acceleration_1g: Some(2048),
+      gyro_scale: Some(1.0),
+      min_throttle: Some(1070),
+      motor_output_range: Some(MotorOutputRange(158, 2047)),
     ),
     stats: Stats(
       counts: FrameCounts(

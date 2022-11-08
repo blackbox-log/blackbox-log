@@ -9,18 +9,20 @@ input_file: blackbox-log/tests/logs/fc-blackbox/btfl_001.bbl
       version: V2,
       firmware_revision: "Betaflight 4.2.11 (948ba6339) STM32F7X2",
       firmware_kind: Betaflight,
-      board_info: "ZEEZ ZEEZF7V2",
-      craft_name: "",
-      vbat_reference: 2466,
-      vbat_scale: 110,
-      current_meter: CurrentMeterConfig(
+      board_info: Some("ZEEZ ZEEZF7V2"),
+      craft_name: None,
+      vbat: Some(VbatConfig(
+        reference: 2466,
+        scale: 110,
+      )),
+      current_meter: Some(CurrentMeterConfig(
         offset: 0,
         scale: 250,
-      ),
-      acceleration_1g: 2048,
-      gyro_scale: 1.0,
-      min_throttle: 1070,
-      motor_output_range: MotorOutputRange(158, 2047),
+      )),
+      acceleration_1g: Some(2048),
+      gyro_scale: Some(1.0),
+      min_throttle: Some(1070),
+      motor_output_range: Some(MotorOutputRange(158, 2047)),
     ),
     stats: Stats(
       counts: FrameCounts(
@@ -309,18 +311,20 @@ input_file: blackbox-log/tests/logs/fc-blackbox/btfl_001.bbl
       version: V2,
       firmware_revision: "Betaflight 4.2.11 (948ba6339) STM32F7X2",
       firmware_kind: Betaflight,
-      board_info: "ZEEZ ZEEZF7V2",
-      craft_name: "",
-      vbat_reference: 2439,
-      vbat_scale: 110,
-      current_meter: CurrentMeterConfig(
+      board_info: Some("ZEEZ ZEEZF7V2"),
+      craft_name: None,
+      vbat: Some(VbatConfig(
+        reference: 2439,
+        scale: 110,
+      )),
+      current_meter: Some(CurrentMeterConfig(
         offset: 0,
         scale: 250,
-      ),
-      acceleration_1g: 2048,
-      gyro_scale: 1.0,
-      min_throttle: 1070,
-      motor_output_range: MotorOutputRange(158, 2047),
+      )),
+      acceleration_1g: Some(2048),
+      gyro_scale: Some(1.0),
+      min_throttle: Some(1070),
+      motor_output_range: Some(MotorOutputRange(158, 2047)),
     ),
     stats: Stats(
       counts: FrameCounts(

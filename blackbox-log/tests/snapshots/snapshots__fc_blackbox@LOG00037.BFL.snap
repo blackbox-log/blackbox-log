@@ -9,18 +9,20 @@ input_file: blackbox-log/tests/logs/fc-blackbox/LOG00037.BFL
       version: V2,
       firmware_revision: "Betaflight 4.2.0 (8f2d21460) STM32F745",
       firmware_kind: Betaflight,
-      board_info: "HBRO KAKUTEF7",
-      craft_name: "AR8",
-      vbat_reference: 2277,
-      vbat_scale: 110,
-      current_meter: CurrentMeterConfig(
+      board_info: Some("HBRO KAKUTEF7"),
+      craft_name: Some("AR8"),
+      vbat: Some(VbatConfig(
+        reference: 2277,
+        scale: 110,
+      )),
+      current_meter: Some(CurrentMeterConfig(
         offset: 0,
         scale: 275,
-      ),
-      acceleration_1g: 2048,
-      gyro_scale: 1.0,
-      min_throttle: 1070,
-      motor_output_range: MotorOutputRange(158, 2047),
+      )),
+      acceleration_1g: Some(2048),
+      gyro_scale: Some(1.0),
+      min_throttle: Some(1070),
+      motor_output_range: Some(MotorOutputRange(158, 2047)),
     ),
     stats: Stats(
       counts: FrameCounts(

@@ -3,7 +3,7 @@ use core::iter;
 
 use tracing::instrument;
 
-use super::{read_field_values, DataFrameKind, DataFrameProperty};
+use super::{read_field_values, DataFrameKind, DataFrameProperty, Unit};
 use crate::parser::{as_signed, Encoding, Headers, ParseError, ParseResult, Predictor, Reader};
 use crate::units;
 
@@ -61,6 +61,25 @@ impl<'data> SlowFrameDef<'data> {
         SlowFrameDefBuilder::default()
     }
 
+    pub(crate) fn validate(
+        &self,
+        check_predictor: impl Fn(&'data str, Predictor) -> ParseResult<()>,
+        check_unit: impl Fn(&'data str, Unit) -> ParseResult<()>,
+    ) -> ParseResult<()> {
+        for SlowFieldDef {
+            name,
+            predictor,
+            unit,
+            ..
+        } in &self.0
+        {
+            check_predictor(name, *predictor)?;
+            check_unit(name, Unit::from(*unit))?;
+        }
+
+        Ok(())
+    }
+
     #[instrument(level = "trace", name = "SlowFrameDef::parse", skip_all)]
     pub(crate) fn parse(&self, data: &mut Reader, headers: &Headers) -> ParseResult<SlowFrame> {
         let raw = read_field_values(data, &self.0, |f| f.encoding)?;
@@ -72,7 +91,7 @@ impl<'data> SlowFrameDef<'data> {
                 let value =
                     field
                         .predictor
-                        .apply(headers, raw_value, field.signed, &raw, None, None, 0)?;
+                        .apply(headers, raw_value, field.signed, &raw, None, None, 0);
 
                 tracing::trace!(
                     field = field.name,

@@ -22,6 +22,21 @@ impl<'data> GpsHomeFrameDef<'data> {
         GpsHomeFrameDefBuilder::default()
     }
 
+    pub(crate) fn validate(
+        &self,
+        check_predictor: impl Fn(&'data str, Predictor) -> ParseResult<()>,
+        _check_unit: impl Fn(&'data str, super::Unit) -> ParseResult<()>,
+    ) -> ParseResult<()> {
+        for GpsHomeFieldDef {
+            name, predictor, ..
+        } in &self.0
+        {
+            check_predictor(name, *predictor)?;
+        }
+
+        Ok(())
+    }
+
     #[instrument(level = "trace", name = "GpsHomeFrameDef::parse", skip_all)]
     pub(crate) fn parse(&self, data: &mut Reader, headers: &Headers) -> ParseResult<GpsHomeFrame> {
         let raw = read_field_values(data, &self.0, |f| f.encoding)?;
@@ -33,7 +48,7 @@ impl<'data> GpsHomeFrameDef<'data> {
             .map(|(&raw_value, field)| {
                 let value = field
                     .predictor
-                    .apply(headers, raw_value, true, &raw, None, None, 0)?;
+                    .apply(headers, raw_value, true, &raw, None, None, 0);
 
                 tracing::trace!(
                     field = field.name,
@@ -44,9 +59,11 @@ impl<'data> GpsHomeFrameDef<'data> {
                 );
 
                 #[allow(clippy::cast_possible_wrap)]
-                Ok(value as i32)
+                {
+                    value as i32
+                }
             })
-            .collect::<ParseResult<Vec<_>>>()?;
+            .collect::<Vec<_>>();
 
         // `values` can only have two elements thanks to zipping with `self.0`
         let [latitude, longitude, ..] = values[..] else { unreachable!() };
