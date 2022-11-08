@@ -74,11 +74,17 @@ impl Predictor {
             Self::Motor0 => headers.main_frames.get_motor_0_from(current)?,
             Self::Increment => {
                 if signed {
-                    1 + skipped_frames + last.unwrap_or(0)
+                    skipped_frames
+                        .wrapping_add(1)
+                        .wrapping_add(last.unwrap_or(0))
                 } else {
                     let skipped_frames = i32::try_from(skipped_frames)
                         .expect("never skip more than i32::MAX frames");
-                    as_unsigned(1 + skipped_frames + as_signed(last.unwrap_or(0)))
+                    as_unsigned(
+                        skipped_frames
+                            .wrapping_add(1)
+                            .wrapping_add(as_signed(last.unwrap_or(0))),
+                    )
                 }
             }
             // Self::HomeLat => todo!(),
@@ -94,11 +100,11 @@ impl Predictor {
         };
 
         Ok(if signed {
-            let signed = as_signed(value) + as_signed(diff);
+            let signed = as_signed(value).wrapping_add(as_signed(diff));
             tracing::trace!(return = signed);
             as_unsigned(signed)
         } else {
-            let x = value + diff;
+            let x = value.wrapping_add(diff);
             tracing::trace!(return = x);
             x
         })
