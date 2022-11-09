@@ -4,9 +4,7 @@ use core::iter;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty, Unit};
-use crate::parser::{
-    as_signed, Encoding, Headers, InternalError, InternalResult, ParseResult, Predictor, Reader,
-};
+use crate::parser::{as_signed, Encoding, Headers, InternalResult, ParseResult, Predictor, Reader};
 use crate::units;
 
 #[derive(Debug, Clone)]
@@ -104,7 +102,7 @@ impl<'data> SlowFrameDef<'data> {
                 );
 
                 let firmware = headers.firmware_kind;
-                let value = match field.unit {
+                match field.unit {
                     SlowUnit::FlightMode => {
                         SlowValue::FlightMode(units::FlightModeSet::new(value, firmware))
                     }
@@ -112,20 +110,17 @@ impl<'data> SlowFrameDef<'data> {
                     SlowUnit::FailsafePhase => {
                         SlowValue::FailsafePhase(units::FailsafePhaseSet::new(value, firmware))
                     }
-                    SlowUnit::Boolean => SlowValue::Boolean(match value {
-                        0 => false,
-                        1 => true,
-                        _ => {
-                            tracing::debug!("invalid boolean ({value})");
-                            return Err(InternalError::Retry);
+                    SlowUnit::Boolean => {
+                        if value > 1 {
+                            tracing::debug!("invalid boolean (0x{value:0>8x})");
                         }
-                    }),
-                    SlowUnit::Unitless => SlowValue::new_unitless(value, field.signed),
-                };
 
-                Ok(value)
+                        SlowValue::Boolean(value != 0)
+                    }
+                    SlowUnit::Unitless => SlowValue::new_unitless(value, field.signed),
+                }
             })
-            .collect::<Result<Vec<_>, _>>()?;
+            .collect::<Vec<_>>();
 
         Ok(SlowFrame { values })
     }
