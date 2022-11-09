@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: true
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Fetch submodule upstream
+        run: git submodule update --init --depth 1 blackbox-sys/upstream
       - name: Build xtasks
         run: cargo build --package xtask
       - name: Clippy (workspace)
@@ -49,8 +49,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          lfs: true
-          submodules: ${{ runner.os == 'Linux' }}
+          submodules: true
 
       - name: Remove rust-toolchain file if not testing MSRV
         run: rm rust-toolchain*
