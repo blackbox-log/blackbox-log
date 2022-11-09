@@ -98,14 +98,14 @@ impl Data {
                 }
                 FrameKind::Gps => headers.gps_frames.as_ref().map_or_else(
                     || {
-                        tracing::error!("found GPS frame without GPS frame definition");
+                        tracing::debug!("found GPS frame without GPS frame definition");
                         Err(InternalError::Retry)
                     },
                     |gps| gps.parse(&mut data, headers).map(|_| ()),
                 ),
                 FrameKind::GpsHome => headers.gps_home_frames.as_ref().map_or_else(
                     || {
-                        tracing::error!("found GPS home frame without GPS home frame definition");
+                        tracing::debug!("found GPS home frame without GPS home frame definition");
                         Err(InternalError::Retry)
                     },
                     |gps_home| {
