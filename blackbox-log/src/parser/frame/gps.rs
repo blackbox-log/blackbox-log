@@ -3,7 +3,7 @@ use alloc::vec::Vec;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty};
-use crate::parser::{Encoding, Headers, ParseError, ParseResult, Predictor, Reader};
+use crate::parser::{Encoding, Headers, ParseResult, Predictor, Reader};
 
 #[derive(Debug, Clone)]
 pub struct GpsFrame;
@@ -109,8 +109,7 @@ impl<'data> GpsFrameDefBuilder<'data> {
             || encodings.next().is_some()
             || signs.next().is_some()
         {
-            tracing::error!("all `Field *` headers must have the same number of elements");
-            return Err(ParseError::Corrupted);
+            tracing::warn!("not all GPS definition headers are of equal length");
         }
 
         Ok(Some(GpsFrameDef(fields)))

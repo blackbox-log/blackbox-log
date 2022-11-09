@@ -434,8 +434,9 @@ impl<'data> MainFrameDefBuilder<'data> {
             || encodings_inter.next().is_some()
             || signs.next().is_some()
         {
-            tracing::error!("all `Field *` headers must have the same number of elements");
-            return Err(ParseError::Corrupted);
+            tracing::warn!(
+                "not all interframe & intraframe definition headers are of equal length"
+            );
         }
 
         let index_motor_0 = fields.iter().position(|f| f.name == "motor[0]");

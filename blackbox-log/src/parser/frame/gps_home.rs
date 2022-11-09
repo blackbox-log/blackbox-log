@@ -162,8 +162,7 @@ impl<'data> GpsHomeFrameDefBuilder<'data> {
             || encodings.next().is_some()
             || signs.next().is_some()
         {
-            tracing::error!("all `Field *` headers must have the same number of elements");
-            return Err(ParseError::Corrupted);
+            tracing::warn!("not all GPS home definition headers are of equal length");
         }
 
         Ok(Some(GpsHomeFrameDef([latitude, longitude], rest)))
