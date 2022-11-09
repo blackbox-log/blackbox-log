@@ -1,6 +1,6 @@
-use crate::parser::{ParseError, ParseResult, Reader};
+use crate::parser::{InternalError, InternalResult, Reader};
 
-pub(crate) fn tagged_variable(data: &mut Reader, extra: usize) -> ParseResult<[i32; 8]> {
+pub(crate) fn tagged_variable(data: &mut Reader, extra: usize) -> InternalResult<[i32; 8]> {
     debug_assert!(extra < 8);
 
     let mut values = [0; 8];
@@ -8,7 +8,7 @@ pub(crate) fn tagged_variable(data: &mut Reader, extra: usize) -> ParseResult<[i
     if extra == 0 {
         values[0] = super::variable_signed(data)?;
     } else {
-        let mut header = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
+        let mut header = data.read_u8().ok_or(InternalError::Eof)?;
 
         for value in values.iter_mut().take(extra + 1) {
             *value = if (header & 1) == 1 {
@@ -21,7 +21,7 @@ pub(crate) fn tagged_variable(data: &mut Reader, extra: usize) -> ParseResult<[i
         }
 
         if header != 0 {
-            return Err(ParseError::Corrupted);
+            return Err(InternalError::Retry);
         }
     }
 
@@ -62,7 +62,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "UnexpectedEof")]
+    #[should_panic(expected = "Eof")]
     fn multiple_expected_but_empty() {
         let mut b = Reader::new(&[]);
 
@@ -70,7 +70,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Corrupted")]
+    #[should_panic(expected = "Retry")]
     fn more_in_tag_than_expected() {
         let b = [0b0000_0111, 2, 2, 2];
         let mut b = Reader::new(&b);

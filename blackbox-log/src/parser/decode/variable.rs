@@ -1,11 +1,11 @@
 use super::zig_zag_decode;
-use crate::parser::{ParseError, ParseResult, Reader};
+use crate::parser::{InternalError, InternalResult, Reader};
 
-pub(crate) fn variable(data: &mut Reader) -> ParseResult<u32> {
+pub(crate) fn variable(data: &mut Reader) -> InternalResult<u32> {
     let mut uvar: u32 = 0;
     let mut offset: u32 = 0;
     loop {
-        let byte = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
+        let byte = data.read_u8().ok_or(InternalError::Eof)?;
         let is_last_byte = (byte & 0x80) == 0;
 
         let byte = u32::from(byte & !0x80);
@@ -13,7 +13,7 @@ pub(crate) fn variable(data: &mut Reader) -> ParseResult<u32> {
         offset += 7;
 
         if !is_last_byte && offset >= 32 {
-            return Err(ParseError::Corrupted);
+            return Err(InternalError::Retry);
         }
 
         if is_last_byte {
@@ -24,7 +24,7 @@ pub(crate) fn variable(data: &mut Reader) -> ParseResult<u32> {
     Ok(uvar)
 }
 
-pub(crate) fn variable_signed(data: &mut Reader) -> ParseResult<i32> {
+pub(crate) fn variable_signed(data: &mut Reader) -> InternalResult<i32> {
     variable(data).map(zig_zag_decode)
 }
 
@@ -63,7 +63,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Corrupted")]
+    #[should_panic(expected = "Retry")]
     fn too_many_bytes() {
         assert_eq!(0xFFFF_FFFF, read_ok(&[0x80, 0x80, 0x80, 0x80, 0x80]));
     }

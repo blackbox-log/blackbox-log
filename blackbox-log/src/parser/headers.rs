@@ -1,3 +1,4 @@
+use alloc::borrow::ToOwned;
 use core::str;
 
 use super::frame::{
@@ -5,7 +6,7 @@ use super::frame::{
     GpsHomeFrameDef, GpsHomeFrameDefBuilder, MainFrameDef, MainFrameDefBuilder, MainUnit,
     SlowFrameDef, SlowFrameDefBuilder, SlowUnit,
 };
-use super::{ParseError, ParseResult, Predictor, Reader, Unit};
+use super::{InternalError, InternalResult, ParseError, ParseResult, Predictor, Reader, Unit};
 use crate::common::{FirmwareKind, LogVersion};
 
 #[allow(dead_code)]
@@ -62,18 +63,18 @@ impl<'data> Headers<'data> {
             let restore = data.get_restore_point();
             let (name, value) = match parse_header(data) {
                 Ok(x) => x,
-                Err(ParseError::Corrupted) => {
+                Err(InternalError::Retry) => {
                     tracing::debug!("found corrupted header");
                     data.restore(restore);
                     break;
                 }
-                Err(e) => return Err(e),
+                Err(InternalError::Eof) => return Err(ParseError::IncompleteHeaders),
+                Err(InternalError::Fatal(err)) => return Err(err),
             };
 
-            state.update(name, value).map_err(|e| {
-                tracing::error!("state.update error: {e}");
-                e
-            })?;
+            if !state.update(name, value) {
+                return Err(ParseError::InvalidHeader(name.to_owned(), value.to_owned()));
+            }
         }
 
         state.finish()
@@ -240,9 +241,10 @@ impl<'data> State<'data> {
         }
     }
 
-    fn update(&mut self, header: &'data str, value: &'data str) -> ParseResult<()> {
+    /// Returns `true` if the header/value pair was valid
+    fn update(&mut self, header: &'data str, value: &'data str) -> bool {
         // TODO: try block
-        (|| {
+        (|| -> Result<(), ()> {
             match header {
                 "Data version" => self.version = Some(value.parse().map_err(|_| ())?),
                 "Firmware revision" => self.firmware_revision = Some(value),
@@ -304,7 +306,7 @@ impl<'data> State<'data> {
 
             Ok(())
         })()
-        .map_err(|_: ()| ParseError::Corrupted)
+        .is_ok()
     }
 
     fn finish(self) -> ParseResult<Headers<'data>> {
@@ -346,18 +348,18 @@ impl<'data> State<'data> {
 }
 
 /// Expects the next character to be the leading H
-fn parse_header<'data>(bytes: &mut Reader<'data>) -> ParseResult<(&'data str, &'data str)> {
+fn parse_header<'data>(bytes: &mut Reader<'data>) -> InternalResult<(&'data str, &'data str)> {
     match bytes.read_u8() {
         Some(b'H') => {}
-        Some(_) => return Err(ParseError::Corrupted),
-        None => return Err(ParseError::UnexpectedEof),
+        Some(_) => return Err(InternalError::Retry),
+        None => return Err(InternalError::Eof),
     }
 
-    let line = bytes.read_line().ok_or(ParseError::UnexpectedEof)?;
+    let line = bytes.read_line().ok_or(InternalError::Eof)?;
 
-    let line = str::from_utf8(line).map_err(|_| ParseError::Corrupted)?;
+    let line = str::from_utf8(line).map_err(|_| InternalError::Retry)?;
     let line = line.strip_prefix(' ').unwrap_or(line);
-    let (name, value) = line.split_once(':').ok_or(ParseError::Corrupted)?;
+    let (name, value) = line.split_once(':').ok_or(InternalError::Retry)?;
 
     tracing::trace!("read header `{name}` = `{value}`");
 
@@ -369,7 +371,7 @@ mod tests {
     use super::*;
 
     #[test]
-    #[should_panic(expected = "Corrupted")]
+    #[should_panic(expected = "Retry")]
     fn invalid_utf8() {
         let mut b = Reader::new(b"H \xFF:\xFF\n");
         parse_header(&mut b).unwrap();

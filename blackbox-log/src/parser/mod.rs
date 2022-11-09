@@ -23,14 +23,16 @@ pub use self::reader::Reader;
 pub type ParseResult<T> = Result<T, ParseError>;
 pub(crate) const MARKER: &[u8] = b"H Product:Blackbox flight data recorder by Nicholas Sherlock\n";
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum ParseError {
     UnsupportedVersion(String),
     UnknownFirmware(String),
+    InvalidHeader(String, String),
+    // TODO: include header
     MissingHeader,
-    Corrupted,
-    UnexpectedEof,
+    IncompleteHeaders,
+    MissingField(FrameKind, String),
 }
 
 impl fmt::Display for ParseError {
@@ -38,11 +40,16 @@ impl fmt::Display for ParseError {
         match self {
             Self::UnsupportedVersion(v) => write!(f, "unsupported or invalid version: `{v}`"),
             Self::UnknownFirmware(firmware) => write!(f, "unknown firmware: `{firmware}`"),
+            Self::InvalidHeader(header, value) => {
+                write!(f, "invalid value for header `{header}`: `{value}`")
+            }
             Self::MissingHeader => {
                 write!(f, "one or more headers required for parsing are missing")
             }
-            Self::Corrupted => write!(f, "invalid/corrupted data"),
-            Self::UnexpectedEof => write!(f, "unexpected end of file"),
+            Self::IncompleteHeaders => write!(f, "end of file found before data section"),
+            Self::MissingField(frame, field) => {
+                write!(f, "missing field `{field}` in `{frame:?}` frame definition")
+            }
         }
     }
 }
@@ -52,10 +59,27 @@ impl fmt::Display for ParseError {
 #[cfg(feature = "std")]
 impl std::error::Error for ParseError {}
 
+pub(crate) type InternalResult<T> = Result<T, InternalError>;
+
+#[derive(Debug, Clone)]
+pub(crate) enum InternalError {
+    Fatal(ParseError),
+    /// Found something unexpected, try to recover
+    Retry,
+    Eof,
+}
+
+impl From<ParseError> for InternalError {
+    fn from(err: ParseError) -> Self {
+        Self::Fatal(err)
+    }
+}
+
 byte_enum! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    #[cfg_attr(feature = "serde", derive(serde::Serialize))]
     #[repr(u8)]
-    pub(crate) enum FrameKind {
+    pub enum FrameKind {
         Event = b'E',
         Intra = b'I',
         Inter = b'P',

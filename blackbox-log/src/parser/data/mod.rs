@@ -4,7 +4,7 @@ use alloc::vec::Vec;
 
 pub use self::event::Event;
 use super::{
-    FrameKind, GpsHomeFrame, Headers, MainFrame, ParseError, ParseResult, Reader, SlowFrame,
+    FrameKind, GpsHomeFrame, Headers, InternalError, MainFrame, ParseResult, Reader, SlowFrame,
 };
 
 #[derive(Debug, Clone)]
@@ -99,14 +99,14 @@ impl Data {
                 FrameKind::Gps => headers.gps_frames.as_ref().map_or_else(
                     || {
                         tracing::error!("found GPS frame without GPS frame definition");
-                        Err(ParseError::Corrupted)
+                        Err(InternalError::Retry)
                     },
                     |gps| gps.parse(&mut data, headers).map(|_| ()),
                 ),
                 FrameKind::GpsHome => headers.gps_home_frames.as_ref().map_or_else(
                     || {
                         tracing::error!("found GPS home frame without GPS home frame definition");
-                        Err(ParseError::Corrupted)
+                        Err(InternalError::Retry)
                     },
                     |gps_home| {
                         gps_home
@@ -124,16 +124,16 @@ impl Data {
                 Ok(()) => {
                     last_kind = Some(kind);
                 }
-                Err(ParseError::Corrupted) => {
+                Err(InternalError::Retry) => {
                     tracing::debug!("found corrupted {kind:?} frame");
                     data.restore(restore);
                     skip_to_frame(&mut data);
                 }
-                Err(ParseError::UnexpectedEof) => {
+                Err(InternalError::Eof) => {
                     tracing::debug!("found unexpected end of file in data section");
                     break;
                 }
-                Err(err) => return Err(err),
+                Err(InternalError::Fatal(err)) => return Err(err),
             }
         }
 

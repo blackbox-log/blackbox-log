@@ -4,7 +4,9 @@ use core::iter;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty, Unit};
-use crate::parser::{as_signed, Encoding, Headers, ParseError, ParseResult, Predictor, Reader};
+use crate::parser::{
+    as_signed, Encoding, Headers, InternalError, InternalResult, ParseResult, Predictor, Reader,
+};
 use crate::units;
 
 #[derive(Debug, Clone)]
@@ -81,7 +83,7 @@ impl<'data> SlowFrameDef<'data> {
     }
 
     #[instrument(level = "trace", name = "SlowFrameDef::parse", skip_all)]
-    pub(crate) fn parse(&self, data: &mut Reader, headers: &Headers) -> ParseResult<SlowFrame> {
+    pub(crate) fn parse(&self, data: &mut Reader, headers: &Headers) -> InternalResult<SlowFrame> {
         let raw = read_field_values(data, &self.0, |f| f.encoding)?;
 
         let values = raw
@@ -115,7 +117,7 @@ impl<'data> SlowFrameDef<'data> {
                         1 => true,
                         _ => {
                             tracing::debug!("invalid boolean ({value})");
-                            return Err(ParseError::Corrupted);
+                            return Err(InternalError::Retry);
                         }
                     }),
                     SlowUnit::Unitless => SlowValue::new_unitless(value, field.signed),
@@ -123,7 +125,7 @@ impl<'data> SlowFrameDef<'data> {
 
                 Ok(value)
             })
-            .collect::<ParseResult<Vec<_>>>()?;
+            .collect::<Result<Vec<_>, _>>()?;
 
         Ok(SlowFrame { values })
     }
@@ -202,7 +204,7 @@ impl<'data> SlowFrameDefBuilder<'data> {
                     signed,
                 })
             })
-            .collect::<ParseResult<Vec<_>>>()?;
+            .collect::<Result<Vec<_>, _>>()?;
 
         if names.next().is_some()
             || predictors.next().is_some()

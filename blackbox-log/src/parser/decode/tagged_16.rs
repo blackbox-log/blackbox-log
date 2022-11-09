@@ -1,10 +1,10 @@
 use super::sign_extend;
-use crate::parser::{ParseError, ParseResult, Reader};
+use crate::parser::{InternalError, InternalResult, Reader};
 
 const COUNT: usize = 4;
 
-pub(crate) fn tagged_16(data: &mut Reader) -> ParseResult<[i16; COUNT]> {
-    let tags = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
+pub(crate) fn tagged_16(data: &mut Reader) -> InternalResult<[i16; COUNT]> {
+    let tags = data.read_u8().ok_or(InternalError::Eof)?;
 
     if tags == 0 {
         return Ok([0; COUNT]);
@@ -19,7 +19,7 @@ pub(crate) fn tagged_16(data: &mut Reader) -> ParseResult<[i16; COUNT]> {
             0 => 0,
             1 => {
                 let nibble = if aligned {
-                    buffer = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
+                    buffer = data.read_u8().ok_or(InternalError::Eof)?;
                     buffer >> 4
                 } else {
                     buffer & 0xF
@@ -30,10 +30,10 @@ pub(crate) fn tagged_16(data: &mut Reader) -> ParseResult<[i16; COUNT]> {
             }
             2 => {
                 let byte = if aligned {
-                    data.read_i8().ok_or(ParseError::UnexpectedEof)?
+                    data.read_i8().ok_or(InternalError::Eof)?
                 } else {
                     let upper = buffer << 4;
-                    buffer = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
+                    buffer = data.read_u8().ok_or(InternalError::Eof)?;
                     (upper | buffer >> 4) as i8
                 };
 
@@ -41,15 +41,10 @@ pub(crate) fn tagged_16(data: &mut Reader) -> ParseResult<[i16; COUNT]> {
             }
             3.. => {
                 if aligned {
-                    data.read_i16()
-                        .ok_or(ParseError::UnexpectedEof)?
-                        .swap_bytes()
+                    data.read_i16().ok_or(InternalError::Eof)?.swap_bytes()
                 } else {
                     let upper = u16::from(buffer) << 12;
-                    let [middle, lower] = data
-                        .read_u16()
-                        .ok_or(ParseError::UnexpectedEof)?
-                        .to_le_bytes();
+                    let [middle, lower] = data.read_u16().ok_or(InternalError::Eof)?.to_le_bytes();
 
                     buffer = lower;
                     (upper | u16::from(middle) << 4 | u16::from(lower >> 4)) as i16

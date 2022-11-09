@@ -3,7 +3,7 @@ use alloc::vec::Vec;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty};
-use crate::parser::{Encoding, Headers, ParseResult, Predictor, Reader};
+use crate::parser::{Encoding, Headers, InternalResult, ParseResult, Predictor, Reader};
 
 #[derive(Debug, Clone)]
 pub struct GpsFrame;
@@ -38,7 +38,7 @@ impl<'data> GpsFrameDef<'data> {
     }
 
     #[instrument(level = "trace", name = "GpsFrameDef::parse", skip_all)]
-    pub(crate) fn parse(&self, data: &mut Reader, _headers: &Headers) -> ParseResult<GpsFrame> {
+    pub(crate) fn parse(&self, data: &mut Reader, _headers: &Headers) -> InternalResult<GpsFrame> {
         let _ = read_field_values(data, &self.0, |f| f.encoding)?;
 
         Ok(GpsFrame)
@@ -102,7 +102,7 @@ impl<'data> GpsFrameDefBuilder<'data> {
                     signed,
                 })
             })
-            .collect::<ParseResult<Vec<_>>>()?;
+            .collect::<Result<Vec<_>, _>>()?;
 
         if names.next().is_some()
             || predictors.next().is_some()

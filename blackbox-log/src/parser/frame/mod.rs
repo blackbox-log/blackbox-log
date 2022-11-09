@@ -3,6 +3,8 @@ mod gps_home;
 mod main;
 mod slow;
 
+use alloc::borrow::ToOwned;
+use alloc::format;
 use alloc::vec::Vec;
 use core::iter::Peekable;
 
@@ -10,7 +12,7 @@ pub(crate) use self::gps::*;
 pub(crate) use self::gps_home::*;
 pub(crate) use self::main::*;
 pub(crate) use self::slow::*;
-use super::{Encoding, ParseError, ParseResult, Predictor, Reader};
+use super::{Encoding, InternalResult, ParseError, ParseResult, Predictor, Reader};
 use crate::units;
 
 pub trait FieldDef {
@@ -171,7 +173,7 @@ impl DataFrameProperty {
 
 fn missing_header_error(kind: DataFrameKind, property: &'static str) -> ParseError {
     tracing::error!("missing header `Field {} {property}`", char::from(kind));
-    ParseError::Corrupted
+    ParseError::MissingHeader
 }
 
 fn parse_names(
@@ -189,8 +191,14 @@ fn parse_enum_list<'a, T>(
     parse: impl Fn(&str) -> Option<T> + 'a,
 ) -> ParseResult<impl Iterator<Item = ParseResult<T>> + 'a> {
     let s = s.ok_or_else(|| missing_header_error(kind, property))?;
-    Ok(s.split(',')
-        .map(move |s| parse(s).ok_or(ParseError::Corrupted)))
+    Ok(s.split(',').map(move |s| {
+        parse(s).ok_or_else(|| {
+            ParseError::InvalidHeader(
+                format!("Field {} {property}", char::from(kind)),
+                s.to_owned(),
+            )
+        })
+    }))
 }
 
 #[inline]
@@ -233,7 +241,7 @@ fn read_field_values<T>(
     data: &mut Reader,
     fields: &[T],
     get_encoding: impl Fn(&T) -> Encoding,
-) -> ParseResult<Vec<u32>> {
+) -> InternalResult<Vec<u32>> {
     let mut encodings = fields.iter().map(get_encoding).peekable();
     let mut values = Vec::with_capacity(encodings.len());
 

@@ -1,11 +1,11 @@
 use super::sign_extend;
-use crate::parser::{ParseError, ParseResult, Reader};
+use crate::parser::{InternalError, InternalResult, Reader};
 
 const COUNT: usize = 3;
 
-pub(crate) fn tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
-    fn read_u8_or_eof(bytes: &mut Reader) -> ParseResult<u8> {
-        bytes.read_u8().ok_or(ParseError::UnexpectedEof)
+pub(crate) fn tagged_32(data: &mut Reader) -> InternalResult<[i32; COUNT]> {
+    fn read_u8_or_eof(bytes: &mut Reader) -> InternalResult<u8> {
+        bytes.read_u8().ok_or(InternalError::Eof)
     }
 
     let mut result = [0; COUNT];
@@ -69,19 +69,19 @@ pub(crate) fn tagged_32(data: &mut Reader) -> ParseResult<[i32; COUNT]> {
 
                     // 16 bits
                     1 => {
-                        let value = data.read_u16().ok_or(ParseError::UnexpectedEof)?;
+                        let value = data.read_u16().ok_or(InternalError::Eof)?;
                         (value as i16).into()
                     }
 
                     // 24 bits
                     2 => {
-                        let x = data.read_u24().ok_or(ParseError::UnexpectedEof)?;
+                        let x = data.read_u24().ok_or(InternalError::Eof)?;
                         sign_extend::<24>(x)
                     }
 
                     // 32 bits
                     3.. => {
-                        let value = data.read_u32().ok_or(ParseError::UnexpectedEof)?;
+                        let value = data.read_u32().ok_or(InternalError::Eof)?;
                         value as i32
                     }
                 }
@@ -177,14 +177,14 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "UnexpectedEof")]
+    #[should_panic(expected = "Eof")]
     fn eof_04_bit() {
         let mut b = Reader::new(&[0x40]);
         tagged_32(&mut b).unwrap();
     }
 
     #[test]
-    #[should_panic(expected = "UnexpectedEof")]
+    #[should_panic(expected = "Eof")]
     fn eof_06_bit() {
         let mut b = Reader::new(&[0x80]);
         tagged_32(&mut b).unwrap();

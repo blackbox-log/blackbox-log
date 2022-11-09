@@ -14,7 +14,7 @@ pub(crate) use self::tagged_16::tagged_16;
 pub(crate) use self::tagged_32::tagged_32;
 pub(crate) use self::tagged_variable::tagged_variable;
 pub(crate) use self::variable::{variable, variable_signed};
-use super::{ParseResult, Reader};
+use super::{InternalResult, Reader};
 use crate::parser::as_unsigned;
 
 byte_enum! {
@@ -70,7 +70,7 @@ impl Encoding {
         data: &mut Reader,
         extra: usize,
         into: &mut Vec<u32>,
-    ) -> ParseResult<()> {
+    ) -> InternalResult<()> {
         let range = 0..=extra;
         match self {
             Self::VariableSigned => into.push(as_unsigned(variable_signed(data)?)),

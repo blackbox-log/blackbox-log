@@ -1,9 +1,12 @@
+use alloc::borrow::ToOwned;
 use alloc::vec::Vec;
 
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty};
-use crate::parser::{Encoding, Headers, ParseError, ParseResult, Predictor, Reader};
+use crate::parser::{
+    Encoding, FrameKind, Headers, InternalResult, ParseError, ParseResult, Predictor, Reader,
+};
 
 #[derive(Debug, Clone)]
 pub struct GpsHomeFrame(GpsPosition);
@@ -38,7 +41,11 @@ impl<'data> GpsHomeFrameDef<'data> {
     }
 
     #[instrument(level = "trace", name = "GpsHomeFrameDef::parse", skip_all)]
-    pub(crate) fn parse(&self, data: &mut Reader, headers: &Headers) -> ParseResult<GpsHomeFrame> {
+    pub(crate) fn parse(
+        &self,
+        data: &mut Reader,
+        headers: &Headers,
+    ) -> InternalResult<GpsHomeFrame> {
         let raw = read_field_values(data, &self.0, |f| f.encoding)?;
         let _ = read_field_values(data, &self.1, |&f| f)?;
 
@@ -131,7 +138,10 @@ impl<'data> GpsHomeFrameDefBuilder<'data> {
                 }
             } else {
                 tracing::error!("missing GPS_home[0] field definition");
-                return Err(ParseError::Corrupted);
+                return Err(ParseError::MissingField(
+                    FrameKind::GpsHome,
+                    "GPS_home[0]".to_owned(),
+                ));
             };
 
         let longitude =
@@ -143,12 +153,15 @@ impl<'data> GpsHomeFrameDefBuilder<'data> {
                 }
             } else {
                 tracing::error!("missing GPS_home[1] field definition");
-                return Err(ParseError::Corrupted);
+                return Err(ParseError::MissingField(
+                    FrameKind::GpsHome,
+                    "GPS_home[1]".to_owned(),
+                ));
             };
 
         let rest = fields
             .map(|(_, (_, encoding))| encoding)
-            .collect::<ParseResult<Vec<_>>>()?;
+            .collect::<Result<Vec<_>, _>>()?;
 
         if !rest.is_empty() {
             tracing::warn!(

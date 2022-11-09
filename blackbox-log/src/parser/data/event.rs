@@ -2,7 +2,7 @@ use alloc::vec::Vec;
 
 use tracing::instrument;
 
-use crate::parser::{decode, ParseError, ParseResult, Reader};
+use crate::parser::{decode, InternalError, InternalResult, Reader};
 
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -36,11 +36,14 @@ pub enum AdjustedValue {
 
 impl Event {
     #[instrument(level = "debug", name = "Event::parse", skip_all, fields(kind))]
-    pub(crate) fn parse_into(data: &mut Reader, events: &mut Vec<Self>) -> ParseResult<EventKind> {
-        let byte = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
+    pub(crate) fn parse_into(
+        data: &mut Reader,
+        events: &mut Vec<Self>,
+    ) -> InternalResult<EventKind> {
+        let byte = data.read_u8().ok_or(InternalError::Eof)?;
         let kind = EventKind::from_byte(byte).ok_or_else(|| {
             tracing::debug!("found invalid event: 0x{byte:0>2x}");
-            ParseError::Corrupted
+            InternalError::Retry
         })?;
 
         match kind {
@@ -52,10 +55,10 @@ impl Event {
             }
 
             EventKind::InflightAdjustment => {
-                let function = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
+                let function = data.read_u8().ok_or(InternalError::Eof)?;
 
                 let new_value = if (function & 0x80) > 0 {
-                    AdjustedValue::Float(data.read_f32().ok_or(ParseError::UnexpectedEof)?)
+                    AdjustedValue::Float(data.read_f32().ok_or(InternalError::Eof)?)
                 } else {
                     AdjustedValue::Int(decode::variable_signed(data)?)
                 };
@@ -101,16 +104,16 @@ impl Event {
 
                     check_message(data, b" (disarm reason:")?;
 
-                    let reason = data.read_u8().ok_or(ParseError::UnexpectedEof)?;
+                    let reason = data.read_u8().ok_or(InternalError::Eof)?;
                     events.push(Self::Disarm(reason.into()));
 
                     if data.read_u8() != Some(b')') {
-                        return Err(ParseError::Corrupted);
+                        return Err(InternalError::Retry);
                     }
                 }
 
                 if data.read_u8() != Some(0) {
-                    return Err(ParseError::Corrupted);
+                    return Err(InternalError::Retry);
                 }
 
                 events.push(Self::End);
@@ -135,15 +138,15 @@ byte_enum! {
     }
 }
 
-fn check_message(bytes: &mut Reader, message: &[u8]) -> ParseResult<()> {
+fn check_message(bytes: &mut Reader, message: &[u8]) -> InternalResult<()> {
     let bytes = bytes.read_n_bytes(message.len());
 
     if bytes.len() != message.len() {
-        return Err(ParseError::UnexpectedEof);
+        return Err(InternalError::Eof);
     }
 
     if bytes != message {
-        return Err(ParseError::Corrupted);
+        return Err(InternalError::Retry);
     }
 
     Ok(())

@@ -1,3 +1,4 @@
+use alloc::borrow::ToOwned;
 use alloc::vec::Vec;
 use core::iter;
 
@@ -5,8 +6,8 @@ use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty, Unit};
 use crate::parser::{
-    as_signed, decode, predictor, to_base_field, Encoding, FrameKind, Headers, ParseError,
-    ParseResult, Predictor, Reader,
+    as_signed, decode, predictor, to_base_field, Encoding, FrameKind, Headers, InternalResult,
+    ParseError, ParseResult, Predictor, Reader,
 };
 use crate::units;
 
@@ -58,7 +59,7 @@ impl MainFrame {
         kind: FrameKind,
         main_frames: &[(MainFrame, usize)],
         headers: &Headers,
-    ) -> Result<Self, ParseError> {
+    ) -> InternalResult<Self> {
         let get_main_frame = |i| main_frames.get(i).map(|(frame, _)| frame);
 
         let current_idx = main_frames.len();
@@ -222,7 +223,7 @@ impl<'data> MainFrameDef<'data> {
         data: &mut Reader,
         headers: &Headers,
         last: Option<&MainFrame>,
-    ) -> ParseResult<MainFrame> {
+    ) -> InternalResult<MainFrame> {
         let iteration = decode::variable(data)?;
         tracing::trace!(iteration);
         let time = decode::variable(data)?.into();
@@ -266,7 +267,7 @@ impl<'data> MainFrameDef<'data> {
         last: Option<&MainFrame>,
         last_last: Option<&MainFrame>,
         skipped_frames: u32,
-    ) -> ParseResult<MainFrame> {
+    ) -> InternalResult<MainFrame> {
         let iteration = 1 + last.map_or(0, |f| f.iteration) + skipped_frames;
         tracing::trace!(iteration);
 
@@ -403,29 +404,35 @@ impl<'data> MainFrameDefBuilder<'data> {
                 },
             );
 
-        let Some(Ok(iteration @ MainFieldDef {
+        let Some(iteration @ MainFieldDef {
             name: "loopIteration",
             predictor_intra: Predictor::Zero,
             predictor_inter: Predictor::Increment,
             encoding_intra: Encoding::Variable,
             encoding_inter: Encoding::Null,
             ..
-        })) = fields.next() else {
-            return Err(ParseError::Corrupted);
+        }) = fields.next().transpose()? else {
+            return Err(ParseError::MissingField(
+                FrameKind::Intra,
+                "loopIteration".to_owned(),
+            ));
         };
 
-        let Some(Ok(time @ MainFieldDef {
+        let Some(time @ MainFieldDef {
             name: "time",
             predictor_intra: Predictor::Zero,
             predictor_inter: Predictor::StraightLine,
             encoding_intra: Encoding::Variable,
             encoding_inter: Encoding::VariableSigned,
             ..
-        })) = fields.next() else {
-            return Err(ParseError::Corrupted);
+        }) = fields.next().transpose()? else {
+            return Err(ParseError::MissingField(
+                FrameKind::Intra,
+                "time".to_owned(),
+            ));
         };
 
-        let fields = fields.collect::<ParseResult<Vec<_>>>()?;
+        let fields = fields.collect::<Result<Vec<_>, _>>()?;
 
         if names.next().is_some()
             || predictors_intra.next().is_some()
