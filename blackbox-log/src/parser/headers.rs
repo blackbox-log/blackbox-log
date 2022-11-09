@@ -1,5 +1,4 @@
-use alloc::borrow::ToOwned;
-use core::str::{self, FromStr};
+use core::str;
 
 use super::frame::{
     is_frame_def_header, parse_frame_def_header, DataFrameKind, GpsFrameDef, GpsFrameDefBuilder,
@@ -49,16 +48,15 @@ impl<'data> Headers<'data> {
     }
 
     pub(crate) fn parse(data: &mut Reader<'data>) -> ParseResult<Self> {
-        check_product(data)?;
-        let version = get_version(data)?;
+        // Skip product header
+        let product = data.read_line();
+        debug_assert_eq!(Some(super::MARKER.strip_suffix(&[b'\n']).unwrap()), product);
 
-        let mut state = State::new(version);
+        let mut state = State::new();
 
         loop {
-            match data.peek() {
-                Some(b'H') => {}
-                Some(_) => break,
-                None => return Err(ParseError::UnexpectedEof),
+            if data.peek() != Some(b'H') {
+                break;
             }
 
             let restore = data.get_restore_point();
@@ -151,29 +149,6 @@ impl<'data> Headers<'data> {
     }
 }
 
-fn check_product(bytes: &mut Reader) -> Result<(), ParseError> {
-    let (product, _) = parse_header(bytes)?;
-    if product != "Product" {
-        tracing::error!("`Product` header must be first");
-        return Err(ParseError::Corrupted);
-    };
-
-    Ok(())
-}
-
-fn get_version(bytes: &mut Reader) -> Result<LogVersion, ParseError> {
-    let (name, value) = parse_header(bytes)?;
-
-    if name != "Data version" {
-        tracing::error!("`Data version` header must be second");
-        return Err(ParseError::Corrupted);
-    }
-
-    value
-        .parse()
-        .map_err(|_| ParseError::UnsupportedVersion(value.to_owned()))
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct VbatConfig {
@@ -205,25 +180,19 @@ impl MotorOutputRange {
     pub const fn max(&self) -> u16 {
         self.1
     }
-}
 
-impl FromStr for MotorOutputRange {
-    type Err = ParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        s.split_once(',')
-            .and_then(|(min, max)| {
-                let min = min.parse().ok()?;
-                let max = max.parse().ok()?;
-                Some(MotorOutputRange::new(min, max))
-            })
-            .ok_or(ParseError::Corrupted)
+    pub(crate) fn from_str(s: &str) -> Option<Self> {
+        s.split_once(',').and_then(|(min, max)| {
+            let min = min.parse().ok()?;
+            let max = max.parse().ok()?;
+            Some(MotorOutputRange::new(min, max))
+        })
     }
 }
 
 #[derive(Debug)]
 struct State<'data> {
-    version: LogVersion,
+    version: Option<LogVersion>,
     main_frames: MainFrameDefBuilder<'data>,
     slow_frames: SlowFrameDefBuilder<'data>,
     gps_frames: GpsFrameDefBuilder<'data>,
@@ -246,9 +215,9 @@ struct State<'data> {
 }
 
 impl<'data> State<'data> {
-    fn new(version: LogVersion) -> Self {
+    fn new() -> Self {
         Self {
-            version,
+            version: None,
             main_frames: MainFrameDef::builder(),
             slow_frames: SlowFrameDef::builder(),
             gps_frames: GpsFrameDef::builder(),
@@ -272,65 +241,70 @@ impl<'data> State<'data> {
     }
 
     fn update(&mut self, header: &'data str, value: &'data str) -> ParseResult<()> {
-        match header {
-            "Firmware revision" => self.firmware_revision = Some(value),
-            "Firmware type" => self.firmware_kind = Some(value.parse()?),
-            "Board information" => self.board_info = Some(value),
-            "Craft name" => self.craft_name = Some(value),
+        // TODO: try block
+        (|| {
+            match header {
+                "Data version" => self.version = Some(value.parse().map_err(|_| ())?),
+                "Firmware revision" => self.firmware_revision = Some(value),
+                "Firmware type" => self.firmware_kind = Some(value.parse().map_err(|_| ())?),
+                "Board information" => self.board_info = Some(value),
+                "Craft name" => self.craft_name = Some(value),
 
-            "vbatref" => {
-                let vbat_reference = value.parse().map_err(|_| ParseError::Corrupted)?;
-                self.vbat_reference = Some(vbat_reference);
-            }
-            "vbatscale" | "vbat_scale" => {
-                let vbat_scale = value.parse().map_err(|_| ParseError::Corrupted)?;
-                self.vbat_scale = Some(vbat_scale);
-            }
-            "currentMeter" | "currentSensor" => {
-                let (offset, scale) = value.split_once(',').ok_or(ParseError::Corrupted)?;
-                let offset = offset.parse().map_err(|_| ParseError::Corrupted)?;
-                let scale = scale.parse().map_err(|_| ParseError::Corrupted)?;
-
-                self.current_meter = Some(CurrentMeterConfig { offset, scale });
-            }
-            "acc_1G" => {
-                let one_g = value.parse().map_err(|_| ParseError::Corrupted)?;
-                self.acceleration_1g = Some(one_g);
-            }
-            "gyro.scale" | "gyro_scale" => {
-                let scale = if let Some(hex) = value.strip_prefix("0x") {
-                    u32::from_str_radix(hex, 16).map_err(|_| ParseError::Corrupted)?
-                } else {
-                    value.parse().map_err(|_| ParseError::Corrupted)?
-                };
-
-                self.gyro_scale = Some(f32::from_bits(scale));
-            }
-            "minthrottle" => {
-                let min_throttle = value.parse().map_err(|_| ParseError::Corrupted)?;
-                self.min_throttle = Some(min_throttle);
-            }
-            "motorOutput" => {
-                let range = value.parse().map_err(|_| ParseError::Corrupted)?;
-                self.motor_output_range = Some(range);
-            }
-
-            _ if is_frame_def_header(header) => {
-                let (frame_kind, property) = parse_frame_def_header(header).unwrap();
-
-                match frame_kind {
-                    DataFrameKind::Inter | DataFrameKind::Intra => {
-                        self.main_frames.update(frame_kind, property, value);
-                    }
-                    DataFrameKind::Slow => self.slow_frames.update(property, value),
-                    DataFrameKind::Gps => self.gps_frames.update(property, value),
-                    DataFrameKind::GpsHome => self.gps_home_frames.update(property, value),
+                "vbatref" => {
+                    let vbat_reference = value.parse().map_err(|_| ())?;
+                    self.vbat_reference = Some(vbat_reference);
                 }
-            }
-            header => tracing::debug!("skipping unknown header: `{header}` = `{value}`"),
-        }
+                "vbatscale" | "vbat_scale" => {
+                    let vbat_scale = value.parse().map_err(|_| ())?;
+                    self.vbat_scale = Some(vbat_scale);
+                }
+                "currentMeter" | "currentSensor" => {
+                    let (offset, scale) = value.split_once(',').ok_or(())?;
+                    let offset = offset.parse().map_err(|_| ())?;
+                    let scale = scale.parse().map_err(|_| ())?;
 
-        Ok(())
+                    self.current_meter = Some(CurrentMeterConfig { offset, scale });
+                }
+                "acc_1G" => {
+                    let one_g = value.parse().map_err(|_| ())?;
+                    self.acceleration_1g = Some(one_g);
+                }
+                "gyro.scale" | "gyro_scale" => {
+                    let scale = if let Some(hex) = value.strip_prefix("0x") {
+                        u32::from_str_radix(hex, 16).map_err(|_| ())?
+                    } else {
+                        value.parse().map_err(|_| ())?
+                    };
+
+                    self.gyro_scale = Some(f32::from_bits(scale));
+                }
+                "minthrottle" => {
+                    let min_throttle = value.parse().map_err(|_| ())?;
+                    self.min_throttle = Some(min_throttle);
+                }
+                "motorOutput" => {
+                    let range = MotorOutputRange::from_str(value).ok_or(())?;
+                    self.motor_output_range = Some(range);
+                }
+
+                _ if is_frame_def_header(header) => {
+                    let (frame_kind, property) = parse_frame_def_header(header).unwrap();
+
+                    match frame_kind {
+                        DataFrameKind::Inter | DataFrameKind::Intra => {
+                            self.main_frames.update(frame_kind, property, value);
+                        }
+                        DataFrameKind::Slow => self.slow_frames.update(property, value),
+                        DataFrameKind::Gps => self.gps_frames.update(property, value),
+                        DataFrameKind::GpsHome => self.gps_home_frames.update(property, value),
+                    }
+                }
+                header => tracing::debug!("skipping unknown header: `{header}` = `{value}`"),
+            };
+
+            Ok(())
+        })()
+        .map_err(|_: ()| ParseError::Corrupted)
     }
 
     fn finish(self) -> ParseResult<Headers<'data>> {
@@ -344,7 +318,7 @@ impl<'data> State<'data> {
 
         // TODO: log where each error comes from
         let headers = Headers {
-            version: self.version,
+            version: self.version.ok_or(ParseError::MissingHeader)?,
             main_frames: self.main_frames.parse()?,
             slow_frames: self.slow_frames.parse()?,
             gps_frames: self.gps_frames.parse()?,
