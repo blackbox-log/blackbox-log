@@ -67,6 +67,18 @@ jobs:
 
       - name: Build xtasks
         run: cargo build --package xtask
+
+      - name: Replace symlinks with copies
+        if: ${{ runner.os == 'windows' }}
+        run: |
+          cd blackbox-log/tests/logs
+          mv fc-blackbox fc-blackbox~
+          mv gimbal-ghost gimbal-ghost~
+          cp -r "$(readlink fc-blackbox~)" fc-blackbox
+          cp -r "$(readlink gimbal-ghost~)" gimbal-ghost
+          rm -r fc-blackbox~
+          rm -r gimbal-ghost~
+
       - name: Run all tests
         run: cargo ci test
 
