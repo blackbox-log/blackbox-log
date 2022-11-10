@@ -27,6 +27,9 @@ pub(crate) struct Cli {
     pub unit_flags: FlagUnit,
 
     #[bpaf(argument("unit"), fallback(Default::default()))]
+    pub unit_bool: BoolUnit,
+
+    #[bpaf(argument("unit"), fallback(Default::default()))]
     pub unit_frame_time: FrameTimeUnit,
 
     #[bpaf(argument("unit"), fallback(Default::default()))]

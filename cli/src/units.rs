@@ -376,16 +376,6 @@ impl FlagUnit {
             }
         }
     }
-
-    pub fn format_bool(&self, b: bool) -> String {
-        match self {
-            Self::Raw => u8::from(b).to_string(),
-            Self::Flags => {
-                let s = if b { "y" } else { "n" };
-                s.to_owned()
-            }
-        }
-    }
 }
 
 from_os_str_impl!(FlagUnit {
@@ -399,6 +389,39 @@ impl fmt::Display for FlagUnit {
         let s = match self {
             Self::Raw => "raw",
             Self::Flags => "flags",
+        };
+
+        f.write_str(s)
+    }
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub enum BoolUnit {
+    #[default]
+    Raw,
+    Letter,
+}
+
+impl BoolUnit {
+    pub fn format(&self, b: bool) -> String {
+        match self {
+            Self::Raw => u8::from(b).to_string(),
+            Self::Letter => (if b { "y" } else { "n" }).to_owned(),
+        }
+    }
+}
+
+from_os_str_impl!(BoolUnit {
+    "raw" => Self::Raw,
+    "letter" | "letters" => Self::Letter,
+    _ => "expected raw or letter",
+});
+
+impl fmt::Display for BoolUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Self::Raw => "raw",
+            Self::Letter => "letter",
         };
 
         f.write_str(s)

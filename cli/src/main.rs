@@ -147,7 +147,7 @@ fn write_csv(out: &mut impl Write, log: &Log, config: &Cli) -> io::Result<()> {
                 Value::FlightMode(m) => config.unit_flags.format(m),
                 Value::State(s) => config.unit_flags.format(s),
                 Value::FailsafePhase(p) => config.unit_flags.format(p),
-                Value::Boolean(b) => config.unit_flags.format_bool(b),
+                Value::Boolean(b) => config.unit_bool.format(b),
                 Value::Unsigned(x) => x.to_string(),
                 Value::Signed(x) => x.to_string(),
             }),
