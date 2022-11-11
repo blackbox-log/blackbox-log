@@ -112,7 +112,7 @@ impl<'data> SlowFrameDef<'data> {
                     }
                     SlowUnit::Boolean => {
                         if value > 1 {
-                            tracing::debug!("invalid boolean (0x{value:0>8x})");
+                            tracing::debug!("invalid boolean ({value:0>#8x})");
                         }
 
                         SlowValue::Boolean(value != 0)

@@ -56,7 +56,7 @@ impl Data {
             restore = data.get_restore_point();
 
             let Some(kind) = FrameKind::from_byte(byte) else {
-                tracing::debug!("found invalid frame byte: 0x{byte:0>2x}");
+                tracing::debug!("found invalid frame byte: {byte:0>#2x}");
 
                 let last_kind = last_kind.take();
                 match last_kind {

@@ -42,7 +42,7 @@ impl Event {
     ) -> InternalResult<EventKind> {
         let byte = data.read_u8().ok_or(InternalError::Eof)?;
         let kind = EventKind::from_byte(byte).ok_or_else(|| {
-            tracing::debug!("found invalid event: 0x{byte:0>2x}");
+            tracing::debug!("found invalid event: {byte:0>#2x}");
             InternalError::Retry
         })?;
 
