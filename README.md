@@ -33,6 +33,7 @@ for `blackbox_decode`, with a WASM/JavaScript interface Coming Soon™.
 | Raw log output             |              :x:            |           :heavy_check_mark:          |
 | Current meter simulation   |              :x:            |           :heavy_check_mark:          |
 | IMU simulation             |              :x:            |           :heavy_check_mark:          |
+| Output unit custimization  |              :x:            |           :heavy_check_mark:          |
 | Output field filter        |      :heavy_check_mark:     |                   :x:                 |
 | Parallel log parsing       |      :heavy_check_mark:     |                   :x:                 |
 

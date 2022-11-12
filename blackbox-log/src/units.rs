@@ -1,5 +1,5 @@
 use alloc::vec::Vec;
-use core::{f64, fmt};
+use core::fmt;
 
 use bitvec::prelude::*;
 
@@ -14,21 +14,23 @@ pub struct Amperage {
 }
 
 impl Amperage {
-    pub fn new(raw: u32, headers: &Headers) -> Self {
+    pub(crate) fn new(raw: u32, headers: &Headers) -> Self {
         Self {
             raw: as_signed(raw),
             current_meter: headers.current_meter.unwrap(),
         }
     }
 
-    pub const fn as_raw(&self) -> i32 {
-        self.raw
-    }
-
-    pub fn as_milliamps(&self) -> f64 {
+    pub fn as_amps(&self) -> f64 {
         let milliamps = f64::from(self.raw * 3300) / 4095.;
         let milliamps = milliamps - f64::from(self.current_meter.offset);
-        (milliamps * 10_000.) / f64::from(self.current_meter.scale)
+        (milliamps * 10.) / f64::from(self.current_meter.scale)
+    }
+}
+
+impl fmt::Display for Amperage {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:.*}", f.precision().unwrap_or(2), self.as_amps())
     }
 }
 
@@ -39,19 +41,25 @@ pub struct Voltage {
 }
 
 impl Voltage {
-    pub fn new(raw: u32, headers: &Headers) -> Self {
+    pub(crate) fn new(raw: u32, headers: &Headers) -> Self {
         Self {
             raw,
             scale: headers.vbat.unwrap().scale,
         }
     }
 
-    pub const fn as_raw(&self) -> u32 {
-        self.raw
+    pub fn as_volts(&self) -> f64 {
+        f64::from(
+            self.raw
+                .saturating_mul(330)
+                .saturating_mul(u32::from(self.scale)),
+        ) / 4.095
     }
+}
 
-    pub fn as_millivolts(&self) -> f64 {
-        f64::from(self.raw * 330 * u32::from(self.scale)) / 4095.
+impl fmt::Display for Voltage {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:.*}", f.precision().unwrap_or(2), self.as_volts())
     }
 }
 
@@ -69,16 +77,14 @@ impl Acceleration {
         }
     }
 
-    pub const fn as_raw(&self) -> i32 {
-        self.raw
-    }
-
     pub fn as_gs(&self) -> f64 {
         f64::from(self.raw) / f64::from(self.one_g)
     }
+}
 
-    pub fn as_meters_per_sec_sq(&self) -> f64 {
-        self.as_gs() * 9.80665
+impl fmt::Display for Acceleration {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:.*}", f.precision().unwrap_or(2), self.as_gs())
     }
 }
 
@@ -86,27 +92,24 @@ impl Acceleration {
 pub struct Rotation(i32);
 
 impl Rotation {
-    pub const fn new(raw: u32) -> Self {
+    pub(crate) const fn new(raw: u32) -> Self {
         Self(as_signed(raw))
     }
 
-    pub const fn as_raw(&self) -> i32 {
+    pub fn as_degrees(&self) -> i32 {
         self.0
     }
+}
 
-    pub fn as_degrees(&self) -> f64 {
-        self.0.into()
-    }
-
-    pub fn as_radians(&self) -> f64 {
-        self.as_degrees() * f64::consts::PI / 180.
+impl fmt::Display for Rotation {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
 pub trait FlagSet {
     type Flag: Flag;
 
-    fn as_raw(&self) -> u32;
     fn is_set(&self, flag: Self::Flag) -> bool;
     fn as_names(&self) -> Vec<&'static str>;
 }
@@ -137,10 +140,6 @@ macro_rules! define_flag_set {
         impl FlagSet for $set {
             type Flag = $flag_name;
 
-            fn as_raw(&self) -> u32 {
-                self.raw.into_inner()[0]
-            }
-
             fn is_set(&self, flag: Self::Flag) -> bool {
                 flag.to_bit(self.firmware)
                     .map_or(false, |bit| self.raw[bit])
@@ -151,6 +150,12 @@ macro_rules! define_flag_set {
                     .iter_ones()
                     .filter_map(|bit| Some($flag_name::from_bit(bit, self.firmware)?.as_name()))
                     .collect()
+            }
+        }
+
+        impl fmt::Display for $set {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.write_str(&self.as_names().join("|"))
             }
         }
 

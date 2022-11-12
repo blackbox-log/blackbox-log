@@ -1,12 +1,10 @@
 mod cli;
-mod units;
 
 use std::fs::File;
 use std::io::{self, BufWriter, Read, Write};
 use std::path::Path;
 use std::process::{ExitCode, Termination};
 
-use blackbox_log::parser::Value;
 use blackbox_log::Log;
 use mimalloc::MiMalloc;
 use rayon::prelude::*;
@@ -88,7 +86,7 @@ fn main() -> QuietResult<()> {
                 }
             };
 
-            if let Err(error) = write_csv(&mut out, &log, &cli) {
+            if let Err(error) = write_csv(&mut out, &log) {
                 tracing::error!(%error, "failed to write csv");
                 return Err(exitcode::IOERR);
             }
@@ -122,51 +120,26 @@ fn get_output(stdout: bool, filename: &Path, index: usize) -> io::Result<Box<dyn
     }
 }
 
-fn write_csv(out: &mut impl Write, log: &Log, config: &Cli) -> io::Result<()> {
-    write_csv_line(
-        out,
-        log.iter_fields().map(|(name, unit)| {
-            let unit = config.get_unit(unit.into());
-            if unit.is_raw() {
-                name.to_owned()
-            } else {
-                format!("{name} ({unit})")
-            }
-        }),
-    )?;
+fn write_csv(out: &mut impl Write, log: &Log) -> io::Result<()> {
+    write_csv_line(out, log.iter_fields().map(|(name, _unit)| name))?;
 
     for frame in log.iter_frames() {
-        write_csv_line(
-            out,
-            frame.map(|value| match value {
-                Value::FrameTime(t) => config.unit_frame_time.format(t),
-                Value::Amperage(a) => config.unit_amperage.format(a),
-                Value::Voltage(v) => config.unit_vbat.format(v),
-                Value::Acceleration(a) => config.unit_acceleration.format(a),
-                Value::Rotation(r) => config.unit_rotation.format(r),
-                Value::FlightMode(m) => config.unit_flags.format(m),
-                Value::State(s) => config.unit_flags.format(s),
-                Value::FailsafePhase(p) => config.unit_flags.format(p),
-                Value::Boolean(b) => config.unit_bool.format(b),
-                Value::Unsigned(x) => x.to_string(),
-                Value::Signed(x) => x.to_string(),
-            }),
-        )?;
+        write_csv_line(out, frame.map(|value| value.to_string()))?;
     }
 
     out.flush()
 }
 
-fn write_csv_line(
+fn write_csv_line<T: AsRef<str>>(
     out: &mut impl Write,
-    mut fields: impl Iterator<Item = String>,
+    mut fields: impl Iterator<Item = T>,
 ) -> io::Result<()> {
     if let Some(first) = fields.next() {
-        out.write_all(first.as_bytes())?;
+        out.write_all(first.as_ref().as_bytes())?;
 
         for s in fields {
             out.write_all(b",")?;
-            out.write_all(s.as_bytes())?;
+            out.write_all(s.as_ref().as_bytes())?;
         }
     }
 

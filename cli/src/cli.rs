@@ -5,8 +5,6 @@ use std::path::PathBuf;
 use bpaf::{construct, Bpaf, Parser};
 use tracing_subscriber::filter::LevelFilter;
 
-use crate::units::*;
-
 #[derive(Debug, Clone, Bpaf)]
 #[bpaf(options, private, version)]
 #[allow(unused, clippy::default_trait_access)]
@@ -19,33 +17,6 @@ pub(crate) struct Cli {
 
     /// Writes log to stdout instead of a file
     pub stdout: bool,
-
-    #[bpaf(argument("unit"), fallback(Default::default()))]
-    pub unit_amperage: AmperageUnit,
-
-    #[bpaf(argument("unit"), fallback(Default::default()))]
-    pub unit_flags: FlagUnit,
-
-    #[bpaf(argument("unit"), fallback(Default::default()))]
-    pub unit_bool: BoolUnit,
-
-    #[bpaf(argument("unit"), fallback(Default::default()))]
-    pub unit_frame_time: FrameTimeUnit,
-
-    #[bpaf(argument("unit"), fallback(Default::default()))]
-    pub unit_height: HeightUnit,
-
-    #[bpaf(argument("unit"), fallback(Default::default()))]
-    pub unit_rotation: RotationUnit,
-
-    #[bpaf(argument("unit"), fallback(Default::default()))]
-    pub unit_acceleration: AccelerationUnit,
-
-    #[bpaf(argument("unit"), fallback(Default::default()))]
-    pub unit_gps_speed: GpsSpeedUnit,
-
-    #[bpaf(argument("unit"), fallback(Default::default()))]
-    pub unit_vbat: VBatUnit,
 
     #[bpaf(external)]
     pub altitude_offset: i16,
@@ -175,20 +146,6 @@ impl Cli {
         cli()
             .usage("Usage: blackbox_decode [options] <log>...")
             .run()
-    }
-
-    pub fn get_unit(&self, unit: CliUnitKind) -> CliUnit {
-        match unit {
-            CliUnitKind::FrameTime => CliUnit::FrameTime(self.unit_frame_time),
-            CliUnitKind::Amperage => CliUnit::Amperage(self.unit_amperage),
-            CliUnitKind::VBat => CliUnit::VBat(self.unit_vbat),
-            CliUnitKind::Acceleration => CliUnit::Acceleration(self.unit_acceleration),
-            CliUnitKind::Rotation => CliUnit::Rotation(self.unit_rotation),
-            CliUnitKind::Height => CliUnit::Height(self.unit_height),
-            CliUnitKind::GpsSpeed => CliUnit::GpsSpeed(self.unit_gps_speed),
-            CliUnitKind::Flag => CliUnit::Flag(self.unit_flags),
-            CliUnitKind::Unitless => CliUnit::Unitless,
-        }
     }
 }
 

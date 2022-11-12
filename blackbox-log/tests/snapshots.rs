@@ -1,7 +1,8 @@
+use std::collections::BTreeMap;
 use std::fs;
 use std::io::Read;
 
-use blackbox_log::parser::{Event, Headers, Stats, Value};
+use blackbox_log::parser::{Event, Headers, Stats, Unit, Value};
 use blackbox_log::units::FlagSet;
 use blackbox_log::Log;
 use serde::ser::{SerializeStruct, Serializer};
@@ -50,10 +51,10 @@ struct LogSnapshot<'a> {
 
 impl<'a> From<Log<'a>> for LogSnapshot<'a> {
     fn from(log: Log<'a>) -> Self {
-        let fields = log.iter_fields().map(|(name, _)| name).collect::<Fields>();
+        let fields = log.iter_fields().collect::<Fields>();
 
         let fields = log.iter_frames().fold(fields, |mut fields, frame| {
-            fields.update(frame.map(value_to_int));
+            fields.update(frame);
             fields
         });
 
@@ -70,62 +71,172 @@ impl<'a> From<Log<'a>> for LogSnapshot<'a> {
 struct Fields(Vec<FieldSnapshot>);
 
 impl Fields {
-    fn update(&mut self, frame: impl Iterator<Item = i128>) {
+    fn update(&mut self, frame: impl Iterator<Item = Value>) {
         for (field, value) in self.0.iter_mut().zip(frame) {
             field.update(value);
         }
     }
 }
 
-impl<T> FromIterator<T> for Fields
+impl<T> FromIterator<(T, Unit)> for Fields
 where
     T: Into<String>,
 {
-    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
-        Self(iter.into_iter().map(FieldSnapshot::new).collect())
+    fn from_iter<I: IntoIterator<Item = (T, Unit)>>(iter: I) -> Self {
+        Self(
+            iter.into_iter()
+                .map(|(name, unit)| FieldSnapshot::new(name.into(), unit))
+                .collect(),
+        )
     }
+}
+
+#[derive(Debug, Serialize)]
+struct FieldSnapshot {
+    name: String,
+    unit: Unit,
+    history: History,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(untagged)]
+enum History {
+    Int(NumberHistory<16, i128>),
+    Float(NumberHistory<16, f64>),
+    Bool { yes: usize, no: usize },
+    Flags(BTreeMap<&'static str, usize>),
 }
 
 #[derive(Debug)]
-struct FieldSnapshot {
-    name: String,
-    min: i128,
-    max: i128,
-    seen: Vec<i128>,
-    histogram: [i128; 16],
+struct NumberHistory<const N: usize, T> {
+    min: T,
+    max: T,
+    seen: Vec<T>,
+    histogram: [usize; N],
 }
 
 impl FieldSnapshot {
-    fn new<T: Into<String>>(name: T) -> Self {
+    fn new(name: String, unit: Unit) -> Self {
         Self {
-            name: name.into(),
-            min: 0,
-            max: 0,
-            seen: Vec::new(),
-            histogram: [0; 16],
+            name,
+            unit,
+            history: match unit {
+                Unit::FrameTime | Unit::Rotation | Unit::Unitless => {
+                    History::Int(NumberHistory::new())
+                }
+                Unit::Amperage | Unit::Voltage | Unit::Acceleration => {
+                    History::Float(NumberHistory::new())
+                }
+                Unit::Boolean => History::Bool { yes: 0, no: 0 },
+                Unit::FlightMode | Unit::State | Unit::FailsafePhase => {
+                    History::Flags(BTreeMap::new())
+                }
+            },
         }
     }
 
-    fn update(&mut self, value: i128) {
+    #[allow(clippy::wildcard_enum_match_arm)]
+    fn update(&mut self, value: Value) {
+        match &mut self.history {
+            History::Int(history) => history.update(match value {
+                Value::FrameTime(t) => t.into(),
+                Value::Rotation(r) => r.as_degrees().into(),
+                Value::Unsigned(u) => u.into(),
+                Value::Signed(s) => s.into(),
+                _ => unreachable!(),
+            }),
+            History::Float(history) => history.update(match value {
+                Value::Amperage(a) => a.as_amps(),
+                Value::Voltage(v) => v.as_volts(),
+                Value::Acceleration(a) => a.as_gs(),
+                _ => unreachable!(),
+            }),
+            History::Bool { yes, no } => match value {
+                Value::Boolean(true) => *yes += 1,
+                Value::Boolean(false) => *no += 1,
+                _ => unreachable!(),
+            },
+            History::Flags(history) => {
+                let flags = match value {
+                    Value::FlightMode(m) => m.as_names(),
+                    Value::State(s) => s.as_names(),
+                    Value::FailsafePhase(f) => f.as_names(),
+                    _ => unreachable!(),
+                };
+
+                for flag in flags {
+                    *history.entry(flag).or_insert(0) += 1;
+                }
+            }
+        }
+    }
+}
+
+impl<const N: usize, T> NumberHistory<N, T> {
+    fn new() -> Self
+    where
+        T: Default,
+    {
+        Self {
+            min: T::default(),
+            max: T::default(),
+            seen: Vec::new(),
+            histogram: [0; N],
+        }
+    }
+
+    fn update_range(&mut self, value: T)
+    where
+        T: PartialOrd,
+    {
         if value < self.min {
             self.min = value;
         } else if value > self.max {
             self.max = value;
         }
+    }
 
-        // Insert new value if not in seen, keeping seen sorted
-        let index = self.seen.partition_point(|&x| x < value);
+    /// Store new value sorted in `seen` if not already present
+    fn update_seen(&mut self, value: T)
+    where
+        T: PartialOrd,
+    {
+        let index = self.seen.partition_point(|x| *x < value);
         if self.seen.get(index) != Some(&value) {
             self.seen.insert(index, value);
         }
+    }
 
-        // Group into buckets using the bottom bits since those vary the most
-        let index = (value.unsigned_abs() % 16) as usize;
-        self.histogram[index] += 1;
+    /// Bucket so that sequential values go in sequential buckets, since data is
+    /// usually clustered
+    #[inline(always)]
+    fn update_histogram(&mut self, value: u128) {
+        self.histogram[(value % N as u128) as usize] += 1;
     }
 }
 
-impl Serialize for FieldSnapshot {
+impl<const N: usize> NumberHistory<N, i128> {
+    fn update(&mut self, value: i128) {
+        self.update_range(value);
+        self.update_seen(value);
+        self.update_histogram(value.unsigned_abs());
+    }
+}
+
+impl<const N: usize> NumberHistory<N, f64> {
+    #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
+    fn update(&mut self, value: f64) {
+        self.update_range(value);
+        self.update_seen(value);
+        self.update_histogram(value.round().abs() as u128);
+    }
+}
+
+impl<const N: usize, T> Serialize for NumberHistory<N, T>
+where
+    T: Serialize,
+    [usize; N]: Serialize,
+{
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -133,9 +244,8 @@ impl Serialize for FieldSnapshot {
         let unique = self.seen.len();
 
         let mut state =
-            serializer.serialize_struct("FieldSnapshot", if unique > 1 { 5 } else { 4 })?;
+            serializer.serialize_struct("FieldSnapshot", if unique > 1 { 4 } else { 3 })?;
 
-        state.serialize_field("name", &self.name)?;
         state.serialize_field("min", &self.min)?;
         state.serialize_field("max", &self.max)?;
         state.serialize_field("unique", &unique)?;
@@ -145,21 +255,5 @@ impl Serialize for FieldSnapshot {
         }
 
         state.end()
-    }
-}
-
-fn value_to_int(value: Value) -> i128 {
-    match value {
-        Value::FrameTime(x) => x.into(),
-        Value::Amperage(x) => x.as_raw().into(),
-        Value::Voltage(x) => x.as_raw().into(),
-        Value::Acceleration(x) => x.as_raw().into(),
-        Value::Rotation(x) => x.as_raw().into(),
-        Value::FlightMode(x) => x.as_raw().into(),
-        Value::State(x) => x.as_raw().into(),
-        Value::FailsafePhase(x) => x.as_raw().into(),
-        Value::Boolean(x) => x.into(),
-        Value::Unsigned(x) => x.into(),
-        Value::Signed(x) => x.into(),
     }
 }

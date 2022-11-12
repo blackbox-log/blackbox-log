@@ -6,6 +6,7 @@ mod slow;
 use alloc::borrow::ToOwned;
 use alloc::format;
 use alloc::vec::Vec;
+use core::fmt;
 use core::iter::Peekable;
 
 pub(crate) use self::gps::*;
@@ -22,6 +23,7 @@ pub trait FieldDef {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum Unit {
     FrameTime,
     Amperage,
@@ -73,6 +75,24 @@ pub enum Value {
     Boolean(bool),
     Unsigned(u32),
     Signed(i32),
+}
+
+impl fmt::Display for Value {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::FrameTime(x) => x.fmt(f),
+            Self::Amperage(x) => x.fmt(f),
+            Self::Voltage(x) => x.fmt(f),
+            Self::Acceleration(x) => x.fmt(f),
+            Self::Rotation(x) => x.fmt(f),
+            Self::FlightMode(x) => x.fmt(f),
+            Self::State(x) => x.fmt(f),
+            Self::FailsafePhase(x) => x.fmt(f),
+            Self::Boolean(x) => x.fmt(f),
+            Self::Unsigned(x) => x.fmt(f),
+            Self::Signed(x) => x.fmt(f),
+        }
+    }
 }
 
 impl From<MainValue> for Value {
