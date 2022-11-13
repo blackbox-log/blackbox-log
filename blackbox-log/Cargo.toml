@@ -9,14 +9,15 @@ rust-version.workspace = true
 
 [features]
 default = ["std"]
-std = ["memchr/std", "serde?/std"]
-serde = ["dep:serde"]
+std = ["memchr/std", "serde?/std", "uom/std"]
+serde = ["dep:serde", "uom/use_serde"]
 
 [dependencies]
 bitvec = { version = "1.0.1", default-features = false }
 memchr = { version = "2.5.0", default-features = false }
 serde = { workspace = true, optional = true }
 tracing.workspace = true
+uom = { version = "0.33.0", default-features = false, features = ["si", "f64", "u64"] }
 
 [dev-dependencies]
 criterion = { version = "0.4.0", features = ["html_reports"] }

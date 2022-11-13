@@ -3,7 +3,7 @@ use std::fs;
 use std::io::Read;
 
 use blackbox_log::parser::{Event, Headers, Stats, Unit, Value};
-use blackbox_log::units::FlagSet;
+use blackbox_log::units::{si, FlagSet};
 use blackbox_log::Log;
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
@@ -102,7 +102,6 @@ struct FieldSnapshot {
 #[serde(untagged)]
 enum History {
     Int(NumberHistory<16, i128>),
-    Float(NumberHistory<16, f64>),
     Bool { yes: usize, no: usize },
     Flags(BTreeMap<&'static str, usize>),
 }
@@ -121,12 +120,12 @@ impl FieldSnapshot {
             name,
             unit,
             history: match unit {
-                Unit::FrameTime | Unit::Rotation | Unit::Unitless => {
-                    History::Int(NumberHistory::new())
-                }
-                Unit::Amperage | Unit::Voltage | Unit::Acceleration => {
-                    History::Float(NumberHistory::new())
-                }
+                Unit::FrameTime
+                | Unit::Amperage
+                | Unit::Voltage
+                | Unit::Acceleration
+                | Unit::Rotation
+                | Unit::Unitless => History::Int(NumberHistory::new()),
                 Unit::Boolean => History::Bool { yes: 0, no: 0 },
                 Unit::FlightMode | Unit::State | Unit::FailsafePhase => {
                     History::Flags(BTreeMap::new())
@@ -135,20 +134,21 @@ impl FieldSnapshot {
         }
     }
 
-    #[allow(clippy::wildcard_enum_match_arm)]
+    #[allow(clippy::wildcard_enum_match_arm, clippy::cast_possible_truncation)]
     fn update(&mut self, value: Value) {
         match &mut self.history {
             History::Int(history) => history.update(match value {
-                Value::FrameTime(t) => t.into(),
-                Value::Rotation(r) => r.as_degrees().into(),
+                Value::FrameTime(t) => t.get::<si::time::microsecond>().into(),
+                Value::Amperage(a) => a.get::<si::electric_current::milliampere>().round() as i128,
+                Value::Voltage(v) => v.get::<si::electric_potential::millivolt>().round() as i128,
+                Value::Acceleration(a) => a
+                    .get::<si::acceleration::centimeter_per_second_squared>()
+                    .round() as i128,
+                Value::Rotation(r) => {
+                    r.get::<si::angular_velocity::degree_per_second>().round() as i128
+                }
                 Value::Unsigned(u) => u.into(),
                 Value::Signed(s) => s.into(),
-                _ => unreachable!(),
-            }),
-            History::Float(history) => history.update(match value {
-                Value::Amperage(a) => a.as_amps(),
-                Value::Voltage(v) => v.as_volts(),
-                Value::Acceleration(a) => a.as_gs(),
                 _ => unreachable!(),
             }),
             History::Bool { yes, no } => match value {
@@ -223,37 +223,61 @@ impl<const N: usize> NumberHistory<N, i128> {
     }
 }
 
-impl<const N: usize> NumberHistory<N, f64> {
-    #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
-    fn update(&mut self, value: f64) {
-        self.update_range(value);
-        self.update_seen(value);
-        self.update_histogram(value.round().abs() as u128);
-    }
-}
-
-impl<const N: usize, T> Serialize for NumberHistory<N, T>
+impl<const N: usize> Serialize for NumberHistory<N, i128>
 where
-    T: Serialize,
     [usize; N]: Serialize,
 {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let unique = self.seen.len();
-
-        let mut state =
-            serializer.serialize_struct("FieldSnapshot", if unique > 1 { 4 } else { 3 })?;
-
-        state.serialize_field("min", &self.min)?;
-        state.serialize_field("max", &self.max)?;
-        state.serialize_field("unique", &unique)?;
-
-        if unique > 1 {
-            state.serialize_field("histogram", &self.histogram)?;
-        }
-
-        state.end()
+        serialize(self, self.min, self.max, serializer)
     }
+}
+
+impl<const N: usize> Serialize for NumberHistory<N, f64>
+where
+    [usize; N]: Serialize,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serialize(
+            self,
+            format!("{:.2}", self.min),
+            format!("{:.2}", self.max),
+            serializer,
+        )
+    }
+}
+
+#[inline(always)]
+fn serialize<const N: usize, T, S, U>(
+    snapshot: &NumberHistory<N, T>,
+    min: U,
+    max: U,
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+    U: Serialize,
+    [usize; N]: Serialize,
+{
+    let unique = snapshot.seen.len();
+
+    let mut state = serializer.serialize_struct("FieldSnapshot", 4)?;
+
+    state.serialize_field("min", &min)?;
+    state.serialize_field("max", &max)?;
+    state.serialize_field("unique", &unique)?;
+
+    let histogram = "histogram";
+    if unique > 1 {
+        state.serialize_field(histogram, &snapshot.histogram)?;
+    } else {
+        state.skip_field(histogram)?;
+    }
+
+    state.end()
 }

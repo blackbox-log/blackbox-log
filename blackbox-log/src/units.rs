@@ -2,110 +2,46 @@ use alloc::vec::Vec;
 use core::fmt;
 
 use bitvec::prelude::*;
+pub use uom::si;
 
 use crate::common::FirmwareKind;
-use crate::parser::headers::CurrentMeterConfig;
-use crate::parser::{as_signed, Headers};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Amperage {
-    raw: i32,
-    current_meter: CurrentMeterConfig,
+pub(crate) mod prelude {
+    pub use super::si::acceleration::meter_per_second_squared as mps2;
+    pub use super::si::angular_velocity::degree_per_second;
+    pub use super::si::electric_current::{ampere, milliampere};
+    pub use super::si::electric_potential::{millivolt, volt};
+    pub use super::si::time::{microsecond, second};
+    pub use super::{
+        Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, SystemTime,
+    };
 }
 
-impl Amperage {
-    pub(crate) fn new(raw: u32, headers: &Headers) -> Self {
-        Self {
-            raw: as_signed(raw),
-            current_meter: headers.current_meter.unwrap(),
-        }
-    }
+pub mod system {
+    use uom::*;
 
-    pub fn as_amps(&self) -> f64 {
-        let milliamps = f64::from(self.raw * 3300) / 4095.;
-        let milliamps = milliamps - f64::from(self.current_meter.offset);
-        (milliamps * 10.) / f64::from(self.current_meter.scale)
-    }
-}
+    storage_types! {
+        pub types: f64, u64;
 
-impl fmt::Display for Amperage {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:.*}", f.precision().unwrap_or(2), self.as_amps())
-    }
-}
-
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Voltage {
-    pub(crate) raw: u32,
-    pub(crate) scale: u16,
-}
-
-impl Voltage {
-    pub(crate) fn new(raw: u32, headers: &Headers) -> Self {
-        Self {
-            raw,
-            scale: headers.vbat.unwrap().scale,
-        }
-    }
-
-    pub fn as_volts(&self) -> f64 {
-        f64::from(
-            self.raw
-                .saturating_mul(330)
-                .saturating_mul(u32::from(self.scale)),
-        ) / 4.095
+        use uom::system;
+        uom::ISQ!(
+            uom::si,
+            V,
+            (
+                meter,
+                gram,
+                microsecond,
+                milliampere,
+                degree_celsius,
+                mole,
+                candela
+            )
+        );
     }
 }
 
-impl fmt::Display for Voltage {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:.*}", f.precision().unwrap_or(2), self.as_volts())
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Acceleration {
-    raw: i32,
-    one_g: u16,
-}
-
-impl Acceleration {
-    pub(crate) fn new(raw: u32, headers: &Headers) -> Self {
-        Self {
-            raw: as_signed(raw),
-            one_g: headers.acceleration_1g.unwrap(),
-        }
-    }
-
-    pub fn as_gs(&self) -> f64 {
-        f64::from(self.raw) / f64::from(self.one_g)
-    }
-}
-
-impl fmt::Display for Acceleration {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:.*}", f.precision().unwrap_or(2), self.as_gs())
-    }
-}
-
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Rotation(i32);
-
-impl Rotation {
-    pub(crate) const fn new(raw: u32) -> Self {
-        Self(as_signed(raw))
-    }
-
-    pub fn as_degrees(&self) -> i32 {
-        self.0
-    }
-}
-
-impl fmt::Display for Rotation {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
+pub use self::system::f64::{Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential};
+pub use self::system::u64::Time as SystemTime;
 
 pub trait FlagSet {
     type Flag: Flag;
@@ -301,3 +237,89 @@ define_flag_set!(FailsafePhaseSet, FailsafePhase {
     RxLossRecovered:  5 / 7,
     GpsRescue:        6 /  ,
 });
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    macro_rules! float_eq {
+        ($left:expr, $right:expr) => {
+            assert!(
+                ($left - $right).abs() < 0.01,
+                "floats are greater than 0.01 apart"
+            );
+        };
+    }
+
+    #[test]
+    fn time_1_microsecond() {
+        use si::time::microsecond;
+        assert_eq!(1, SystemTime::new::<microsecond>(1).get::<microsecond>());
+    }
+
+    #[test]
+    fn time_1_day() {
+        use si::time::day;
+        assert_eq!(1, SystemTime::new::<day>(1).get::<day>());
+    }
+
+    #[test]
+    fn acceleration_1_mm_per_sec_sq() {
+        use si::acceleration::millimeter_per_second_squared as mmps2;
+        float_eq!(1., Acceleration::new::<mmps2>(1.).get::<mmps2>());
+    }
+
+    #[test]
+    fn acceleration_1_km_per_sec_sq() {
+        use si::acceleration::kilometer_per_second_squared as kmps2;
+        float_eq!(1., Acceleration::new::<kmps2>(1.).get::<kmps2>());
+    }
+
+    #[test]
+    fn angular_velocity_1_rev_per_sec() {
+        use si::angular_velocity::revolution_per_second as rps;
+        float_eq!(1., AngularVelocity::new::<rps>(1.).get::<rps>());
+    }
+
+    #[test]
+    fn angular_velocity_5k_degree() {
+        use si::angular_velocity::degree_per_second;
+        float_eq!(
+            5_000.,
+            AngularVelocity::new::<degree_per_second>(5_000.).get::<degree_per_second>()
+        );
+    }
+
+    #[test]
+    fn electric_current_1_milliamp() {
+        use si::electric_current::milliampere;
+        float_eq!(
+            1.,
+            ElectricCurrent::new::<milliampere>(1.).get::<milliampere>()
+        );
+    }
+
+    #[test]
+    fn electric_current_1_kiloamp() {
+        use si::electric_current::kiloampere;
+        float_eq!(
+            1.,
+            ElectricCurrent::new::<kiloampere>(1.).get::<kiloampere>()
+        );
+    }
+
+    #[test]
+    fn electric_potential_1_millivolt() {
+        use si::electric_potential::millivolt;
+        float_eq!(
+            1.,
+            ElectricPotential::new::<millivolt>(1.).get::<millivolt>()
+        );
+    }
+
+    #[test]
+    fn electric_potential_1_kilovolt() {
+        use si::electric_potential::kilovolt;
+        float_eq!(1., ElectricPotential::new::<kilovolt>(1.).get::<kilovolt>());
+    }
+}

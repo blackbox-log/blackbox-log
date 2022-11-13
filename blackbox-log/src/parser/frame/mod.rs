@@ -6,7 +6,6 @@ mod slow;
 use alloc::borrow::ToOwned;
 use alloc::format;
 use alloc::vec::Vec;
-use core::fmt;
 use core::iter::Peekable;
 
 pub(crate) use self::gps::*;
@@ -15,6 +14,7 @@ pub(crate) use self::main::*;
 pub(crate) use self::slow::*;
 use super::{Encoding, InternalResult, ParseError, ParseResult, Predictor, Reader};
 use crate::units;
+use crate::units::{Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, SystemTime};
 
 pub trait FieldDef {
     fn name(&self) -> &str;
@@ -62,37 +62,19 @@ impl From<SlowUnit> for Unit {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Value {
-    FrameTime(u64),
-    Amperage(units::Amperage),
-    Voltage(units::Voltage),
-    Acceleration(units::Acceleration),
-    Rotation(units::Rotation),
+    FrameTime(SystemTime),
+    Amperage(ElectricCurrent),
+    Voltage(ElectricPotential),
+    Acceleration(Acceleration),
+    Rotation(AngularVelocity),
     FlightMode(units::FlightModeSet),
     State(units::StateSet),
     FailsafePhase(units::FailsafePhaseSet),
     Boolean(bool),
     Unsigned(u32),
     Signed(i32),
-}
-
-impl fmt::Display for Value {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::FrameTime(x) => x.fmt(f),
-            Self::Amperage(x) => x.fmt(f),
-            Self::Voltage(x) => x.fmt(f),
-            Self::Acceleration(x) => x.fmt(f),
-            Self::Rotation(x) => x.fmt(f),
-            Self::FlightMode(x) => x.fmt(f),
-            Self::State(x) => x.fmt(f),
-            Self::FailsafePhase(x) => x.fmt(f),
-            Self::Boolean(x) => x.fmt(f),
-            Self::Unsigned(x) => x.fmt(f),
-            Self::Signed(x) => x.fmt(f),
-        }
-    }
 }
 
 impl From<MainValue> for Value {

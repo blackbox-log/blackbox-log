@@ -9,7 +9,7 @@ use crate::parser::{
     as_signed, decode, predictor, to_base_field, Encoding, FrameKind, Headers, InternalResult,
     ParseError, ParseResult, Predictor, Reader,
 };
-use crate::units;
+use crate::units::prelude::*;
 
 macro_rules! trace_field {
     (_impl pre $field:expr, $enc:expr, $signed:expr, $raw:expr) => {
@@ -79,7 +79,7 @@ impl MainFrame {
     pub(crate) fn get(&self, index: usize, headers: &Headers) -> Option<MainValue> {
         let unit = match index {
             0 => MainValue::Unsigned(self.iteration),
-            1 => MainValue::FrameTime(self.time),
+            1 => MainValue::FrameTime(SystemTime::new::<microsecond>(self.time)),
             _ => {
                 let index = index - 2;
                 let def = headers.main_frames.fields.get(index)?;
@@ -87,19 +87,38 @@ impl MainFrame {
                 match def.unit {
                     MainUnit::Amperage => {
                         debug_assert!(def.signed);
-                        MainValue::Amperage(units::Amperage::new(raw, headers))
+                        let meter = headers.current_meter.unwrap();
+
+                        let milliamps = f64::from(raw * 3300) / 4095.;
+                        let milliamps = milliamps - f64::from(meter.offset);
+                        let amps = (milliamps * 10.) / f64::from(meter.scale);
+
+                        MainValue::Amperage(ElectricCurrent::new::<ampere>(amps))
                     }
                     MainUnit::Voltage => {
                         debug_assert!(!def.signed);
-                        MainValue::Voltage(units::Voltage::new(raw, headers))
+
+                        let vbat = headers.vbat.unwrap();
+                        let volts = f64::from(
+                            raw.saturating_mul(330)
+                                .saturating_mul(u32::from(vbat.scale)),
+                        ) / 4.095;
+
+                        MainValue::Voltage(ElectricPotential::new::<volt>(volts))
                     }
                     MainUnit::Acceleration => {
                         debug_assert!(def.signed);
-                        MainValue::Acceleration(units::Acceleration::new(raw, headers))
+
+                        let one_g = headers.acceleration_1g.unwrap();
+                        let gs = f64::from(as_signed(raw)) / f64::from(one_g);
+
+                        MainValue::Acceleration(Acceleration::new::<mps2>(gs * 9.80665))
                     }
                     MainUnit::Rotation => {
                         debug_assert!(def.signed);
-                        MainValue::Rotation(units::Rotation::new(raw))
+                        MainValue::Rotation(AngularVelocity::new::<degree_per_second>(
+                            as_signed(raw).into(),
+                        ))
                     }
                     MainUnit::Unitless => MainValue::new_unitless(raw, def.signed),
                     MainUnit::FrameTime => unreachable!(),
@@ -111,13 +130,13 @@ impl MainFrame {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub(crate) enum MainValue {
-    FrameTime(u64),
-    Amperage(units::Amperage),
-    Voltage(units::Voltage),
-    Acceleration(units::Acceleration),
-    Rotation(units::Rotation),
+    FrameTime(SystemTime),
+    Amperage(ElectricCurrent),
+    Voltage(ElectricPotential),
+    Acceleration(Acceleration),
+    Rotation(AngularVelocity),
     Unsigned(u32),
     Signed(i32),
 }

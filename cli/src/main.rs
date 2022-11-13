@@ -5,6 +5,8 @@ use std::io::{self, BufWriter, Read, Write};
 use std::path::Path;
 use std::process::{ExitCode, Termination};
 
+use blackbox_log::parser::Value;
+use blackbox_log::units::si;
 use blackbox_log::Log;
 use mimalloc::MiMalloc;
 use rayon::prelude::*;
@@ -124,10 +126,33 @@ fn write_csv(out: &mut impl Write, log: &Log) -> io::Result<()> {
     write_csv_line(out, log.iter_fields().map(|(name, _unit)| name))?;
 
     for frame in log.iter_frames() {
-        write_csv_line(out, frame.map(|value| value.to_string()))?;
+        write_csv_line(
+            out,
+            frame.map(|value| match value {
+                Value::FrameTime(t) => t.get::<si::time::microsecond>().to_string(),
+                Value::Amperage(a) => a.get::<si::electric_current::milliampere>().to_string(),
+                Value::Voltage(v) => format_float(v.get::<si::electric_potential::volt>()),
+                Value::Acceleration(a) => {
+                    format_float(a.get::<si::acceleration::meter_per_second_squared>())
+                }
+                Value::Rotation(r) => {
+                    format_float(r.get::<si::angular_velocity::degree_per_second>())
+                }
+                Value::FlightMode(f) => f.to_string(),
+                Value::State(s) => s.to_string(),
+                Value::FailsafePhase(f) => f.to_string(),
+                Value::Boolean(b) => b.to_string(),
+                Value::Unsigned(u) => u.to_string(),
+                Value::Signed(s) => s.to_string(),
+            }),
+        )?;
     }
 
     out.flush()
+}
+
+fn format_float(f: f64) -> String {
+    format!("{f:.2}")
 }
 
 fn write_csv_line<T: AsRef<str>>(
