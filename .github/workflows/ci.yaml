@@ -79,7 +79,7 @@ jobs:
           rm -r fc-blackbox~
           rm -r gimbal-ghost~
 
-      - name: Run all tests
+      - name: Run tests
         run: cargo ci test
         if: ${{ !matrix.coverage }}
 

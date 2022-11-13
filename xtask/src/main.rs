@@ -61,12 +61,14 @@ fn main() -> Result<()> {
 
         Args::Test {
             coverage,
+            ignored,
             quiet,
             args,
         } => {
             let ci = if is_ci { "--profile=ci" } else { "" };
-            let quiet = if !is_ci && quiet {
-                "--status-level=leak"
+            let quiet = if quiet { "--status-level=leak" } else { "" };
+            let ignored = if ignored || coverage {
+                "--run-ignored=all"
             } else {
                 ""
             };
@@ -75,16 +77,22 @@ fn main() -> Result<()> {
                 let base = cmd!(sh, "cargo llvm-cov --package blackbox-log --all-features");
 
                 if is_ci {
-                    base.args(&["--lcov", "--output-path=coverage.lcov", "nextest", ci])
-                        .run()
+                    base.args(&[
+                        "--lcov",
+                        "--output-path=coverage.lcov",
+                        "nextest",
+                        ci,
+                        ignored,
+                    ])
+                    .run()
                 } else {
-                    base.args(&["--html", "nextest", quiet]).run()
+                    base.args(&["--html", "nextest", quiet, ignored]).run()
                 }
             } else {
                 let workspace = get_workspace_args(true);
                 cmd!(
                     sh,
-                    "cargo nextest run --all-features {workspace...} {ci} {quiet}"
+                    "cargo nextest run --all-features {workspace...} {ci} {quiet} {ignored}"
                 )
                 .args(args)
                 .run()
@@ -258,8 +266,11 @@ enum Args {
     /// Runs nextest tests
     Test {
         /// Generates a coverage report while running tests (only for
-        /// `blackbox-log`)
+        /// `blackbox-log`). Implies --ignored
         coverage: bool,
+
+        /// Additionally run ignored tests
+        ignored: bool,
 
         #[bpaf(short, long)]
         /// Hide output for successful tests

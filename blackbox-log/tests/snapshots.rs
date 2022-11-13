@@ -32,11 +32,13 @@ fn own() {
 }
 
 #[test]
+#[ignore]
 fn fc_blackbox() {
     insta::glob!("logs/fc-blackbox/*", run!());
 }
 
 #[test]
+#[ignore]
 fn gimbal_ghost() {
     insta::glob!("logs/gimbal-ghost/*", run!());
 }
