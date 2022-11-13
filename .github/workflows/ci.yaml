@@ -81,6 +81,7 @@ jobs:
 
       - name: Run all tests
         run: cargo ci test
+        if: ${{ !matrix.coverage }}
 
       - name: Generate coverage
         run: cargo ci test --coverage
