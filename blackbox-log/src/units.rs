@@ -5,6 +5,7 @@ use bitvec::prelude::*;
 pub use uom::si;
 
 use crate::common::FirmwareKind;
+use crate::parser::headers::CurrentMeterConfig;
 
 pub(crate) mod prelude {
     pub use super::si::acceleration::meter_per_second_squared as mps2;
@@ -33,6 +34,29 @@ pub mod system {
 }
 
 pub use self::system::{Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Time};
+
+pub(crate) fn new_acceleration(raw: i32, one_g: u16) -> Acceleration {
+    let gs = f64::from(raw) / f64::from(one_g);
+    Acceleration::new::<prelude::mps2>(gs * 9.80665)
+}
+
+pub(crate) fn new_angular_velocity(raw: i32) -> AngularVelocity {
+    AngularVelocity::new::<prelude::degree_per_second>(raw.into())
+}
+
+pub(crate) fn new_electric_current(raw: i32, current_meter: CurrentMeterConfig) -> ElectricCurrent {
+    let milliamps = f64::from(raw) * 3300. / 4095.;
+    let milliamps = milliamps - f64::from(current_meter.offset);
+    let amps = (milliamps * 10.) / f64::from(current_meter.scale);
+
+    ElectricCurrent::new::<prelude::ampere>(amps)
+}
+
+pub(crate) fn new_electric_potential(raw: u32, scale: u16) -> ElectricPotential {
+    let volts = f64::from(raw) * 330. * f64::from(scale) / 4.095;
+
+    ElectricPotential::new::<prelude::volt>(volts)
+}
 
 pub trait FlagSet {
     type Flag: Flag;

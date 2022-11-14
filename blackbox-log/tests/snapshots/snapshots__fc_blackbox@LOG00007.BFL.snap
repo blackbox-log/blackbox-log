@@ -245,9 +245,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00007.BFL
         unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 1048832062271,
-          unique: 13,
-          histogram: (52540, 1, 39, 6792, 0, 151754, 0, 0, 686, 0, 69984, 0, 1, 58, 0, 12601),
+          max: 38072603727472528,
+          unique: 14,
+          histogram: (52542, 1, 39, 6792, 0, 151754, 0, 0, 686, 0, 69984, 0, 1, 58, 0, 12599),
         ),
       ),
       FieldSnapshot(
