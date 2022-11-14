@@ -1,8 +1,8 @@
 #![allow(clippy::print_stdout)]
 
-use std::env;
 use std::ffi::OsString;
 use std::path::PathBuf;
+use std::{env, fs};
 
 use bpaf::{Bpaf, Parser};
 use serde::Deserialize;
@@ -38,12 +38,27 @@ fn main() -> Result<()> {
             let lints: Lints = toml::from_str(&lints).unwrap();
             let lints = lints.into_clippy_args();
 
+            let workspace_args = get_workspace_args(workspace, false);
+
             run(
-                cmd!(sh, "cargo clippy --all-targets")
-                    .args(get_workspace_args(workspace))
+                cmd!(sh, "cargo clippy --examples --tests --bins")
+                    .args(&workspace_args)
                     .args(&args),
                 &lints,
             )?;
+
+            {
+                let _env = sh.push_env("RUSTFLAGS", "--cfg bench");
+                run(
+                    cmd!(sh, "cargo clippy --benches").args(&workspace_args),
+                    &lints,
+                )?;
+            }
+
+            if workspace_args.iter().any(|s| s.contains("fuzz")) {
+                let _env = sh.push_env("RUSTFLAGS", "--cfg fuzzing");
+                run(cmd!(sh, "cargo clippy --package blackbox-fuzz"), &lints)?;
+            }
 
             if !is_ci && (workspace || sh.current_dir() == root) {
                 run(
@@ -89,7 +104,8 @@ fn main() -> Result<()> {
                     base.args(&["--html", "nextest", quiet, ignored]).run()
                 }
             } else {
-                let workspace = get_workspace_args(true);
+                let workspace = get_workspace_args(true, false);
+
                 cmd!(
                     sh,
                     "cargo nextest run --all-features {workspace...} {ci} {quiet} {ignored}"
@@ -100,6 +116,8 @@ fn main() -> Result<()> {
         }
 
         Args::Bench { test, args } => {
+            let _env = sh.push_env("RUSTFLAGS", "--cfg bench");
+
             if test {
                 cmd!(
                     sh,
@@ -146,7 +164,17 @@ fn main() -> Result<()> {
             ];
 
             match fuzz {
-                Fuzz::List => cmd!(sh, "cargo fuzz list {dir_args...}").run(),
+                Fuzz::List => {
+                    let dir = fuzz_dir.join("src/bin");
+
+                    for entry in fs::read_dir(dir).unwrap().map(Result::unwrap) {
+                        let path = entry.path();
+                        let name = path.file_stem().unwrap();
+                        println!("{}", name.to_string_lossy());
+                    }
+
+                    Ok(())
+                }
 
                 Fuzz::Run {
                     target,
@@ -422,17 +450,21 @@ fn get_unixtime() -> u64 {
         .as_secs()
 }
 
-fn get_workspace_args(workspace: bool) -> Vec<&'static str> {
+fn get_workspace_args(workspace: bool, fuzz: bool) -> Vec<&'static str> {
     if workspace {
         let mut args = vec!["--workspace"];
 
-        if cfg!(not(target_os = "linux")) {
-            let packages = ["blackbox-fuzz", "blackbox-sys"];
+        let packages: &[_] = if cfg!(not(target_os = "linux")) {
+            &["blackbox-fuzz", "blackbox-sys"]
+        } else if !fuzz {
+            &["blackbox-fuzz"]
+        } else {
+            &[]
+        };
 
-            for package in packages {
-                args.push("--exclude");
-                args.push(package);
-            }
+        for package in packages {
+            args.push("--exclude");
+            args.push(package);
         }
 
         args

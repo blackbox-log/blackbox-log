@@ -104,7 +104,7 @@ const fn zig_zag_decode(value: u32) -> i32 {
     (value >> 1) as i32 ^ -(value as i32 & 1)
 }
 
-#[doc(hidden)]
+#[cfg(any(fuzzing, bench))]
 pub mod no_error {
     use crate::parser::Reader;
 

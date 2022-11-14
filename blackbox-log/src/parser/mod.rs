@@ -1,5 +1,6 @@
-// Need it `pub` to run benchmarks and fuzz test
-#[doc(hidden)]
+#[cfg(not(any(fuzzing, bench)))]
+mod decode;
+#[cfg(any(fuzzing, bench))]
 pub mod decode;
 
 mod data;

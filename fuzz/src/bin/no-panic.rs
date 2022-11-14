@@ -1,8 +1,6 @@
 #![no_main]
 
-use blackbox_fuzz::fuzz_target;
-
-fuzz_target!(|data: &[u8]| {
+blackbox_fuzz::fuzz_target!(|data: &[u8]| {
     let f = blackbox_log::File::new(data);
 
     for i in 0..f.log_count() {

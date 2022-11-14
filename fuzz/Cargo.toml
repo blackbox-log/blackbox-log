@@ -17,51 +17,48 @@ blackbox-log.workspace = true
 libfuzzer-sys = "0.4.5"
 memfile = "0.2.1"
 
+[lib]
+test = false
+bench = false
+doc = false
+
 [[bin]]
-name = "file"
-path = "fuzz_targets/file.rs"
+name = "no-panic"
 test = false
 bench = false
 doc = false
 
 [[bin]]
 name = "variable-signed"
-path = "fuzz_targets/variable_signed.rs"
 test = false
 bench = false
 doc = false
 
 [[bin]]
 name = "variable"
-path = "fuzz_targets/variable.rs"
 test = false
 bench = false
 doc = false
 
 [[bin]]
 name = "tagged-variable"
-path = "fuzz_targets/tagged_variable.rs"
 test = false
 bench = false
 doc = false
 
 [[bin]]
 name = "tagged-16"
-path = "fuzz_targets/tagged_16.rs"
 test = false
 bench = false
 doc = false
 
 [[bin]]
 name = "tagged-32"
-path = "fuzz_targets/tagged_32.rs"
 test = false
 bench = false
 doc = false
 
 [[bin]]
 name = "negative-14-bit"
-path = "fuzz_targets/negative_14_bit.rs"
 test = false
 doc = false
-
