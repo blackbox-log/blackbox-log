@@ -1,0 +1,933 @@
+---
+source: blackbox-log/tests/snapshots.rs
+expression: logs
+input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
+---
+[
+  Ok(LogSnapshot(
+    headers: Headers(
+      version: V2,
+      firmware_revision: "EmuFlight 0.4.1 (7bac6ddd0) HELIOSPRING",
+      firmware_kind: Betaflight,
+      board_info: None,
+      craft_name: Some("XL7_HELIO"),
+      vbat: Some(VbatConfig(
+        reference: 248,
+        scale: 110,
+      )),
+      current_meter: Some(CurrentMeterConfig(
+        offset: 0,
+        scale: 250,
+      )),
+      acceleration_1g: Some(2048),
+      gyro_scale: Some(1.0),
+      min_throttle: Some(1070),
+      motor_output_range: Some(MotorOutputRange(158, 1587)),
+    ),
+    stats: Stats(
+      counts: FrameCounts(
+        main: 223997,
+        slow: 19,
+        gps_home: 0,
+      ),
+    ),
+    events: [
+      SyncBeep(27349603),
+      FlightMode(
+        flags: 4194305,
+        last_flags: 2151677953,
+      ),
+      FlightMode(
+        flags: 4194304,
+        last_flags: 4194305,
+      ),
+      End,
+    ],
+    fields: Fields([
+      FieldSnapshot(
+        name: "loopIteration",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1331719,
+          unique: 223997,
+          histogram: (14000, 14000, 14000, 14000, 14000, 14000, 14000, 14000, 13999, 13999, 13999, 14000, 14000, 14000, 14000, 14000),
+        ),
+      ),
+      FieldSnapshot(
+        name: "time",
+        unit: FrameTime,
+        history: FieldSnapshot(
+          min: 0,
+          max: 164072536,
+          unique: 223997,
+          histogram: (14009, 13947, 13858, 14184, 14062, 13939, 14040, 13885, 14149, 14035, 13855, 14076, 13927, 13960, 14171, 13900),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisP[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -186,
+          max: 574,
+          unique: 547,
+          histogram: (30549, 28676, 25735, 22916, 20056, 17565, 15255, 12949, 10904, 8984, 7528, 6277, 5191, 4392, 3768, 3252),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisP[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -1128,
+          max: 622,
+          unique: 869,
+          histogram: (25302, 24520, 23030, 20814, 19491, 17389, 15648, 13998, 12142, 10739, 9213, 7939, 7142, 6224, 5608, 4798),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisP[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -135,
+          max: 119,
+          unique: 216,
+          histogram: (25153, 23454, 22049, 20453, 19116, 17214, 15778, 14073, 12458, 10871, 9650, 8489, 7368, 6625, 5895, 5351),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisI[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -84,
+          max: 131,
+          unique: 216,
+          histogram: (20101, 14342, 15225, 15993, 15169, 14910, 14133, 13217, 15576, 14668, 13779, 13337, 11605, 10747, 11274, 9921),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisI[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -69,
+          max: 132,
+          unique: 202,
+          histogram: (20038, 15504, 13591, 14737, 15858, 15433, 13749, 13902, 12694, 12017, 12420, 11931, 12904, 13524, 13061, 12634),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisI[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -102,
+          max: 103,
+          unique: 206,
+          histogram: (24075, 18926, 17814, 18157, 17089, 17215, 14127, 11519, 11254, 11339, 11451, 10919, 9961, 9631, 9273, 11247),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisD[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -406,
+          max: 1356,
+          unique: 354,
+          histogram: (21093, 20486, 19228, 18116, 17190, 15854, 14934, 13849, 12976, 11981, 11426, 10719, 9824, 9308, 8828, 8185),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisD[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -2375,
+          max: 828,
+          unique: 522,
+          histogram: (21981, 20834, 19872, 18720, 17508, 16507, 15059, 13912, 12825, 11812, 10947, 10335, 9457, 8666, 8122, 7440),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisD[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -11,
+          max: 5,
+          unique: 16,
+          histogram: (193952, 29014, 975, 30, 11, 4, 2, 2, 2, 0, 3, 2, 0, 0, 0, 0),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisF[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 0,
+          unique: 1,
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisF[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 0,
+          unique: 1,
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisF[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 0,
+          unique: 1,
+        ),
+      ),
+      FieldSnapshot(
+        name: "rcCommand[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -419,
+          max: 495,
+          unique: 915,
+          histogram: (40253, 18141, 17035, 13150, 11623, 11949, 10745, 10508, 10784, 10663, 11878, 11837, 10557, 10754, 12629, 11491),
+        ),
+      ),
+      FieldSnapshot(
+        name: "rcCommand[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -317,
+          max: 499,
+          unique: 817,
+          histogram: (36135, 25458, 23164, 17179, 11758, 11952, 11903, 11829, 9928, 8577, 10182, 9730, 9043, 8401, 8944, 9814),
+        ),
+      ),
+      FieldSnapshot(
+        name: "rcCommand[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -303,
+          max: 390,
+          unique: 694,
+          histogram: (50414, 26422, 18090, 12400, 11757, 10433, 10498, 9854, 9709, 9139, 10402, 9667, 8729, 8722, 8860, 8901),
+        ),
+      ),
+      FieldSnapshot(
+        name: "rcCommand[3]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1999,
+          unique: 1001,
+          histogram: (12436, 14437, 11294, 13285, 14813, 13279, 11856, 13251, 26991, 12348, 14287, 11669, 13192, 11760, 13052, 16047),
+        ),
+      ),
+      FieldSnapshot(
+        name: "setpoint[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -396,
+          max: 769,
+          unique: 1154,
+          histogram: (44437, 22292, 13818, 12469, 13695, 12921, 12663, 11185, 12084, 11015, 11084, 9058, 9420, 9142, 10429, 8285),
+        ),
+      ),
+      FieldSnapshot(
+        name: "setpoint[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -188,
+          max: 800,
+          unique: 939,
+          histogram: (41748, 41168, 17210, 14966, 12804, 13429, 12983, 10274, 10969, 9198, 7772, 7846, 6521, 5311, 5814, 5984),
+        ),
+      ),
+      FieldSnapshot(
+        name: "setpoint[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -154,
+          max: 286,
+          unique: 441,
+          histogram: (62629, 28133, 13812, 12361, 12470, 10291, 9009, 8939, 9885, 8906, 8258, 8251, 7413, 7688, 7813, 8139),
+        ),
+      ),
+      FieldSnapshot(
+        name: "setpoint[3]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1000,
+          unique: 1001,
+          histogram: (29251, 11945, 14284, 11700, 13417, 12593, 11680, 13662, 15588, 13215, 13044, 11140, 15346, 14956, 10991, 11185),
+        ),
+      ),
+      FieldSnapshot(
+        name: "vbatLatest",
+        unit: Voltage,
+        history: FieldSnapshot(
+          min: 0,
+          max: 2198388278,
+          unique: 54,
+          histogram: (17530, 6315, 17671, 19243, 17997, 5782, 9135, 12588, 20033, 20250, 7433, 17433, 4666, 20870, 19458, 7593),
+        ),
+      ),
+      FieldSnapshot(
+        name: "amperageLatest",
+        unit: Amperage,
+        history: FieldSnapshot(
+          min: 0,
+          max: 424205,
+          unique: 1125,
+          histogram: (13821, 15877, 14311, 12981, 14074, 14397, 12690, 13509, 13587, 13363, 14188, 15124, 13231, 14269, 14409, 14166),
+        ),
+      ),
+      FieldSnapshot(
+        name: "rssi",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1023,
+          unique: 63,
+          histogram: (21034, 16925, 4699, 14886, 2232, 18350, 1525, 21240, 8611, 18917, 19355, 8085, 29152, 1852, 31776, 5358),
+        ),
+      ),
+      FieldSnapshot(
+        name: "gyroADC[0]",
+        unit: Rotation,
+        history: FieldSnapshot(
+          min: -392,
+          max: 780,
+          unique: 1141,
+          histogram: (18032, 23741, 20248, 18327, 16469, 14817, 14237, 13093, 12394, 11651, 10711, 10404, 10240, 10236, 9901, 9496),
+        ),
+      ),
+      FieldSnapshot(
+        name: "gyroADC[1]",
+        unit: Rotation,
+        history: FieldSnapshot(
+          min: -203,
+          max: 830,
+          unique: 983,
+          histogram: (18964, 27707, 24387, 21105, 17992, 15784, 13986, 12964, 11754, 10605, 9780, 8827, 8200, 7787, 7189, 6966),
+        ),
+      ),
+      FieldSnapshot(
+        name: "gyroADC[2]",
+        unit: Rotation,
+        history: FieldSnapshot(
+          min: -161,
+          max: 281,
+          unique: 443,
+          histogram: (19710, 28712, 25196, 21424, 18057, 15816, 13325, 11500, 10480, 9792, 9665, 8931, 8320, 8016, 7714, 7339),
+        ),
+      ),
+      FieldSnapshot(
+        name: "accSmooth[0]",
+        unit: Acceleration,
+        history: FieldSnapshot(
+          min: -6276,
+          max: 4521,
+          unique: 3152,
+          histogram: (14088, 13969, 14311, 14038, 13914, 14076, 14011, 14249, 13717, 14077, 13877, 13977, 13950, 14093, 13886, 13764),
+        ),
+      ),
+      FieldSnapshot(
+        name: "accSmooth[1]",
+        unit: Acceleration,
+        history: FieldSnapshot(
+          min: -7924,
+          max: 1725,
+          unique: 2587,
+          histogram: (14063, 14322, 14556, 14085, 14423, 13811, 14093, 13997, 13849, 14028, 13897, 14033, 13797, 13796, 13761, 13486),
+        ),
+      ),
+      FieldSnapshot(
+        name: "accSmooth[2]",
+        unit: Acceleration,
+        history: FieldSnapshot(
+          min: -11995,
+          max: 13366,
+          unique: 8663,
+          histogram: (14079, 14062, 14072, 13885, 14045, 13802, 14167, 13971, 13961, 13868, 13737, 14226, 14103, 13933, 14157, 13929),
+        ),
+      ),
+      FieldSnapshot(
+        name: "debug[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -392,
+          max: 780,
+          unique: 1139,
+          histogram: (18067, 23739, 20246, 18302, 16458, 14836, 14211, 13088, 12383, 11627, 10686, 10401, 10304, 10264, 9923, 9462),
+        ),
+      ),
+      FieldSnapshot(
+        name: "debug[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -203,
+          max: 830,
+          unique: 984,
+          histogram: (18875, 27718, 24395, 21110, 18021, 15802, 13977, 12963, 11705, 10623, 9754, 8858, 8222, 7801, 7168, 7005),
+        ),
+      ),
+      FieldSnapshot(
+        name: "debug[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -161,
+          max: 281,
+          unique: 443,
+          histogram: (19690, 28773, 25187, 21441, 18060, 15811, 13313, 11490, 10468, 9781, 9664, 8916, 8326, 8017, 7715, 7345),
+        ),
+      ),
+      FieldSnapshot(
+        name: "debug[3]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 0,
+          unique: 1,
+        ),
+      ),
+      FieldSnapshot(
+        name: "motor[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1593,
+          unique: 1445,
+          histogram: (13835, 14398, 17315, 14680, 13757, 13858, 13622, 13560, 13671, 13718, 13628, 13631, 13597, 13505, 13565, 13657),
+        ),
+      ),
+      FieldSnapshot(
+        name: "motor[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1599,
+          unique: 1432,
+          histogram: (14137, 15369, 15649, 13767, 13921, 13879, 13618, 13509, 13849, 13832, 13627, 13641, 13730, 13760, 13812, 13897),
+        ),
+      ),
+      FieldSnapshot(
+        name: "motor[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1593,
+          unique: 1448,
+          histogram: (13669, 14792, 15486, 14051, 13825, 13945, 13776, 13974, 14015, 13802, 13717, 13705, 13557, 13974, 13821, 13888),
+        ),
+      ),
+      FieldSnapshot(
+        name: "motor[3]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1598,
+          unique: 1454,
+          histogram: (13959, 14886, 15761, 14137, 13746, 13997, 13894, 13855, 13402, 13883, 13703, 13705, 13690, 13735, 13666, 13978),
+        ),
+      ),
+      FieldSnapshot(
+        name: "flightModeFlags",
+        unit: FlightMode,
+        history: {
+          "Arm": 223963,
+          "FpvAngleMix": 223996,
+          "Paralyze": 266,
+        },
+      ),
+      FieldSnapshot(
+        name: "stateFlags",
+        unit: State,
+        history: {},
+      ),
+      FieldSnapshot(
+        name: "failsafePhase",
+        unit: FailsafePhase,
+        history: {},
+      ),
+      FieldSnapshot(
+        name: "rxSignalReceived",
+        unit: Boolean,
+        history: History(
+          yes: 223996,
+          no: 1,
+        ),
+      ),
+      FieldSnapshot(
+        name: "rxFlightChannelsValid",
+        unit: Boolean,
+        history: History(
+          yes: 223996,
+          no: 1,
+        ),
+      ),
+    ]),
+  )),
+  Ok(LogSnapshot(
+    headers: Headers(
+      version: V2,
+      firmware_revision: "EmuFlight 0.4.1 (7bac6ddd0) HELIOSPRING",
+      firmware_kind: Betaflight,
+      board_info: None,
+      craft_name: Some("XL7_HELIO"),
+      vbat: Some(VbatConfig(
+        reference: 248,
+        scale: 110,
+      )),
+      current_meter: Some(CurrentMeterConfig(
+        offset: 0,
+        scale: 250,
+      )),
+      acceleration_1g: Some(2048),
+      gyro_scale: Some(1.0),
+      min_throttle: Some(1070),
+      motor_output_range: Some(MotorOutputRange(158, 1587)),
+    ),
+    stats: Stats(
+      counts: FrameCounts(
+        main: 247980,
+        slow: 22,
+        gps_home: 0,
+      ),
+    ),
+    events: [
+      SyncBeep(33246310),
+      FlightMode(
+        flags: 4194305,
+        last_flags: 2151677953,
+      ),
+      FlightMode(
+        flags: 4194304,
+        last_flags: 4194305,
+      ),
+      End,
+    ],
+    fields: Fields([
+      FieldSnapshot(
+        name: "loopIteration",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1474535,
+          unique: 247980,
+          histogram: (15499, 15500, 15500, 15499, 15500, 15500, 15499, 15499, 15498, 15497, 15497, 15498, 15498, 15498, 15499, 15499),
+        ),
+      ),
+      FieldSnapshot(
+        name: "time",
+        unit: FrameTime,
+        history: FieldSnapshot(
+          min: 0,
+          max: 184602129,
+          unique: 247980,
+          histogram: (15514, 15363, 15635, 15617, 15577, 15485, 15558, 15685, 15519, 15530, 15532, 15413, 15265, 15524, 15347, 15416),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisP[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -529,
+          max: 591,
+          unique: 696,
+          histogram: (33855, 30837, 28502, 25891, 22748, 19466, 16678, 14437, 11966, 10115, 8517, 6836, 5822, 4803, 4115, 3392),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisP[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -4804,
+          max: 851,
+          unique: 957,
+          histogram: (27976, 27324, 25725, 22687, 20566, 18594, 17093, 15087, 13666, 12014, 10549, 9322, 8279, 7060, 6367, 5671),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisP[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -206,
+          max: 235,
+          unique: 283,
+          histogram: (29961, 28154, 25815, 23863, 21326, 19129, 16997, 14557, 12829, 11308, 9876, 8669, 7404, 6768, 6065, 5259),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisI[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -131,
+          max: 190,
+          unique: 322,
+          histogram: (21584, 16266, 16665, 16911, 15588, 16147, 13988, 14129, 18121, 19515, 17113, 13695, 12011, 14318, 12370, 9559),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisI[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -72,
+          max: 144,
+          unique: 217,
+          histogram: (24825, 18354, 17330, 13632, 16689, 15515, 16494, 16778, 16527, 15839, 13108, 12615, 12570, 12279, 11941, 13484),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisI[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -94,
+          max: 94,
+          unique: 189,
+          histogram: (21749, 18348, 18235, 19445, 18534, 16166, 14962, 14960, 13664, 14348, 15750, 15818, 14074, 11533, 10097, 10297),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisD[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -2869,
+          max: 1492,
+          unique: 370,
+          histogram: (23845, 22615, 21380, 19910, 18567, 17555, 16374, 15232, 14441, 13567, 12863, 11862, 10904, 10316, 9582, 8967),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisD[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -6725,
+          max: 6303,
+          unique: 513,
+          histogram: (23295, 22399, 21390, 20114, 19090, 17732, 16576, 15523, 14602, 13586, 12671, 11702, 10999, 10312, 9365, 8624),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisD[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -21,
+          max: 36,
+          unique: 30,
+          histogram: (227574, 20193, 166, 18, 8, 6, 4, 1, 0, 2, 1, 3, 0, 3, 1, 0),
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisF[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 0,
+          unique: 1,
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisF[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 0,
+          unique: 1,
+        ),
+      ),
+      FieldSnapshot(
+        name: "axisF[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 0,
+          unique: 1,
+        ),
+      ),
+      FieldSnapshot(
+        name: "rcCommand[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -490,
+          max: 493,
+          unique: 935,
+          histogram: (35961, 24392, 20271, 15324, 14023, 13949, 13570, 12239, 11045, 11551, 11899, 12857, 12579, 12423, 12261, 13636),
+        ),
+      ),
+      FieldSnapshot(
+        name: "rcCommand[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -491,
+          max: 499,
+          unique: 968,
+          histogram: (35460, 27309, 32879, 19075, 13150, 12175, 10982, 11754, 10914, 10653, 10429, 10015, 11068, 10155, 11220, 10742),
+        ),
+      ),
+      FieldSnapshot(
+        name: "rcCommand[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -319,
+          max: 369,
+          unique: 689,
+          histogram: (41525, 32537, 19678, 14075, 13755, 12305, 11557, 12104, 11766, 11603, 10752, 11624, 11445, 10754, 10965, 11535),
+        ),
+      ),
+      FieldSnapshot(
+        name: "rcCommand[3]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1999,
+          unique: 1001,
+          histogram: (14904, 16265, 13789, 13209, 15610, 11289, 13277, 18412, 24574, 12615, 14693, 17224, 15007, 15277, 13646, 18189),
+        ),
+      ),
+      FieldSnapshot(
+        name: "setpoint[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -730,
+          max: 749,
+          unique: 1140,
+          histogram: (41892, 25213, 13239, 13082, 12812, 14498, 14173, 14952, 16229, 12767, 12005, 11516, 12184, 10633, 12184, 10601),
+        ),
+      ),
+      FieldSnapshot(
+        name: "setpoint[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -740,
+          max: 800,
+          unique: 1329,
+          histogram: (38360, 51120, 16944, 19764, 17867, 12717, 13519, 12937, 10920, 10560, 9561, 8701, 6461, 5244, 7175, 6130),
+        ),
+      ),
+      FieldSnapshot(
+        name: "setpoint[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -172,
+          max: 245,
+          unique: 418,
+          histogram: (56302, 32882, 16073, 14741, 14640, 14973, 13319, 11071, 11628, 9467, 10225, 9541, 8776, 7999, 7994, 8349),
+        ),
+      ),
+      FieldSnapshot(
+        name: "setpoint[3]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1000,
+          unique: 1001,
+          histogram: (29327, 12671, 13377, 17938, 13944, 15582, 14079, 14449, 19116, 15573, 14548, 13152, 15643, 12503, 11878, 14200),
+        ),
+      ),
+      FieldSnapshot(
+        name: "vbatLatest",
+        unit: Voltage,
+        history: FieldSnapshot(
+          min: 0,
+          max: 2207252747,
+          unique: 55,
+          histogram: (20516, 6142, 16086, 20299, 20730, 12858, 8889, 16143, 23313, 21006, 8918, 20415, 4768, 18733, 20385, 8779),
+        ),
+      ),
+      FieldSnapshot(
+        name: "amperageLatest",
+        unit: Amperage,
+        history: FieldSnapshot(
+          min: 0,
+          max: 424205,
+          unique: 1145,
+          histogram: (13978, 15402, 16577, 16125, 15497, 15864, 16268, 14877, 15427, 15294, 15095, 15705, 13978, 15095, 16737, 16061),
+        ),
+      ),
+      FieldSnapshot(
+        name: "rssi",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1023,
+          unique: 63,
+          histogram: (23442, 14447, 10934, 25235, 1869, 27717, 3062, 24719, 9550, 14340, 22261, 6575, 27067, 4195, 27962, 4605),
+        ),
+      ),
+      FieldSnapshot(
+        name: "gyroADC[0]",
+        unit: Rotation,
+        history: FieldSnapshot(
+          min: -733,
+          max: 770,
+          unique: 1164,
+          histogram: (20640, 24731, 22709, 20027, 17614, 16232, 15255, 14596, 13571, 12984, 12188, 12099, 11809, 11503, 11085, 10937),
+        ),
+      ),
+      FieldSnapshot(
+        name: "gyroADC[1]",
+        unit: Rotation,
+        history: FieldSnapshot(
+          min: -743,
+          max: 2076,
+          unique: 1367,
+          histogram: (21082, 29452, 26776, 23860, 21117, 18137, 16074, 14227, 12880, 11631, 10392, 9587, 9007, 8436, 7713, 7609),
+        ),
+      ),
+      FieldSnapshot(
+        name: "gyroADC[2]",
+        unit: Rotation,
+        history: FieldSnapshot(
+          min: -164,
+          max: 233,
+          unique: 398,
+          histogram: (23227, 31452, 26471, 21932, 18875, 16371, 14813, 12969, 11882, 10867, 10307, 9694, 9640, 9792, 9893, 9795),
+        ),
+      ),
+      FieldSnapshot(
+        name: "accSmooth[0]",
+        unit: Acceleration,
+        history: FieldSnapshot(
+          min: -7491,
+          max: 8552,
+          unique: 3259,
+          histogram: (15643, 15681, 15712, 15595, 15731, 15475, 15360, 15754, 15545, 15275, 15239, 15638, 15513, 14981, 15597, 15241),
+        ),
+      ),
+      FieldSnapshot(
+        name: "accSmooth[1]",
+        unit: Acceleration,
+        history: FieldSnapshot(
+          min: -2493,
+          max: 2003,
+          unique: 2739,
+          histogram: (15557, 15745, 16506, 15463, 15550, 15192, 15593, 15728, 15381, 15712, 15081, 15807, 15248, 15226, 15295, 14896),
+        ),
+      ),
+      FieldSnapshot(
+        name: "accSmooth[2]",
+        unit: Acceleration,
+        history: FieldSnapshot(
+          min: -7298,
+          max: 13692,
+          unique: 8270,
+          histogram: (15382, 15736, 15632, 15470, 15621, 15669, 15598, 15245, 15726, 15132, 15486, 15504, 15634, 15201, 15529, 15415),
+        ),
+      ),
+      FieldSnapshot(
+        name: "debug[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -733,
+          max: 770,
+          unique: 1165,
+          histogram: (20644, 24760, 22629, 19986, 17658, 16230, 15306, 14601, 13525, 12959, 12217, 12125, 11783, 11520, 11117, 10920),
+        ),
+      ),
+      FieldSnapshot(
+        name: "debug[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -743,
+          max: 2076,
+          unique: 1370,
+          histogram: (21065, 29414, 26826, 23872, 21123, 18094, 16107, 14207, 12901, 11603, 10358, 9568, 9025, 8423, 7728, 7666),
+        ),
+      ),
+      FieldSnapshot(
+        name: "debug[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -164,
+          max: 233,
+          unique: 398,
+          histogram: (23224, 31470, 26471, 21880, 18878, 16369, 14805, 12972, 11879, 10878, 10310, 9662, 9662, 9799, 9915, 9806),
+        ),
+      ),
+      FieldSnapshot(
+        name: "debug[3]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 0,
+          unique: 1,
+        ),
+      ),
+      FieldSnapshot(
+        name: "motor[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1598,
+          unique: 1445,
+          histogram: (15149, 15621, 17537, 17116, 15622, 15163, 15190, 15050, 15033, 15107, 15427, 15233, 15297, 15104, 15243, 15088),
+        ),
+      ),
+      FieldSnapshot(
+        name: "motor[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1594,
+          unique: 1439,
+          histogram: (15201, 16412, 17920, 15768, 15659, 15158, 15345, 15160, 15163, 15211, 15295, 15288, 15100, 15124, 15051, 15125),
+        ),
+      ),
+      FieldSnapshot(
+        name: "motor[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1596,
+          unique: 1448,
+          histogram: (15175, 15750, 16095, 15699, 15803, 15430, 15509, 15541, 15452, 15364, 15315, 15215, 15350, 15360, 15386, 15536),
+        ),
+      ),
+      FieldSnapshot(
+        name: "motor[3]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1595,
+          unique: 1448,
+          histogram: (15206, 16935, 16923, 15508, 15445, 15361, 15453, 15442, 15195, 14924, 15452, 15224, 15189, 15247, 15241, 15235),
+        ),
+      ),
+      FieldSnapshot(
+        name: "flightModeFlags",
+        unit: FlightMode,
+        history: {
+          "Arm": 247946,
+          "FpvAngleMix": 247979,
+          "Paralyze": 241,
+        },
+      ),
+      FieldSnapshot(
+        name: "stateFlags",
+        unit: State,
+        history: {},
+      ),
+      FieldSnapshot(
+        name: "failsafePhase",
+        unit: FailsafePhase,
+        history: {},
+      ),
+      FieldSnapshot(
+        name: "rxSignalReceived",
+        unit: Boolean,
+        history: History(
+          yes: 247962,
+          no: 18,
+        ),
+      ),
+      FieldSnapshot(
+        name: "rxFlightChannelsValid",
+        unit: Boolean,
+        history: History(
+          yes: 247979,
+          no: 1,
+        ),
+      ),
+    ]),
+  )),
+]
