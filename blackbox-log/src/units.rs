@@ -235,82 +235,93 @@ mod tests {
 
     macro_rules! float_eq {
         ($left:expr, $right:expr) => {
+            let epsilon = 0.0001;
+            let diff = ($left - $right).abs();
             assert!(
-                ($left - $right).abs() < 0.01,
-                "floats are greater than 0.01 apart"
+                diff < epsilon,
+                "{left} and {right} are greater than {epsilon} apart: {diff}",
+                left = $left,
+                right = $right
             );
         };
     }
 
     #[test]
-    fn time_1_microsecond() {
-        use si::time::microsecond;
-        assert_eq!(1., Time::new::<microsecond>(1.).get::<microsecond>());
-    }
+    fn time() {
+        use si::time::{day, microsecond};
 
-    #[test]
-    fn time_1_day() {
-        use si::time::day;
-        assert_eq!(1., Time::new::<day>(1.).get::<day>());
-    }
+        let ms = Time::new::<microsecond>(1.);
+        float_eq!(1., ms.get::<microsecond>());
 
-    #[test]
-    fn acceleration_1_mm_per_sec_sq() {
-        use si::acceleration::millimeter_per_second_squared as mmps2;
-        float_eq!(1., Acceleration::new::<mmps2>(1.).get::<mmps2>());
-    }
+        let d = Time::new::<day>(1.);
+        float_eq!(1., d.get::<day>());
 
-    #[test]
-    fn acceleration_1_km_per_sec_sq() {
-        use si::acceleration::kilometer_per_second_squared as kmps2;
-        float_eq!(1., Acceleration::new::<kmps2>(1.).get::<kmps2>());
-    }
-
-    #[test]
-    fn angular_velocity_1_rev_per_sec() {
-        use si::angular_velocity::revolution_per_second as rps;
-        float_eq!(1., AngularVelocity::new::<rps>(1.).get::<rps>());
-    }
-
-    #[test]
-    fn angular_velocity_5k_degree() {
-        use si::angular_velocity::degree_per_second;
         float_eq!(
-            5_000.,
-            AngularVelocity::new::<degree_per_second>(5_000.).get::<degree_per_second>()
+            ms.get::<microsecond>() + d.get::<microsecond>(),
+            (ms + d).get::<microsecond>()
         );
     }
 
     #[test]
-    fn electric_current_1_milliamp() {
-        use si::electric_current::milliampere;
+    fn acceleration() {
+        use si::acceleration::{
+            kilometer_per_second_squared as kmps2, millimeter_per_second_squared as mmps2,
+        };
+
+        let mm = Acceleration::new::<mmps2>(1.);
+        float_eq!(1., mm.get::<mmps2>());
+
+        let km = Acceleration::new::<kmps2>(1.);
+        float_eq!(1., km.get::<kmps2>());
+
         float_eq!(
-            1.,
-            ElectricCurrent::new::<milliampere>(1.).get::<milliampere>()
+            mm.get::<mmps2>() + km.get::<mmps2>(),
+            (mm + km).get::<mmps2>()
         );
     }
 
     #[test]
-    fn electric_current_1_kiloamp() {
-        use si::electric_current::kiloampere;
+    fn angular_velocity() {
+        use si::angular_velocity::degree_per_second as dps;
+
+        let slow = AngularVelocity::new::<dps>(0.01);
+        float_eq!(0.01, slow.get::<dps>());
+
+        let fast = AngularVelocity::new::<dps>(5_000.);
+        float_eq!(5_000., fast.get::<dps>());
+
+        float_eq!(5_000.01, (slow + fast).get::<dps>());
+    }
+
+    #[test]
+    fn electric_current() {
+        use si::electric_current::{kiloampere, milliampere};
+
+        let ma = ElectricCurrent::new::<milliampere>(1.);
+        float_eq!(1., ma.get::<milliampere>());
+
+        let ka = ElectricCurrent::new::<kiloampere>(1.);
+        float_eq!(1., ka.get::<kiloampere>());
+
         float_eq!(
-            1.,
-            ElectricCurrent::new::<kiloampere>(1.).get::<kiloampere>()
+            ma.get::<milliampere>() + ka.get::<milliampere>(),
+            (ma + ka).get::<milliampere>()
         );
     }
 
     #[test]
-    fn electric_potential_1_millivolt() {
-        use si::electric_potential::millivolt;
-        float_eq!(
-            1.,
-            ElectricPotential::new::<millivolt>(1.).get::<millivolt>()
-        );
-    }
+    fn electric_potential() {
+        use si::electric_potential::{kilovolt, millivolt};
 
-    #[test]
-    fn electric_potential_1_kilovolt() {
-        use si::electric_potential::kilovolt;
-        float_eq!(1., ElectricPotential::new::<kilovolt>(1.).get::<kilovolt>());
+        let mv = ElectricPotential::new::<millivolt>(1.);
+        float_eq!(1., mv.get::<millivolt>());
+
+        let kv = ElectricPotential::new::<kilovolt>(1.);
+        float_eq!(1., kv.get::<kilovolt>());
+
+        float_eq!(
+            mv.get::<millivolt>() + kv.get::<millivolt>(),
+            (mv + kv).get::<millivolt>()
+        );
     }
 }
