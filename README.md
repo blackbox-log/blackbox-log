@@ -39,24 +39,24 @@ for `blackbox_decode`, with a WASM/JavaScript interface Coming Soon™.
 
 ## Benchmarks
 
-As of [ce71c9a](https://github.com/wetheredge/blackbox/tree/ce71c9a3a7f7218328f1162b2f33e32fab4ea24d):
+As of [50e7566](https://github.com/wetheredge/blackbox/tree/ce71c9a3a7f7218328f1162b2f33e32fab4ea24d):
 
 ```shell
-$ exa -lbs size --no-permissions --no-time --no-user blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
+$ exa -lbs size --no-time --no-permissions --no-user blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
 6.6Mi blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
 
 $ hyperfine -w 10 -L version ce71c9a,betaflight './blackbox_decode-{version} blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL'
-Benchmark #1: ./blackbox_decode-ce71c9a blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
-  Time (mean ± σ):     613.5 ms ±   9.1 ms    [User: 566.2 ms, System: 48.1 ms]
-  Range (min … max):   601.2 ms … 630.1 ms    10 runs
+Benchmark #1: ./blackbox_decode-50e7566 blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
+  Time (mean ± σ):     686.5 ms ±  16.0 ms    [User: 623.8 ms, System: 64.1 ms]
+  Range (min … max):   657.3 ms … 707.3 ms    10 runs
 
 Benchmark #2: ./blackbox_decode-betaflight blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
-  Time (mean ± σ):      1.035 s ±  0.005 s    [User: 994.1 ms, System: 38.2 ms]
-  Range (min … max):    1.030 s …  1.048 s    10 runs
+  Time (mean ± σ):      1.055 s ±  0.010 s    [User: 1.013 s, System: 0.041 s]
+  Range (min … max):    1.039 s …  1.072 s    10 runs
 
 Summary
-  './blackbox_decode-ce71c9a blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL' ran
-    1.69 ± 0.03 times faster than './blackbox_decode-betaflight blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL'
+  './blackbox_decode-50e7566 blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL' ran
+    1.54 ± 0.04 times faster than './blackbox_decode-betaflight blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL'
 ```
 
 `…/gimbal-ghost/LOG00001.BFL` contains only one log. Files with multiple logs
