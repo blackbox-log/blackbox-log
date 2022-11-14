@@ -79,7 +79,7 @@ impl MainFrame {
     pub(crate) fn get(&self, index: usize, headers: &Headers) -> Option<MainValue> {
         let unit = match index {
             0 => MainValue::Unsigned(self.iteration),
-            1 => MainValue::FrameTime(SystemTime::new::<microsecond>(self.time)),
+            1 => MainValue::FrameTime(Time::new::<microsecond>(self.time as f64)),
             _ => {
                 let index = index - 2;
                 let def = headers.main_frames.fields.get(index)?;
@@ -132,7 +132,7 @@ impl MainFrame {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub(crate) enum MainValue {
-    FrameTime(SystemTime),
+    FrameTime(Time),
     Amperage(ElectricCurrent),
     Voltage(ElectricPotential),
     Acceleration(Acceleration),

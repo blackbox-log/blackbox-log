@@ -17,7 +17,7 @@ bitvec = { version = "1.0.1", default-features = false }
 memchr = { version = "2.5.0", default-features = false }
 serde = { workspace = true, optional = true }
 tracing.workspace = true
-uom = { version = "0.33.0", default-features = false, features = ["si", "f64", "u64"] }
+uom = { version = "0.33.0", default-features = false, features = ["si", "f64"] }
 
 [dev-dependencies]
 criterion = { version = "0.4.0", features = ["html_reports"] }

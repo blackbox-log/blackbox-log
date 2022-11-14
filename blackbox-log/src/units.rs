@@ -12,36 +12,27 @@ pub(crate) mod prelude {
     pub use super::si::electric_current::{ampere, milliampere};
     pub use super::si::electric_potential::{millivolt, volt};
     pub use super::si::time::{microsecond, second};
-    pub use super::{
-        Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, SystemTime,
-    };
+    pub use super::{Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Time};
 }
 
 pub mod system {
-    use uom::*;
-
-    storage_types! {
-        pub types: f64, u64;
-
-        use uom::system;
-        uom::ISQ!(
-            uom::si,
-            V,
-            (
-                meter,
-                gram,
-                microsecond,
-                milliampere,
-                degree_celsius,
-                mole,
-                candela
-            )
-        );
-    }
+    use uom::system;
+    uom::ISQ!(
+        uom::si,
+        f64,
+        (
+            meter,
+            gram,
+            microsecond,
+            milliampere,
+            degree_celsius,
+            mole,
+            candela
+        )
+    );
 }
 
-pub use self::system::f64::{Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential};
-pub use self::system::u64::Time as SystemTime;
+pub use self::system::{Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Time};
 
 pub trait FlagSet {
     type Flag: Flag;
@@ -254,13 +245,13 @@ mod tests {
     #[test]
     fn time_1_microsecond() {
         use si::time::microsecond;
-        assert_eq!(1, SystemTime::new::<microsecond>(1).get::<microsecond>());
+        assert_eq!(1., Time::new::<microsecond>(1.).get::<microsecond>());
     }
 
     #[test]
     fn time_1_day() {
         use si::time::day;
-        assert_eq!(1, SystemTime::new::<day>(1).get::<day>());
+        assert_eq!(1., Time::new::<day>(1.).get::<day>());
     }
 
     #[test]

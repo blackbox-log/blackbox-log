@@ -140,7 +140,7 @@ impl FieldSnapshot {
     fn update(&mut self, value: Value) {
         match &mut self.history {
             History::Int(history) => history.update(match value {
-                Value::FrameTime(t) => t.get::<si::time::microsecond>().into(),
+                Value::FrameTime(t) => t.get::<si::time::microsecond>().round() as i128,
                 Value::Amperage(a) => a.get::<si::electric_current::milliampere>().round() as i128,
                 Value::Voltage(v) => v.get::<si::electric_potential::millivolt>().round() as i128,
                 Value::Acceleration(a) => a

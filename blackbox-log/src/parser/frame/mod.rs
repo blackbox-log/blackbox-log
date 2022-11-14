@@ -14,7 +14,7 @@ pub(crate) use self::main::*;
 pub(crate) use self::slow::*;
 use super::{Encoding, InternalResult, ParseError, ParseResult, Predictor, Reader};
 use crate::units;
-use crate::units::{Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, SystemTime};
+use crate::units::{Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Time};
 
 pub trait FieldDef {
     fn name(&self) -> &str;
@@ -64,7 +64,7 @@ impl From<SlowUnit> for Unit {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Value {
-    FrameTime(SystemTime),
+    FrameTime(Time),
     Amperage(ElectricCurrent),
     Voltage(ElectricPotential),
     Acceleration(Acceleration),
