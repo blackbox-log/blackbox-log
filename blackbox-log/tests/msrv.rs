@@ -17,7 +17,7 @@ fn readme() -> io::Result<()> {
     let (msrv, _) = msrv.split_once(')').unwrap();
     let (_, msrv) = msrv.rsplit_once('=').unwrap();
 
-    assert_eq!(get_msrv()?, msrv);
+    assert_eq!(env!("CARGO_PKG_RUST_VERSION"), msrv);
 
     Ok(())
 }
@@ -43,21 +43,7 @@ fn toolchain_file() -> io::Result<()> {
     let (_, msrv) = msrv.split_once('=').unwrap();
     let msrv = msrv.trim().trim_matches('"');
 
-    assert_eq!(get_msrv()?, msrv);
+    assert_eq!(env!("CARGO_PKG_RUST_VERSION"), msrv);
 
     Ok(())
-}
-
-fn get_msrv() -> io::Result<String> {
-    let manifest = File::open("../Cargo.toml")?;
-    let manifest = BufReader::new(manifest);
-
-    let msrv = manifest
-        .lines()
-        .map(Result::unwrap)
-        .find(|line| line.contains("rust-version"))
-        .expect("rust-version line");
-
-    let (_, msrv) = msrv.split_once('=').unwrap();
-    Ok(msrv.trim().trim().trim_matches('"').to_owned())
 }
