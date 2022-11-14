@@ -47,7 +47,7 @@ fn main() -> Result<()> {
                 &lints,
             )?;
 
-            {
+            if !is_ci {
                 let _env = sh.push_env("RUSTFLAGS", "--cfg bench");
                 run(
                     cmd!(sh, "cargo clippy --benches").args(&workspace_args),
@@ -55,7 +55,7 @@ fn main() -> Result<()> {
                 )?;
             }
 
-            if workspace_args.iter().any(|s| s.contains("fuzz")) {
+            if !is_ci && workspace_args.iter().any(|s| s.contains("fuzz")) {
                 let _env = sh.push_env("RUSTFLAGS", "--cfg fuzzing");
                 run(cmd!(sh, "cargo clippy --package blackbox-fuzz"), &lints)?;
             }
