@@ -183,7 +183,7 @@ impl Default for Headers<'static> {
 pub struct VbatConfig {
     /// Measured battery voltage at arm
     pub reference: u16,
-    pub scale: u16,
+    pub scale: u8,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -233,7 +233,7 @@ struct State<'data> {
     craft_name: Option<&'data str>,
 
     vbat_reference: Option<u16>,
-    vbat_scale: Option<u16>,
+    vbat_scale: Option<u8>,
     current_meter: Option<CurrentMeterConfig>,
 
     acceleration_1g: Option<u16>,

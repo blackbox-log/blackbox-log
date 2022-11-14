@@ -1,8 +1,10 @@
 const FILES: &[&str] = &[
     "upstream/src/platform.c",
+    "upstream/src/blackbox_fielddefs.c",
     "upstream/src/tools.c",
     "upstream/src/stream.c",
     "upstream/src/decoders.c",
+    "upstream/src/parser.c",
     "src/negative_14_bit.c",
 ];
 

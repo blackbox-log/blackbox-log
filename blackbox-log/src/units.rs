@@ -29,6 +29,8 @@ pub use from_raw::FromRaw;
 #[cfg(not(fuzzing))]
 pub(crate) use from_raw::FromRaw;
 
+const ADC_VREF: f64 = 33.;
+
 impl FromRaw for Acceleration {
     type Raw = i32;
 
@@ -65,9 +67,9 @@ impl FromRaw for ElectricPotential {
 
     fn from_raw(raw: Self::Raw, headers: &self::Headers) -> Self {
         let scale = headers.vbat.unwrap().scale;
-        let volts = f64::from(raw) * 330. * f64::from(scale) / 4.095;
+        let volts = f64::from(raw) * ADC_VREF * 10. * f64::from(scale) / 4095.;
 
-        Self::new::<prelude::volt>(volts)
+        Self::new::<prelude::millivolt>(volts)
     }
 }
 

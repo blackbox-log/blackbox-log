@@ -61,4 +61,11 @@ doc = false
 [[bin]]
 name = "negative-14-bit"
 test = false
+bench = false
+doc = false
+
+[[bin]]
+name = "electric-potential"
+test = false
+bench = false
 doc = false

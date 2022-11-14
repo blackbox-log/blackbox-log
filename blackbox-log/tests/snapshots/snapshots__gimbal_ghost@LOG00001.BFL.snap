@@ -256,9 +256,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/LOG00001.BFL
         unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 15530549451,
+          max: 15531,
           unique: 444,
-          histogram: (15129, 14156, 14571, 12901, 13401, 14744, 14530, 17746, 14261, 13271, 13118, 13201, 13117, 14741, 16864, 13514),
+          histogram: (12722, 13887, 16066, 11927, 14237, 14225, 14935, 15626, 14120, 13889, 14981, 13285, 14829, 14911, 13101, 16524),
         ),
       ),
       FieldSnapshot(

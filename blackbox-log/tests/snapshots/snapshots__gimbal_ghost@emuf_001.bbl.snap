@@ -266,9 +266,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
         unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 2198388278,
+          max: 2198,
           unique: 54,
-          histogram: (17530, 6315, 17671, 19243, 17997, 5782, 9135, 12588, 20033, 20250, 7433, 17433, 4666, 20870, 19458, 7593),
+          histogram: (27462, 3385, 19297, 7628, 13085, 23503, 1979, 27993, 361, 25047, 3090, 19921, 19318, 1282, 29331, 1315),
         ),
       ),
       FieldSnapshot(
@@ -729,9 +729,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
         unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 2207252747,
+          max: 2207,
           unique: 55,
-          histogram: (20516, 6142, 16086, 20299, 20730, 12858, 8889, 16143, 23313, 21006, 8918, 20415, 4768, 18733, 20385, 8779),
+          histogram: (29368, 4206, 15365, 14272, 10346, 30939, 3037, 29165, 2466, 22639, 4471, 19037, 27147, 955, 31405, 3162),
         ),
       ),
       FieldSnapshot(

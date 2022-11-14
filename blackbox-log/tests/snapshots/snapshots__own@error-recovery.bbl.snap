@@ -236,9 +236,9 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
         unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 21833186813,
+          max: 21833,
           unique: 2,
-          histogram: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0),
+          histogram: (0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(

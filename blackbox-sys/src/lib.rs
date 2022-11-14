@@ -2,6 +2,7 @@
 #![allow(clippy::undocumented_unsafe_blocks)]
 #![allow(unsafe_code)]
 
+pub mod parser;
 pub mod stream;
 pub mod tools;
 
