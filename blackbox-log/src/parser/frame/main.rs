@@ -9,8 +9,8 @@ use crate::parser::{
     as_signed, decode, predictor, to_base_field, Encoding, FrameKind, Headers, InternalResult,
     ParseError, ParseResult, Predictor, Reader,
 };
-use crate::units;
 use crate::units::prelude::*;
+use crate::units::FromRaw;
 
 macro_rules! trace_field {
     (_impl pre $field:expr, $enc:expr, $signed:expr, $raw:expr) => {
@@ -89,34 +89,21 @@ impl MainFrame {
                     MainUnit::Amperage => {
                         debug_assert!(def.signed);
                         let raw = as_signed(raw);
-
-                        let meter = headers.current_meter.unwrap();
-                        let current = units::new_electric_current(raw, meter);
-
-                        MainValue::Amperage(current)
+                        MainValue::Amperage(ElectricCurrent::from_raw(raw, headers))
                     }
                     MainUnit::Voltage => {
                         debug_assert!(!def.signed);
-
-                        let vbat = headers.vbat.unwrap();
-                        let volts = units::new_electric_potential(raw, vbat.scale);
-
-                        MainValue::Voltage(volts)
+                        MainValue::Voltage(ElectricPotential::from_raw(raw, headers))
                     }
                     MainUnit::Acceleration => {
                         debug_assert!(def.signed);
                         let raw = as_signed(raw);
-
-                        let one_g = headers.acceleration_1g.unwrap();
-                        let accel = units::new_acceleration(raw, one_g);
-
-                        MainValue::Acceleration(accel)
+                        MainValue::Acceleration(Acceleration::from_raw(raw, headers))
                     }
                     MainUnit::Rotation => {
                         debug_assert!(def.signed);
                         let raw = as_signed(raw);
-
-                        MainValue::Rotation(units::new_angular_velocity(raw))
+                        MainValue::Rotation(AngularVelocity::from_raw(raw, headers))
                     }
                     MainUnit::Unitless => MainValue::new_unitless(raw, def.signed),
                     MainUnit::FrameTime => unreachable!(),
@@ -344,6 +331,29 @@ impl<'data> MainFrameDef<'data> {
             time,
             values,
         })
+    }
+}
+
+#[cfg(fuzzing)]
+impl Default for MainFrameDef<'static> {
+    fn default() -> Self {
+        let default_def = MainFieldDef {
+            name: "",
+            predictor_intra: Predictor::Zero,
+            predictor_inter: Predictor::Zero,
+            encoding_intra: Encoding::Null,
+            encoding_inter: Encoding::Null,
+            signed: false,
+            unit: MainUnit::Unitless,
+        };
+
+        Self {
+            iteration: default_def.clone(),
+            time: default_def,
+            fields: Vec::new(),
+
+            index_motor_0: None,
+        }
     }
 }
 

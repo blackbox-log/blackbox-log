@@ -5,7 +5,7 @@ use bitvec::prelude::*;
 pub use uom::si;
 
 use crate::common::FirmwareKind;
-use crate::parser::headers::CurrentMeterConfig;
+use crate::parser::Headers;
 
 pub(crate) mod prelude {
     pub use super::si::acceleration::meter_per_second_squared as mps2;
@@ -35,27 +35,58 @@ pub mod system {
 
 pub use self::system::{Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Time};
 
-pub(crate) fn new_acceleration(raw: i32, one_g: u16) -> Acceleration {
-    let gs = f64::from(raw) / f64::from(one_g);
-    Acceleration::new::<prelude::mps2>(gs * 9.80665)
+mod from_raw {
+    pub trait FromRaw {
+        type Raw;
+        fn from_raw(raw: Self::Raw, headers: &super::Headers) -> Self;
+    }
 }
 
-pub(crate) fn new_angular_velocity(raw: i32) -> AngularVelocity {
-    AngularVelocity::new::<prelude::degree_per_second>(raw.into())
+#[cfg(fuzzing)]
+pub use from_raw::FromRaw;
+#[cfg(not(fuzzing))]
+pub(crate) use from_raw::FromRaw;
+
+impl FromRaw for Acceleration {
+    type Raw = i32;
+
+    fn from_raw(raw: Self::Raw, headers: &self::Headers) -> Self {
+        let gs = f64::from(raw) / f64::from(headers.acceleration_1g.unwrap());
+        Self::new::<prelude::mps2>(gs * 9.80665)
+    }
 }
 
-pub(crate) fn new_electric_current(raw: i32, current_meter: CurrentMeterConfig) -> ElectricCurrent {
-    let milliamps = f64::from(raw) * 3300. / 4095.;
-    let milliamps = milliamps - f64::from(current_meter.offset);
-    let amps = (milliamps * 10.) / f64::from(current_meter.scale);
+impl FromRaw for AngularVelocity {
+    type Raw = i32;
 
-    ElectricCurrent::new::<prelude::ampere>(amps)
+    fn from_raw(raw: Self::Raw, _headers: &self::Headers) -> Self {
+        Self::new::<prelude::degree_per_second>(raw.into())
+    }
 }
 
-pub(crate) fn new_electric_potential(raw: u32, scale: u16) -> ElectricPotential {
-    let volts = f64::from(raw) * 330. * f64::from(scale) / 4.095;
+impl FromRaw for ElectricCurrent {
+    type Raw = i32;
 
-    ElectricPotential::new::<prelude::volt>(volts)
+    fn from_raw(raw: Self::Raw, headers: &self::Headers) -> Self {
+        let current_meter = headers.current_meter.unwrap();
+
+        let milliamps = f64::from(raw) * 3300. / 4095.;
+        let milliamps = milliamps - f64::from(current_meter.offset);
+        let amps = (milliamps * 10.) / f64::from(current_meter.scale);
+
+        Self::new::<prelude::ampere>(amps)
+    }
+}
+
+impl FromRaw for ElectricPotential {
+    type Raw = u32;
+
+    fn from_raw(raw: Self::Raw, headers: &self::Headers) -> Self {
+        let scale = headers.vbat.unwrap().scale;
+        let volts = f64::from(raw) * 330. * f64::from(scale) / 4.095;
+
+        Self::new::<prelude::volt>(volts)
+    }
 }
 
 pub trait FlagSet {

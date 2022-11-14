@@ -42,6 +42,7 @@ pub(crate) enum SlowUnit {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(fuzzing, derive(Default))]
 pub(crate) struct SlowFrameDef<'data>(pub(crate) Vec<SlowFieldDef<'data>>);
 
 impl<'data> SlowFrameDef<'data> {

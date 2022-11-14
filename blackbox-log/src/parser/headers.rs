@@ -150,6 +150,34 @@ impl<'data> Headers<'data> {
     }
 }
 
+#[cfg(fuzzing)]
+impl Default for Headers<'static> {
+    fn default() -> Self {
+        Self {
+            version: LogVersion::V2,
+
+            main_frames: MainFrameDef::default(),
+            slow_frames: SlowFrameDef::default(),
+            gps_frames: None,
+            gps_home_frames: None,
+
+            firmware_revision: "",
+            firmware_kind: FirmwareKind::Betaflight,
+            board_info: None,
+            craft_name: None,
+
+            vbat: None,
+            current_meter: None,
+
+            acceleration_1g: None,
+            gyro_scale: None,
+
+            min_throttle: None,
+            motor_output_range: None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct VbatConfig {
