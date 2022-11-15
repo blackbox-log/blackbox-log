@@ -189,8 +189,8 @@ pub struct VbatConfig {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CurrentMeterConfig {
-    pub offset: u16,
-    pub scale: u16,
+    pub offset: i16,
+    pub scale: i16,
 }
 
 #[derive(Debug, Clone, Copy)]

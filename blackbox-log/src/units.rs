@@ -6,6 +6,7 @@ pub use uom::si;
 pub use uom::si::f64::{Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Time};
 
 use crate::common::FirmwareKind;
+use crate::parser::headers::CurrentMeterConfig;
 use crate::parser::Headers;
 
 pub(crate) mod prelude {
@@ -52,13 +53,15 @@ impl FromRaw for ElectricCurrent {
     type Raw = i32;
 
     fn from_raw(raw: Self::Raw, headers: &self::Headers) -> Self {
-        let current_meter = headers.current_meter.unwrap();
+        let CurrentMeterConfig { offset, scale } = headers.current_meter.unwrap();
+        let offset = f64::from(offset);
+        let scale = f64::from(scale);
 
-        let milliamps = f64::from(raw) * 3300. / 4095.;
-        let milliamps = milliamps - f64::from(current_meter.offset);
-        let amps = (milliamps * 10.) / f64::from(current_meter.scale);
+        let milliamps = f64::from(raw) * ADC_VREF * 100. / 4095.;
+        let milliamps = milliamps - offset;
+        let amps = (milliamps * 10_000.) / scale;
 
-        Self::new::<prelude::ampere>(amps)
+        Self::new::<prelude::milliampere>(amps)
     }
 }
 

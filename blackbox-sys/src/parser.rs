@@ -695,8 +695,8 @@ mod ffi {
         pub(super) vbatmaxcellvoltage: u8,
         pub(super) vbatmincellvoltage: u8,
         pub(super) vbatwarningcellvoltage: u8,
-        pub(super) currentMeterOffset: i16,
-        pub(super) currentMeterScale: i16,
+        pub currentMeterOffset: i16,
+        pub currentMeterScale: i16,
         pub(super) vbatref: u16,
         pub(super) firmwareType: FirmwareType,
     }
