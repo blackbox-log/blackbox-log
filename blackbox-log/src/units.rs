@@ -3,6 +3,7 @@ use core::fmt;
 
 use bitvec::prelude::*;
 pub use uom::si;
+pub use uom::si::f64::{Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Time};
 
 use crate::common::FirmwareKind;
 use crate::parser::Headers;
@@ -15,25 +16,6 @@ pub(crate) mod prelude {
     pub use super::si::time::{microsecond, second};
     pub use super::{Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Time};
 }
-
-pub mod system {
-    use uom::system;
-    uom::ISQ!(
-        uom::si,
-        f64,
-        (
-            meter,
-            gram,
-            microsecond,
-            milliampere,
-            degree_celsius,
-            mole,
-            candela
-        )
-    );
-}
-
-pub use self::system::{Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Time};
 
 mod from_raw {
     pub trait FromRaw {
