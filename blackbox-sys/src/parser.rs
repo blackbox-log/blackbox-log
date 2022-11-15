@@ -689,7 +689,7 @@ mod ffi {
         pub(super) motorOutputHigh: c_int,
         pub(super) rcRate: c_uint,
         pub(super) yawRate: c_uint,
-        pub(super) acc_1G: u16,
+        pub acc_1G: u16,
         pub(super) gyroScale: f32,
         pub vbatscale: u8,
         pub(super) vbatmaxcellvoltage: u8,

@@ -36,6 +36,9 @@ impl FromRaw for Acceleration {
     type Raw = i32;
 
     fn from_raw(raw: Self::Raw, headers: &self::Headers) -> Self {
+        // TODO: switch to `standard_gravity` instead of `mps2` once
+        // https://github.com/iliekturtles/uom/pull/351 lands
+
         let gs = f64::from(raw) / f64::from(headers.acceleration_1g.unwrap());
         Self::new::<prelude::mps2>(gs * 9.80665)
     }
