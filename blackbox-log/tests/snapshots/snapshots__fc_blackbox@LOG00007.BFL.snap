@@ -17,7 +17,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00007.BFL
       )),
       current_meter: None,
       acceleration_1g: Some(2048),
-      gyro_scale: Some(1.0),
+      gyro_scale: Some(0.017453292),
       min_throttle: Some(1070),
       motor_output_range: Some(MotorOutputRange(158, 2047)),
     ),
@@ -274,10 +274,10 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00007.BFL
         name: "gyroADC[2]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: -68032520,
+          min: -68032519,
           max: 33659202,
           unique: 303,
-          histogram: (66056, 47067, 30723, 22162, 16952, 14999, 13379, 12462, 11227, 10060, 9408, 8712, 8348, 7917, 7425, 7559),
+          histogram: (66056, 47067, 30723, 22162, 16952, 14999, 13379, 12463, 11226, 10060, 9408, 8712, 8348, 7917, 7425, 7559),
         ),
       ),
       FieldSnapshot(

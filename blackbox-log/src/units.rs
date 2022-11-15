@@ -47,8 +47,11 @@ impl FromRaw for Acceleration {
 impl FromRaw for AngularVelocity {
     type Raw = i32;
 
-    fn from_raw(raw: Self::Raw, _headers: &self::Headers) -> Self {
-        Self::new::<prelude::degree_per_second>(raw.into())
+    fn from_raw(raw: Self::Raw, headers: &self::Headers) -> Self {
+        let scale = headers.gyro_scale.unwrap();
+        let rad = f64::from(scale) * f64::from(raw);
+
+        AngularVelocity::new::<si::angular_velocity::radian_per_second>(rad)
     }
 }
 

@@ -33,6 +33,7 @@ pub struct Headers<'data> {
     pub current_meter: Option<CurrentMeterConfig>,
 
     pub acceleration_1g: Option<u16>,
+    /// In radians / second
     pub gyro_scale: Option<f32>,
 
     pub min_throttle: Option<u16>,
@@ -306,7 +307,8 @@ impl<'data> State<'data> {
                         value.parse().map_err(|_| ())?
                     };
 
-                    self.gyro_scale = Some(f32::from_bits(scale));
+                    let scale = f32::from_bits(scale);
+                    self.gyro_scale = Some(scale.to_radians());
                 }
                 "minthrottle" => {
                     let min_throttle = value.parse().map_err(|_| ())?;

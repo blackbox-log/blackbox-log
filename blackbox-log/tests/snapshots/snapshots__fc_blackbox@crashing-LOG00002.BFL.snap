@@ -14,7 +14,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/crashing-LOG00002
       vbat: None,
       current_meter: None,
       acceleration_1g: Some(2048),
-      gyro_scale: Some(1.0),
+      gyro_scale: Some(0.017453292),
       min_throttle: Some(1070),
       motor_output_range: Some(MotorOutputRange(1070, 2000)),
     ),

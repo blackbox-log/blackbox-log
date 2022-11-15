@@ -20,7 +20,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
         scale: 317,
       )),
       acceleration_1g: Some(2048),
-      gyro_scale: Some(1.0),
+      gyro_scale: Some(0.017453292),
       min_throttle: Some(1042),
       motor_output_range: Some(MotorOutputRange(1042, 1850)),
     ),

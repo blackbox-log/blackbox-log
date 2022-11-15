@@ -65,6 +65,12 @@ bench = false
 doc = false
 
 [[bin]]
+name = "angular-velocity"
+test = false
+bench = false
+doc = false
+
+[[bin]]
 name = "electric-current"
 test = false
 bench = false
