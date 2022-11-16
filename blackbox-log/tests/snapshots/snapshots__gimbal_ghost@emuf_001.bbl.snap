@@ -406,9 +406,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
+          max: 1599,
           unique: 1432,
-          histogram: (13791, 13904, 14144, 15418, 15641, 13772, 13921, 13878, 13623, 13505, 13816, 13806, 13635, 13615, 13804, 13724),
+          histogram: (14137, 15369, 15649, 13767, 13921, 13879, 13618, 13509, 13849, 13832, 13627, 13641, 13730, 13760, 13812, 13897),
         ),
       ),
       FieldSnapshot(
@@ -416,9 +416,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
-          unique: 1449,
-          histogram: (13805, 13878, 13642, 14858, 15482, 14038, 13843, 13930, 13768, 13991, 13979, 13765, 13756, 13712, 13563, 13987),
+          max: 1593,
+          unique: 1448,
+          histogram: (13669, 14792, 15486, 14051, 13825, 13945, 13776, 13974, 14015, 13802, 13717, 13705, 13557, 13974, 13821, 13888),
         ),
       ),
       FieldSnapshot(
@@ -426,9 +426,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
+          max: 1598,
           unique: 1454,
-          histogram: (13651, 13938, 14030, 14894, 15749, 14132, 13752, 13998, 13894, 13803, 13418, 13885, 13715, 13696, 13650, 13792),
+          histogram: (13959, 14886, 15761, 14137, 13746, 13997, 13894, 13855, 13402, 13883, 13703, 13705, 13690, 13735, 13666, 13978),
         ),
       ),
       FieldSnapshot(
@@ -870,9 +870,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
+          max: 1594,
           unique: 1439,
-          histogram: (15105, 15054, 15246, 16431, 17917, 15771, 15655, 15171, 15285, 15143, 15200, 15155, 15354, 15246, 15124, 15123),
+          histogram: (15201, 16412, 17920, 15768, 15659, 15158, 15345, 15160, 15163, 15211, 15295, 15288, 15100, 15124, 15051, 15125),
         ),
       ),
       FieldSnapshot(
@@ -880,9 +880,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
-          unique: 1447,
-          histogram: (15401, 15525, 15190, 15763, 16089, 15706, 15770, 15457, 15514, 15545, 15442, 15362, 15311, 15208, 15329, 15368),
+          max: 1596,
+          unique: 1448,
+          histogram: (15175, 15750, 16095, 15699, 15803, 15430, 15509, 15541, 15452, 15364, 15315, 15215, 15350, 15360, 15386, 15536),
         ),
       ),
       FieldSnapshot(
@@ -890,9 +890,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
-          unique: 1447,
-          histogram: (15235, 15235, 15209, 16936, 16926, 15502, 15445, 15355, 15440, 15455, 15200, 14931, 15450, 15223, 15188, 15250),
+          max: 1595,
+          unique: 1448,
+          histogram: (15206, 16935, 16923, 15508, 15445, 15361, 15453, 15442, 15195, 14924, 15452, 15224, 15189, 15247, 15241, 15235),
         ),
       ),
       FieldSnapshot(

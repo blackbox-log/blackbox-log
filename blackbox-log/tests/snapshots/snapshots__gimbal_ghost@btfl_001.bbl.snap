@@ -396,9 +396,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
-          unique: 1294,
-          histogram: (1449, 992, 988, 949, 941, 1037, 975, 995, 950, 892, 993, 970, 962, 1019, 942, 1366),
+          max: 2048,
+          unique: 1295,
+          histogram: (994, 962, 941, 1027, 983, 989, 956, 896, 995, 990, 989, 1026, 1189, 1597, 896, 990),
         ),
       ),
       FieldSnapshot(
@@ -406,9 +406,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
+          max: 2278,
           unique: 1369,
-          histogram: (1400, 1045, 970, 1061, 977, 953, 985, 929, 941, 982, 983, 1019, 1026, 1010, 1050, 1089),
+          histogram: (979, 1059, 970, 958, 978, 932, 945, 987, 984, 1021, 1020, 1016, 1047, 1472, 1017, 1035),
         ),
       ),
       FieldSnapshot(
@@ -416,9 +416,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
-          unique: 1300,
-          histogram: (1185, 1007, 1008, 966, 1049, 1018, 1025, 1061, 1035, 1015, 1013, 1052, 989, 961, 995, 1041),
+          max: 4294967235,
+          unique: 1299,
+          histogram: (1012, 967, 1046, 1020, 1029, 1061, 1034, 1007, 1012, 1054, 989, 964, 997, 1208, 1014, 1006),
         ),
       ),
       FieldSnapshot(
@@ -921,9 +921,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
-          unique: 1569,
-          histogram: (1563, 1391, 1473, 1364, 1331, 1382, 1284, 1366, 1347, 1356, 1385, 1270, 1415, 1320, 1368, 1553),
+          max: 4294967293,
+          unique: 1571,
+          histogram: (1468, 1362, 1329, 1380, 1282, 1382, 1338, 1344, 1396, 1284, 1404, 1337, 1401, 1750, 1314, 1397),
         ),
       ),
       FieldSnapshot(
@@ -932,8 +932,8 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
         history: FieldSnapshot(
           min: 0,
           max: 4294967295,
-          unique: 1703,
-          histogram: (1564, 1411, 1369, 1359, 1268, 1282, 1393, 1328, 1373, 1428, 1339, 1390, 1349, 1276, 1384, 1655),
+          unique: 1700,
+          histogram: (1377, 1349, 1264, 1292, 1388, 1331, 1357, 1431, 1349, 1389, 1349, 1276, 1608, 1577, 1418, 1413),
         ),
       ),
       FieldSnapshot(
@@ -941,9 +941,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
-          unique: 1563,
-          histogram: (1702, 1322, 1336, 1366, 1342, 1297, 1354, 1291, 1423, 1317, 1317, 1392, 1364, 1349, 1316, 1680),
+          max: 4294967284,
+          unique: 1568,
+          histogram: (1328, 1362, 1344, 1293, 1364, 1305, 1413, 1328, 1318, 1389, 1395, 1398, 1456, 1772, 1374, 1329),
         ),
       ),
       FieldSnapshot(
@@ -1447,8 +1447,8 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
         history: FieldSnapshot(
           min: 0,
           max: 4294967295,
-          unique: 1569,
-          histogram: (2490, 2066, 2007, 1945, 1968, 1984, 1907, 1948, 1999, 1939, 1909, 1866, 1889, 1954, 1979, 2537),
+          unique: 1568,
+          histogram: (1992, 1949, 1974, 1976, 1909, 1958, 2010, 1932, 1911, 1867, 1938, 1991, 2289, 2669, 1960, 2062),
         ),
       ),
       FieldSnapshot(
@@ -1456,9 +1456,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
-          unique: 1696,
-          histogram: (2313, 1997, 1975, 1910, 1955, 1961, 1967, 1881, 1999, 1919, 1901, 1925, 1979, 1972, 1965, 2768),
+          max: 4294967264,
+          unique: 1697,
+          histogram: (1976, 1918, 1947, 1984, 1953, 1869, 2011, 1921, 1908, 1922, 2004, 2009, 2437, 2638, 1900, 1990),
         ),
       ),
       FieldSnapshot(
@@ -1466,9 +1466,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
-          unique: 1611,
-          histogram: (2355, 2005, 2032, 1948, 2021, 1923, 1934, 1874, 1971, 2014, 2005, 1984, 1868, 2035, 1965, 2453),
+          max: 4294967283,
+          unique: 1615,
+          histogram: (2026, 1946, 2008, 1936, 1924, 1884, 1969, 2022, 1999, 1987, 1895, 2045, 2175, 2408, 2142, 2021),
         ),
       ),
       FieldSnapshot(

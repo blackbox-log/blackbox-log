@@ -203,7 +203,7 @@ impl<'data> MainFrameDef<'data> {
 
         let raw = read_field_values(data, &self.fields, |f| f.encoding_intra)?;
 
-        let mut ctx = PredictorContext::new(headers, &raw);
+        let mut ctx = PredictorContext::new(headers);
         let mut values = Vec::with_capacity(raw.len());
 
         for (i, field) in self.fields.iter().enumerate() {
@@ -214,7 +214,9 @@ impl<'data> MainFrameDef<'data> {
 
             trace_field!(pre, field = field, enc = field.encoding_intra, raw = raw);
 
-            let value = field.predictor_intra.apply(raw, signed, &ctx);
+            let value = field
+                .predictor_intra
+                .apply(raw, signed, Some(&values), &ctx);
             values.push(value);
 
             trace_field!(
@@ -268,7 +270,7 @@ impl<'data> MainFrameDef<'data> {
 
         let raw = read_field_values(data, &self.fields, |f| f.encoding_inter)?;
 
-        let mut ctx = PredictorContext::new(headers, &raw);
+        let mut ctx = PredictorContext::new(headers);
         ctx.set_skipped_frames(skipped_frames);
         let mut values = Vec::with_capacity(raw.len());
 
@@ -280,7 +282,9 @@ impl<'data> MainFrameDef<'data> {
 
             trace_field!(pre, field = field, enc = field.encoding_inter, raw = raw);
 
-            let value = field.predictor_inter.apply(raw, signed, &ctx);
+            let value = field
+                .predictor_inter
+                .apply(raw, signed, Some(&values), &ctx);
             values.push(value);
 
             trace_field!(

@@ -88,12 +88,12 @@ impl<'data> SlowFrameDef<'data> {
     pub(crate) fn parse(&self, data: &mut Reader, headers: &Headers) -> InternalResult<SlowFrame> {
         let raw = read_field_values(data, &self.0, |f| f.encoding)?;
 
-        let ctx = PredictorContext::new(headers, &raw);
+        let ctx = PredictorContext::new(headers);
         let values = raw
             .iter()
             .zip(self.0.iter())
             .map(|(&raw_value, field)| {
-                let value = field.predictor.apply(raw_value, field.signed, &ctx);
+                let value = field.predictor.apply(raw_value, field.signed, None, &ctx);
 
                 tracing::trace!(
                     field = field.name,

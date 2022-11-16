@@ -322,9 +322,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/crashing-LOG00002
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
+          max: 1875,
           unique: 717,
-          histogram: (59941, 5599, 5606, 5668, 6664, 14012, 19520, 11122, 6227, 5423, 5445, 5515, 5384, 5145, 5161, 5262),
+          histogram: (5592, 5644, 6734, 14031, 19519, 11161, 6123, 5371, 5416, 5554, 5377, 5270, 5320, 18468, 46508, 5606),
         ),
       ),
       FieldSnapshot(
@@ -332,9 +332,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/crashing-LOG00002
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
+          max: 1950,
           unique: 774,
-          histogram: (45070, 18364, 7909, 7679, 7795, 7909, 8216, 7796, 7869, 7712, 7614, 7723, 8838, 7428, 6952, 6820),
+          histogram: (7721, 7588, 7765, 7927, 8167, 7790, 7856, 7709, 7630, 7747, 8824, 7419, 7097, 18789, 38439, 13226),
         ),
       ),
       FieldSnapshot(
@@ -342,9 +342,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/crashing-LOG00002
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
-          unique: 583,
-          histogram: (91388, 6039, 5676, 5375, 5368, 5402, 5489, 5246, 5384, 5233, 5043, 5058, 5132, 5099, 5408, 5354),
+          max: 1781,
+          unique: 579,
+          histogram: (5557, 5408, 5347, 5345, 5438, 5241, 5386, 5221, 5229, 4996, 5105, 5332, 5559, 56175, 40208, 6147),
         ),
       ),
       FieldSnapshot(

@@ -366,9 +366,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00002.BFL
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 1209012,
+          max: 1209170,
           unique: 3,
-          histogram: (220311, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+          histogram: (0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 220311, 0),
         ),
       ),
       FieldSnapshot(
@@ -376,9 +376,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00002.BFL
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 1178130,
+          max: 1178288,
           unique: 3,
-          histogram: (220311, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+          histogram: (1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 220311, 0),
         ),
       ),
       FieldSnapshot(
@@ -386,9 +386,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00002.BFL
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 1208981,
+          max: 1209139,
           unique: 2,
-          histogram: (220312, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+          histogram: (0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 220312, 0),
         ),
       ),
       FieldSnapshot(

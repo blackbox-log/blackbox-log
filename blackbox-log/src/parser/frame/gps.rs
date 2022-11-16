@@ -112,7 +112,7 @@ impl<'data> GpsFrameDef<'data> {
 
         let raw = read_field_values(data, &self.0, |f| f.encoding)?;
 
-        let ctx = PredictorContext::new(headers, &raw);
+        let ctx = PredictorContext::new(headers);
         let mut values = Vec::with_capacity(raw.len());
 
         for (i, field) in self.0.iter().enumerate() {
@@ -121,7 +121,7 @@ impl<'data> GpsFrameDef<'data> {
 
             trace_field!(pre, field = field, enc = field.encoding, raw = raw);
 
-            let value = field.predictor.apply(raw, signed, &ctx);
+            let value = field.predictor.apply(raw, signed, None, &ctx);
 
             trace_field!(
                 post,

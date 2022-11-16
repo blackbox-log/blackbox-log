@@ -50,12 +50,12 @@ impl<'data> GpsHomeFrameDef<'data> {
         let raw = read_field_values(data, &self.0, |f| f.encoding)?;
         let _ = read_field_values(data, &self.1, |&f| f)?;
 
-        let ctx = PredictorContext::new(headers, &raw);
+        let ctx = PredictorContext::new(headers);
         let values = raw
             .iter()
             .zip(self.0.iter())
             .map(|(&raw_value, field)| {
-                let value = field.predictor.apply(raw_value, true, &ctx);
+                let value = field.predictor.apply(raw_value, true, None, &ctx);
 
                 tracing::trace!(
                     field = field.name,

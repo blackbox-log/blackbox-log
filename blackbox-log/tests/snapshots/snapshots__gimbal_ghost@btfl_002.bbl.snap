@@ -388,9 +388,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
+          max: 245,
           unique: 109,
-          histogram: (66, 50, 58, 55, 49, 56, 61, 60, 54, 59, 68, 65, 62, 79, 112, 182),
+          histogram: (49, 51, 55, 55, 48, 64, 71, 59, 67, 77, 67, 109, 97, 154, 63, 50),
         ),
       ),
       FieldSnapshot(
@@ -398,9 +398,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
+          max: 266,
           unique: 114,
-          histogram: (69, 61, 60, 53, 61, 66, 69, 70, 60, 63, 73, 63, 70, 73, 88, 137),
+          histogram: (56, 54, 69, 70, 62, 74, 62, 61, 67, 76, 70, 79, 70, 140, 57, 69),
         ),
       ),
       FieldSnapshot(
@@ -408,9 +408,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
-          unique: 76,
-          histogram: (76, 65, 73, 69, 70, 81, 71, 59, 70, 76, 56, 67, 79, 79, 80, 65),
+          max: 231,
+          unique: 75,
+          histogram: (73, 69, 71, 80, 71, 60, 69, 77, 57, 66, 80, 79, 79, 64, 76, 65),
         ),
       ),
       FieldSnapshot(
@@ -897,9 +897,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
+          max: 233,
           unique: 22,
-          histogram: (0, 2, 3, 1, 1, 0, 2, 0, 3, 2, 0, 4, 2, 2, 1, 15),
+          histogram: (3, 1, 1, 0, 2, 0, 3, 2, 0, 4, 2, 2, 1, 15, 0, 2),
         ),
       ),
       FieldSnapshot(
@@ -907,9 +907,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
+          max: 207,
           unique: 28,
-          histogram: (0, 1, 2, 3, 7, 3, 3, 1, 1, 1, 3, 4, 1, 3, 0, 5),
+          histogram: (2, 3, 7, 3, 3, 1, 1, 2, 2, 4, 1, 3, 0, 5, 0, 1),
         ),
       ),
       FieldSnapshot(
@@ -917,9 +917,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 65,
+          max: 223,
           unique: 24,
-          histogram: (2, 1, 3, 3, 2, 1, 1, 1, 3, 3, 4, 6, 2, 2, 4, 0),
+          histogram: (3, 3, 2, 1, 1, 1, 3, 3, 4, 6, 2, 2, 4, 0, 2, 1),
         ),
       ),
       FieldSnapshot(
@@ -1420,9 +1420,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
-          unique: 1467,
-          histogram: (1135, 684, 676, 624, 701, 594, 673, 683, 627, 663, 618, 627, 680, 639, 663, 1328),
+          max: 2222,
+          unique: 1468,
+          histogram: (659, 620, 694, 595, 674, 689, 614, 665, 623, 638, 694, 663, 864, 1586, 650, 687),
         ),
       ),
       FieldSnapshot(
@@ -1430,9 +1430,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
-          unique: 1514,
-          histogram: (871, 732, 662, 705, 694, 764, 682, 689, 746, 638, 687, 633, 669, 697, 719, 1027),
+          max: 2090,
+          unique: 1516,
+          histogram: (663, 697, 691, 773, 681, 685, 745, 640, 691, 638, 676, 710, 764, 1152, 685, 724),
         ),
       ),
       FieldSnapshot(
@@ -1440,9 +1440,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294967295,
-          unique: 1448,
-          histogram: (916, 692, 804, 714, 700, 692, 721, 736, 711, 720, 692, 681, 695, 697, 707, 737),
+          max: 2296,
+          unique: 1449,
+          histogram: (805, 718, 701, 690, 720, 739, 711, 717, 692, 684, 690, 702, 705, 879, 776, 686),
         ),
       ),
       FieldSnapshot(

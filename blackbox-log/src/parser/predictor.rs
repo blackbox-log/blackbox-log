@@ -22,7 +22,13 @@ pub enum Predictor {
 }
 
 impl Predictor {
-    pub(crate) fn apply(self, value: u32, signed: bool, ctx: &PredictorContext) -> u32 {
+    pub(crate) fn apply(
+        self,
+        value: u32,
+        signed: bool,
+        current: Option<&[u32]>,
+        ctx: &PredictorContext,
+    ) -> u32 {
         let _span = if signed {
             tracing::trace_span!(
                 "Predictor::apply",
@@ -68,7 +74,13 @@ impl Predictor {
                 }
             }
             Self::MinThrottle => ctx.headers.min_throttle.unwrap().into(),
-            Self::Motor0 => ctx.headers.main_frames.get_motor_0_from(ctx.current),
+            Self::Motor0 => current.map_or_else(
+                || {
+                    tracing::debug!("found {self:?} without current values");
+                    0
+                },
+                |current| ctx.headers.main_frames.get_motor_0_from(current),
+            ),
             Self::Increment => {
                 if signed {
                     ctx.skipped_frames
@@ -130,19 +142,17 @@ impl Predictor {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct PredictorContext<'a, 'b, 'data> {
+pub(crate) struct PredictorContext<'a, 'data> {
     headers: &'a Headers<'data>,
-    current: &'b [u32],
     last: Option<u32>,
     last_last: Option<u32>,
     skipped_frames: u32,
 }
 
-impl<'a, 'b, 'data> PredictorContext<'a, 'b, 'data> {
-    pub(crate) fn new(headers: &'a Headers<'data>, current: &'b [u32]) -> Self {
+impl<'a, 'data> PredictorContext<'a, 'data> {
+    pub(crate) fn new(headers: &'a Headers<'data>) -> Self {
         Self {
             headers,
-            current,
             last: None,
             last_last: None,
             skipped_frames: 0,
