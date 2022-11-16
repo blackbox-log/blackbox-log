@@ -15,6 +15,9 @@ for `blackbox_decode`, with a WASM/JavaScript interface Coming Soon™.
 - [ ] Betaflight log parsing
   - [x] Spec-compliant error recovery
   - [ ] Handle outputting GPS data
+    - [x] Merged CSV
+    - [ ] Separate CSV
+    - [ ] Separate GPX
 - [ ] `blackbox_decode` replacement
 - [x] Snapshot testing with [`insta`](https://insta.rs)
   - [x] [`fc-blackbox` test files](https://github.com/ilya-epifanov/fc-blackbox/tree/main/src/test-data)
