@@ -25,6 +25,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00002.BFL
       counts: FrameCounts(
         main: 220313,
         slow: 75,
+        gps: 0,
         gps_home: 0,
       ),
     ),
@@ -365,9 +366,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00002.BFL
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 1209170,
+          max: 1209012,
           unique: 3,
-          histogram: (0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 220311, 0),
+          histogram: (220311, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -375,9 +376,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00002.BFL
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 1178288,
+          max: 1178130,
           unique: 3,
-          histogram: (1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 220311, 0),
+          histogram: (220311, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -385,9 +386,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00002.BFL
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 1209139,
+          max: 1208981,
           unique: 2,
-          histogram: (0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 220312, 0),
+          histogram: (220312, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -423,7 +424,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00002.BFL
         unit: Boolean,
         history: History(
           yes: 2,
-          no: 220311,
+          no: 220310,
         ),
       ),
       FieldSnapshot(
@@ -431,7 +432,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00002.BFL
         unit: Boolean,
         history: History(
           yes: 2,
-          no: 220311,
+          no: 220310,
         ),
       ),
     ]),

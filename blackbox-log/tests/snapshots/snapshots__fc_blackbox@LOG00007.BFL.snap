@@ -25,6 +25,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00007.BFL
       counts: FrameCounts(
         main: 294456,
         slow: 60,
+        gps: 0,
         gps_home: 0,
       ),
     ),
@@ -365,9 +366,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00007.BFL
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294715419,
+          max: 4294715261,
           unique: 8,
-          histogram: (1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 294452, 1),
+          histogram: (294452, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -375,9 +376,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00007.BFL
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 4294962297,
+          max: 4294962139,
           unique: 8,
-          histogram: (2, 0, 0, 0, 0, 0, 1, 0, 0, 2, 2, 0, 0, 0, 294449, 0),
+          histogram: (294449, 0, 2, 0, 0, 0, 0, 0, 1, 0, 0, 2, 2, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -385,9 +386,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00007.BFL
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 830112,
+          max: 829954,
           unique: 6,
-          histogram: (1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 294452, 2),
+          histogram: (294452, 2, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -448,7 +449,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00007.BFL
         unit: Boolean,
         history: History(
           yes: 2,
-          no: 294454,
+          no: 294453,
         ),
       ),
       FieldSnapshot(
@@ -456,7 +457,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00007.BFL
         unit: Boolean,
         history: History(
           yes: 0,
-          no: 294456,
+          no: 294455,
         ),
       ),
     ]),

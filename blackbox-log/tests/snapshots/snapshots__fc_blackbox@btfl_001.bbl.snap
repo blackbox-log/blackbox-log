@@ -28,6 +28,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
       counts: FrameCounts(
         main: 98,
         slow: 3,
+        gps: 0,
         gps_home: 0,
       ),
     ),
@@ -351,9 +352,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 183,
+          max: 4294967295,
           unique: 16,
-          histogram: (8, 16, 15, 6, 9, 10, 6, 4, 1, 2, 2, 0, 0, 1, 11, 7),
+          histogram: (11, 7, 8, 16, 15, 6, 9, 10, 6, 4, 1, 2, 2, 0, 0, 1),
         ),
       ),
       FieldSnapshot(
@@ -361,9 +362,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 179,
+          max: 4294967295,
           unique: 17,
-          histogram: (8, 10, 19, 7, 2, 6, 3, 3, 3, 1, 1, 0, 3, 4, 13, 15),
+          histogram: (13, 14, 9, 10, 19, 7, 2, 5, 4, 3, 3, 1, 1, 0, 3, 4),
         ),
       ),
       FieldSnapshot(
@@ -371,9 +372,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 183,
+          max: 4294967295,
           unique: 15,
-          histogram: (10, 12, 8, 9, 4, 4, 1, 4, 0, 1, 2, 0, 0, 16, 18, 9),
+          histogram: (23, 9, 7, 14, 7, 9, 6, 4, 1, 4, 0, 1, 2, 0, 0, 11),
         ),
       ),
       FieldSnapshot(
@@ -398,7 +399,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
         unit: Boolean,
         history: History(
           yes: 97,
-          no: 1,
+          no: 0,
         ),
       ),
       FieldSnapshot(
@@ -406,7 +407,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
         unit: Boolean,
         history: History(
           yes: 97,
-          no: 1,
+          no: 0,
         ),
       ),
     ]),
@@ -435,6 +436,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
       counts: FrameCounts(
         main: 24893,
         slow: 9,
+        gps: 0,
         gps_home: 0,
       ),
     ),
@@ -763,9 +765,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 531,
-          unique: 331,
-          histogram: (973, 901, 869, 856, 846, 841, 813, 872, 868, 922, 940, 1092, 3982, 8061, 1074, 983),
+          max: 4294967295,
+          unique: 330,
+          histogram: (7015, 966, 975, 925, 863, 888, 842, 832, 825, 867, 853, 874, 851, 984, 1071, 5262),
         ),
       ),
       FieldSnapshot(
@@ -773,9 +775,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 515,
-          unique: 335,
-          histogram: (1379, 1384, 1368, 1318, 1231, 1228, 1307, 1257, 1285, 1322, 1245, 1381, 2476, 3718, 1482, 1512),
+          max: 4294967295,
+          unique: 334,
+          histogram: (3261, 1524, 1390, 1361, 1383, 1346, 1230, 1237, 1305, 1264, 1275, 1251, 1249, 1276, 1363, 3178),
         ),
       ),
       FieldSnapshot(
@@ -783,9 +785,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 681,
+          max: 4294967295,
           unique: 505,
-          histogram: (1321, 1267, 1289, 1251, 1208, 1178, 1207, 1134, 1137, 1230, 1178, 1217, 1964, 5422, 1508, 1382),
+          histogram: (5047, 1401, 1332, 1265, 1300, 1251, 1235, 1160, 1223, 1129, 1152, 1197, 1191, 1149, 1237, 2624),
         ),
       ),
       FieldSnapshot(
@@ -810,7 +812,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
         unit: Boolean,
         history: History(
           yes: 24892,
-          no: 1,
+          no: 0,
         ),
       ),
       FieldSnapshot(
@@ -818,7 +820,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
         unit: Boolean,
         history: History(
           yes: 24892,
-          no: 1,
+          no: 0,
         ),
       ),
     ]),

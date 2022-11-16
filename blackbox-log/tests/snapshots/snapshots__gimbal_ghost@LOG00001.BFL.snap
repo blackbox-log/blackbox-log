@@ -28,6 +28,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/LOG00001.BFL
       counts: FrameCounts(
         main: 229265,
         slow: 35,
+        gps: 1170,
         gps_home: 0,
       ),
     ),
@@ -405,9 +406,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/LOG00001.BFL
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 1955,
+          max: 4294967295,
           unique: 1602,
-          histogram: (14450, 14124, 14203, 14216, 14519, 14350, 14608, 13989, 14150, 14215, 14159, 14526, 14496, 14353, 14516, 14391),
+          histogram: (14876, 14384, 14432, 14170, 14193, 14205, 14521, 14372, 14563, 14027, 14163, 14195, 14101, 14451, 14329, 14283),
         ),
       ),
       FieldSnapshot(
@@ -415,9 +416,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/LOG00001.BFL
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 1986,
-          unique: 1770,
-          histogram: (14258, 14003, 14248, 14203, 14248, 14442, 14189, 14281, 14267, 14368, 14323, 14232, 14513, 14700, 14441, 14549),
+          max: 4294967295,
+          unique: 1769,
+          histogram: (14783, 14567, 14255, 14014, 14238, 14197, 14236, 14442, 14214, 14287, 14221, 14367, 14336, 14153, 14507, 14448),
         ),
       ),
       FieldSnapshot(
@@ -425,9 +426,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/LOG00001.BFL
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 1956,
-          unique: 1662,
-          histogram: (14408, 14260, 14282, 14328, 14331, 14277, 14152, 14267, 14354, 14290, 14402, 14581, 14316, 14297, 14487, 14233),
+          max: 4294967295,
+          unique: 1664,
+          histogram: (14559, 14225, 14417, 14259, 14283, 14337, 14331, 14271, 14135, 14261, 14343, 14325, 14394, 14561, 14306, 14258),
         ),
       ),
       FieldSnapshot(
@@ -455,7 +456,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/LOG00001.BFL
         unit: Boolean,
         history: History(
           yes: 229264,
-          no: 1,
+          no: 0,
         ),
       ),
       FieldSnapshot(
@@ -463,7 +464,77 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/LOG00001.BFL
         unit: Boolean,
         history: History(
           yes: 229264,
-          no: 1,
+          no: 0,
+        ),
+      ),
+      FieldSnapshot(
+        name: "time",
+        unit: FrameTime,
+        history: FieldSnapshot(
+          min: 0,
+          max: 620991448,
+          unique: 1169,
+          histogram: (14899, 13528, 14531, 10983, 15293, 16654, 13456, 12541, 15379, 11984, 15945, 14716, 12690, 14874, 15101, 16690),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_numSat",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 6,
+          unique: 4,
+          histogram: (7270, 0, 0, 0, 94253, 68912, 58829, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_coord[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -337981507,
+          max: 0,
+          unique: 1084,
+          histogram: (14912, 13563, 13492, 15094, 16872, 17671, 14134, 15939, 13058, 15588, 15539, 10138, 14285, 12285, 13515, 13179),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_coord[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 201019858,
+          unique: 1102,
+          histogram: (14828, 12922, 16648, 13892, 13864, 13351, 13567, 17286, 14686, 16073, 13968, 11954, 10571, 16336, 15100, 14218),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_altitude",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 3747,
+          unique: 717,
+          histogram: (14120, 12991, 14298, 15237, 12358, 13767, 13544, 13952, 16813, 12345, 12803, 14928, 13721, 12757, 18418, 17212),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_speed",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 2806,
+          unique: 893,
+          histogram: (16865, 18507, 16702, 11598, 13526, 12168, 15606, 15686, 15033, 14519, 14471, 15102, 12386, 11942, 12397, 12756),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_ground_course",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 3598,
+          unique: 789,
+          histogram: (13685, 11699, 20804, 15611, 19609, 9870, 16919, 10792, 15744, 12011, 16655, 8629, 11978, 19748, 12328, 13182),
         ),
       ),
     ]),

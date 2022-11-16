@@ -74,7 +74,10 @@ fn main() -> QuietResult<()> {
             let span = tracing::info_span!("log", index = human_i);
             let _span = span.enter();
 
-            let mut log = file.parse_by_index(i).map_err(|_| exitcode::DATAERR)?;
+            let mut log = file.parse_by_index(i).map_err(|err| {
+                tracing::debug!("error from parse_by_index: {err}");
+                exitcode::DATAERR
+            })?;
 
             if let Some(ref filter) = cli.filter {
                 log.set_filter(filter);
@@ -144,6 +147,7 @@ fn write_csv(out: &mut impl Write, log: &Log) -> io::Result<()> {
                 Value::Boolean(b) => b.to_string(),
                 Value::Unsigned(u) => u.to_string(),
                 Value::Signed(s) => s.to_string(),
+                Value::Missing => String::new(),
             }),
         )?;
     }

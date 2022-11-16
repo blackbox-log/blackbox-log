@@ -5,7 +5,8 @@ use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty};
 use crate::parser::{
-    Encoding, FrameKind, Headers, InternalResult, ParseError, ParseResult, Predictor, Reader,
+    Encoding, FrameKind, Headers, InternalResult, ParseError, ParseResult, Predictor,
+    PredictorContext, Reader,
 };
 
 #[derive(Debug, Clone)]
@@ -49,13 +50,12 @@ impl<'data> GpsHomeFrameDef<'data> {
         let raw = read_field_values(data, &self.0, |f| f.encoding)?;
         let _ = read_field_values(data, &self.1, |&f| f)?;
 
+        let ctx = PredictorContext::new(headers, &raw);
         let values = raw
             .iter()
             .zip(self.0.iter())
             .map(|(&raw_value, field)| {
-                let value = field
-                    .predictor
-                    .apply(headers, raw_value, true, &raw, None, None, 0);
+                let value = field.predictor.apply(raw_value, true, &ctx);
 
                 tracing::trace!(
                     field = field.name,

@@ -3,7 +3,7 @@ use core::ops::{Add, Div, Sub};
 use super::{as_signed, as_unsigned, Headers};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[repr(u8)]
+#[repr(u16)]
 pub enum Predictor {
     Zero = 0,
     Previous,
@@ -17,83 +17,83 @@ pub enum Predictor {
     VBatReference,
     LastMainFrameTime,
     MinMotor,
-    // HomeLon = 256,
+    #[allow(dead_code)]
+    HomeLon = 256,
 }
 
 impl Predictor {
-    #[allow(clippy::too_many_arguments)]
-    pub(crate) fn apply(
-        self,
-        headers: &Headers,
-        value: u32,
-        signed: bool,
-        current: &[u32],
-        last: Option<u32>,
-        last_last: Option<u32>,
-        skipped_frames: u32,
-    ) -> u32 {
+    pub(crate) fn apply(self, value: u32, signed: bool, ctx: &PredictorContext) -> u32 {
         let _span = if signed {
             tracing::trace_span!(
                 "Predictor::apply",
                 ?self,
                 value = as_signed(value),
-                last = last.map(as_signed),
-                last_last = last_last.map(as_signed),
-                skipped_frames,
+                last = ctx.last.map(as_signed),
+                last_last = ctx.last_last.map(as_signed),
+                skipped_frames = ctx.skipped_frames,
             )
         } else {
             tracing::trace_span!(
                 "Predictor::apply",
                 ?self,
                 value,
-                last,
-                last_last,
-                skipped_frames
+                last = ctx.last,
+                last_last = ctx.last_last,
+                skipped_frames = ctx.skipped_frames
             )
         };
         let _span = _span.enter();
 
         let diff = match self {
             Self::Zero => 0,
-            Self::Previous => last.unwrap_or(0),
+            Self::Previous => ctx.last.unwrap_or(0),
             Self::StraightLine => {
                 if signed {
-                    as_unsigned(straight_line(last.map(as_signed), last_last.map(as_signed)))
+                    as_unsigned(straight_line(
+                        ctx.last.map(as_signed),
+                        ctx.last_last.map(as_signed),
+                    ))
                 } else {
-                    straight_line(last, last_last)
+                    straight_line(ctx.last, ctx.last_last)
                 }
             }
             Self::Average2 => {
                 if signed {
-                    as_unsigned(average(last.map(as_signed), last_last.map(as_signed)))
+                    as_unsigned(average(
+                        ctx.last.map(as_signed),
+                        ctx.last_last.map(as_signed),
+                    ))
                 } else {
-                    average(last, last_last)
+                    average(ctx.last, ctx.last_last)
                 }
             }
-            Self::MinThrottle => headers.min_throttle.unwrap().into(),
-            Self::Motor0 => headers.main_frames.get_motor_0_from(current),
+            Self::MinThrottle => ctx.headers.min_throttle.unwrap().into(),
+            Self::Motor0 => ctx.headers.main_frames.get_motor_0_from(ctx.current),
             Self::Increment => {
                 if signed {
-                    skipped_frames
+                    ctx.skipped_frames
                         .wrapping_add(1)
-                        .wrapping_add(last.unwrap_or(0))
+                        .wrapping_add(ctx.last.unwrap_or(0))
                 } else {
-                    let skipped_frames = i32::try_from(skipped_frames)
+                    let skipped_frames = i32::try_from(ctx.skipped_frames)
                         .expect("never skip more than i32::MAX frames");
                     as_unsigned(
                         skipped_frames
                             .wrapping_add(1)
-                            .wrapping_add(as_signed(last.unwrap_or(0))),
+                            .wrapping_add(as_signed(ctx.last.unwrap_or(0))),
                     )
                 }
             }
             // Self::HomeLat => todo!(),
-            Self::FifteenHundred => 1500,
-            Self::VBatReference => headers.vbat.unwrap().reference.into(),
-            // Self::LastMainFrameTime => todo!(),
-            Self::MinMotor => headers.motor_output_range.unwrap().min().into(),
             // Self::HomeLon => todo!(),
-            Self::HomeLat | Self::LastMainFrameTime => {
+            Self::FifteenHundred => 1500,
+            Self::VBatReference => ctx.headers.vbat.unwrap().reference.into(),
+            Self::LastMainFrameTime => {
+                tracing::debug!("found unhandled {self:?}");
+                0
+            }
+            Self::MinMotor => ctx.headers.motor_output_range.unwrap().min().into(),
+            Self::HomeLat | Self::HomeLon => {
                 tracing::warn!("found unimplemented predictor: {self:?}");
                 0
             }
@@ -126,6 +126,43 @@ impl Predictor {
             "11" => Some(Self::MinMotor),
             _ => None,
         }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct PredictorContext<'a, 'b, 'data> {
+    headers: &'a Headers<'data>,
+    current: &'b [u32],
+    last: Option<u32>,
+    last_last: Option<u32>,
+    skipped_frames: u32,
+}
+
+impl<'a, 'b, 'data> PredictorContext<'a, 'b, 'data> {
+    pub(crate) fn new(headers: &'a Headers<'data>, current: &'b [u32]) -> Self {
+        Self {
+            headers,
+            current,
+            last: None,
+            last_last: None,
+            skipped_frames: 0,
+        }
+    }
+
+    pub(crate) fn set_last(&mut self, last: Option<u32>) -> &mut Self {
+        self.last = last;
+        self
+    }
+
+    pub(crate) fn set_last_2(&mut self, last: Option<u32>, last_last: Option<u32>) -> &mut Self {
+        self.last = last;
+        self.last_last = last_last;
+        self
+    }
+
+    pub(crate) fn set_skipped_frames(&mut self, skipped: u32) -> &mut Self {
+        self.skipped_frames = skipped;
+        self
     }
 }
 

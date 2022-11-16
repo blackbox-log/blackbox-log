@@ -32,6 +32,14 @@ pub(crate) use from_raw::FromRaw;
 
 const ADC_VREF: f64 = 33.;
 
+impl FromRaw for Time {
+    type Raw = u64;
+
+    fn from_raw(raw: Self::Raw, _headers: &self::Headers) -> Self {
+        Self::new::<prelude::microsecond>(raw as f64)
+    }
+}
+
 impl FromRaw for Acceleration {
     type Raw = i32;
 

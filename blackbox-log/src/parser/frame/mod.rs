@@ -1,3 +1,6 @@
+#[macro_use]
+mod trace_field;
+
 mod gps;
 mod gps_home;
 mod main;
@@ -62,6 +65,15 @@ impl From<SlowUnit> for Unit {
     }
 }
 
+impl From<GpsUnit> for Unit {
+    fn from(unit: GpsUnit) -> Self {
+        match unit {
+            GpsUnit::FrameTime => Self::FrameTime,
+            GpsUnit::Unitless => Self::Unitless,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Value {
     FrameTime(Time),
@@ -75,6 +87,7 @@ pub enum Value {
     Boolean(bool),
     Unsigned(u32),
     Signed(i32),
+    Missing,
 }
 
 impl From<MainValue> for Value {
@@ -100,6 +113,18 @@ impl From<SlowValue> for Value {
             SlowValue::Boolean(b) => Self::Boolean(b),
             SlowValue::Unsigned(x) => Self::Unsigned(x),
             SlowValue::Signed(x) => Self::Signed(x),
+            SlowValue::Missing => Self::Missing,
+        }
+    }
+}
+
+impl From<GpsValue> for Value {
+    fn from(value: GpsValue) -> Self {
+        match value {
+            GpsValue::FrameTime(t) => Self::FrameTime(t),
+            GpsValue::Unsigned(x) => Self::Unsigned(x),
+            GpsValue::Signed(x) => Self::Signed(x),
+            GpsValue::Missing => Self::Missing,
         }
     }
 }

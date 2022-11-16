@@ -28,6 +28,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
       counts: FrameCounts(
         main: 16774,
         slow: 4,
+        gps: 87,
         gps_home: 1,
       ),
     ),
@@ -430,9 +431,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 2044,
-          unique: 1193,
-          histogram: (1078, 1056, 985, 1017, 983, 1077, 1030, 1067, 1009, 989, 1020, 1103, 1023, 1192, 1083, 1062),
+          max: 4294967295,
+          unique: 1191,
+          histogram: (1106, 1063, 1079, 1054, 986, 1020, 985, 1070, 1020, 1080, 1011, 987, 1016, 1109, 1023, 1165),
         ),
       ),
       FieldSnapshot(
@@ -440,9 +441,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 1901,
+          max: 4294967295,
           unique: 1153,
-          histogram: (1057, 1042, 1023, 1079, 1035, 1038, 979, 1029, 1048, 1058, 1051, 1037, 1096, 1126, 1069, 1007),
+          histogram: (1192, 1011, 1082, 1043, 1018, 1077, 1043, 1040, 982, 1029, 1034, 1061, 1043, 1031, 1062, 1026),
         ),
       ),
       FieldSnapshot(
@@ -450,9 +451,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 2052,
+          max: 4294967295,
           unique: 1190,
-          histogram: (1032, 1067, 1018, 1055, 1030, 1063, 997, 1030, 1048, 1040, 1044, 1088, 1201, 1049, 1013, 999),
+          histogram: (1067, 993, 1031, 1067, 1028, 1051, 1027, 1060, 997, 1036, 1046, 1043, 1042, 1056, 1057, 1173),
         ),
       ),
       FieldSnapshot(
@@ -481,7 +482,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
         unit: Boolean,
         history: History(
           yes: 16773,
-          no: 1,
+          no: 0,
         ),
       ),
       FieldSnapshot(
@@ -489,7 +490,76 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
         unit: Boolean,
         history: History(
           yes: 16773,
-          no: 1,
+          no: 0,
+        ),
+      ),
+      FieldSnapshot(
+        name: "time",
+        unit: FrameTime,
+        history: FieldSnapshot(
+          min: 0,
+          max: 469166774,
+          unique: 86,
+          histogram: (1582, 740, 1017, 594, 988, 1047, 1535, 888, 1174, 800, 1038, 1580, 692, 938, 986, 1174),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_numSat",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 8,
+          unique: 1,
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_coord[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -1022,
+          max: 270,
+          unique: 84,
+          histogram: (1442, 851, 1283, 683, 1085, 949, 1205, 1472, 444, 632, 1333, 394, 1708, 937, 747, 1608),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_coord[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -3233,
+          max: 0,
+          unique: 82,
+          histogram: (987, 840, 1223, 606, 681, 1186, 2501, 829, 1824, 791, 493, 948, 1531, 839, 198, 1296),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_altitude",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 665,
+          unique: 42,
+          histogram: (1324, 840, 838, 1175, 484, 694, 1483, 2282, 1490, 1176, 493, 544, 1037, 840, 1076, 997),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_speed",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 266,
+          unique: 60,
+          histogram: (394, 805, 396, 1384, 1561, 792, 1432, 1580, 839, 1341, 839, 779, 1540, 583, 1520, 988),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_ground_course",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 879,
+          unique: 58,
+          histogram: (986, 1535, 840, 593, 750, 791, 593, 977, 938, 602, 594, 1224, 1124, 1926, 197, 3103),
         ),
       ),
     ]),

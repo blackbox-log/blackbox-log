@@ -2,49 +2,17 @@ use alloc::borrow::ToOwned;
 use alloc::vec::Vec;
 use core::iter;
 
+use predictor::PredictorContext;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty, Unit};
+use crate::parser::data::FrameSync;
 use crate::parser::{
     as_signed, decode, predictor, to_base_field, Encoding, FrameKind, Headers, InternalResult,
     ParseError, ParseResult, Predictor, Reader,
 };
 use crate::units::prelude::*;
 use crate::units::FromRaw;
-
-macro_rules! trace_field {
-    (_impl pre $field:expr, $enc:expr, $signed:expr, $raw:expr) => {
-        tracing::trace!(
-            field = $field.name,
-            encoding = ?$enc,
-            signed_encoding = $signed,
-            raw = $raw,
-        );
-    };
-    (_impl post $field:expr, $pred:expr, $signed:expr, $final:expr) => {
-        tracing::trace!(
-            field = $field.name,
-            predictor = ?$pred,
-            signed = $signed,
-            value = $final,
-        );
-    };
-
-    (pre, field = $field:expr, enc = $enc:expr, raw = $raw:expr $(,)?) => {
-        if $enc.is_signed() {
-            trace_field!(_impl pre $field, $enc, $enc.is_signed(), crate::parser::as_signed($raw));
-        } else {
-            trace_field!(_impl pre $field, $enc, $enc.is_signed(), $raw);
-        }
-    };
-    (post, field = $field:expr, pred = $pred:expr, final = $final:expr $(,)?) => {
-        if $field.signed {
-            trace_field!(_impl post $field, $pred, $field.signed, crate::parser::as_signed($final));
-        } else {
-            trace_field!(_impl post $field, $pred, $field.signed, $final);
-        }
-    };
-}
 
 #[derive(Debug, Clone)]
 pub(crate) struct MainFrame {
@@ -58,10 +26,10 @@ impl MainFrame {
     pub(crate) fn parse(
         data: &mut Reader,
         kind: FrameKind,
-        main_frames: &[(MainFrame, usize)],
+        main_frames: &[FrameSync],
         headers: &Headers,
     ) -> InternalResult<Self> {
-        let get_main_frame = |i| main_frames.get(i).map(|(frame, _)| frame);
+        let get_main_frame = |i| main_frames.get(i).map(|sync: &FrameSync| &sync.main);
 
         let current_idx = main_frames.len();
         let last = current_idx.checked_sub(1).and_then(get_main_frame);
@@ -78,9 +46,9 @@ impl MainFrame {
     }
 
     pub(crate) fn get(&self, index: usize, headers: &Headers) -> Option<MainValue> {
-        let unit = match index {
+        let value = match index {
             0 => MainValue::Unsigned(self.iteration),
-            1 => MainValue::FrameTime(Time::new::<microsecond>(self.time as f64)),
+            1 => MainValue::FrameTime(Time::from_raw(self.time, headers)),
             _ => {
                 let index = index - 2;
                 let def = headers.main_frames.fields.get(index)?;
@@ -111,7 +79,7 @@ impl MainFrame {
             }
         };
 
-        Some(unit)
+        Some(value)
     }
 }
 
@@ -233,25 +201,27 @@ impl<'data> MainFrameDef<'data> {
         let time = decode::variable(data)?.into();
         tracing::trace!(time);
 
-        let mut values = read_field_values(data, &self.fields, |f| f.encoding_intra)?;
+        let raw = read_field_values(data, &self.fields, |f| f.encoding_intra)?;
+
+        let mut ctx = PredictorContext::new(headers, &raw);
+        let mut values = Vec::with_capacity(raw.len());
 
         for (i, field) in self.fields.iter().enumerate() {
-            let raw = values[i];
+            let raw = raw[i];
             let signed = field.encoding_intra.is_signed();
 
-            let last = last.map(|l| l.values[i]);
+            ctx.set_last(last.map(|l| l.values[i]));
 
             trace_field!(pre, field = field, enc = field.encoding_intra, raw = raw);
 
-            values[i] = field
-                .predictor_intra
-                .apply(headers, raw, signed, &values, last, None, 0);
+            let value = field.predictor_intra.apply(raw, signed, &ctx);
+            values.push(value);
 
             trace_field!(
                 post,
                 field = field,
                 pred = field.predictor_intra,
-                final = values[i]
+                final = value
             );
         }
 
@@ -296,32 +266,28 @@ impl<'data> MainFrameDef<'data> {
             time
         };
 
-        let mut values = read_field_values(data, &self.fields, |f| f.encoding_inter)?;
+        let raw = read_field_values(data, &self.fields, |f| f.encoding_inter)?;
+
+        let mut ctx = PredictorContext::new(headers, &raw);
+        ctx.set_skipped_frames(skipped_frames);
+        let mut values = Vec::with_capacity(raw.len());
 
         for (i, field) in self.fields.iter().enumerate() {
-            let raw = values[i];
+            let raw = raw[i];
             let signed = field.encoding_inter.is_signed();
 
-            let last = last.map(|l| l.values[i]);
-            let last_last = last_last.map(|l| l.values[i]);
+            ctx.set_last_2(last.map(|l| l.values[i]), last_last.map(|l| l.values[i]));
 
             trace_field!(pre, field = field, enc = field.encoding_inter, raw = raw);
 
-            values[i] = field.predictor_inter.apply(
-                headers,
-                raw,
-                signed,
-                &values,
-                last,
-                last_last,
-                skipped_frames,
-            );
+            let value = field.predictor_inter.apply(raw, signed, &ctx);
+            values.push(value);
 
             trace_field!(
                 post,
                 field = field,
                 pred = field.predictor_inter,
-                final = values[i]
+                final = value
             );
         }
 

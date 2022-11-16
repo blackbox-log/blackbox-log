@@ -12,13 +12,13 @@ mod reader;
 use alloc::string::String;
 use core::fmt;
 
-pub(crate) use self::data::Data;
+pub(crate) use self::data::{Data, FrameSync};
 pub use self::data::{Event, Stats};
 pub use self::decode::Encoding;
-pub(crate) use self::frame::{GpsHomeFrame, MainFrame, SlowFrame};
+pub(crate) use self::frame::{GpsFrame, GpsHomeFrame, MainFrame, SlowFrame};
 pub use self::frame::{Unit, Value};
 pub use self::headers::Headers;
-pub(crate) use self::predictor::Predictor;
+pub(crate) use self::predictor::{Predictor, PredictorContext};
 pub use self::reader::Reader;
 
 pub type ParseResult<T> = Result<T, ParseError>;

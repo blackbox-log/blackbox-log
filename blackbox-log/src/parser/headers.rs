@@ -3,7 +3,7 @@ use core::str;
 
 use super::frame::{
     is_frame_def_header, parse_frame_def_header, DataFrameKind, GpsFrameDef, GpsFrameDefBuilder,
-    GpsHomeFrameDef, GpsHomeFrameDefBuilder, MainFrameDef, MainFrameDefBuilder, MainUnit,
+    GpsHomeFrameDef, GpsHomeFrameDefBuilder, GpsUnit, MainFrameDef, MainFrameDefBuilder, MainUnit,
     SlowFrameDef, SlowFrameDefBuilder, SlowUnit,
 };
 use super::{InternalError, InternalResult, ParseError, ParseResult, Predictor, Reader, Unit};
@@ -47,6 +47,11 @@ impl<'data> Headers<'data> {
 
     pub(crate) fn slow_fields(&self) -> impl Iterator<Item = (&str, SlowUnit)> {
         self.slow_frames.iter()
+    }
+
+    #[allow(clippy::redundant_closure_for_method_calls)]
+    pub(crate) fn gps_fields(&self) -> impl Iterator<Item = (&str, GpsUnit)> {
+        self.gps_frames.iter().flat_map(|def| def.iter())
     }
 
     pub(crate) fn parse(data: &mut Reader<'data>) -> ParseResult<Self> {
@@ -94,7 +99,7 @@ impl<'data> Headers<'data> {
             let ok = match predictor {
                 Predictor::MinThrottle => has_min_throttle,
                 Predictor::Motor0 => has_motor_0,
-                Predictor::HomeLat => has_gps_home,
+                Predictor::HomeLat | Predictor::HomeLon => has_gps_home,
                 Predictor::VBatReference => has_vbat,
                 Predictor::MinMotor => has_min_motor,
                 Predictor::Zero

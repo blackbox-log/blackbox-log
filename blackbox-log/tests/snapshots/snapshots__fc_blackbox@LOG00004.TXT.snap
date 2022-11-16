@@ -28,6 +28,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
       counts: FrameCounts(
         main: 199851,
         slow: 698,
+        gps: 4170,
         gps_home: 137,
       ),
     ),
@@ -1194,6 +1195,146 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
           max: 7,
           unique: 7,
           histogram: (199845, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1),
+        ),
+      ),
+      FieldSnapshot(
+        name: "time",
+        unit: FrameTime,
+        history: FieldSnapshot(
+          min: 0,
+          max: 513471046,
+          unique: 4141,
+          histogram: (11835, 11876, 12986, 12468, 13274, 13211, 13085, 12572, 11184, 14015, 13241, 11400, 11750, 12901, 11863, 12189),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_fixType",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 1973410172,
+          unique: 7,
+          histogram: (0, 0, 199844, 0, 0, 0, 1, 0, 1, 2, 0, 0, 1, 1, 0, 0),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_numSat",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 6474,
+          unique: 17,
+          histogram: (20124, 69498, 0, 0, 0, 0, 4, 1743, 14429, 2832, 2962, 15324, 26748, 6967, 20979, 18240),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_coord[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -81178,
+          max: 29274,
+          unique: 3852,
+          histogram: (12298, 13086, 13305, 12186, 11772, 14335, 12310, 12461, 13160, 13118, 12950, 11222, 12014, 12279, 11608, 11746),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_coord[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -72719,
+          max: 155109,
+          unique: 3940,
+          histogram: (11424, 13813, 14004, 11126, 11504, 12614, 12466, 11649, 12927, 12903, 12059, 11821, 13235, 12355, 12905, 13045),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_altitude",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -2000117058,
+          max: 4649,
+          unique: 268,
+          histogram: (12439, 16075, 15434, 11851, 10104, 12609, 14779, 13592, 13696, 12602, 9967, 9360, 9847, 9546, 14657, 13292),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_speed",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 9210,
+          unique: 1687,
+          histogram: (12342, 11993, 13460, 11507, 12579, 12200, 11420, 13180, 12618, 12269, 12914, 12320, 12209, 13929, 12583, 12327),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_ground_course",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 4698,
+          unique: 2021,
+          histogram: (10835, 13914, 13317, 12056, 12651, 12006, 12284, 12961, 13140, 13264, 13350, 12414, 11719, 10507, 12647, 12785),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_hdop",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 8242,
+          unique: 29,
+          histogram: (0, 4523, 39865, 43145, 3531, 17033, 10051, 31611, 1898, 26350, 2831, 1942, 0, 1, 7172, 9897),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_eph",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 7972,
+          unique: 61,
+          histogram: (20016, 12234, 13340, 8558, 11451, 15968, 34081, 11988, 4723, 4536, 10395, 12135, 10668, 10089, 11636, 8032),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_epv",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: 0,
+          max: 9051,
+          unique: 77,
+          histogram: (12779, 12775, 8521, 8226, 7512, 16975, 12064, 12324, 18324, 13710, 7876, 11700, 12164, 13994, 12600, 18306),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_velned[0]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -3360,
+          max: 3872,
+          unique: 2813,
+          histogram: (11857, 10458, 12529, 12637, 12746, 13484, 12260, 13162, 11817, 13356, 12125, 13758, 11063, 12052, 12621, 13925),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_velned[1]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -4312,
+          max: 4355,
+          unique: 2801,
+          histogram: (13995, 12234, 13271, 12540, 11086, 12016, 13293, 11991, 12943, 12429, 12282, 12558, 13260, 11862, 12897, 11193),
+        ),
+      ),
+      FieldSnapshot(
+        name: "GPS_velned[2]",
+        unit: Unitless,
+        history: FieldSnapshot(
+          min: -2126,
+          max: 2664,
+          unique: 1689,
+          histogram: (12282, 13121, 13414, 13495, 12483, 11727, 12706, 11595, 12193, 14098, 11657, 12542, 11819, 13977, 11636, 11105),
         ),
       ),
     ]),

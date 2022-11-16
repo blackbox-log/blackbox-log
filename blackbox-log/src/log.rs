@@ -2,8 +2,8 @@ use alloc::vec::Vec;
 use core::iter::FusedIterator;
 
 use crate::parser::{
-    to_base_field, Data, Event, Headers, MainFrame, ParseResult, Reader, SlowFrame, Stats, Unit,
-    Value,
+    to_base_field, Data, Event, FrameSync, GpsFrame, Headers, MainFrame, ParseResult, Reader,
+    SlowFrame, Stats, Unit, Value,
 };
 
 #[derive(Debug)]
@@ -17,6 +17,7 @@ pub struct Log<'data> {
 struct Filter {
     main: Vec<usize>,
     slow: Vec<usize>,
+    gps: Vec<usize>,
 }
 
 impl Filter {
@@ -47,13 +48,21 @@ impl Filter {
                 .enumerate()
                 .filter_map(filter)
                 .collect(),
+            gps: headers
+                .gps_fields()
+                .map(|(name, _)| name)
+                .enumerate()
+                .filter_map(filter)
+                .collect(),
         }
     }
 
+    #[allow(clippy::redundant_closure_for_method_calls)]
     fn new_unfiltered(headers: &Headers) -> Self {
         Self {
             main: (0..headers.main_frames.len()).collect(),
             slow: (0..headers.slow_frames.len()).collect(),
+            gps: (0..headers.gps_frames.as_ref().map_or(0, |def| def.len())).collect(),
         }
     }
 }
@@ -137,6 +146,11 @@ impl<'log: 'data, 'data> Iterator for FieldIter<'log, 'data> {
                 let (name, unit) = headers.slow_frames.get(index).unwrap();
                 (name, unit.into())
             },
+            |index| {
+                let def = headers.gps_frames.as_ref().unwrap();
+                let (name, unit) = def.get(index).unwrap();
+                (name, unit.into())
+            },
         )?;
 
         self.index += 1;
@@ -166,14 +180,16 @@ impl<'log, 'data> Iterator for FrameIter<'log, 'data> {
             return None;
         }
 
-        let (main, slow) = &self.log.data.main_frames[self.index];
+        let FrameSync { main, slow, gps } = &self.log.data.main_frames[self.index];
         let slow = &self.log.data.slow_frames[*slow];
+        let gps = gps.map(|index| &self.log.data.gps_frames[index]);
         self.index += 1;
 
         Some(FieldValueIter {
             log: self.log,
             main,
             slow,
+            gps,
             index: 0,
         })
     }
@@ -186,6 +202,7 @@ pub struct FieldValueIter<'log, 'data> {
     log: &'log Log<'data>,
     main: &'log MainFrame,
     slow: &'log SlowFrame,
+    gps: Option<&'log GpsFrame>,
     index: usize,
 }
 
@@ -202,6 +219,7 @@ impl<'log, 'data> Iterator for FieldValueIter<'log, 'data> {
             filter,
             |index| self.main.get(index, headers).unwrap().into(),
             |index| self.slow.values[index].into(),
+            |index| self.gps.unwrap().get(index).unwrap().into(),
         )?;
 
         self.index += 1;
@@ -217,16 +235,21 @@ fn get_next<T>(
     filter: &Filter,
     get_main: impl Fn(usize) -> T,
     get_slow: impl Fn(usize) -> T,
+    get_gps: impl Fn(usize) -> T,
 ) -> Option<T> {
     let slow = filter.main.len();
-    let done = slow + filter.slow.len();
+    let gps = slow + filter.slow.len();
+    let done = gps + filter.gps.len();
 
     let next = if index < slow {
         let index = filter.main[index];
         get_main(index)
-    } else if index < done {
+    } else if index < gps {
         let index = filter.slow[index - slow];
         get_slow(index)
+    } else if index < done {
+        let index = filter.gps[index - gps];
+        get_gps(index)
     } else {
         return None;
     };

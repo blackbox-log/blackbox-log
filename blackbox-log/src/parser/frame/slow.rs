@@ -4,7 +4,9 @@ use core::iter;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty, Unit};
-use crate::parser::{as_signed, Encoding, Headers, InternalResult, ParseResult, Predictor, Reader};
+use crate::parser::{
+    as_signed, Encoding, Headers, InternalResult, ParseResult, Predictor, PredictorContext, Reader,
+};
 use crate::units;
 
 #[derive(Debug, Clone)]
@@ -20,6 +22,7 @@ pub(crate) enum SlowValue {
     Boolean(bool),
     Unsigned(u32),
     Signed(i32),
+    Missing,
 }
 
 impl SlowValue {
@@ -85,14 +88,12 @@ impl<'data> SlowFrameDef<'data> {
     pub(crate) fn parse(&self, data: &mut Reader, headers: &Headers) -> InternalResult<SlowFrame> {
         let raw = read_field_values(data, &self.0, |f| f.encoding)?;
 
+        let ctx = PredictorContext::new(headers, &raw);
         let values = raw
             .iter()
             .zip(self.0.iter())
             .map(|(&raw_value, field)| {
-                let value =
-                    field
-                        .predictor
-                        .apply(headers, raw_value, field.signed, &raw, None, None, 0);
+                let value = field.predictor.apply(raw_value, field.signed, &ctx);
 
                 tracing::trace!(
                     field = field.name,
@@ -126,28 +127,8 @@ impl<'data> SlowFrameDef<'data> {
         Ok(SlowFrame { values })
     }
 
-    pub(crate) fn default_frame(&self, headers: &Headers) -> SlowFrame {
-        let mut i = 0;
-        let values = iter::from_fn(|| {
-            self.0.get(i).map(|def| {
-                i += 1;
-
-                let firmware = headers.firmware_kind;
-                match def.unit {
-                    SlowUnit::FlightMode => {
-                        SlowValue::FlightMode(units::FlightModeSet::new(0, firmware))
-                    }
-                    SlowUnit::State => SlowValue::State(units::StateSet::new(0, firmware)),
-                    SlowUnit::FailsafePhase => {
-                        SlowValue::FailsafePhase(units::FailsafePhaseSet::new(0, firmware))
-                    }
-                    SlowUnit::Boolean => SlowValue::Boolean(false),
-                    SlowUnit::Unitless => SlowValue::new_unitless(0, def.signed),
-                }
-            })
-        })
-        .collect();
-
+    pub(crate) fn empty_frame(&self) -> SlowFrame {
+        let values = iter::repeat(SlowValue::Missing).take(self.len()).collect();
         SlowFrame { values }
     }
 }

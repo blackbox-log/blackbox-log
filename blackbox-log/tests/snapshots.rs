@@ -138,6 +138,10 @@ impl FieldSnapshot {
 
     #[allow(clippy::wildcard_enum_match_arm, clippy::cast_possible_truncation)]
     fn update(&mut self, value: Value) {
+        if value == Value::Missing {
+            return;
+        }
+
         match &mut self.history {
             History::Int(history) => history.update(match value {
                 Value::FrameTime(t) => t.get::<si::time::microsecond>().round() as i128,
