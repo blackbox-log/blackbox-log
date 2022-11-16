@@ -129,8 +129,8 @@ fn write_csv(out: &mut impl Write, log: &Log) -> io::Result<()> {
         write_csv_line(
             out,
             frame.map(|value| match value {
-                Value::FrameTime(t) => t.get::<si::time::microsecond>().to_string(),
-                Value::Amperage(a) => a.get::<si::electric_current::milliampere>().to_string(),
+                Value::FrameTime(t) => format!("{:.0}", t.get::<si::time::microsecond>()),
+                Value::Amperage(a) => format_float(a.get::<si::electric_current::ampere>()),
                 Value::Voltage(v) => format_float(v.get::<si::electric_potential::volt>()),
                 Value::Acceleration(a) => {
                     format_float(a.get::<si::acceleration::meter_per_second_squared>())
