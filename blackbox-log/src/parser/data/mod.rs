@@ -135,6 +135,7 @@ impl Data {
                             &mut data,
                             headers,
                             main_frames.last().map(|sync| &sync.main),
+                            gps_home_frames.last(),
                         )
                         .map(|frame| gps_frames.push(frame))
                     },

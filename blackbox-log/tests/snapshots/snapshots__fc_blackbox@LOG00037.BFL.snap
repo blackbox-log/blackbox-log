@@ -516,20 +516,20 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
         name: "GPS_coord[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -1022,
-          max: 270,
+          min: 0,
+          max: 503976202,
           unique: 84,
-          histogram: (1442, 851, 1283, 683, 1085, 949, 1205, 1472, 444, 632, 1333, 394, 1708, 937, 747, 1608),
+          histogram: (1806, 740, 1351, 1165, 444, 939, 1187, 603, 987, 583, 1188, 1245, 1442, 1214, 842, 1037),
         ),
       ),
       FieldSnapshot(
         name: "GPS_coord[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -3233,
-          max: 0,
+          min: 0,
+          max: 74973158,
           unique: 82,
-          histogram: (987, 840, 1223, 606, 681, 1186, 2501, 829, 1824, 791, 493, 948, 1531, 839, 198, 1296),
+          histogram: (791, 1824, 829, 2501, 1186, 681, 606, 1223, 840, 987, 1296, 198, 839, 1531, 948, 493),
         ),
       ),
       FieldSnapshot(

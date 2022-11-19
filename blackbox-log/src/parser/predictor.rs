@@ -1,5 +1,6 @@
 use core::ops::{Add, Div, Sub};
 
+use super::frame::GpsPosition;
 use super::{as_signed, as_unsigned, Headers};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -96,8 +97,19 @@ impl Predictor {
                     )
                 }
             }
-            // Self::HomeLat => todo!(),
-            // Self::HomeLon => todo!(),
+            Self::HomeLat | Self::HomeLon => ctx.gps_home.map_or_else(
+                || {
+                    tracing::debug!("found {self:?} without gps home");
+                    0
+                },
+                |home| {
+                    as_unsigned(if self == Self::HomeLat {
+                        home.latitude
+                    } else {
+                        home.longitude
+                    })
+                },
+            ),
             Self::FifteenHundred => 1500,
             Self::VBatReference => ctx.headers.vbat.unwrap().reference.into(),
             Self::LastMainFrameTime => {
@@ -105,10 +117,6 @@ impl Predictor {
                 0
             }
             Self::MinMotor => ctx.headers.motor_output_range.unwrap().min().into(),
-            Self::HomeLat | Self::HomeLon => {
-                tracing::warn!("found unimplemented predictor: {self:?}");
-                0
-            }
         };
 
         if signed {
@@ -147,6 +155,7 @@ pub(crate) struct PredictorContext<'a, 'data> {
     last: Option<u32>,
     last_last: Option<u32>,
     skipped_frames: u32,
+    gps_home: Option<GpsPosition>,
 }
 
 impl<'a, 'data> PredictorContext<'a, 'data> {
@@ -156,6 +165,27 @@ impl<'a, 'data> PredictorContext<'a, 'data> {
             last: None,
             last_last: None,
             skipped_frames: 0,
+            gps_home: None,
+        }
+    }
+
+    pub(crate) fn with_skipped(headers: &'a Headers<'data>, skipped_frames: u32) -> Self {
+        Self {
+            headers,
+            last: None,
+            last_last: None,
+            skipped_frames,
+            gps_home: None,
+        }
+    }
+
+    pub(crate) fn with_home(headers: &'a Headers<'data>, gps_home: Option<GpsPosition>) -> Self {
+        Self {
+            headers,
+            last: None,
+            last_last: None,
+            skipped_frames: 0,
+            gps_home,
         }
     }
 
@@ -167,11 +197,6 @@ impl<'a, 'data> PredictorContext<'a, 'data> {
     pub(crate) fn set_last_2(&mut self, last: Option<u32>, last_last: Option<u32>) -> &mut Self {
         self.last = last;
         self.last_last = last_last;
-        self
-    }
-
-    pub(crate) fn set_skipped_frames(&mut self, skipped: u32) -> &mut Self {
-        self.skipped_frames = skipped;
         self
     }
 }

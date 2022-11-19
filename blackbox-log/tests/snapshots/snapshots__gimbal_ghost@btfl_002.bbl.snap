@@ -472,20 +472,20 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
         name: "GPS_coord[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -61,
-          max: 0,
+          min: 0,
+          max: 298132142,
           unique: 24,
-          histogram: (75, 0, 107, 45, 100, 50, 100, 100, 42, 200, 50, 50, 50, 63, 103, 0),
+          histogram: (103, 63, 50, 50, 50, 200, 42, 100, 100, 50, 100, 45, 107, 0, 75, 0),
         ),
       ),
       FieldSnapshot(
         name: "GPS_coord[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -30,
+          min: -957820525,
           max: 0,
           unique: 19,
-          histogram: (52, 125, 0, 50, 50, 50, 160, 45, 50, 45, 0, 100, 100, 50, 63, 195),
+          histogram: (125, 0, 50, 50, 50, 160, 45, 50, 45, 0, 100, 100, 50, 63, 195, 52),
         ),
       ),
       FieldSnapshot(
@@ -981,20 +981,20 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
         name: "GPS_coord[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -84,
-          max: 0,
+          min: 0,
+          max: 298132062,
           unique: 2,
-          histogram: (5, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+          histogram: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 5, 0),
         ),
       ),
       FieldSnapshot(
         name: "GPS_coord[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -46,
+          min: -957820541,
           max: 0,
           unique: 2,
-          histogram: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 32, 0),
+          histogram: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 32, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -1505,20 +1505,20 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
         name: "GPS_coord[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -4844,
-          max: 5426,
+          min: 0,
+          max: 298137568,
           unique: 221,
-          histogram: (746, 1082, 567, 1241, 282, 686, 636, 738, 546, 702, 486, 1041, 1003, 642, 453, 763),
+          histogram: (415, 1244, 354, 781, 542, 407, 546, 1033, 580, 946, 931, 639, 605, 710, 746, 1135),
         ),
       ),
       FieldSnapshot(
         name: "GPS_coord[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -7688,
-          max: 11340,
+          min: -957828183,
+          max: 0,
           unique: 218,
-          histogram: (897, 911, 581, 698, 744, 894, 451, 628, 597, 793, 496, 413, 1111, 1027, 602, 771),
+          histogram: (1140, 545, 1229, 685, 652, 353, 745, 597, 676, 594, 655, 1170, 496, 638, 542, 897),
         ),
       ),
       FieldSnapshot(

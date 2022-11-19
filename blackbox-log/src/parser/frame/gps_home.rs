@@ -10,12 +10,12 @@ use crate::parser::{
 };
 
 #[derive(Debug, Clone)]
-pub struct GpsHomeFrame(GpsPosition);
+pub(crate) struct GpsHomeFrame(pub(crate) GpsPosition);
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct GpsPosition {
-    latitude: i32,
-    longitude: i32,
+    pub latitude: i32,
+    pub longitude: i32,
 }
 
 #[derive(Debug, Clone)]

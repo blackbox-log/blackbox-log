@@ -270,8 +270,7 @@ impl<'data> MainFrameDef<'data> {
 
         let raw = read_field_values(data, &self.fields, |f| f.encoding_inter)?;
 
-        let mut ctx = PredictorContext::new(headers);
-        ctx.set_skipped_frames(skipped_frames);
+        let mut ctx = PredictorContext::with_skipped(headers, skipped_frames);
         let mut values = Vec::with_capacity(raw.len());
 
         for (i, field) in self.fields.iter().enumerate() {

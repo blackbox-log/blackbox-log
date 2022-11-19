@@ -1231,20 +1231,20 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
         name: "GPS_coord[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -81178,
-          max: 29274,
-          unique: 3852,
-          histogram: (12298, 13086, 13305, 12186, 11772, 14335, 12310, 12461, 13160, 13118, 12950, 11222, 12014, 12279, 11608, 11746),
+          min: -5951,
+          max: 524872737,
+          unique: 3855,
+          histogram: (12552, 12408, 13654, 12294, 11513, 12993, 12308, 12298, 12522, 11920, 12953, 11491, 11901, 12854, 13028, 13161),
         ),
       ),
       FieldSnapshot(
         name: "GPS_coord[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -72719,
-          max: 155109,
-          unique: 3940,
-          histogram: (11424, 13813, 14004, 11126, 11504, 12614, 12466, 11649, 12927, 12903, 12059, 11821, 13235, 12355, 12905, 13045),
+          min: -6500,
+          max: 136677548,
+          unique: 3941,
+          histogram: (11966, 12156, 12357, 12973, 11559, 14153, 12471, 11421, 14387, 12757, 11925, 11766, 12076, 12370, 12586, 12927),
         ),
       ),
       FieldSnapshot(

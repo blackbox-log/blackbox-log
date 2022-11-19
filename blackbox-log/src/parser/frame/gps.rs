@@ -4,7 +4,7 @@ use core::iter;
 
 use tracing::instrument;
 
-use super::{read_field_values, DataFrameKind, DataFrameProperty, MainFrame, Unit};
+use super::{read_field_values, DataFrameKind, DataFrameProperty, GpsHomeFrame, MainFrame, Unit};
 use crate::parser::{
     as_signed, decode, Encoding, FrameKind, Headers, InternalResult, ParseError, ParseResult,
     Predictor, PredictorContext, Reader,
@@ -100,6 +100,7 @@ impl<'data> GpsFrameDef<'data> {
         data: &mut Reader,
         headers: &Headers,
         last_main: Option<&MainFrame>,
+        last_home: Option<&GpsHomeFrame>,
     ) -> InternalResult<GpsFrame> {
         let time = {
             let time = last_main.map_or(0, |main| main.time);
@@ -112,7 +113,7 @@ impl<'data> GpsFrameDef<'data> {
 
         let raw = read_field_values(data, &self.0, |f| f.encoding)?;
 
-        let ctx = PredictorContext::new(headers);
+        let ctx = PredictorContext::with_home(headers, last_home.map(|home| home.0));
         let mut values = Vec::with_capacity(raw.len());
 
         for (i, field) in self.0.iter().enumerate() {
@@ -219,7 +220,14 @@ impl<'data> GpsFrameDefBuilder<'data> {
             }
         }
 
-        let fields = fields.collect::<Result<Vec<_>, _>>()?;
+        let mut fields = fields.collect::<Result<Vec<_>, _>>()?;
+        for (i, j) in (1..fields.len()).into_iter().map(|i| (i - 1, i)) {
+            if fields[i].predictor == Predictor::HomeLat
+                && fields[j].predictor == Predictor::HomeLat
+            {
+                fields[j].predictor = Predictor::HomeLon;
+            }
+        }
 
         if names.next().is_some()
             || predictors.next().is_some()
