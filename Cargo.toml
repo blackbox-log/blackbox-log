@@ -11,7 +11,7 @@ rust-version = "1.65"
 [workspace.dependencies]
 blackbox-log.path = "blackbox-log"
 bpaf = { version = "0.6.1", features = ["derive"] }
-serde = { version = "1.0.147", default-features = false, features = ["derive"] }
+serde = { version = "1.0.147", default-features = false, features = ["alloc", "derive"] }
 tracing = { version = "0.1.37", default-features = false }
 
 [profile.bench]
