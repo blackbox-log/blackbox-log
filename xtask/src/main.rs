@@ -41,9 +41,7 @@ fn main() -> Result<()> {
             let workspace_args = get_workspace_args(workspace, false);
 
             run(
-                cmd!(sh, "cargo clippy --examples --tests --bins")
-                    .args(&workspace_args)
-                    .args(&args),
+                cmd!(sh, "cargo clippy").args(&workspace_args).args(&args),
                 &lints,
             )?;
 
