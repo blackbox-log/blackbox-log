@@ -1,6 +1,7 @@
 [workspace]
 members = ["blackbox-log", "blackbox-sys", "cli", "fuzz", "xtask"]
 default-members = ["blackbox-log", "cli"]
+resolver = "2"
 
 [workspace.package]
 edition = "2021"
