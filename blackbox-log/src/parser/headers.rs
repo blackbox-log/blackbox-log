@@ -130,6 +130,7 @@ impl<'data> Headers<'data> {
                 | Unit::State
                 | Unit::FailsafePhase
                 | Unit::GpsCoordinate
+                | Unit::Altitude
                 | Unit::Velocity
                 | Unit::Boolean
                 | Unit::Unitless => true,

@@ -128,6 +128,7 @@ impl FieldSnapshot {
                 | Unit::Acceleration
                 | Unit::Rotation
                 | Unit::GpsCoordinate
+                | Unit::Altitude
                 | Unit::Velocity
                 | Unit::Unitless => History::Int(NumberHistory::new()),
                 Unit::Boolean => History::Bool { yes: 0, no: 0 },
@@ -156,6 +157,7 @@ impl FieldSnapshot {
                     r.get::<si::angular_velocity::degree_per_second>().round() as i128
                 }
                 Value::GpsCoordinate(c) => (c * 10000000.).round() as i128,
+                Value::Altitude(a) => a.get::<si::length::meter>().round() as i128,
                 Value::Velocity(v) => {
                     v.get::<si::velocity::centimeter_per_second>().round() as i128
                 }

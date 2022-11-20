@@ -534,7 +534,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
       ),
       FieldSnapshot(
         name: "GPS_altitude",
-        unit: Unitless,
+        unit: Altitude,
         history: FieldSnapshot(
           min: 0,
           max: 665,

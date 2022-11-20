@@ -22,6 +22,7 @@ pub struct GpsFrame {
 pub enum GpsValue {
     FrameTime(Time),
     Coordinate(f64),
+    Altitude(Length),
     Velocity(Velocity),
     Unsigned(u32),
     Signed(i32),
@@ -51,6 +52,7 @@ impl GpsValue {
 pub enum GpsUnit {
     FrameTime,
     Coordinate,
+    Altitude,
     Velocity,
     Unitless,
 }
@@ -142,6 +144,15 @@ impl<'data> GpsFrameDef<'data> {
                     let value = as_signed(value);
 
                     GpsValue::Coordinate(f64::from(value) / 10000000.)
+                }
+                GpsUnit::Altitude => {
+                    let altitude = if field.signed {
+                        as_signed(value).into()
+                    } else {
+                        value.into()
+                    };
+
+                    GpsValue::Altitude(Length::new::<meter>(altitude))
                 }
                 GpsUnit::Velocity => {
                     assert!(!field.signed);
@@ -259,6 +270,7 @@ fn unit_from_name(name: &str) -> GpsUnit {
     match to_base_field(name) {
         "time" => GpsUnit::FrameTime,
         "GPS_coord" => GpsUnit::Coordinate,
+        "GPS_altitude" => GpsUnit::Altitude,
         "GPS_speed" => GpsUnit::Velocity,
         _ => GpsUnit::Unitless,
     }

@@ -4,7 +4,7 @@ use core::fmt;
 use bitvec::prelude::*;
 pub use uom::si;
 pub use uom::si::f64::{
-    Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Time, Velocity,
+    Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Length, Time, Velocity,
 };
 
 use crate::common::FirmwareKind;
@@ -16,10 +16,11 @@ pub(crate) mod prelude {
     pub use super::si::angular_velocity::degree_per_second;
     pub use super::si::electric_current::{ampere, milliampere};
     pub use super::si::electric_potential::{millivolt, volt};
+    pub use super::si::length::meter;
     pub use super::si::time::{microsecond, second};
     pub use super::si::velocity::meter_per_second;
     pub use super::{
-        Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Time, Velocity,
+        Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Length, Time, Velocity,
     };
 }
 

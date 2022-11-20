@@ -499,7 +499,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
       ),
       FieldSnapshot(
         name: "GPS_altitude",
-        unit: Unitless,
+        unit: Altitude,
         history: FieldSnapshot(
           min: 0,
           max: 966,
@@ -1024,7 +1024,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
       ),
       FieldSnapshot(
         name: "GPS_altitude",
-        unit: Unitless,
+        unit: Altitude,
         history: FieldSnapshot(
           min: 0,
           max: 588,
@@ -1549,7 +1549,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
       ),
       FieldSnapshot(
         name: "GPS_altitude",
-        unit: Unitless,
+        unit: Altitude,
         history: FieldSnapshot(
           min: 0,
           max: 667,

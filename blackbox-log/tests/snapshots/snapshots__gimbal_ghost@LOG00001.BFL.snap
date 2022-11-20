@@ -509,7 +509,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/LOG00001.BFL
       ),
       FieldSnapshot(
         name: "GPS_altitude",
-        unit: Unitless,
+        unit: Altitude,
         history: FieldSnapshot(
           min: 0,
           max: 3747,

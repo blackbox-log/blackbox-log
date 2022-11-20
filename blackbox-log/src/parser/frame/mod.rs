@@ -37,6 +37,7 @@ pub enum Unit {
     State,
     FailsafePhase,
     GpsCoordinate,
+    Altitude,
     Velocity,
     Boolean,
     Unitless,
@@ -72,6 +73,7 @@ impl From<GpsUnit> for Unit {
         match unit {
             GpsUnit::FrameTime => Self::FrameTime,
             GpsUnit::Coordinate => Self::GpsCoordinate,
+            GpsUnit::Altitude => Self::Altitude,
             GpsUnit::Velocity => Self::Velocity,
             GpsUnit::Unitless => Self::Unitless,
         }
@@ -90,6 +92,7 @@ pub enum Value {
     FailsafePhase(units::FailsafePhaseSet),
     Boolean(bool),
     GpsCoordinate(f64),
+    Altitude(Length),
     Velocity(Velocity),
     Unsigned(u32),
     Signed(i32),
@@ -129,6 +132,7 @@ impl From<GpsValue> for Value {
         match value {
             GpsValue::FrameTime(t) => Self::FrameTime(t),
             GpsValue::Coordinate(c) => Self::GpsCoordinate(c),
+            GpsValue::Altitude(a) => Self::Altitude(a),
             GpsValue::Velocity(v) => Self::Velocity(v),
             GpsValue::Unsigned(x) => Self::Unsigned(x),
             GpsValue::Signed(x) => Self::Signed(x),
