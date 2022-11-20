@@ -1259,7 +1259,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
       ),
       FieldSnapshot(
         name: "GPS_speed",
-        unit: Unitless,
+        unit: Velocity,
         history: FieldSnapshot(
           min: 0,
           max: 9210,

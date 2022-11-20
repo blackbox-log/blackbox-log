@@ -17,7 +17,7 @@ pub(crate) use self::main::*;
 pub(crate) use self::slow::*;
 use super::{Encoding, InternalResult, ParseError, ParseResult, Predictor, Reader};
 use crate::units;
-use crate::units::{Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Time};
+use crate::units::prelude::*;
 
 pub trait FieldDef {
     fn name(&self) -> &str;
@@ -37,6 +37,7 @@ pub enum Unit {
     State,
     FailsafePhase,
     GpsCoordinate,
+    Velocity,
     Boolean,
     Unitless,
 }
@@ -71,6 +72,7 @@ impl From<GpsUnit> for Unit {
         match unit {
             GpsUnit::FrameTime => Self::FrameTime,
             GpsUnit::Coordinate => Self::GpsCoordinate,
+            GpsUnit::Velocity => Self::Velocity,
             GpsUnit::Unitless => Self::Unitless,
         }
     }
@@ -88,6 +90,7 @@ pub enum Value {
     FailsafePhase(units::FailsafePhaseSet),
     Boolean(bool),
     GpsCoordinate(f64),
+    Velocity(Velocity),
     Unsigned(u32),
     Signed(i32),
     Missing,
@@ -126,6 +129,7 @@ impl From<GpsValue> for Value {
         match value {
             GpsValue::FrameTime(t) => Self::FrameTime(t),
             GpsValue::Coordinate(c) => Self::GpsCoordinate(c),
+            GpsValue::Velocity(v) => Self::Velocity(v),
             GpsValue::Unsigned(x) => Self::Unsigned(x),
             GpsValue::Signed(x) => Self::Signed(x),
             GpsValue::Missing => Self::Missing,

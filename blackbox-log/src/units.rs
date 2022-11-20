@@ -3,7 +3,9 @@ use core::fmt;
 
 use bitvec::prelude::*;
 pub use uom::si;
-pub use uom::si::f64::{Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Time};
+pub use uom::si::f64::{
+    Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Time, Velocity,
+};
 
 use crate::common::FirmwareKind;
 use crate::parser::headers::CurrentMeterConfig;
@@ -15,7 +17,10 @@ pub(crate) mod prelude {
     pub use super::si::electric_current::{ampere, milliampere};
     pub use super::si::electric_potential::{millivolt, volt};
     pub use super::si::time::{microsecond, second};
-    pub use super::{Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Time};
+    pub use super::si::velocity::meter_per_second;
+    pub use super::{
+        Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Time, Velocity,
+    };
 }
 
 mod from_raw {
@@ -87,6 +92,14 @@ impl FromRaw for ElectricPotential {
         let volts = f64::from(raw) * ADC_VREF * 10. * f64::from(scale) / 4095.;
 
         Self::new::<prelude::millivolt>(volts)
+    }
+}
+
+impl FromRaw for Velocity {
+    type Raw = u32;
+
+    fn from_raw(raw: Self::Raw, _headers: &self::Headers) -> Self {
+        Self::new::<si::velocity::centimeter_per_second>(raw.into())
     }
 }
 

@@ -519,7 +519,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/LOG00001.BFL
       ),
       FieldSnapshot(
         name: "GPS_speed",
-        unit: Unitless,
+        unit: Velocity,
         history: FieldSnapshot(
           min: 0,
           max: 2806,

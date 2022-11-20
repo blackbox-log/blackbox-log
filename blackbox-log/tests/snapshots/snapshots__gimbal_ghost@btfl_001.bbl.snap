@@ -509,7 +509,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
       ),
       FieldSnapshot(
         name: "GPS_speed",
-        unit: Unitless,
+        unit: Velocity,
         history: FieldSnapshot(
           min: 0,
           max: 2713,
@@ -1034,7 +1034,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
       ),
       FieldSnapshot(
         name: "GPS_speed",
-        unit: Unitless,
+        unit: Velocity,
         history: FieldSnapshot(
           min: 0,
           max: 2774,
@@ -1559,7 +1559,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
       ),
       FieldSnapshot(
         name: "GPS_speed",
-        unit: Unitless,
+        unit: Velocity,
         history: FieldSnapshot(
           min: 0,
           max: 3156,
