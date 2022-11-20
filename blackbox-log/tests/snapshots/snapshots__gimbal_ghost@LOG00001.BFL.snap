@@ -489,7 +489,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/LOG00001.BFL
       ),
       FieldSnapshot(
         name: "GPS_coord[0]",
-        unit: Unitless,
+        unit: GpsCoordinate,
         history: FieldSnapshot(
           min: -337981507,
           max: 0,
@@ -499,7 +499,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/LOG00001.BFL
       ),
       FieldSnapshot(
         name: "GPS_coord[1]",
-        unit: Unitless,
+        unit: GpsCoordinate,
         history: FieldSnapshot(
           min: 0,
           max: 201019858,

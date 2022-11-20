@@ -36,6 +36,7 @@ pub enum Unit {
     FlightMode,
     State,
     FailsafePhase,
+    GpsCoordinate,
     Boolean,
     Unitless,
 }
@@ -69,6 +70,7 @@ impl From<GpsUnit> for Unit {
     fn from(unit: GpsUnit) -> Self {
         match unit {
             GpsUnit::FrameTime => Self::FrameTime,
+            GpsUnit::Coordinate => Self::GpsCoordinate,
             GpsUnit::Unitless => Self::Unitless,
         }
     }
@@ -85,6 +87,7 @@ pub enum Value {
     State(units::StateSet),
     FailsafePhase(units::FailsafePhaseSet),
     Boolean(bool),
+    GpsCoordinate(f64),
     Unsigned(u32),
     Signed(i32),
     Missing,
@@ -122,6 +125,7 @@ impl From<GpsValue> for Value {
     fn from(value: GpsValue) -> Self {
         match value {
             GpsValue::FrameTime(t) => Self::FrameTime(t),
+            GpsValue::Coordinate(c) => Self::GpsCoordinate(c),
             GpsValue::Unsigned(x) => Self::Unsigned(x),
             GpsValue::Signed(x) => Self::Signed(x),
             GpsValue::Missing => Self::Missing,

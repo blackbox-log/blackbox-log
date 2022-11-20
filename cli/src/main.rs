@@ -145,6 +145,7 @@ fn write_csv(out: &mut impl Write, log: &Log) -> io::Result<()> {
                 Value::State(s) => s.to_string(),
                 Value::FailsafePhase(f) => f.to_string(),
                 Value::Boolean(b) => b.to_string(),
+                Value::GpsCoordinate(c) => format!("{:.7}", c),
                 Value::Unsigned(u) => u.to_string(),
                 Value::Signed(s) => s.to_string(),
                 Value::Missing => String::new(),

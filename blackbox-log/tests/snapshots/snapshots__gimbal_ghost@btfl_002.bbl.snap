@@ -470,7 +470,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
       ),
       FieldSnapshot(
         name: "GPS_coord[0]",
-        unit: Unitless,
+        unit: GpsCoordinate,
         history: FieldSnapshot(
           min: 0,
           max: 298132142,
@@ -480,7 +480,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
       ),
       FieldSnapshot(
         name: "GPS_coord[1]",
-        unit: Unitless,
+        unit: GpsCoordinate,
         history: FieldSnapshot(
           min: -957820525,
           max: 0,
@@ -979,7 +979,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
       ),
       FieldSnapshot(
         name: "GPS_coord[0]",
-        unit: Unitless,
+        unit: GpsCoordinate,
         history: FieldSnapshot(
           min: 0,
           max: 298132062,
@@ -989,7 +989,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
       ),
       FieldSnapshot(
         name: "GPS_coord[1]",
-        unit: Unitless,
+        unit: GpsCoordinate,
         history: FieldSnapshot(
           min: -957820541,
           max: 0,
@@ -1503,7 +1503,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
       ),
       FieldSnapshot(
         name: "GPS_coord[0]",
-        unit: Unitless,
+        unit: GpsCoordinate,
         history: FieldSnapshot(
           min: 0,
           max: 298137568,
@@ -1513,7 +1513,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
       ),
       FieldSnapshot(
         name: "GPS_coord[1]",
-        unit: Unitless,
+        unit: GpsCoordinate,
         history: FieldSnapshot(
           min: -957828183,
           max: 0,

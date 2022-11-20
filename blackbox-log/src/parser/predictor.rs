@@ -100,6 +100,7 @@ impl Predictor {
             Self::HomeLat | Self::HomeLon => ctx.gps_home.map_or_else(
                 || {
                     tracing::debug!("found {self:?} without gps home");
+                    // TODO: invalidate result
                     0
                 },
                 |home| {

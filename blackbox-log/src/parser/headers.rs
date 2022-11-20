@@ -129,6 +129,7 @@ impl<'data> Headers<'data> {
                 | Unit::FlightMode
                 | Unit::State
                 | Unit::FailsafePhase
+                | Unit::GpsCoordinate
                 | Unit::Boolean
                 | Unit::Unitless => true,
             };

@@ -6,8 +6,8 @@ use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty, GpsHomeFrame, MainFrame, Unit};
 use crate::parser::{
-    as_signed, decode, Encoding, FrameKind, Headers, InternalResult, ParseError, ParseResult,
-    Predictor, PredictorContext, Reader,
+    as_signed, decode, to_base_field, Encoding, FrameKind, Headers, InternalResult, ParseError,
+    ParseResult, Predictor, PredictorContext, Reader,
 };
 use crate::units::prelude::*;
 use crate::units::FromRaw;
@@ -21,6 +21,7 @@ pub struct GpsFrame {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum GpsValue {
     FrameTime(Time),
+    Coordinate(f64),
     Unsigned(u32),
     Signed(i32),
     Missing,
@@ -48,6 +49,7 @@ impl GpsValue {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum GpsUnit {
     FrameTime,
+    Coordinate,
     Unitless,
 }
 
@@ -133,6 +135,12 @@ impl<'data> GpsFrameDef<'data> {
 
             values.push(match field.unit {
                 GpsUnit::FrameTime => unreachable!(),
+                GpsUnit::Coordinate => {
+                    assert!(field.signed);
+                    let value = as_signed(value);
+
+                    GpsValue::Coordinate(f64::from(value) / 10000000.)
+                }
                 GpsUnit::Unitless => GpsValue::new_unitless(value, signed),
             });
         }
@@ -242,8 +250,9 @@ impl<'data> GpsFrameDefBuilder<'data> {
 }
 
 fn unit_from_name(name: &str) -> GpsUnit {
-    match name {
+    match to_base_field(name) {
         "time" => GpsUnit::FrameTime,
+        "GPS_coord" => GpsUnit::Coordinate,
         _ => GpsUnit::Unitless,
     }
 }

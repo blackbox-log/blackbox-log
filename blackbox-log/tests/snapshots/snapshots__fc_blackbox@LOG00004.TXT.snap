@@ -1229,7 +1229,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
       ),
       FieldSnapshot(
         name: "GPS_coord[0]",
-        unit: Unitless,
+        unit: GpsCoordinate,
         history: FieldSnapshot(
           min: -5951,
           max: 524872737,
@@ -1239,7 +1239,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
       ),
       FieldSnapshot(
         name: "GPS_coord[1]",
-        unit: Unitless,
+        unit: GpsCoordinate,
         history: FieldSnapshot(
           min: -6500,
           max: 136677548,
