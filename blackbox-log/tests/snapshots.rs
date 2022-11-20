@@ -130,6 +130,7 @@ impl FieldSnapshot {
                 | Unit::GpsCoordinate
                 | Unit::Altitude
                 | Unit::Velocity
+                | Unit::GpsHeading
                 | Unit::Unitless => History::Int(NumberHistory::new()),
                 Unit::Boolean => History::Bool { yes: 0, no: 0 },
                 Unit::FlightMode | Unit::State | Unit::FailsafePhase => {
@@ -161,6 +162,7 @@ impl FieldSnapshot {
                 Value::Velocity(v) => {
                     v.get::<si::velocity::centimeter_per_second>().round() as i128
                 }
+                Value::GpsHeading(h) => (h * 10.).round() as i128,
                 Value::Unsigned(u) => u.into(),
                 Value::Signed(s) => s.into(),
                 _ => unreachable!(),

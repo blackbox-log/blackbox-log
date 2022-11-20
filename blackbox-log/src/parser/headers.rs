@@ -132,6 +132,7 @@ impl<'data> Headers<'data> {
                 | Unit::GpsCoordinate
                 | Unit::Altitude
                 | Unit::Velocity
+                | Unit::GpsHeading
                 | Unit::Boolean
                 | Unit::Unitless => true,
             };

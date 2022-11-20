@@ -510,7 +510,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
       ),
       FieldSnapshot(
         name: "GPS_ground_course",
-        unit: Unitless,
+        unit: GpsHeading,
         history: FieldSnapshot(
           min: 0,
           max: 1076,
@@ -1019,7 +1019,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
       ),
       FieldSnapshot(
         name: "GPS_ground_course",
-        unit: Unitless,
+        unit: GpsHeading,
         history: FieldSnapshot(
           min: 0,
           max: 1076,
@@ -1543,7 +1543,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
       ),
       FieldSnapshot(
         name: "GPS_ground_course",
-        unit: Unitless,
+        unit: GpsHeading,
         history: FieldSnapshot(
           min: 0,
           max: 3592,

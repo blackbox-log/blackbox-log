@@ -39,6 +39,7 @@ pub enum Unit {
     GpsCoordinate,
     Altitude,
     Velocity,
+    GpsHeading,
     Boolean,
     Unitless,
 }
@@ -75,6 +76,7 @@ impl From<GpsUnit> for Unit {
             GpsUnit::Coordinate => Self::GpsCoordinate,
             GpsUnit::Altitude => Self::Altitude,
             GpsUnit::Velocity => Self::Velocity,
+            GpsUnit::Heading => Self::GpsHeading,
             GpsUnit::Unitless => Self::Unitless,
         }
     }
@@ -94,6 +96,7 @@ pub enum Value {
     GpsCoordinate(f64),
     Altitude(Length),
     Velocity(Velocity),
+    GpsHeading(f64),
     Unsigned(u32),
     Signed(i32),
     Missing,
@@ -134,6 +137,7 @@ impl From<GpsValue> for Value {
             GpsValue::Coordinate(c) => Self::GpsCoordinate(c),
             GpsValue::Altitude(a) => Self::Altitude(a),
             GpsValue::Velocity(v) => Self::Velocity(v),
+            GpsValue::Heading(h) => Self::GpsHeading(h),
             GpsValue::Unsigned(x) => Self::Unsigned(x),
             GpsValue::Signed(x) => Self::Signed(x),
             GpsValue::Missing => Self::Missing,

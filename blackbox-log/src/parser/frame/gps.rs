@@ -24,6 +24,7 @@ pub enum GpsValue {
     Coordinate(f64),
     Altitude(Length),
     Velocity(Velocity),
+    Heading(f64),
     Unsigned(u32),
     Signed(i32),
     Missing,
@@ -54,6 +55,7 @@ pub enum GpsUnit {
     Coordinate,
     Altitude,
     Velocity,
+    Heading,
     Unitless,
 }
 
@@ -157,6 +159,10 @@ impl<'data> GpsFrameDef<'data> {
                 GpsUnit::Velocity => {
                     assert!(!field.signed);
                     GpsValue::Velocity(Velocity::from_raw(value, headers))
+                }
+                GpsUnit::Heading => {
+                    assert!(!field.signed);
+                    GpsValue::Heading(f64::from(value) / 10.)
                 }
                 GpsUnit::Unitless => GpsValue::new_unitless(value, signed),
             });
@@ -272,6 +278,7 @@ fn unit_from_name(name: &str) -> GpsUnit {
         "GPS_coord" => GpsUnit::Coordinate,
         "GPS_altitude" => GpsUnit::Altitude,
         "GPS_speed" => GpsUnit::Velocity,
+        "GPS_ground_course" => GpsUnit::Heading,
         _ => GpsUnit::Unitless,
     }
 }

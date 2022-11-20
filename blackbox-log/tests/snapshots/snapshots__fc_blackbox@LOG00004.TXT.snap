@@ -1269,7 +1269,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
       ),
       FieldSnapshot(
         name: "GPS_ground_course",
-        unit: Unitless,
+        unit: GpsHeading,
         history: FieldSnapshot(
           min: 0,
           max: 4698,

@@ -1,0 +1,6 @@
+---
+source: blackbox-log/tests/snapshots.rs
+expression: logs
+input_file: blackbox-log/tests/logs/.gimbal-ghost/test/LOG00001.01.csv
+---
+[]
