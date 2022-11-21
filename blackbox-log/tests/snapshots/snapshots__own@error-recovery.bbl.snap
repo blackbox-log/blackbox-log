@@ -37,7 +37,7 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
       Disarm(4),
       End,
     ],
-    fields: Fields([
+    main: Fields([
       FieldSnapshot(
         name: "loopIteration",
         unit: Unitless,
@@ -401,5 +401,6 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
         ),
       ),
     ]),
+    gps: Fields([]),
   )),
 ]

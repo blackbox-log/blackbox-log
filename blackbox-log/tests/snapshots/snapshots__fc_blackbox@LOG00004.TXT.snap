@@ -148,7 +148,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
         time: 1426,
       ),
     ],
-    fields: Fields([
+    main: Fields([
       FieldSnapshot(
         name: "loopIteration",
         unit: Unitless,
@@ -1197,14 +1197,26 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
           histogram: (199845, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1),
         ),
       ),
+    ]),
+    gps: Fields([
+      FieldSnapshot(
+        name: "time",
+        unit: FrameTime,
+        history: FieldSnapshot(
+          min: 0,
+          max: 513471046,
+          unique: 4168,
+          histogram: (253, 246, 269, 259, 276, 277, 275, 261, 232, 291, 274, 241, 248, 265, 247, 255),
+        ),
+      ),
       FieldSnapshot(
         name: "GPS_fixType",
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
           max: 1973410172,
-          unique: 7,
-          histogram: (0, 0, 199844, 0, 0, 0, 1, 0, 1, 2, 0, 0, 1, 1, 0, 0),
+          unique: 30,
+          histogram: (2, 3, 4137, 0, 2, 0, 1, 2, 5, 7, 3, 0, 5, 1, 0, 1),
         ),
       ),
       FieldSnapshot(
@@ -1212,29 +1224,29 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 6474,
-          unique: 17,
-          histogram: (20124, 69498, 0, 0, 0, 0, 4, 1743, 14429, 2832, 2962, 15324, 26748, 6967, 20979, 18240),
+          max: 638555,
+          unique: 43,
+          histogram: (420, 1440, 3, 1, 1, 2, 4, 36, 298, 61, 66, 321, 555, 143, 437, 381),
         ),
       ),
       FieldSnapshot(
         name: "GPS_coord[0]",
         unit: GpsCoordinate,
         history: FieldSnapshot(
-          min: -5951,
-          max: 524872737,
-          unique: 3855,
-          histogram: (12552, 12408, 13654, 12294, 11513, 12993, 12308, 12298, 12522, 11920, 12953, 11491, 11901, 12854, 13028, 13161),
+          min: -21985368,
+          max: 939252068,
+          unique: 3883,
+          histogram: (267, 257, 284, 254, 241, 272, 261, 251, 265, 248, 262, 242, 246, 270, 270, 279),
         ),
       ),
       FieldSnapshot(
         name: "GPS_coord[1]",
         unit: GpsCoordinate,
         history: FieldSnapshot(
-          min: -6500,
+          min: -25635,
           max: 136677548,
-          unique: 3941,
-          histogram: (11966, 12156, 12357, 12973, 11559, 14153, 12471, 11421, 14387, 12757, 11925, 11766, 12076, 12370, 12586, 12927),
+          unique: 3968,
+          histogram: (251, 252, 260, 271, 240, 295, 262, 241, 297, 269, 252, 245, 255, 252, 259, 268),
         ),
       ),
       FieldSnapshot(
@@ -1242,9 +1254,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
         unit: Altitude,
         history: FieldSnapshot(
           min: -2000117058,
-          max: 4649,
-          unique: 268,
-          histogram: (12439, 16075, 15434, 11851, 10104, 12609, 14779, 13592, 13696, 12602, 9967, 9360, 9847, 9546, 14657, 13292),
+          max: 5002,
+          unique: 293,
+          histogram: (255, 338, 314, 251, 211, 264, 311, 280, 288, 270, 209, 195, 204, 201, 304, 274),
         ),
       ),
       FieldSnapshot(
@@ -1252,9 +1264,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
         unit: Velocity,
         history: FieldSnapshot(
           min: 0,
-          max: 9210,
-          unique: 1687,
-          histogram: (12342, 11993, 13460, 11507, 12579, 12200, 11420, 13180, 12618, 12269, 12914, 12320, 12209, 13929, 12583, 12327),
+          max: 10179,
+          unique: 1702,
+          histogram: (265, 250, 278, 240, 260, 252, 242, 269, 261, 253, 273, 258, 256, 288, 265, 259),
         ),
       ),
       FieldSnapshot(
@@ -1262,9 +1274,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
         unit: GpsHeading,
         history: FieldSnapshot(
           min: 0,
-          max: 4698,
-          unique: 2021,
-          histogram: (10835, 13914, 13317, 12056, 12651, 12006, 12284, 12961, 13140, 13264, 13350, 12414, 11719, 10507, 12647, 12785),
+          max: 10210,
+          unique: 2038,
+          histogram: (230, 294, 278, 255, 266, 253, 256, 266, 273, 277, 275, 259, 248, 213, 265, 261),
         ),
       ),
       FieldSnapshot(
@@ -1272,9 +1284,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 8242,
-          unique: 29,
-          histogram: (0, 4523, 39865, 43145, 3531, 17033, 10051, 31611, 1898, 26350, 2831, 1942, 0, 1, 7172, 9897),
+          max: 573328,
+          unique: 56,
+          histogram: (6, 96, 829, 896, 74, 353, 208, 654, 40, 546, 61, 43, 2, 2, 149, 210),
         ),
       ),
       FieldSnapshot(
@@ -1282,9 +1294,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 7972,
-          unique: 61,
-          histogram: (20016, 12234, 13340, 8558, 11451, 15968, 34081, 11988, 4723, 4536, 10395, 12135, 10668, 10089, 11636, 8032),
+          max: 557036,
+          unique: 88,
+          histogram: (413, 253, 281, 182, 241, 328, 715, 250, 99, 94, 217, 253, 221, 213, 245, 164),
         ),
       ),
       FieldSnapshot(
@@ -1292,19 +1304,19 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 9051,
-          unique: 77,
-          histogram: (12779, 12775, 8521, 8226, 7512, 16975, 12064, 12324, 18324, 13710, 7876, 11700, 12164, 13994, 12600, 18306),
+          max: 134079861,
+          unique: 102,
+          histogram: (269, 266, 179, 176, 154, 356, 250, 258, 378, 286, 166, 246, 250, 294, 262, 379),
         ),
       ),
       FieldSnapshot(
         name: "GPS_velned[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -3360,
-          max: 3872,
-          unique: 2813,
-          histogram: (11857, 10458, 12529, 12637, 12746, 13484, 12260, 13162, 11817, 13356, 12125, 13758, 11063, 12052, 12621, 13925),
+          min: -5190,
+          max: 6526,
+          unique: 2825,
+          histogram: (253, 216, 256, 266, 261, 280, 256, 274, 245, 280, 261, 288, 230, 252, 259, 292),
         ),
       ),
       FieldSnapshot(
@@ -1312,19 +1324,19 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
         unit: Unitless,
         history: FieldSnapshot(
           min: -4312,
-          max: 4355,
-          unique: 2801,
-          histogram: (13995, 12234, 13271, 12540, 11086, 12016, 13293, 11991, 12943, 12429, 12282, 12558, 13260, 11862, 12897, 11193),
+          max: 4657,
+          unique: 2808,
+          histogram: (293, 255, 272, 258, 235, 255, 282, 250, 273, 255, 254, 258, 278, 240, 277, 234),
         ),
       ),
       FieldSnapshot(
         name: "GPS_velned[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -2126,
-          max: 2664,
-          unique: 1689,
-          histogram: (12282, 13121, 13414, 13495, 12483, 11727, 12706, 11595, 12193, 14098, 11657, 12542, 11819, 13977, 11636, 11105),
+          min: -4572,
+          max: 4140,
+          unique: 1693,
+          histogram: (251, 275, 284, 283, 259, 242, 265, 245, 251, 291, 240, 261, 245, 294, 245, 238),
         ),
       ),
     ]),

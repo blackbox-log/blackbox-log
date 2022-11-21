@@ -29,7 +29,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/crashing-LOG00002
     events: [
       End,
     ],
-    fields: Fields([
+    main: Fields([
       FieldSnapshot(
         name: "loopIteration",
         unit: Unitless,
@@ -382,5 +382,6 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/crashing-LOG00002
         ),
       ),
     ]),
+    gps: Fields([]),
   )),
 ]

@@ -12,6 +12,7 @@ use alloc::vec::Vec;
 use core::iter::Peekable;
 
 pub(crate) use self::gps::*;
+pub use self::gps::{GpsUnit, GpsValue};
 pub(crate) use self::gps_home::*;
 pub(crate) use self::main::*;
 pub(crate) use self::slow::*;

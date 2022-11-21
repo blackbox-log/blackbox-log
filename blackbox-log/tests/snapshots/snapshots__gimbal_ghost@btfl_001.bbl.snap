@@ -41,7 +41,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
       Disarm(4),
       End,
     ],
-    fields: Fields([
+    main: Fields([
       FieldSnapshot(
         name: "loopIteration",
         unit: Unitless,
@@ -457,6 +457,18 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           no: 0,
         ),
       ),
+    ]),
+    gps: Fields([
+      FieldSnapshot(
+        name: "time",
+        unit: FrameTime,
+        history: FieldSnapshot(
+          min: 0,
+          max: 285916010,
+          unique: 354,
+          histogram: (21, 19, 25, 23, 21, 31, 29, 10, 29, 18, 20, 23, 31, 23, 19, 12),
+        ),
+      ),
       FieldSnapshot(
         name: "GPS_numSat",
         unit: Unitless,
@@ -464,7 +476,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: 0,
           max: 16,
           unique: 5,
-          histogram: (9760, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 50, 1528, 5031),
+          histogram: (204, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 35, 111),
         ),
       ),
       FieldSnapshot(
@@ -474,7 +486,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: 0,
           max: 298135884,
           unique: 316,
-          histogram: (1060, 1017, 897, 1211, 869, 1144, 1268, 1120, 765, 1047, 977, 684, 895, 1020, 1451, 994),
+          histogram: (24, 21, 18, 26, 20, 23, 28, 28, 17, 21, 21, 15, 17, 22, 32, 21),
         ),
       ),
       FieldSnapshot(
@@ -484,7 +496,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: -957831102,
           max: 0,
           unique: 316,
-          histogram: (1385, 858, 837, 1401, 1099, 690, 999, 1063, 990, 1256, 750, 1039, 697, 1075, 1185, 1095),
+          histogram: (31, 19, 19, 31, 23, 15, 21, 21, 21, 27, 15, 23, 15, 24, 26, 23),
         ),
       ),
       FieldSnapshot(
@@ -494,7 +506,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: 0,
           max: 966,
           unique: 212,
-          histogram: (1199, 1080, 1122, 673, 871, 789, 895, 1064, 1314, 987, 1027, 988, 1099, 1238, 1241, 832),
+          histogram: (25, 27, 22, 14, 19, 17, 18, 23, 30, 20, 22, 20, 24, 27, 28, 18),
         ),
       ),
       FieldSnapshot(
@@ -504,7 +516,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: 0,
           max: 2713,
           unique: 255,
-          histogram: (955, 1001, 1001, 886, 1135, 981, 751, 1338, 1410, 1285, 1022, 1052, 564, 969, 937, 1132),
+          histogram: (20, 21, 20, 18, 27, 21, 17, 27, 31, 29, 23, 22, 12, 20, 20, 26),
         ),
       ),
       FieldSnapshot(
@@ -514,7 +526,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: 0,
           max: 3585,
           unique: 237,
-          histogram: (1850, 986, 1000, 797, 1372, 942, 711, 1052, 983, 1186, 614, 896, 693, 1379, 903, 1055),
+          histogram: (39, 22, 20, 18, 28, 21, 15, 21, 22, 27, 13, 20, 15, 30, 19, 24),
         ),
       ),
     ]),
@@ -556,7 +568,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
       Disarm(4),
       End,
     ],
-    fields: Fields([
+    main: Fields([
       FieldSnapshot(
         name: "loopIteration",
         unit: Unitless,
@@ -972,6 +984,18 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           no: 0,
         ),
       ),
+    ]),
+    gps: Fields([
+      FieldSnapshot(
+        name: "time",
+        unit: FrameTime,
+        history: FieldSnapshot(
+          min: 0,
+          max: 381772759,
+          unique: 457,
+          histogram: (29, 11, 34, 31, 25, 29, 35, 32, 22, 22, 33, 45, 26, 30, 28, 25),
+        ),
+      ),
       FieldSnapshot(
         name: "GPS_numSat",
         unit: Unitless,
@@ -979,7 +1003,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: 0,
           max: 15,
           unique: 5,
-          histogram: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 574, 150, 1343, 3935, 16165),
+          histogram: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 4, 29, 83, 329),
         ),
       ),
       FieldSnapshot(
@@ -989,7 +1013,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: 0,
           max: 298136528,
           unique: 419,
-          histogram: (1437, 1118, 1735, 1342, 1175, 1403, 1366, 1975, 963, 1378, 1120, 1926, 1107, 1329, 1184, 1609),
+          histogram: (29, 22, 35, 29, 24, 28, 29, 42, 21, 28, 24, 40, 23, 27, 23, 33),
         ),
       ),
       FieldSnapshot(
@@ -999,7 +1023,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: -957833585,
           max: 0,
           unique: 440,
-          histogram: (1556, 1455, 1245, 1513, 1142, 1247, 1339, 1275, 1575, 1219, 1449, 1537, 1406, 1673, 1443, 1093),
+          histogram: (32, 30, 25, 31, 23, 25, 30, 25, 34, 25, 31, 31, 29, 35, 29, 22),
         ),
       ),
       FieldSnapshot(
@@ -1009,7 +1033,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: 0,
           max: 588,
           unique: 174,
-          histogram: (989, 1204, 1375, 1317, 1379, 1526, 1366, 1435, 1334, 1463, 1652, 1560, 1571, 1508, 861, 1627),
+          histogram: (21, 25, 29, 28, 28, 31, 28, 30, 27, 30, 34, 32, 31, 32, 19, 32),
         ),
       ),
       FieldSnapshot(
@@ -1019,7 +1043,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: 0,
           max: 2774,
           unique: 322,
-          histogram: (1181, 1435, 1485, 1609, 1536, 1327, 1503, 1060, 1297, 1953, 1283, 1730, 1327, 877, 1169, 1395),
+          histogram: (26, 30, 30, 33, 31, 27, 31, 23, 26, 40, 27, 37, 27, 17, 24, 28),
         ),
       ),
       FieldSnapshot(
@@ -1029,7 +1053,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: 0,
           max: 3534,
           unique: 270,
-          histogram: (1338, 1636, 905, 1674, 1590, 1293, 1360, 1089, 1223, 2312, 1009, 1022, 1595, 1503, 1671, 947),
+          histogram: (27, 33, 19, 36, 32, 26, 29, 23, 25, 48, 20, 21, 32, 31, 35, 20),
         ),
       ),
     ]),
@@ -1071,7 +1095,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
       Disarm(4),
       End,
     ],
-    fields: Fields([
+    main: Fields([
       FieldSnapshot(
         name: "loopIteration",
         unit: Unitless,
@@ -1487,6 +1511,18 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           no: 0,
         ),
       ),
+    ]),
+    gps: Fields([
+      FieldSnapshot(
+        name: "time",
+        unit: FrameTime,
+        history: FieldSnapshot(
+          min: 0,
+          max: 516151134,
+          unique: 698,
+          histogram: (35, 29, 59, 51, 52, 46, 34, 46, 40, 23, 63, 46, 37, 42, 46, 49),
+        ),
+      ),
       FieldSnapshot(
         name: "GPS_numSat",
         unit: Unitless,
@@ -1494,7 +1530,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: 0,
           max: 16,
           unique: 5,
-          histogram: (1438, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 202, 1390, 5952, 23404),
+          histogram: (30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 36, 144, 482),
         ),
       ),
       FieldSnapshot(
@@ -1504,7 +1540,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: 0,
           max: 298135771,
           unique: 602,
-          histogram: (1181, 2438, 1660, 1869, 2878, 2050, 1822, 1888, 2017, 2311, 1842, 1853, 1983, 1863, 2237, 2494),
+          histogram: (24, 50, 37, 40, 65, 47, 38, 39, 43, 47, 41, 40, 44, 39, 51, 53),
         ),
       ),
       FieldSnapshot(
@@ -1514,7 +1550,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: -957835883,
           max: 0,
           unique: 638,
-          histogram: (1831, 2382, 2218, 1950, 1878, 2176, 1951, 2450, 2039, 2839, 1925, 2074, 1211, 2079, 1548, 1835),
+          histogram: (42, 49, 47, 43, 42, 46, 43, 51, 45, 62, 43, 44, 26, 43, 32, 40),
         ),
       ),
       FieldSnapshot(
@@ -1524,7 +1560,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: 0,
           max: 667,
           unique: 241,
-          histogram: (2147, 2086, 1993, 2204, 2061, 1483, 2013, 2346, 2234, 1969, 2121, 2093, 1727, 2297, 2171, 1441),
+          histogram: (47, 44, 44, 52, 44, 32, 42, 52, 48, 42, 45, 43, 38, 48, 46, 31),
         ),
       ),
       FieldSnapshot(
@@ -1534,7 +1570,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: 0,
           max: 3156,
           unique: 470,
-          histogram: (2201, 1506, 2336, 1809, 1928, 1917, 1981, 1897, 2124, 1894, 1678, 1983, 1806, 2478, 2120, 2728),
+          histogram: (50, 33, 49, 39, 45, 43, 41, 43, 46, 39, 36, 44, 38, 51, 44, 57),
         ),
       ),
       FieldSnapshot(
@@ -1544,7 +1580,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
           min: 0,
           max: 3592,
           unique: 401,
-          histogram: (1911, 2143, 1471, 1786, 2229, 1809, 2161, 2017, 2211, 2493, 1688, 2192, 2006, 2270, 1905, 2094),
+          histogram: (42, 44, 31, 41, 49, 38, 46, 44, 48, 52, 39, 45, 43, 47, 40, 49),
         ),
       ),
     ]),

@@ -30,7 +30,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00007.BFL
       ),
     ),
     events: [],
-    fields: Fields([
+    main: Fields([
       FieldSnapshot(
         name: "loopIteration",
         unit: Unitless,
@@ -461,5 +461,6 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00007.BFL
         ),
       ),
     ]),
+    gps: Fields([]),
   )),
 ]

@@ -5,7 +5,7 @@ use std::io::{self, BufWriter, Read, Write};
 use std::path::Path;
 use std::process::{ExitCode, Termination};
 
-use blackbox_log::log::MainView;
+use blackbox_log::log::{LogView, MainView};
 use blackbox_log::parser::Value;
 use blackbox_log::units::si;
 use mimalloc::MiMalloc;
@@ -79,10 +79,13 @@ fn main() -> QuietResult<()> {
                 exitcode::DATAERR
             })?;
 
-            let data = cli
-                .filter
-                .as_ref()
-                .map_or_else(|| log.data(), |filter| log.data_with_filter(filter));
+            let data = {
+                let mut data = log.merged_data();
+                if let Some(filter) = &cli.filter {
+                    data.update_filter(filter);
+                }
+                data
+            };
 
             let mut out = get_output(cli.stdout, filename, human_i, "csv")?;
             if let Err(error) = write_csv(&mut out, &data) {

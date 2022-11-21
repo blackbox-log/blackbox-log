@@ -3,7 +3,8 @@ use core::cmp::Ordering;
 use core::iter::FusedIterator;
 
 use crate::parser::{
-    to_base_field, Data, Event, FrameSync, Headers, ParseResult, Reader, Stats, Unit, Value,
+    to_base_field, Data, Event, FrameSync, GpsUnit, GpsValue, Headers, ParseResult, Reader, Stats,
+    Unit, Value,
 };
 
 #[derive(Debug)]
@@ -104,6 +105,12 @@ impl<'data> Log<'data> {
 
     pub fn data<'log>(&'log self) -> MainView<'log, 'data> {
         let mut filter = Filter::new_unfiltered(&self.headers);
+        filter.gps = Vec::new();
+        MainView { log: self, filter }
+    }
+
+    pub fn merged_data<'log>(&'log self) -> MainView<'log, 'data> {
+        let mut filter = Filter::new_unfiltered(&self.headers);
 
         // Filter out the GPS time field
         if self.headers.gps_frames.is_some() {
@@ -113,14 +120,17 @@ impl<'data> Log<'data> {
         MainView { log: self, filter }
     }
 
-    pub fn data_with_filter<'log, S: AsRef<str>>(
-        &'log self,
-        filter: &[S],
-    ) -> MainView<'log, 'data> {
-        let mut view = self.data();
-        view.filter.merge(&Filter::new(filter, &self.headers));
-        view
+    pub fn gps_data<'log>(&'log self) -> GpsView<'log, 'data> {
+        GpsView { log: self }
     }
+}
+
+pub trait LogView: Sized {
+    fn field_count(&self) -> usize;
+    fn frame_count(&self) -> usize;
+
+    fn fields(&self) -> FieldIter<'_, Self>;
+    fn values(&self) -> FrameIter<'_, Self>;
 }
 
 #[derive(Debug, Clone)]
@@ -130,6 +140,12 @@ pub struct MainView<'log: 'data, 'data> {
 }
 
 impl<'log: 'data, 'data> MainView<'log, 'data> {
+    pub fn update_filter<S: AsRef<str>>(&mut self, filter: &[S]) {
+        self.filter.merge(&Filter::new(filter, &self.log.headers));
+    }
+}
+
+impl<'log: 'data, 'data> LogView for MainView<'log, 'data> {
     #[inline]
     fn field_count(&self) -> usize {
         self.filter.len()
@@ -139,11 +155,40 @@ impl<'log: 'data, 'data> MainView<'log, 'data> {
         self.log.data.main_frames.len()
     }
 
-    pub fn fields(&self) -> FieldIter<'_, Self> {
+    fn fields(&self) -> FieldIter<'_, Self> {
         FieldIter::new(self)
     }
 
-    pub fn values(&self) -> FrameIter<'_, Self> {
+    fn values(&self) -> FrameIter<'_, Self> {
+        FrameIter::new(self, self.frame_count())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct GpsView<'log: 'data, 'data> {
+    log: &'log Log<'data>,
+}
+
+impl<'log: 'data, 'data> LogView for GpsView<'log, 'data> {
+    // Reason: cannot name type of gps here
+    #[allow(clippy::redundant_closure_for_method_calls)]
+    fn field_count(&self) -> usize {
+        self.log
+            .headers
+            .gps_frames
+            .as_ref()
+            .map_or(0, |gps| gps.len())
+    }
+
+    fn frame_count(&self) -> usize {
+        self.log.data.gps_frames.len()
+    }
+
+    fn fields(&self) -> FieldIter<'_, Self> {
+        FieldIter::new(self)
+    }
+
+    fn values(&self) -> FrameIter<'_, Self> {
         FrameIter::new(self, self.frame_count())
     }
 }
@@ -188,6 +233,21 @@ impl<'view: 'log, 'log: 'data, 'data> Iterator for FieldIter<'view, MainView<'lo
     }
 }
 
+impl<'view: 'log, 'log: 'data, 'data> Iterator for FieldIter<'view, GpsView<'log, 'data>> {
+    type Item = (&'data str, GpsUnit);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next = self.view.log.headers.gps_frames.as_ref()?.get(self.index)?;
+        self.index += 1;
+        Some(next)
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = self.view.field_count() - self.index;
+        (len, Some(len))
+    }
+}
+
 impl<'a, V> FusedIterator for FieldIter<'a, V> where Self: Iterator {}
 impl<'a, V> ExactSizeIterator for FieldIter<'a, V> where Self: Iterator {}
 
@@ -208,8 +268,12 @@ impl<'a, V> FrameIter<'a, V> {
     }
 }
 
-impl<'view: 'log, 'log: 'data, 'data> Iterator for FrameIter<'view, MainView<'log, 'data>> {
-    type Item = FieldValueIter<'view, MainView<'log, 'data>>;
+impl<'a, V> Iterator for FrameIter<'a, V>
+where
+    V: LogView,
+    FieldValueIter<'a, V>: Iterator,
+{
+    type Item = FieldValueIter<'a, V>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let index = self.index;
@@ -264,6 +328,21 @@ impl<'view: 'log, 'log: 'data, 'data> Iterator for FieldValueIter<'view, MainVie
             |index| data.gps_frames[gps.unwrap()].get(index).unwrap().into(),
         )?;
 
+        self.field += 1;
+        Some(next)
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = self.view.field_count() - self.field;
+        (len, Some(len))
+    }
+}
+
+impl<'view: 'log, 'log: 'data, 'data> Iterator for FieldValueIter<'view, GpsView<'log, 'data>> {
+    type Item = GpsValue;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next = self.view.log.data.gps_frames[self.frame].get(self.field)?;
         self.field += 1;
         Some(next)
     }

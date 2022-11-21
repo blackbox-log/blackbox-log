@@ -44,7 +44,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
       ),
       End,
     ],
-    fields: Fields([
+    main: Fields([
       FieldSnapshot(
         name: "loopIteration",
         unit: Unitless,
@@ -467,6 +467,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
         ),
       ),
     ]),
+    gps: Fields([]),
   )),
   Ok(LogSnapshot(
     headers: Headers(
@@ -508,7 +509,7 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
       ),
       End,
     ],
-    fields: Fields([
+    main: Fields([
       FieldSnapshot(
         name: "loopIteration",
         unit: Unitless,
@@ -931,5 +932,6 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
         ),
       ),
     ]),
+    gps: Fields([]),
   )),
 ]

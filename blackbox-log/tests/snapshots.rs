@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::io::Read;
 
+use blackbox_log::log::LogView;
 use blackbox_log::parser::{Event, Headers, Stats, Unit, Value};
 use blackbox_log::units::{si, FlagSet};
 use blackbox_log::Log;
@@ -48,16 +49,26 @@ struct LogSnapshot<'a> {
     headers: Headers<'a>,
     stats: Stats,
     events: Vec<Event>,
-    fields: Fields,
+    main: Fields,
+    gps: Fields,
 }
 
 impl<'a> From<Log<'a>> for LogSnapshot<'a> {
     fn from(log: Log<'a>) -> Self {
         let data = log.data();
-        let fields = data.fields().collect::<Fields>();
-
-        let fields = data.values().fold(fields, |mut fields, frame| {
+        let main = data.fields().collect::<Fields>();
+        let main = data.values().fold(main, |mut fields, frame| {
             fields.update(frame);
+            fields
+        });
+
+        let data = log.gps_data();
+        let gps = data
+            .fields()
+            .map(|(name, unit)| (name, unit.into()))
+            .collect::<Fields>();
+        let gps = data.values().fold(gps, |mut fields, frame| {
+            fields.update(frame.map(Into::into));
             fields
         });
 
@@ -65,7 +76,8 @@ impl<'a> From<Log<'a>> for LogSnapshot<'a> {
             headers: log.headers().clone(),
             stats: log.stats(),
             events: log.events().to_owned(),
-            fields,
+            main,
+            gps,
         }
     }
 }

@@ -16,7 +16,7 @@ pub(crate) use self::data::{Data, FrameSync};
 pub use self::data::{Event, Stats};
 pub use self::decode::Encoding;
 pub(crate) use self::frame::{GpsFrame, GpsHomeFrame, MainFrame, SlowFrame};
-pub use self::frame::{Unit, Value};
+pub use self::frame::{GpsUnit, GpsValue, Unit, Value};
 pub use self::headers::Headers;
 pub(crate) use self::predictor::{Predictor, PredictorContext};
 pub use self::reader::Reader;

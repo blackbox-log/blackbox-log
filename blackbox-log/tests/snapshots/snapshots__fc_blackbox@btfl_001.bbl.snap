@@ -41,7 +41,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
       Disarm(4),
       End,
     ],
-    fields: Fields([
+    main: Fields([
       FieldSnapshot(
         name: "loopIteration",
         unit: Unitless,
@@ -411,6 +411,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
         ),
       ),
     ]),
+    gps: Fields([]),
   )),
   Ok(LogSnapshot(
     headers: Headers(
@@ -449,7 +450,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
       Disarm(4),
       End,
     ],
-    fields: Fields([
+    main: Fields([
       FieldSnapshot(
         name: "loopIteration",
         unit: Unitless,
@@ -824,5 +825,6 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
         ),
       ),
     ]),
+    gps: Fields([]),
   )),
 ]

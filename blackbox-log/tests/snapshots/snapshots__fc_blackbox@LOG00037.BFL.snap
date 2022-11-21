@@ -37,7 +37,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
       Disarm(4),
       End,
     ],
-    fields: Fields([
+    main: Fields([
       FieldSnapshot(
         name: "loopIteration",
         unit: Unitless,
@@ -493,6 +493,18 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
           no: 0,
         ),
       ),
+    ]),
+    gps: Fields([
+      FieldSnapshot(
+        name: "time",
+        unit: FrameTime,
+        history: FieldSnapshot(
+          min: 0,
+          max: 469166774,
+          unique: 86,
+          histogram: (8, 4, 5, 3, 5, 6, 8, 4, 6, 4, 5, 8, 4, 5, 5, 6),
+        ),
+      ),
       FieldSnapshot(
         name: "GPS_numSat",
         unit: Unitless,
@@ -509,7 +521,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
           min: 0,
           max: 503976202,
           unique: 84,
-          histogram: (1806, 740, 1351, 1165, 444, 939, 1187, 603, 987, 583, 1188, 1245, 1442, 1214, 842, 1037),
+          histogram: (9, 4, 7, 5, 2, 5, 6, 3, 5, 3, 7, 6, 8, 6, 5, 5),
         ),
       ),
       FieldSnapshot(
@@ -519,7 +531,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
           min: 0,
           max: 74973158,
           unique: 82,
-          histogram: (791, 1824, 829, 2501, 1186, 681, 606, 1223, 840, 987, 1296, 198, 839, 1531, 948, 493),
+          histogram: (4, 9, 4, 13, 7, 3, 4, 6, 4, 5, 7, 1, 4, 7, 5, 3),
         ),
       ),
       FieldSnapshot(
@@ -529,7 +541,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
           min: 0,
           max: 665,
           unique: 42,
-          histogram: (1324, 840, 838, 1175, 484, 694, 1483, 2282, 1490, 1176, 493, 544, 1037, 840, 1076, 997),
+          histogram: (7, 5, 4, 6, 2, 4, 8, 11, 8, 6, 3, 3, 5, 4, 5, 5),
         ),
       ),
       FieldSnapshot(
@@ -539,7 +551,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
           min: 0,
           max: 266,
           unique: 60,
-          histogram: (394, 805, 396, 1384, 1561, 792, 1432, 1580, 839, 1341, 839, 779, 1540, 583, 1520, 988),
+          histogram: (2, 5, 2, 7, 8, 4, 7, 9, 4, 7, 4, 4, 8, 3, 7, 5),
         ),
       ),
       FieldSnapshot(
@@ -549,7 +561,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
           min: 0,
           max: 879,
           unique: 58,
-          histogram: (986, 1535, 840, 593, 750, 791, 593, 977, 938, 602, 594, 1224, 1124, 1926, 197, 3103),
+          histogram: (5, 8, 4, 3, 4, 4, 3, 5, 5, 3, 3, 6, 6, 10, 1, 16),
         ),
       ),
     ]),
