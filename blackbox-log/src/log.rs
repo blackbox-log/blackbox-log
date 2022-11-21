@@ -181,9 +181,15 @@ impl<'view: 'log, 'log: 'data, 'data> Iterator for FieldIter<'view, MainView<'lo
         self.index += 1;
         Some(next)
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = self.view.field_count() - self.index;
+        (len, Some(len))
+    }
 }
 
 impl<'a, V> FusedIterator for FieldIter<'a, V> where Self: Iterator {}
+impl<'a, V> ExactSizeIterator for FieldIter<'a, V> where Self: Iterator {}
 
 #[derive(Debug)]
 pub struct FrameIter<'a, V> {
@@ -212,9 +218,15 @@ impl<'view: 'log, 'log: 'data, 'data> Iterator for FrameIter<'view, MainView<'lo
             FieldValueIter::new(self.view, index)
         })
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = self.view.frame_count() - self.index;
+        (len, Some(len))
+    }
 }
 
 impl<'a, V> FusedIterator for FrameIter<'a, V> where Self: Iterator {}
+impl<'a, V> ExactSizeIterator for FrameIter<'a, V> where Self: Iterator {}
 
 #[derive(Debug)]
 pub struct FieldValueIter<'a, V> {
@@ -255,9 +267,15 @@ impl<'view: 'log, 'log: 'data, 'data> Iterator for FieldValueIter<'view, MainVie
         self.field += 1;
         Some(next)
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = self.view.field_count() - self.field;
+        (len, Some(len))
+    }
 }
 
 impl<'a, V> FusedIterator for FieldValueIter<'a, V> where Self: Iterator {}
+impl<'a, V> ExactSizeIterator for FieldValueIter<'a, V> where Self: Iterator {}
 
 fn name_unit_into<T: Into<Unit>>((name, unit): (&str, T)) -> (&str, Unit) {
     (name, unit.into())

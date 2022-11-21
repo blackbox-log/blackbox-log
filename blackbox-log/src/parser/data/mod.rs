@@ -50,7 +50,7 @@ pub struct FrameCounts {
 }
 
 impl Data {
-    pub(crate) const fn to_stats(&self) -> Stats {
+    pub(crate) fn to_stats(&self) -> Stats {
         Stats {
             counts: FrameCounts {
                 main: self.main_frames.len(),
