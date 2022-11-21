@@ -13,7 +13,7 @@ blackbox-log.workspace = true
 bpaf.workspace = true
 exitcode = "1.1.2"
 mimalloc = { version = "0.1.32", default-features = false }
-rayon = "1.5.3"
+rayon = "1.6.0"
 tracing = { workspace = true, features = ["release_max_level_debug"] }
 
 [dependencies.tracing-subscriber]
