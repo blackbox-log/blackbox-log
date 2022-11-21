@@ -125,12 +125,19 @@ impl<'data> Log<'data> {
     }
 }
 
-pub trait LogView: Sized {
+pub trait LogView<'v: 'd, 'd>: 'v + Sized {
+    type Unit;
+    type Value;
+
+    type FieldIter: Iterator<Item = (&'d str, Self::Unit)>;
+    type FrameIter: Iterator<Item = Self::ValueIter>;
+    type ValueIter: Iterator<Item = Self::Value>;
+
     fn field_count(&self) -> usize;
     fn frame_count(&self) -> usize;
 
-    fn fields(&self) -> FieldIter<'_, Self>;
-    fn values(&self) -> FrameIter<'_, Self>;
+    fn fields(&'v self) -> Self::FieldIter;
+    fn values(&'v self) -> Self::FrameIter;
 }
 
 #[derive(Debug, Clone)]
@@ -145,7 +152,16 @@ impl<'log: 'data, 'data> MainView<'log, 'data> {
     }
 }
 
-impl<'log: 'data, 'data> LogView for MainView<'log, 'data> {
+impl<'view: 'log, 'log: 'data, 'data> LogView<'view, 'data> for MainView<'log, 'data>
+where
+    Self: 'view,
+{
+    type FieldIter = FieldIter<'view, Self>;
+    type FrameIter = FrameIter<'view, Self>;
+    type Unit = Unit;
+    type Value = Value;
+    type ValueIter = FieldValueIter<'view, Self>;
+
     #[inline]
     fn field_count(&self) -> usize {
         self.filter.len()
@@ -155,11 +171,11 @@ impl<'log: 'data, 'data> LogView for MainView<'log, 'data> {
         self.log.data.main_frames.len()
     }
 
-    fn fields(&self) -> FieldIter<'_, Self> {
+    fn fields(&'view self) -> FieldIter<'view, Self> {
         FieldIter::new(self)
     }
 
-    fn values(&self) -> FrameIter<'_, Self> {
+    fn values(&'view self) -> FrameIter<'view, Self> {
         FrameIter::new(self, self.frame_count())
     }
 }
@@ -169,7 +185,16 @@ pub struct GpsView<'log: 'data, 'data> {
     log: &'log Log<'data>,
 }
 
-impl<'log: 'data, 'data> LogView for GpsView<'log, 'data> {
+impl<'view: 'log, 'log: 'data, 'data> LogView<'view, 'data> for GpsView<'log, 'data>
+where
+    Self: 'view,
+{
+    type FieldIter = FieldIter<'view, Self>;
+    type FrameIter = FrameIter<'view, Self>;
+    type Unit = GpsUnit;
+    type Value = GpsValue;
+    type ValueIter = FieldValueIter<'view, Self>;
+
     // Reason: cannot name type of gps here
     #[allow(clippy::redundant_closure_for_method_calls)]
     fn field_count(&self) -> usize {
@@ -184,11 +209,11 @@ impl<'log: 'data, 'data> LogView for GpsView<'log, 'data> {
         self.log.data.gps_frames.len()
     }
 
-    fn fields(&self) -> FieldIter<'_, Self> {
+    fn fields(&'view self) -> FieldIter<'view, Self> {
         FieldIter::new(self)
     }
 
-    fn values(&self) -> FrameIter<'_, Self> {
+    fn values(&'view self) -> FrameIter<'view, Self> {
         FrameIter::new(self, self.frame_count())
     }
 }
@@ -268,12 +293,8 @@ impl<'a, V> FrameIter<'a, V> {
     }
 }
 
-impl<'a, V> Iterator for FrameIter<'a, V>
-where
-    V: LogView,
-    FieldValueIter<'a, V>: Iterator,
-{
-    type Item = FieldValueIter<'a, V>;
+impl<'v: 'd, 'd, V: LogView<'v, 'd>> Iterator for FrameIter<'v, V> {
+    type Item = FieldValueIter<'v, V>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let index = self.index;

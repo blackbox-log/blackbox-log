@@ -21,9 +21,8 @@ pub(crate) struct Cli {
     #[bpaf(external)]
     pub altitude_offset: i16,
 
-    /// Merges GPS data into the main CSV file instead of writing it
-    /// separately (TODO)
-    pub merge_gps: bool,
+    #[bpaf(external)]
+    pub gps: GpsFormats,
 
     // TODO
     // #[arg(long)]
@@ -95,6 +94,34 @@ fn filter() -> impl Parser<Option<Vec<String>>> {
             "filter must contain at least one field",
         )
         .optional()
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct GpsFormats {
+    pub merged: bool,
+    pub separate: bool,
+    pub gpx: bool,
+}
+
+fn gps() -> impl Parser<GpsFormats> {
+    bpaf::long("gps")
+        .help("One or more formats to write GPS data (merged, separate (csv), gpx)")
+        .argument::<String>("format")
+        .guard(
+            |s| {
+                matches!(
+                    s.to_ascii_lowercase().as_str(),
+                    "merged" | "separate" | "gpx"
+                )
+            },
+            "expected either separate or gpx",
+        )
+        .many()
+        .map(|v| GpsFormats {
+            merged: v.iter().any(|s| s == "merged"),
+            separate: v.iter().any(|s| s == "separate"),
+            gpx: v.iter().any(|s| s == "gpx"),
+        })
 }
 
 fn verbosity() -> impl Parser<LevelFilter> {

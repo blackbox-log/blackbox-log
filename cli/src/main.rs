@@ -5,7 +5,7 @@ use std::io::{self, BufWriter, Read, Write};
 use std::path::Path;
 use std::process::{ExitCode, Termination};
 
-use blackbox_log::log::{LogView, MainView};
+use blackbox_log::log::LogView;
 use blackbox_log::parser::Value;
 use blackbox_log::units::si;
 use mimalloc::MiMalloc;
@@ -44,9 +44,16 @@ fn main() -> QuietResult<()> {
         .with_max_level(cli.verbosity)
         .init();
 
-    if cli.logs.len() > 1 && cli.stdout {
-        tracing::error!("cannot write multiple logs to stdout");
-        return QuietResult::from(exitcode::USAGE);
+    if cli.stdout {
+        if cli.logs.len() > 1 {
+            tracing::error!("cannot write multiple logs to stdout");
+            return QuietResult::from(exitcode::USAGE);
+        }
+
+        if cli.gps.separate || cli.gps.gpx {
+            tracing::error!("only merged GPS data can be written to stdout");
+            return QuietResult::from(exitcode::USAGE);
+        }
     }
 
     let result = cli.logs.par_iter().try_for_each(|filename| {
@@ -80,10 +87,16 @@ fn main() -> QuietResult<()> {
             })?;
 
             let data = {
-                let mut data = log.merged_data();
+                let mut data = if cli.gps.merged {
+                    log.merged_data()
+                } else {
+                    log.data()
+                };
+
                 if let Some(filter) = &cli.filter {
                     data.update_filter(filter);
                 }
+
                 data
             };
 
@@ -91,6 +104,14 @@ fn main() -> QuietResult<()> {
             if let Err(error) = write_csv(&mut out, &data) {
                 tracing::error!(%error, "failed to write csv");
                 return Err(exitcode::IOERR);
+            }
+
+            if cli.gps.separate {
+                let mut out = get_output(cli.stdout, filename, human_i, "gps.csv")?;
+                if let Err(error) = write_csv(&mut out, &data) {
+                    tracing::error!(%error, "failed to write gps csv");
+                    return Err(exitcode::IOERR);
+                }
             }
 
             Ok(())
@@ -135,13 +156,16 @@ fn get_output(
     Ok(BufWriter::new(out))
 }
 
-fn write_csv(out: &mut impl Write, log: &MainView) -> io::Result<()> {
+fn write_csv<'v: 'd, 'd, V: LogView<'v, 'd>>(out: &mut impl Write, log: &'v V) -> io::Result<()>
+where
+    V::Value: Into<Value>,
+{
     write_csv_line(out, log.fields().map(|(name, _unit)| name))?;
 
     for frame in log.values() {
         write_csv_line(
             out,
-            frame.map(|value| match value {
+            frame.map(|value| match value.into() {
                 Value::FrameTime(t) => format!("{:.0}", t.get::<si::time::microsecond>()),
                 Value::Amperage(a) => format_float(a.get::<si::electric_current::ampere>()),
                 Value::Voltage(v) => format_float(v.get::<si::electric_potential::volt>()),

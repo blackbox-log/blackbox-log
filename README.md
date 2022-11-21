@@ -16,7 +16,7 @@ for `blackbox_decode`, with a WASM/JavaScript interface Coming Soon™.
   - [x] Spec-compliant error recovery
   - [ ] Handle outputting GPS data
     - [x] Merged CSV
-    - [ ] Separate CSV
+    - [x] Separate CSV
     - [ ] Separate GPX
 - [ ] `blackbox_decode` replacement
 - [x] Snapshot testing with [`insta`](https://insta.rs)
