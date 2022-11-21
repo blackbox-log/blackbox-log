@@ -494,16 +494,6 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
         ),
       ),
       FieldSnapshot(
-        name: "time",
-        unit: FrameTime,
-        history: FieldSnapshot(
-          min: 0,
-          max: 469166774,
-          unique: 86,
-          histogram: (1582, 740, 1017, 594, 988, 1047, 1535, 888, 1174, 800, 1038, 1580, 692, 938, 986, 1174),
-        ),
-      ),
-      FieldSnapshot(
         name: "GPS_numSat",
         unit: Unitless,
         history: FieldSnapshot(

@@ -5,9 +5,9 @@ use std::io::{self, BufWriter, Read, Write};
 use std::path::Path;
 use std::process::{ExitCode, Termination};
 
+use blackbox_log::log::MainView;
 use blackbox_log::parser::Value;
 use blackbox_log::units::si;
-use blackbox_log::Log;
 use mimalloc::MiMalloc;
 use rayon::prelude::*;
 
@@ -74,24 +74,18 @@ fn main() -> QuietResult<()> {
             let span = tracing::info_span!("log", index = human_i);
             let _span = span.enter();
 
-            let mut log = file.parse_by_index(i).map_err(|err| {
+            let log = file.parse_by_index(i).map_err(|err| {
                 tracing::debug!("error from parse_by_index: {err}");
                 exitcode::DATAERR
             })?;
 
-            if let Some(ref filter) = cli.filter {
-                log.set_filter(filter);
-            }
+            let data = cli
+                .filter
+                .as_ref()
+                .map_or_else(|| log.data(), |filter| log.data_with_filter(filter));
 
-            let mut out = match get_output(cli.stdout, filename, human_i) {
-                Ok(out) => BufWriter::new(out),
-                Err(error) => {
-                    tracing::error!(%error, "failed to open output file");
-                    return Err(exitcode::CANTCREAT);
-                }
-            };
-
-            if let Err(error) = write_csv(&mut out, &log) {
+            let mut out = get_output(cli.stdout, filename, human_i, "csv")?;
+            if let Err(error) = write_csv(&mut out, &data) {
                 tracing::error!(%error, "failed to write csv");
                 return Err(exitcode::IOERR);
             }
@@ -114,21 +108,34 @@ fn read_log_file(filename: &Path) -> io::Result<Vec<u8>> {
     Ok(data)
 }
 
-fn get_output(stdout: bool, filename: &Path, index: usize) -> io::Result<Box<dyn Write>> {
-    if stdout {
-        Ok(Box::new(io::stdout().lock()))
+fn get_output(
+    stdout: bool,
+    filename: &Path,
+    index: usize,
+    extension: &str,
+) -> Result<BufWriter<Box<dyn Write>>, exitcode::ExitCode> {
+    let out: Box<dyn Write> = if stdout {
+        Box::new(io::stdout().lock())
     } else {
         let mut out = filename.to_owned();
-        out.set_extension(format!("{index:0>2}.csv"));
-        tracing::info!("Writing log to '{}'", out.display());
-        Ok(Box::new(File::create(out)?))
-    }
+        out.set_extension(format!("{index:0>2}.{extension}"));
+
+        let file = File::create(&out).map_err(|error| {
+            tracing::error!(%error, file = %out.display(), "failed to open output file");
+            exitcode::CANTCREAT
+        })?;
+
+        tracing::info!("Writing to '{}'", out.display());
+        Box::new(file)
+    };
+
+    Ok(BufWriter::new(out))
 }
 
-fn write_csv(out: &mut impl Write, log: &Log) -> io::Result<()> {
-    write_csv_line(out, log.iter_fields().map(|(name, _unit)| name))?;
+fn write_csv(out: &mut impl Write, log: &MainView) -> io::Result<()> {
+    write_csv_line(out, log.fields().map(|(name, _unit)| name))?;
 
-    for frame in log.iter_frames() {
+    for frame in log.values() {
         write_csv_line(
             out,
             frame.map(|value| match value {

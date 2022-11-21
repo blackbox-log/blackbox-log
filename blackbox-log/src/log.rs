@@ -1,19 +1,18 @@
 use alloc::vec::Vec;
+use core::cmp::Ordering;
 use core::iter::FusedIterator;
 
 use crate::parser::{
-    to_base_field, Data, Event, FrameSync, GpsFrame, Headers, MainFrame, ParseResult, Reader,
-    SlowFrame, Stats, Unit, Value,
+    to_base_field, Data, Event, FrameSync, Headers, ParseResult, Reader, Stats, Unit, Value,
 };
 
 #[derive(Debug)]
 pub struct Log<'data> {
     headers: Headers<'data>,
     data: Data,
-    filter: Filter,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Filter {
     main: Vec<usize>,
     slow: Vec<usize>,
@@ -21,6 +20,10 @@ struct Filter {
 }
 
 impl Filter {
+    fn len(&self) -> usize {
+        self.main.len() + self.slow.len() + self.gps.len()
+    }
+
     fn new<S: AsRef<str>>(fields: &[S], headers: &Headers) -> Self {
         let mut fields = fields
             .iter()
@@ -65,6 +68,12 @@ impl Filter {
             gps: (0..headers.gps_frames.as_ref().map_or(0, |def| def.len())).collect(),
         }
     }
+
+    fn merge(&mut self, other: &Self) {
+        self.main = intersection(&self.main, &other.main);
+        self.slow = intersection(&self.slow, &other.slow);
+        self.gps = intersection(&self.gps, &other.gps);
+    }
 }
 
 impl<'data> Log<'data> {
@@ -77,21 +86,8 @@ impl<'data> Log<'data> {
         let headers = Headers::parse(&mut data)?;
 
         let data = Data::parse(data, &headers)?;
-        let filter = Filter::new_unfiltered(&headers);
 
-        Ok(Self {
-            headers,
-            data,
-            filter,
-        })
-    }
-
-    pub fn set_filter<S: AsRef<str>>(&mut self, filter: &[S]) {
-        self.filter = Filter::new(filter, self.headers());
-    }
-
-    pub fn unset_filter(&mut self) {
-        self.filter = Filter::new_unfiltered(self.headers());
+        Ok(Self { headers, data })
     }
 
     pub const fn headers(&self) -> &Headers<'data> {
@@ -106,50 +102,79 @@ impl<'data> Log<'data> {
         self.data.to_stats()
     }
 
-    pub const fn iter_frames(&self) -> FrameIter {
-        FrameIter::new(self)
+    pub fn data<'log>(&'log self) -> MainView<'log, 'data> {
+        let mut filter = Filter::new_unfiltered(&self.headers);
+
+        // Filter out the GPS time field
+        if self.headers.gps_frames.is_some() {
+            filter.gps.remove(0);
+        }
+
+        MainView { log: self, filter }
     }
 
-    pub const fn iter_fields(&self) -> FieldIter {
+    pub fn data_with_filter<'log, S: AsRef<str>>(
+        &'log self,
+        filter: &[S],
+    ) -> MainView<'log, 'data> {
+        let mut view = self.data();
+        view.filter.merge(&Filter::new(filter, &self.headers));
+        view
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct MainView<'log: 'data, 'data> {
+    log: &'log Log<'data>,
+    filter: Filter,
+}
+
+impl<'log: 'data, 'data> MainView<'log, 'data> {
+    #[inline]
+    fn field_count(&self) -> usize {
+        self.filter.len()
+    }
+
+    fn frame_count(&self) -> usize {
+        self.log.data.main_frames.len()
+    }
+
+    pub fn fields(&self) -> FieldIter<'_, Self> {
         FieldIter::new(self)
+    }
+
+    pub fn values(&self) -> FrameIter<'_, Self> {
+        FrameIter::new(self, self.frame_count())
     }
 }
 
 #[derive(Debug)]
-pub struct FieldIter<'log, 'data> {
-    log: &'log Log<'data>,
+pub struct FieldIter<'a, V> {
+    view: &'a V,
     index: usize,
 }
 
-impl<'log, 'data> FieldIter<'log, 'data> {
-    const fn new(log: &'log Log<'data>) -> Self {
-        Self { log, index: 0 }
+impl<'a, V> FieldIter<'a, V> {
+    const fn new(view: &'a V) -> Self {
+        Self { view, index: 0 }
     }
 }
 
-impl<'log: 'data, 'data> Iterator for FieldIter<'log, 'data> {
+impl<'view: 'log, 'log: 'data, 'data> Iterator for FieldIter<'view, MainView<'log, 'data>> {
     type Item = (&'data str, Unit);
 
     fn next(&mut self) -> Option<Self::Item> {
-        let Log {
-            headers, filter, ..
-        } = self.log;
+        let headers = &self.view.log.headers;
+        let filter = &self.view.filter;
 
         let next = get_next(
             self.index,
             filter,
-            |index| {
-                let (name, unit) = headers.main_frames.get(index).unwrap();
-                (name, unit.into())
-            },
-            |index| {
-                let (name, unit) = headers.slow_frames.get(index).unwrap();
-                (name, unit.into())
-            },
+            |index| name_unit_into(headers.main_frames.get(index).unwrap()),
+            |index| name_unit_into(headers.slow_frames.get(index).unwrap()),
             |index| {
                 let def = headers.gps_frames.as_ref().unwrap();
-                let (name, unit) = def.get(index).unwrap();
-                (name, unit.into())
+                name_unit_into(def.get(index).unwrap())
             },
         )?;
 
@@ -158,76 +183,113 @@ impl<'log: 'data, 'data> Iterator for FieldIter<'log, 'data> {
     }
 }
 
-impl<'log: 'data, 'data> FusedIterator for FieldIter<'log, 'data> {}
+impl<'a, V> FusedIterator for FieldIter<'a, V> where Self: Iterator {}
 
 #[derive(Debug)]
-pub struct FrameIter<'log, 'data> {
-    log: &'log Log<'data>,
+pub struct FrameIter<'a, V> {
+    view: &'a V,
+    len: usize,
     index: usize,
 }
 
-impl<'log, 'data> FrameIter<'log, 'data> {
-    const fn new(log: &'log Log<'data>) -> Self {
-        Self { log, index: 0 }
+impl<'a, V> FrameIter<'a, V> {
+    const fn new(view: &'a V, len: usize) -> Self {
+        Self {
+            view,
+            len,
+            index: 0,
+        }
     }
 }
 
-impl<'log, 'data> Iterator for FrameIter<'log, 'data> {
-    type Item = FieldValueIter<'log, 'data>;
+impl<'view: 'log, 'log: 'data, 'data> Iterator for FrameIter<'view, MainView<'log, 'data>> {
+    type Item = FieldValueIter<'view, MainView<'log, 'data>>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.index >= self.log.data.main_frames.len() {
-            return None;
-        }
-
-        let FrameSync { main, slow, gps } = &self.log.data.main_frames[self.index];
-        let slow = &self.log.data.slow_frames[*slow];
-        let gps = gps.map(|index| &self.log.data.gps_frames[index]);
-        self.index += 1;
-
-        Some(FieldValueIter {
-            log: self.log,
-            main,
-            slow,
-            gps,
-            index: 0,
+        let index = self.index;
+        (index < self.len).then(|| {
+            self.index += 1;
+            FieldValueIter::new(self.view, index)
         })
     }
 }
 
-impl<'log, 'data> FusedIterator for FrameIter<'log, 'data> {}
+impl<'a, V> FusedIterator for FrameIter<'a, V> where Self: Iterator {}
 
 #[derive(Debug)]
-pub struct FieldValueIter<'log, 'data> {
-    log: &'log Log<'data>,
-    main: &'log MainFrame,
-    slow: &'log SlowFrame,
-    gps: Option<&'log GpsFrame>,
-    index: usize,
+pub struct FieldValueIter<'a, V> {
+    view: &'a V,
+    frame: usize,
+    field: usize,
 }
 
-impl<'log, 'data> Iterator for FieldValueIter<'log, 'data> {
+impl<'a, V> FieldValueIter<'a, V> {
+    const fn new(view: &'a V, frame: usize) -> Self {
+        Self {
+            view,
+            frame,
+            field: 0,
+        }
+    }
+}
+
+impl<'view: 'log, 'log: 'data, 'data> Iterator for FieldValueIter<'view, MainView<'log, 'data>> {
     type Item = Value;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let Log {
-            headers, filter, ..
-        } = self.log;
+        let MainView {
+            log: Log { headers, data, .. },
+            filter,
+        } = &self.view;
+
+        let FrameSync { main, slow, gps } = &data.main_frames[self.frame];
 
         let next = get_next(
-            self.index,
+            self.field,
             filter,
-            |index| self.main.get(index, headers).unwrap().into(),
-            |index| self.slow.values[index].into(),
-            |index| self.gps.unwrap().get(index).unwrap().into(),
+            |index| main.get(index, headers).unwrap().into(),
+            |index| data.slow_frames[*slow].values[index].into(),
+            |index| data.gps_frames[gps.unwrap()].get(index).unwrap().into(),
         )?;
 
-        self.index += 1;
+        self.field += 1;
         Some(next)
     }
 }
 
-impl<'log, 'data> FusedIterator for FieldValueIter<'log, 'data> {}
+impl<'a, V> FusedIterator for FieldValueIter<'a, V> where Self: Iterator {}
+
+fn name_unit_into<T: Into<Unit>>((name, unit): (&str, T)) -> (&str, Unit) {
+    (name, unit.into())
+}
+
+// Reason: lint ignores let-else
+#[allow(unreachable_code)]
+fn intersection(a: &[usize], b: &[usize]) -> Vec<usize> {
+    let mut new = Vec::with_capacity(a.len().min(b.len()));
+    let mut a = a.iter().peekable();
+    let mut b = b.iter().peekable();
+
+    loop {
+        let (Some(next_a), Some(next_b)) = (a.peek(), b.peek()) else { return new; };
+
+        match next_a.cmp(next_b) {
+            Ordering::Less => {
+                a.next();
+            }
+            Ordering::Equal => {
+                new.push(**next_a);
+                a.next();
+                b.next();
+            }
+            Ordering::Greater => {
+                b.next();
+            }
+        }
+    }
+
+    new
+}
 
 #[inline]
 fn get_next<T>(
@@ -255,4 +317,26 @@ fn get_next<T>(
     };
 
     Some(next)
+}
+
+#[allow(clippy::dbg_macro)]
+#[cfg(test)]
+mod test {
+    use test_case::case;
+
+    use super::*;
+
+    #[case(Vec::new(), Vec::new() ; "both")]
+    #[case(vec![0], Vec::new() ; "left")]
+    #[case(Vec::new(), vec![0] ; "right")]
+    fn intersection_empty(left: Vec<usize>, right: Vec<usize>) {
+        let result = dbg!(intersection(&left, &right));
+        assert!(result.is_empty());
+    }
+
+    #[case(vec![0, 1, 2], vec![0, 3] => vec![0] ; "left")]
+    #[case(vec![0, 2], vec![1, 2, 3] => vec![2] ; "right")]
+    fn intersection_skip(left: Vec<usize>, right: Vec<usize>) -> Vec<usize> {
+        intersection(&left, &right)
+    }
 }

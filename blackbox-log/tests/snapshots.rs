@@ -53,9 +53,10 @@ struct LogSnapshot<'a> {
 
 impl<'a> From<Log<'a>> for LogSnapshot<'a> {
     fn from(log: Log<'a>) -> Self {
-        let fields = log.iter_fields().collect::<Fields>();
+        let data = log.data();
+        let fields = data.fields().collect::<Fields>();
 
-        let fields = log.iter_frames().fold(fields, |mut fields, frame| {
+        let fields = data.values().fold(fields, |mut fields, frame| {
             fields.update(frame);
             fields
         });

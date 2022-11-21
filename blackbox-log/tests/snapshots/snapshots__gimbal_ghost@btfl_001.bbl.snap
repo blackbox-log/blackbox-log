@@ -458,16 +458,6 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
         ),
       ),
       FieldSnapshot(
-        name: "time",
-        unit: FrameTime,
-        history: FieldSnapshot(
-          min: 0,
-          max: 285916010,
-          unique: 354,
-          histogram: (952, 874, 1156, 1128, 1028, 1458, 1296, 423, 1234, 869, 1014, 1028, 1473, 1028, 961, 497),
-        ),
-      ),
-      FieldSnapshot(
         name: "GPS_numSat",
         unit: Unitless,
         history: FieldSnapshot(
@@ -983,16 +973,6 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
         ),
       ),
       FieldSnapshot(
-        name: "time",
-        unit: FrameTime,
-        history: FieldSnapshot(
-          min: 0,
-          max: 381772759,
-          unique: 457,
-          histogram: (1453, 507, 1634, 1432, 1258, 1386, 1707, 1513, 1112, 1067, 1602, 2246, 1290, 1433, 1353, 1174),
-        ),
-      ),
-      FieldSnapshot(
         name: "GPS_numSat",
         unit: Unitless,
         history: FieldSnapshot(
@@ -1505,16 +1485,6 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
         history: History(
           yes: 32386,
           no: 0,
-        ),
-      ),
-      FieldSnapshot(
-        name: "time",
-        unit: FrameTime,
-        history: FieldSnapshot(
-          min: 0,
-          max: 516151134,
-          unique: 698,
-          histogram: (1546, 1300, 2645, 2414, 2444, 2076, 1618, 2241, 1901, 1031, 2963, 2131, 1735, 1890, 2148, 2303),
         ),
       ),
       FieldSnapshot(

@@ -468,16 +468,6 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/LOG00001.BFL
         ),
       ),
       FieldSnapshot(
-        name: "time",
-        unit: FrameTime,
-        history: FieldSnapshot(
-          min: 0,
-          max: 620991448,
-          unique: 1169,
-          histogram: (14899, 13528, 14531, 10983, 15293, 16654, 13456, 12541, 15379, 11984, 15945, 14716, 12690, 14874, 15101, 16690),
-        ),
-      ),
-      FieldSnapshot(
         name: "GPS_numSat",
         unit: Unitless,
         history: FieldSnapshot(

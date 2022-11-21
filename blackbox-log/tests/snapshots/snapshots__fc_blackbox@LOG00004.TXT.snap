@@ -1198,16 +1198,6 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
         ),
       ),
       FieldSnapshot(
-        name: "time",
-        unit: FrameTime,
-        history: FieldSnapshot(
-          min: 0,
-          max: 513471046,
-          unique: 4141,
-          histogram: (11835, 11876, 12986, 12468, 13274, 13211, 13085, 12572, 11184, 14015, 13241, 11400, 11750, 12901, 11863, 12189),
-        ),
-      ),
-      FieldSnapshot(
         name: "GPS_fixType",
         unit: Unitless,
         history: FieldSnapshot(
