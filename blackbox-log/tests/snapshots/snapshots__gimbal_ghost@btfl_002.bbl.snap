@@ -259,9 +259,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
         unit: Amperage,
         history: FieldSnapshot(
           min: 0,
-          max: 35948,
+          max: 5130,
           unique: 43,
-          histogram: (295, 30, 10, 75, 20, 20, 80, 30, 70, 5, 100, 46, 140, 45, 75, 95),
+          histogram: (375, 0, 131, 0, 175, 0, 55, 0, 80, 0, 95, 0, 70, 0, 155, 0),
         ),
       ),
       FieldSnapshot(
@@ -771,9 +771,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
         unit: Amperage,
         history: FieldSnapshot(
           min: 0,
-          max: 12123,
+          max: 1730,
           unique: 5,
-          histogram: (14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 5, 10, 0, 0, 0),
+          histogram: (14, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 10, 0),
         ),
       ),
       FieldSnapshot(
@@ -1295,9 +1295,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_002.bbl
         unit: Amperage,
         history: FieldSnapshot(
           min: 0,
-          max: 794579,
+          max: 113390,
           unique: 465,
-          histogram: (1700, 534, 404, 592, 522, 519, 764, 629, 888, 645, 928, 789, 827, 490, 725, 659),
+          histogram: (2527, 0, 1506, 0, 1374, 0, 865, 0, 1462, 0, 1287, 0, 1261, 0, 1333, 0),
         ),
       ),
       FieldSnapshot(

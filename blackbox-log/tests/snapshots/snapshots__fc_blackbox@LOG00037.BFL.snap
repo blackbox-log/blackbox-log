@@ -263,9 +263,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
         unit: Amperage,
         history: FieldSnapshot(
           min: 0,
-          max: 351004,
+          max: 119780,
           unique: 591,
-          histogram: (1621, 1001, 1342, 828, 1145, 1004, 1052, 922, 986, 947, 927, 885, 1126, 1109, 949, 930),
+          histogram: (3455, 0, 2868, 0, 3594, 0, 1300, 0, 1245, 0, 1358, 0, 1199, 0, 1755, 0),
         ),
       ),
       FieldSnapshot(

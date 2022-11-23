@@ -8,7 +8,6 @@ pub use uom::si::f64::{
 };
 
 use crate::common::FirmwareKind;
-use crate::parser::headers::CurrentMeterConfig;
 use crate::parser::Headers;
 
 pub(crate) mod prelude {
@@ -35,8 +34,6 @@ mod from_raw {
 pub use from_raw::FromRaw;
 #[cfg(not(fuzzing))]
 pub(crate) use from_raw::FromRaw;
-
-const ADC_VREF: f64 = 33.;
 
 impl FromRaw for Time {
     type Raw = u64;
@@ -72,17 +69,15 @@ impl FromRaw for AngularVelocity {
 impl FromRaw for ElectricCurrent {
     type Raw = i32;
 
-    fn from_raw(raw: Self::Raw, headers: &self::Headers) -> Self {
-        let CurrentMeterConfig { offset, scale } = headers.current_meter.unwrap();
-        let offset = f64::from(offset);
-        let scale = f64::from(scale);
-
-        let milliamps = f64::from(raw) * ADC_VREF * 100. / 4095.;
-        let milliamps = milliamps - offset;
-        let amps = (milliamps * 10_000.) / scale;
-
-        Self::new::<prelude::milliampere>(amps)
+    fn from_raw(raw: Self::Raw, _headers: &self::Headers) -> Self {
+        new_amps(raw)
     }
+}
+
+/// Correct from BF 3.1.7 (3.1.0?), INAV 2.0.0
+#[inline(always)]
+fn new_amps(raw: i32) -> ElectricCurrent {
+    ElectricCurrent::new::<si::electric_current::centiampere>(raw.into())
 }
 
 impl FromRaw for ElectricPotential {
@@ -317,6 +312,11 @@ mod tests {
                 right = $right
             );
         };
+    }
+
+    #[test]
+    fn electric_current() {
+        float_eq!(1.39, new_amps(139).get::<prelude::ampere>());
     }
 
     #[test]

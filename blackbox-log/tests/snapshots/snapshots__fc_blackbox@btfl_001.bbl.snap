@@ -253,9 +253,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
         unit: Amperage,
         history: FieldSnapshot(
           min: 0,
-          max: 5931,
+          max: 1840,
           unique: 8,
-          histogram: (30, 0, 10, 10, 0, 0, 0, 0, 18, 0, 10, 20, 0, 0, 0, 0),
+          histogram: (80, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -666,9 +666,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
         unit: Amperage,
         history: FieldSnapshot(
           min: 0,
-          max: 30558,
+          max: 9480,
           unique: 158,
-          histogram: (3875, 1217, 1279, 1437, 1238, 1360, 1927, 1677, 1988, 1268, 1319, 1310, 1160, 1189, 1440, 1209),
+          histogram: (14994, 0, 0, 0, 0, 0, 0, 0, 9899, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(

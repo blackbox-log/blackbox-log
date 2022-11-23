@@ -277,9 +277,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
         unit: Amperage,
         history: FieldSnapshot(
           min: 0,
-          max: 424205,
+          max: 131600,
           unique: 1125,
-          histogram: (13821, 15877, 14311, 12981, 14074, 14397, 12690, 13509, 13587, 13363, 14188, 15124, 13231, 14269, 14409, 14166),
+          histogram: (110176, 0, 0, 0, 0, 0, 0, 0, 113821, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -742,9 +742,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
         unit: Amperage,
         history: FieldSnapshot(
           min: 0,
-          max: 424205,
+          max: 131600,
           unique: 1145,
-          histogram: (13978, 15402, 16577, 16125, 15497, 15864, 16268, 14877, 15427, 15294, 15095, 15705, 13978, 15095, 16737, 16061),
+          histogram: (127346, 0, 0, 0, 0, 0, 0, 0, 120634, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(

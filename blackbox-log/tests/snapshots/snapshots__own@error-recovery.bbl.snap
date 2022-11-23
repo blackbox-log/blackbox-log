@@ -247,9 +247,9 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
         unit: Amperage,
         history: FieldSnapshot(
           min: 0,
-          max: 2450,
+          max: 760,
           unique: 2,
-          histogram: (1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+          histogram: (1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(

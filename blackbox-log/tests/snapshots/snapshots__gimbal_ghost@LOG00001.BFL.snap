@@ -267,9 +267,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/LOG00001.BFL
         unit: Amperage,
         history: FieldSnapshot(
           min: 0,
-          max: 340262,
+          max: 75580,
           unique: 782,
-          histogram: (15252, 14967, 16408, 14190, 13971, 13565, 15871, 12779, 13701, 14211, 12807, 14532, 15387, 15237, 12808, 13579),
+          histogram: (29228, 0, 29338, 0, 30926, 0, 27502, 0, 28291, 0, 28149, 0, 27798, 0, 28033, 0),
         ),
       ),
       FieldSnapshot(
