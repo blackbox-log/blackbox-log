@@ -457,7 +457,7 @@ impl<'data> MainFrameDefBuilder<'data> {
 fn unit_from_name(name: &str) -> MainUnit {
     match to_base_field(name) {
         "time" => MainUnit::FrameTime,
-        "vbatLatest" => MainUnit::Voltage,
+        "vbat" | "vbatLatest" => MainUnit::Voltage,
         "amperageLatest" => MainUnit::Amperage,
         "accSmooth" => MainUnit::Acceleration,
         "gyroADC" => MainUnit::Rotation,

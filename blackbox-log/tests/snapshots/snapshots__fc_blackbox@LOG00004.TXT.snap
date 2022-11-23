@@ -451,12 +451,12 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
       ),
       FieldSnapshot(
         name: "vbat",
-        unit: Unitless,
+        unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 4294965541,
+          max: 42949655410,
           unique: 291,
-          histogram: (10286, 11976, 9303, 9979, 8883, 9279, 11351, 16706, 14178, 14453, 15776, 15117, 16095, 12820, 13175, 10474),
+          histogram: (24464, 0, 22099, 0, 25079, 0, 27180, 0, 24978, 0, 26429, 0, 24526, 0, 25096, 0),
         ),
       ),
       FieldSnapshot(
