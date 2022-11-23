@@ -125,19 +125,19 @@ impl<'data> Log<'data> {
     }
 }
 
-pub trait LogView<'v: 'd, 'd>: 'v + Sized {
+pub trait LogView<'view: 'data, 'data>: 'view + Sized {
     type Unit;
     type Value;
 
-    type FieldIter: Iterator<Item = (&'d str, Self::Unit)>;
+    type FieldIter: Iterator<Item = (&'data str, Self::Unit)>;
     type FrameIter: Iterator<Item = Self::ValueIter>;
     type ValueIter: Iterator<Item = Self::Value>;
 
     fn field_count(&self) -> usize;
     fn frame_count(&self) -> usize;
 
-    fn fields(&'v self) -> Self::FieldIter;
-    fn values(&'v self) -> Self::FrameIter;
+    fn fields(&'view self) -> Self::FieldIter;
+    fn values(&'view self) -> Self::FrameIter;
 }
 
 #[derive(Debug, Clone)]
@@ -167,15 +167,18 @@ where
         self.filter.len()
     }
 
+    #[inline]
     fn frame_count(&self) -> usize {
         self.log.data.main_frames.len()
     }
 
-    fn fields(&'view self) -> FieldIter<'view, Self> {
+    #[inline]
+    fn fields(&self) -> FieldIter<'_, Self> {
         FieldIter::new(self)
     }
 
-    fn values(&'view self) -> FrameIter<'view, Self> {
+    #[inline]
+    fn values(&self) -> FrameIter<'_, Self> {
         FrameIter::new(self, self.frame_count())
     }
 }
@@ -197,6 +200,7 @@ where
 
     // Reason: cannot name type of gps here
     #[allow(clippy::redundant_closure_for_method_calls)]
+    #[inline]
     fn field_count(&self) -> usize {
         self.log
             .headers
@@ -205,15 +209,18 @@ where
             .map_or(0, |gps| gps.len())
     }
 
+    #[inline]
     fn frame_count(&self) -> usize {
         self.log.data.gps_frames.len()
     }
 
-    fn fields(&'view self) -> FieldIter<'view, Self> {
+    #[inline]
+    fn fields(&self) -> FieldIter<'_, Self> {
         FieldIter::new(self)
     }
 
-    fn values(&'view self) -> FrameIter<'view, Self> {
+    #[inline]
+    fn values(&self) -> FrameIter<'_, Self> {
         FrameIter::new(self, self.frame_count())
     }
 }
