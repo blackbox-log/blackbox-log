@@ -257,9 +257,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
         unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 22516,
+          max: 25400,
           unique: 337,
-          histogram: (1034, 1193, 949, 1085, 1099, 980, 1130, 1074, 901, 1129, 927, 1084, 1043, 808, 1039, 945),
+          histogram: (2243, 0, 1770, 0, 1942, 0, 2316, 0, 2164, 0, 1994, 0, 1859, 0, 2132, 0),
         ),
       ),
       FieldSnapshot(
@@ -784,9 +784,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
         unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 21257,
+          max: 23980,
           unique: 374,
-          histogram: (1353, 1284, 1243, 1547, 1561, 1219, 1498, 1296, 1513, 1675, 1164, 1381, 1258, 1454, 1508, 1214),
+          histogram: (2894, 0, 2560, 0, 2673, 0, 2787, 0, 2752, 0, 2787, 0, 2834, 0, 2881, 0),
         ),
       ),
       FieldSnapshot(
@@ -1311,9 +1311,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
         unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 20574,
+          max: 23210,
           unique: 350,
-          histogram: (2192, 1909, 2083, 2423, 1645, 2112, 1719, 2018, 2226, 1959, 2035, 2101, 1911, 2057, 2105, 1892),
+          histogram: (4227, 0, 3810, 0, 4228, 0, 3890, 0, 3916, 0, 3947, 0, 4144, 0, 4225, 0),
         ),
       ),
       FieldSnapshot(

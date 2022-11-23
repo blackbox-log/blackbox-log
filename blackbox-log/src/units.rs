@@ -88,11 +88,11 @@ impl FromRaw for ElectricCurrent {
 impl FromRaw for ElectricPotential {
     type Raw = u32;
 
-    fn from_raw(raw: Self::Raw, headers: &self::Headers) -> Self {
-        let scale = headers.vbat.unwrap().scale;
-        let volts = f64::from(raw) * ADC_VREF * 10. * f64::from(scale) / 4095.;
+    fn from_raw(raw: Self::Raw, _headers: &self::Headers) -> Self {
+        // let scale = headers.vbat.unwrap().scale;
+        // let millivolts = f64::from(raw) * ADC_VREF * 10. * f64::from(scale) / 4095.;
 
-        Self::new::<prelude::millivolt>(volts)
+        Self::new::<si::electric_potential::centivolt>(raw.into())
     }
 }
 

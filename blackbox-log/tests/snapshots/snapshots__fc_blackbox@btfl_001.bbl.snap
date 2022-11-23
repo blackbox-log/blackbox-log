@@ -243,9 +243,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
         unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 21833,
+          max: 24630,
           unique: 4,
-          histogram: (0, 0, 0, 0, 0, 0, 39, 19, 0, 30, 0, 0, 0, 10, 0, 0),
+          histogram: (0, 0, 19, 0, 10, 0, 30, 0, 0, 0, 0, 0, 0, 0, 39, 0),
         ),
       ),
       FieldSnapshot(
@@ -656,9 +656,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
         unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 22223,
+          max: 25070,
           unique: 42,
-          histogram: (59, 2737, 70, 3220, 1048, 2056, 2055, 459, 2747, 60, 2435, 100, 1866, 728, 1909, 3344),
+          histogram: (3111, 0, 2925, 0, 4405, 0, 3155, 0, 3755, 0, 2647, 0, 2787, 0, 2108, 0),
         ),
       ),
       FieldSnapshot(
