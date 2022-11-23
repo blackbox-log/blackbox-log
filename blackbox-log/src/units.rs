@@ -89,11 +89,14 @@ impl FromRaw for ElectricPotential {
     type Raw = u32;
 
     fn from_raw(raw: Self::Raw, _headers: &self::Headers) -> Self {
-        // let scale = headers.vbat.unwrap().scale;
-        // let millivolts = f64::from(raw) * ADC_VREF * 10. * f64::from(scale) / 4095.;
-
-        Self::new::<si::electric_potential::centivolt>(raw.into())
+        new_vbat(raw)
     }
+}
+
+/// Correct from BF 4.0.0, INAV 3.0.0?
+#[inline(always)]
+fn new_vbat(raw: u32) -> ElectricPotential {
+    ElectricPotential::new::<si::electric_potential::centivolt>(raw.into())
 }
 
 impl FromRaw for Velocity {
@@ -314,6 +317,11 @@ mod tests {
                 right = $right
             );
         };
+    }
+
+    #[test]
+    fn electric_potential() {
+        float_eq!(16.32, new_vbat(1632).get::<prelude::volt>());
     }
 
     mod resolution {
