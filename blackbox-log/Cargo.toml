@@ -32,6 +32,10 @@ bench = false
 name = "decode"
 harness = false
 
+[[bench]]
+name = "headers"
+harness = false
+
 [[test]]
 name = "snapshots"
 required-features = ["serde"]

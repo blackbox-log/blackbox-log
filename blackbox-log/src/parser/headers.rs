@@ -418,6 +418,13 @@ fn parse_header<'data>(bytes: &mut Reader<'data>) -> InternalResult<(&'data str,
     Ok((name, value))
 }
 
+#[cfg(bench)]
+#[inline]
+pub fn parse_headers(data: &[u8]) -> Headers {
+    let mut data = Reader::new(data);
+    Headers::parse(&mut data).unwrap()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
