@@ -123,7 +123,14 @@ fn main() -> Result<()> {
                 )
                 .run()
             } else {
-                cmd!(sh, "cargo criterion --package blackbox-log --benches")
+                let bench = if args.is_empty() {
+                    "--benches"
+                } else {
+                    "--bench"
+                };
+
+                cmd!(sh, "cargo criterion --package blackbox-log")
+                    .arg(bench)
                     .args(args)
                     .run()
             }
