@@ -33,7 +33,7 @@ name = "decode"
 harness = false
 
 [[bench]]
-name = "headers"
+name = "parse"
 harness = false
 
 [[test]]

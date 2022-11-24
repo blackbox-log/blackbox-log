@@ -91,6 +91,15 @@ impl<'data> Log<'data> {
         Ok(Self { headers, data })
     }
 
+    /// Attempts to parse a single blackbox log using pre-parsed `Headers`
+    ///
+    /// **Note**: This assumes that `data` is already aligned to the start of
+    /// the data section of the log.
+    pub fn parse_with_headers(data: Reader<'data>, headers: Headers<'data>) -> ParseResult<Self> {
+        let data = Data::parse(data, &headers)?;
+        Ok(Self { headers, data })
+    }
+
     pub const fn headers(&self) -> &Headers<'data> {
         &self.headers
     }

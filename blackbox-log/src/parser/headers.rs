@@ -58,7 +58,7 @@ impl<'data> Headers<'data> {
         self.gps_frames.iter().flat_map(|def| def.iter())
     }
 
-    pub(crate) fn parse(data: &mut Reader<'data>) -> ParseResult<Self> {
+    pub fn parse(data: &mut Reader<'data>) -> ParseResult<Self> {
         // Skip product header
         let product = data.read_line();
         debug_assert_eq!(Some(super::MARKER.strip_suffix(&[b'\n']).unwrap()), product);
@@ -416,13 +416,6 @@ fn parse_header<'data>(bytes: &mut Reader<'data>) -> InternalResult<(&'data str,
     tracing::trace!("read header `{name}` = `{value}`");
 
     Ok((name, value))
-}
-
-#[cfg(bench)]
-#[inline]
-pub fn parse_headers(data: &[u8]) -> Headers {
-    let mut data = Reader::new(data);
-    Headers::parse(&mut data).unwrap()
 }
 
 #[cfg(test)]

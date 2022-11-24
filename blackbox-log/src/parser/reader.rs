@@ -3,6 +3,7 @@ use core::fmt;
 #[cfg(feature = "std")]
 use std::io::{self, Read};
 
+#[derive(Clone)]
 pub struct Reader<'data> {
     index: usize,
     data: &'data [u8],

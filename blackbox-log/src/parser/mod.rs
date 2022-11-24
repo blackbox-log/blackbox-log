@@ -12,8 +12,8 @@ mod reader;
 use alloc::string::String;
 use core::fmt;
 
-pub(crate) use self::data::{Data, FrameSync};
-pub use self::data::{Event, Stats};
+pub(crate) use self::data::FrameSync;
+pub use self::data::{Data, Event, Stats};
 pub use self::decode::Encoding;
 pub(crate) use self::frame::{GpsFrame, GpsHomeFrame, MainFrame, SlowFrame};
 pub use self::frame::{GpsUnit, GpsValue, Unit, Value};
