@@ -1,6 +1,8 @@
 use alloc::borrow::ToOwned;
 use core::str;
 
+use hashbrown::HashMap;
+
 use super::frame::{
     is_frame_def_header, parse_frame_def_header, DataFrameKind, GpsFrameDef, GpsFrameDefBuilder,
     GpsHomeFrameDef, GpsHomeFrameDefBuilder, GpsUnit, MainFrameDef, MainFrameDefBuilder, MainUnit,
@@ -38,6 +40,8 @@ pub struct Headers<'data> {
 
     pub min_throttle: Option<u16>,
     pub motor_output_range: Option<MotorOutputRange>,
+
+    pub unknown: HashMap<&'data str, &'data str>,
 }
 
 impl<'data> Headers<'data> {
@@ -251,6 +255,8 @@ struct State<'data> {
 
     min_throttle: Option<u16>,
     motor_output_range: Option<MotorOutputRange>,
+
+    unknown: HashMap<&'data str, &'data str>,
 }
 
 impl<'data> State<'data> {
@@ -276,6 +282,8 @@ impl<'data> State<'data> {
 
             min_throttle: None,
             motor_output_range: None,
+
+            unknown: HashMap::new(),
         }
     }
 
@@ -340,7 +348,10 @@ impl<'data> State<'data> {
                         DataFrameKind::GpsHome => self.gps_home_frames.update(property, value),
                     }
                 }
-                header => tracing::debug!("skipping unknown header: `{header}` = `{value}`"),
+                header => {
+                    tracing::debug!("skipping unknown header: `{header}` = `{value}`");
+                    self.unknown.insert(header, value);
+                }
             };
 
             Ok(())
@@ -378,6 +389,8 @@ impl<'data> State<'data> {
 
             min_throttle: self.min_throttle,
             motor_output_range: self.motor_output_range,
+
+            unknown: self.unknown,
         };
 
         headers.validate()?;

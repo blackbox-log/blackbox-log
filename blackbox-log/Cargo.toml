@@ -10,10 +10,11 @@ rust-version.workspace = true
 [features]
 default = ["std"]
 std = ["memchr/std", "serde?/std", "uom/std"]
-serde = ["dep:serde", "uom/use_serde"]
+serde = ["dep:serde", "hashbrown/serde", "uom/use_serde"]
 
 [dependencies]
 bitvec = { version = "1.0.1", default-features = false }
+hashbrown = "0.13.1"
 memchr = { version = "2.5.0", default-features = false }
 serde = { workspace = true, optional = true }
 tracing = { workspace = true, features = ["attributes"] }
