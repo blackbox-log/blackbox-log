@@ -540,7 +540,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 16419,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
@@ -1168,7 +1170,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 22167,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
@@ -1796,7 +1800,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/btfl_001.bbl
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 32386,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",

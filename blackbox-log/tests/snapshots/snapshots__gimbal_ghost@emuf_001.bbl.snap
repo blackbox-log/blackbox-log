@@ -584,7 +584,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 223996,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
@@ -1185,7 +1187,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 247979,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",

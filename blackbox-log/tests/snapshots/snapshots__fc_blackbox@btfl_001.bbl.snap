@@ -493,7 +493,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 97,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
@@ -1008,7 +1010,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 24892,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",

@@ -92,7 +92,7 @@ pub enum Value {
     Rotation(AngularVelocity),
     FlightMode(units::FlightModeSet),
     State(units::StateSet),
-    FailsafePhase(units::FailsafePhaseSet),
+    FailsafePhase(units::FailsafePhase),
     Boolean(bool),
     GpsCoordinate(f64),
     Altitude(Length),

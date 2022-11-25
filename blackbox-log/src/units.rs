@@ -285,17 +285,78 @@ define_flag_set!(StateSet, State {
     LandingDetected:              / 26,
 });
 
-define_flag_set!(FailsafePhaseSet, FailsafePhase {
-    Idle:             0 / 0,
-    RxLossDetected:   1 / 1,
-    RxLossIdle:         / 2,
-    ReturnToHome:       / 3,
-    Landing:          2 / 4,
-    Landed:           3 / 5,
-    RxLossMonitoring: 4 / 6,
-    RxLossRecovered:  5 / 7,
-    GpsRescue:        6 /  ,
-});
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum FailsafePhase {
+    Idle,
+    RxLossDetected,
+    RxLossIdle,
+    ReturnToHome,
+    Landing,
+    Landed,
+    RxLossMonitoring,
+    RxLossRecovered,
+    GpsRescue,
+    Unknown,
+}
+
+impl FailsafePhase {
+    pub(crate) fn new(raw: u32, firmware: FirmwareKind) -> Self {
+        let mapping: &[Self] = if firmware == FirmwareKind::INav {
+            &[
+                Self::Idle,
+                Self::RxLossDetected,
+                Self::RxLossIdle,
+                Self::ReturnToHome,
+                Self::Landing,
+                Self::Landed,
+                Self::RxLossMonitoring,
+                Self::RxLossRecovered,
+            ]
+        } else {
+            &[
+                Self::Idle,
+                Self::RxLossDetected,
+                Self::Landing,
+                Self::Landed,
+                Self::RxLossMonitoring,
+                Self::RxLossRecovered,
+                Self::GpsRescue,
+            ]
+        };
+
+        usize::try_from(raw)
+            .ok()
+            .and_then(|index| mapping.get(index))
+            .copied()
+            .unwrap_or_else(|| {
+                tracing::debug!("invalid failsafe phase ({raw})");
+                Self::Unknown
+            })
+    }
+}
+
+impl Flag for FailsafePhase {
+    fn as_name(&self) -> &'static str {
+        match self {
+            Self::Idle => "Idle",
+            Self::RxLossDetected => "RxLossDetected",
+            Self::RxLossIdle => "RxLossIdle",
+            Self::ReturnToHome => "ReturnToHome",
+            Self::Landing => "Landing",
+            Self::Landed => "Landed",
+            Self::RxLossMonitoring => "RxLossMonitoring",
+            Self::RxLossRecovered => "RxLossRecovered",
+            Self::GpsRescue => "GpsRescue",
+            Self::Unknown => "Unknown",
+        }
+    }
+}
+
+impl fmt::Display for FailsafePhase {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_name())
+    }
+}
 
 #[cfg(test)]
 mod tests {

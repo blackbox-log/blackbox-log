@@ -1060,14 +1060,10 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 5,
-          "Landed": 2,
-          "Landing": 2,
-          "ReturnToHome": 3,
-          "RxLossDetected": 2,
-          "RxLossIdle": 3,
-          "RxLossMonitoring": 3,
-          "RxLossRecovered": 4,
+          "Idle": 199845,
+          "ReturnToHome": 1,
+          "RxLossDetected": 1,
+          "Unknown": 4,
         },
       ),
       FieldSnapshot(

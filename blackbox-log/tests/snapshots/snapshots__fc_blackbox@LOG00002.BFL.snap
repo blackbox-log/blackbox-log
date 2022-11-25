@@ -515,9 +515,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00002.BFL
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 2,
-          "Landing": 1,
-          "RxLossDetected": 1,
+          "Idle": 220310,
+          "Landed": 1,
+          "RxLossRecovered": 1,
         },
       ),
       FieldSnapshot(

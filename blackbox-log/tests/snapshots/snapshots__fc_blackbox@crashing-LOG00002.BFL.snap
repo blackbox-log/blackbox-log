@@ -454,7 +454,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/crashing-LOG00002
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 171693,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",

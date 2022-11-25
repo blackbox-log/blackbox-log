@@ -18,7 +18,7 @@ pub(crate) struct SlowFrame {
 pub(crate) enum SlowValue {
     FlightMode(units::FlightModeSet),
     State(units::StateSet),
-    FailsafePhase(units::FailsafePhaseSet),
+    FailsafePhase(units::FailsafePhase),
     Boolean(bool),
     Unsigned(u32),
     Signed(i32),
@@ -110,7 +110,7 @@ impl<'data> SlowFrameDef<'data> {
                     }
                     SlowUnit::State => SlowValue::State(units::StateSet::new(value, firmware)),
                     SlowUnit::FailsafePhase => {
-                        SlowValue::FailsafePhase(units::FailsafePhaseSet::new(value, firmware))
+                        SlowValue::FailsafePhase(units::FailsafePhase::new(value, firmware))
                     }
                     SlowUnit::Boolean => {
                         if value > 1 {

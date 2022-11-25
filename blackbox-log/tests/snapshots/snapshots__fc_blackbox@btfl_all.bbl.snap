@@ -489,7 +489,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_all.bbl
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 204,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
@@ -1947,7 +1949,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_all.bbl
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 72454,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
@@ -5760,7 +5764,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_all.bbl
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 2857,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
@@ -7681,7 +7687,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_all.bbl
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 883,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
@@ -13367,7 +13375,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_all.bbl
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 693,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
@@ -15756,7 +15766,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_all.bbl
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 737,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
@@ -16732,7 +16744,9 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_all.bbl
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 653,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",

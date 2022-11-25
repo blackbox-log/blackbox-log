@@ -4,7 +4,7 @@ use std::io::Read;
 
 use blackbox_log::log::LogView;
 use blackbox_log::parser::{Event, Headers, Stats, Unit, Value};
-use blackbox_log::units::{si, FlagSet};
+use blackbox_log::units::{si, Flag, FlagSet};
 use blackbox_log::Log;
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
@@ -186,15 +186,18 @@ impl FieldSnapshot {
                 _ => unreachable!(),
             },
             History::Flags(history) => {
-                let flags = match value {
-                    Value::FlightMode(m) => m.as_names(),
-                    Value::State(s) => s.as_names(),
-                    Value::FailsafePhase(f) => f.as_names(),
-                    _ => unreachable!(),
-                };
+                if let Value::FailsafePhase(phase) = value {
+                    *history.entry(phase.as_name()).or_insert(0) += 1;
+                } else {
+                    let flags = match value {
+                        Value::FlightMode(m) => m.as_names(),
+                        Value::State(s) => s.as_names(),
+                        _ => unreachable!(),
+                    };
 
-                for flag in flags {
-                    *history.entry(flag).or_insert(0) += 1;
+                    for flag in flags {
+                        *history.entry(flag).or_insert(0) += 1;
+                    }
                 }
             }
         }

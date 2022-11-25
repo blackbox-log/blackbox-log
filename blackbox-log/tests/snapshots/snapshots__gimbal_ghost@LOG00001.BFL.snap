@@ -574,7 +574,9 @@ input_file: blackbox-log/tests/logs/.gimbal-ghost/test/LOG00001.BFL
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 229264,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
