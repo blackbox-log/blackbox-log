@@ -8,7 +8,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/crashing-LOG00002
     headers: Headers(
       version: V2,
       firmware_revision: "EmuFlight 3.7.0 (9366544) OMNIBUSF4SD",
-      firmware_kind: Betaflight,
+      firmware_kind: EmuFlight,
       board_info: None,
       craft_name: Some("25x25_blaxkbox_s"),
       vbat: None,

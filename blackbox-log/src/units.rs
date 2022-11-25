@@ -170,7 +170,7 @@ macro_rules! define_flag_set {
         impl $flag_name {
             const fn from_bit(bit: usize, firmware: FirmwareKind) -> Option<Self> {
                 match (bit, firmware) {
-                    $($( ($beta, FirmwareKind::Betaflight) => Some(Self::$flag), )?)*
+                    $($( ($beta, FirmwareKind::Betaflight | FirmwareKind::EmuFlight) => Some(Self::$flag), )?)*
                     $($( ($inav, FirmwareKind::INav) => Some(Self::$flag), )?)*
                     _ => None,
                 }
@@ -178,7 +178,7 @@ macro_rules! define_flag_set {
 
             const fn to_bit(self, firmware: FirmwareKind) -> Option<usize> {
                 match (self, firmware) {
-                    $($( (Self::$flag, FirmwareKind::Betaflight) => Some($beta), )?)*
+                    $($( (Self::$flag, FirmwareKind::Betaflight | FirmwareKind::EmuFlight) => Some($beta), )?)*
                     $($( (Self::$flag, FirmwareKind::INav) => Some($inav), )?)*
                     _ => None,
                 }

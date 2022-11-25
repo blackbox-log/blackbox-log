@@ -242,7 +242,7 @@ struct State<'data> {
     gps_home_frames: GpsHomeFrameDefBuilder<'data>,
 
     firmware_revision: Option<&'data str>,
-    firmware_kind: Option<FirmwareKind>,
+    firmware_kind: Option<&'data str>,
     board_info: Option<&'data str>,
     craft_name: Option<&'data str>,
 
@@ -294,7 +294,7 @@ impl<'data> State<'data> {
             match header {
                 "Data version" => self.version = Some(value.parse().map_err(|_| ())?),
                 "Firmware revision" => self.firmware_revision = Some(value),
-                "Firmware type" => self.firmware_kind = Some(value.parse().map_err(|_| ())?),
+                "Firmware type" => self.firmware_kind = Some(value),
                 "Board information" => self.board_info = Some(value),
                 "Craft name" => self.craft_name = Some(value),
 
@@ -362,6 +362,23 @@ impl<'data> State<'data> {
     fn finish(self) -> ParseResult<Headers<'data>> {
         let not_empty = |s: &&str| !s.is_empty();
 
+        let firmware_revision = self.firmware_revision.ok_or(ParseError::MissingHeader)?;
+        let firmware_kind = firmware_revision
+            .split_once(' ')
+            .map(|(fw, _)| fw.to_ascii_lowercase());
+        let firmware_kind = match firmware_kind.as_deref() {
+            Some("betaflight") => FirmwareKind::Betaflight,
+            Some("inav") => FirmwareKind::INav,
+            Some("emuflight") => FirmwareKind::EmuFlight,
+            _ => {
+                tracing::error!("Could not parse firmware revision");
+                return Err(ParseError::InvalidHeader(
+                    "Firmware revision".to_owned(),
+                    firmware_revision.to_owned(),
+                ));
+            }
+        };
+
         let vbat = if let (Some(reference), Some(scale)) = (self.vbat_reference, self.vbat_scale) {
             Some(VbatConfig { reference, scale })
         } else {
@@ -376,8 +393,8 @@ impl<'data> State<'data> {
             gps_frames: self.gps_frames.parse()?,
             gps_home_frames: self.gps_home_frames.parse()?,
 
-            firmware_revision: self.firmware_revision.ok_or(ParseError::MissingHeader)?,
-            firmware_kind: self.firmware_kind.ok_or(ParseError::MissingHeader)?,
+            firmware_revision,
+            firmware_kind,
             board_info: self.board_info.map(str::trim).filter(not_empty),
             craft_name: self.craft_name.map(str::trim).filter(not_empty),
 

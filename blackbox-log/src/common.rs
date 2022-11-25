@@ -1,8 +1,5 @@
-use alloc::borrow::ToOwned;
 use core::fmt;
 use core::str::FromStr;
-
-use crate::parser::ParseError;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[non_exhaustive]
@@ -27,22 +24,7 @@ impl FromStr for LogVersion {
 pub enum FirmwareKind {
     Betaflight,
     INav,
-}
-
-impl FromStr for FirmwareKind {
-    type Err = ParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_ascii_lowercase().as_str() {
-            "cleanflight" | "betaflight" => Ok(Self::Betaflight),
-            "baseflight" => {
-                tracing::error!("Baseflight logs are not supported");
-                Err(ParseError::UnknownFirmware(s.to_owned()))
-            }
-            "inav" => Ok(Self::INav),
-            _ => Err(ParseError::UnknownFirmware(s.to_owned())),
-        }
-    }
+    EmuFlight,
 }
 
 pub trait DisarmReason: TryFrom<u32, Error = DisarmReasonError> {}
