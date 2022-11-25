@@ -1,22 +1,10 @@
 use core::fmt;
-use core::str::FromStr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[non_exhaustive]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum LogVersion {
     V2,
-}
-
-impl FromStr for LogVersion {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "2" | "v2" => Ok(Self::V2),
-            _ => Err(()),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

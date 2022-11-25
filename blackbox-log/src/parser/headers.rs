@@ -292,7 +292,13 @@ impl<'data> State<'data> {
         // TODO: try block
         (|| -> Result<(), ()> {
             match header {
-                "Data version" => self.version = Some(value.parse().map_err(|_| ())?),
+                "Data version" => {
+                    if value == "2" {
+                        self.version = Some(LogVersion::V2);
+                    } else {
+                        return Err(());
+                    }
+                }
                 "Firmware revision" => self.firmware_revision = Some(value),
                 "Firmware type" => self.firmware_kind = Some(value),
                 "Board information" => self.board_info = Some(value),
