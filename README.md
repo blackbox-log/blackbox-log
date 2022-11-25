@@ -42,24 +42,24 @@ for `blackbox_decode`, with a WASM/JavaScript interface Coming Soon™.
 
 ## Benchmarks
 
-As of [50e7566](https://github.com/wetheredge/blackbox/tree/ce71c9a3a7f7218328f1162b2f33e32fab4ea24d):
+As of [f5163d9](https://github.com/wetheredge/blackbox/tree/f5163d92a3574e5e251acd5b5da3d0c0d84c23cf):
 
 ```shell
 $ exa -lbs size --no-time --no-permissions --no-user blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
 6.6Mi blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
 
-$ hyperfine -w 10 -L version ce71c9a,betaflight './blackbox_decode-{version} blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL'
-Benchmark #1: ./blackbox_decode-50e7566 blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
-  Time (mean ± σ):     686.5 ms ±  16.0 ms    [User: 623.8 ms, System: 64.1 ms]
-  Range (min … max):   657.3 ms … 707.3 ms    10 runs
+$ hyperfine -w 10 -L version f5163d9,betaflight './blackbox_decode-{version} blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL'
+Benchmark #1: ./blackbox_decode-f5163d9 blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
+  Time (mean ± σ):     661.9 ms ±   8.0 ms    [User: 604.2 ms, System: 59.0 ms]
+  Range (min … max):   646.9 ms … 673.0 ms    10 runs
 
 Benchmark #2: ./blackbox_decode-betaflight blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL
-  Time (mean ± σ):      1.055 s ±  0.010 s    [User: 1.013 s, System: 0.041 s]
-  Range (min … max):    1.039 s …  1.072 s    10 runs
+  Time (mean ± σ):      1.068 s ±  0.019 s    [User: 1.018 s, System: 0.046 s]
+  Range (min … max):    1.042 s …  1.102 s    10 runs
 
 Summary
-  './blackbox_decode-50e7566 blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL' ran
-    1.54 ± 0.04 times faster than './blackbox_decode-betaflight blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL'
+  './blackbox_decode-f5163d9 blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL' ran
+    1.61 ± 0.03 times faster than './blackbox_decode-betaflight blackbox-log/tests/logs/gimbal-ghost/LOG00001.BFL'
 ```
 
 `…/gimbal-ghost/LOG00001.BFL` contains only one log. Files with multiple logs
