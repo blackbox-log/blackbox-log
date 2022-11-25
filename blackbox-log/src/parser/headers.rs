@@ -94,7 +94,6 @@ impl<'data> Headers<'data> {
 
     fn validate(&self) -> ParseResult<()> {
         let has_accel = self.acceleration_1g.is_some();
-        let has_current_meter = self.current_meter.is_some();
         let has_min_throttle = self.min_throttle.is_some();
         let has_motor_0 = self.main_frames.has_motor_0();
         let has_vbat_ref = self.vbat_reference.is_some();
@@ -126,21 +125,10 @@ impl<'data> Headers<'data> {
         };
 
         let unit = |field, unit| {
-            let ok = match unit {
-                Unit::Amperage => has_current_meter,
-                Unit::Acceleration => has_accel,
-                Unit::FrameTime
-                | Unit::Voltage
-                | Unit::Rotation
-                | Unit::FlightMode
-                | Unit::State
-                | Unit::FailsafePhase
-                | Unit::GpsCoordinate
-                | Unit::Altitude
-                | Unit::Velocity
-                | Unit::GpsHeading
-                | Unit::Boolean
-                | Unit::Unitless => true,
+            let ok = if unit == Unit::Acceleration {
+                has_accel
+            } else {
+                true
             };
 
             if ok {
