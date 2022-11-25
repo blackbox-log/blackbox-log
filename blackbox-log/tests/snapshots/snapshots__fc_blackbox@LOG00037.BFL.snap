@@ -11,10 +11,8 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00037.BFL
       firmware_kind: Betaflight,
       board_info: Some("HBRO KAKUTEF7"),
       craft_name: Some("AR8"),
-      vbat: Some(VbatConfig(
-        reference: 2277,
-        scale: 110,
-      )),
+      vbat_reference: Some(2277),
+      vbat_scale: Some(110),
       current_meter: Some(CurrentMeterConfig(
         offset: 0,
         scale: 275,

@@ -11,10 +11,8 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
       firmware_kind: INav,
       board_info: None,
       craft_name: Some(":WDTE"),
-      vbat: Some(VbatConfig(
-        reference: 1646,
-        scale: 110,
-      )),
+      vbat_reference: Some(1646),
+      vbat_scale: Some(110),
       current_meter: Some(CurrentMeterConfig(
         offset: 0,
         scale: 317,

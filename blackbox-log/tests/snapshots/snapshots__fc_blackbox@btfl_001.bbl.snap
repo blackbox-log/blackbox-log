@@ -11,10 +11,8 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
       firmware_kind: Betaflight,
       board_info: Some("ZEEZ ZEEZF7V2"),
       craft_name: None,
-      vbat: Some(VbatConfig(
-        reference: 2466,
-        scale: 110,
-      )),
+      vbat_reference: Some(2466),
+      vbat_scale: Some(110),
       current_meter: Some(CurrentMeterConfig(
         offset: 0,
         scale: 250,
@@ -523,10 +521,8 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/btfl_001.bbl
       firmware_kind: Betaflight,
       board_info: Some("ZEEZ ZEEZF7V2"),
       craft_name: None,
-      vbat: Some(VbatConfig(
-        reference: 2439,
-        scale: 110,
-      )),
+      vbat_reference: Some(2439),
+      vbat_scale: Some(110),
       current_meter: Some(CurrentMeterConfig(
         offset: 0,
         scale: 250,

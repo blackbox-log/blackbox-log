@@ -31,7 +31,9 @@ pub struct Headers<'data> {
     pub board_info: Option<&'data str>,
     pub craft_name: Option<&'data str>,
 
-    pub vbat: Option<VbatConfig>,
+    /// Measured battery voltage at arm
+    pub vbat_reference: Option<u16>,
+    pub vbat_scale: Option<u8>,
     pub current_meter: Option<CurrentMeterConfig>,
 
     pub acceleration_1g: Option<u16>,
@@ -95,7 +97,7 @@ impl<'data> Headers<'data> {
         let has_current_meter = self.current_meter.is_some();
         let has_min_throttle = self.min_throttle.is_some();
         let has_motor_0 = self.main_frames.has_motor_0();
-        let has_vbat = self.vbat.is_some();
+        let has_vbat_ref = self.vbat_reference.is_some();
         let has_min_motor = self.motor_output_range.is_some();
         let has_gps_home = self.gps_home_frames.is_some();
 
@@ -104,7 +106,7 @@ impl<'data> Headers<'data> {
                 Predictor::MinThrottle => has_min_throttle,
                 Predictor::Motor0 => has_motor_0,
                 Predictor::HomeLat | Predictor::HomeLon => has_gps_home,
-                Predictor::VBatReference => has_vbat,
+                Predictor::VBatReference => has_vbat_ref,
                 Predictor::MinMotor => has_min_motor,
                 Predictor::Zero
                 | Predictor::Previous
@@ -126,9 +128,9 @@ impl<'data> Headers<'data> {
         let unit = |field, unit| {
             let ok = match unit {
                 Unit::Amperage => has_current_meter,
-                Unit::Voltage => has_vbat,
                 Unit::Acceleration => has_accel,
                 Unit::FrameTime
+                | Unit::Voltage
                 | Unit::Rotation
                 | Unit::FlightMode
                 | Unit::State
@@ -190,14 +192,6 @@ impl Default for Headers<'static> {
             motor_output_range: None,
         }
     }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct VbatConfig {
-    /// Measured battery voltage at arm
-    pub reference: u16,
-    pub scale: u8,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -385,12 +379,6 @@ impl<'data> State<'data> {
             }
         };
 
-        let vbat = if let (Some(reference), Some(scale)) = (self.vbat_reference, self.vbat_scale) {
-            Some(VbatConfig { reference, scale })
-        } else {
-            None
-        };
-
         // TODO: log where each error comes from
         let headers = Headers {
             version: self.version.ok_or(ParseError::MissingHeader)?,
@@ -404,7 +392,8 @@ impl<'data> State<'data> {
             board_info: self.board_info.map(str::trim).filter(not_empty),
             craft_name: self.craft_name.map(str::trim).filter(not_empty),
 
-            vbat,
+            vbat_reference: self.vbat_reference,
+            vbat_scale: self.vbat_scale,
             current_meter: self.current_meter,
 
             acceleration_1g: self.acceleration_1g,

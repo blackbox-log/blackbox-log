@@ -112,7 +112,7 @@ impl Predictor {
                 },
             ),
             Self::FifteenHundred => 1500,
-            Self::VBatReference => ctx.headers.vbat.unwrap().reference.into(),
+            Self::VBatReference => ctx.headers.vbat_reference.unwrap().into(),
             Self::LastMainFrameTime => {
                 tracing::debug!("found unhandled {self:?}");
                 0
