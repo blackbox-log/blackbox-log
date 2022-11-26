@@ -1,7 +1,12 @@
 [package]
 name = "blackbox-log"
 version = "0.1.0"
-publish = false
+description = "Ergonomic parser for BetaFlight blackbox logs"
+repository = "https://github.com/wetheredge/blackbox"
+categories = ["parser-implementations", "no-std", "encoding"]
+keywords = ["betaflight", "blackbox"]
+
+exclude = ["/tests/logs/", "/tests/snapshots/"]
 
 license.workspace = true
 edition.workspace = true

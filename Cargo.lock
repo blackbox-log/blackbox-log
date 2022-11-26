@@ -105,14 +105,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "blackbox-sys"
-version = "0.1.0"
-dependencies = [
- "cc",
-]
-
-[[package]]
-name = "blackbox_decode"
+name = "blackbox-log-cli"
 version = "0.1.0"
 dependencies = [
  "blackbox-log",
@@ -122,6 +115,13 @@ dependencies = [
  "rayon",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "blackbox-sys"
+version = "0.1.0"
+dependencies = [
+ "cc",
 ]
 
 [[package]]

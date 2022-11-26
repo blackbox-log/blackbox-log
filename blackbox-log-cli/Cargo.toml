@@ -1,12 +1,18 @@
 [package]
-name = "blackbox_decode"
-description = "Rust port of Nicholas Sherlock's blackbox_decode"
+name = "blackbox-log-cli"
 version = "0.1.0"
-publish = false
+description = "Ergonomic cli for parsing BetaFlight blackbox logs"
+repository = "https://github.com/wetheredge/blackbox"
+categories = ["command-line-utilities", "parser-implementations"]
+keywords = ["blackbox_decode", "betaflight", "blackbox"]
 
 license.workspace = true
 edition.workspace = true
 rust-version.workspace = true
+
+[[bin]]
+path = "src/main.rs"
+name = "blackbox-log"
 
 [dependencies]
 blackbox-log.workspace = true
