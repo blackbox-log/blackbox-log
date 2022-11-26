@@ -1,4 +1,3 @@
-use alloc::vec::Vec;
 use core::fmt;
 #[cfg(feature = "std")]
 use std::io::{self, Read};
@@ -85,16 +84,14 @@ impl<'data> Reader<'data> {
         }
     }
 
-    pub fn read_n_bytes(&mut self, n: usize) -> Vec<u8> {
+    pub fn read_n_bytes(&mut self, n: usize) -> &'data [u8] {
         let len = n.min(self.remaining());
-        let mut buffer = Vec::with_capacity(len);
 
         let start = self.index;
         let slice = &self.data[start..(start + len)];
 
-        buffer.extend_from_slice(slice);
         self.index += len;
-        buffer
+        slice
     }
 
     pub fn read_u8(&mut self) -> Option<u8> {
@@ -310,7 +307,7 @@ mod tests {
 
         let read = bytes.read_n_bytes(1);
         assert_eq!(read.len(), 1);
-        assert_eq!(read, input[0..1]);
+        assert_eq!(read, &input[0..1]);
 
         let read = bytes.read_n_bytes(0);
         assert_eq!(read.len(), 0);
@@ -318,7 +315,7 @@ mod tests {
 
         let read = bytes.read_n_bytes(3);
         assert_eq!(read.len(), 3);
-        assert_eq!(read, input[1..]);
+        assert_eq!(read, &input[1..]);
 
         assert!(bytes.is_empty());
     }
