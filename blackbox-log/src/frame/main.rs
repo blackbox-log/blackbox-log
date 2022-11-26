@@ -161,7 +161,7 @@ impl<'data> MainFrameDef<'data> {
 
     /// # Panics
     ///
-    /// Panics if there is no motor[0] field in the frame
+    /// Panics if there is no `motor[0]` field in the frame
     pub(crate) fn get_motor_0_from(&self, frame: &[u32]) -> u32 {
         frame[self.index_motor_0.unwrap()]
     }

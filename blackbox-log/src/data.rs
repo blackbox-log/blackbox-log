@@ -6,7 +6,7 @@ use crate::parser::InternalError;
 use crate::{Headers, ParseResult, Reader};
 
 #[derive(Debug, Clone)]
-pub struct Data {
+pub(crate) struct Data {
     pub(crate) events: Vec<Event>,
     pub(crate) main_frames: Vec<FrameSync>,
     pub(crate) slow_frames: Vec<SlowFrame>,
@@ -33,6 +33,7 @@ impl FrameSync {
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[non_exhaustive]
 pub struct Stats {
     pub counts: FrameCounts,
 }
@@ -58,7 +59,7 @@ impl Data {
         }
     }
 
-    pub fn parse(mut data: Reader, headers: &Headers) -> ParseResult<Self> {
+    pub(crate) fn parse(mut data: Reader, headers: &Headers) -> ParseResult<Self> {
         let mut events = Vec::new();
         let mut main_frames = Vec::new();
         let mut slow_frames = Vec::new();

@@ -7,6 +7,7 @@ use crate::event::Event;
 use crate::parser::to_base_field;
 use crate::{GpsUnit, GpsValue, Headers, ParseResult, Reader, Unit, Value};
 
+/// Represents a single log out of a blackbox log file.
 #[derive(Debug)]
 pub struct Log<'data> {
     headers: Headers<'data>,
@@ -78,10 +79,9 @@ impl Filter {
 }
 
 impl<'data> Log<'data> {
-    /// Attempts to parse a single blackbox log
+    /// Attempts to parse a single blackbox log.
     ///
-    /// **Note**: This assumes that `data` is already aligned to the start of
-    /// the log and will return an error if it is not.
+    /// This assumes that `data` is already aligned to the beginning of the log.
     pub fn parse(data: &'data [u8]) -> ParseResult<Self> {
         let mut data = Reader::new(data);
         let headers = Headers::parse(&mut data)?;
@@ -91,10 +91,10 @@ impl<'data> Log<'data> {
         Ok(Self { headers, data })
     }
 
-    /// Attempts to parse a single blackbox log using pre-parsed `Headers`
+    /// Attempts to parse a single blackbox log using pre-parsed `Headers`.
     ///
-    /// **Note**: This assumes that `data` is already aligned to the start of
-    /// the data section of the log.
+    /// This assumes that `data` is already aligned to the beginning of the data
+    /// section of the log.
     pub fn parse_with_headers(data: Reader<'data>, headers: Headers<'data>) -> ParseResult<Self> {
         let data = Data::parse(data, &headers)?;
         Ok(Self { headers, data })
@@ -112,12 +112,16 @@ impl<'data> Log<'data> {
         self.data.to_stats()
     }
 
+    /// Returns a [`LogView`] that iterates based on main frames and *does not*
+    /// include any data from GPS frames.
     pub fn data<'log>(&'log self) -> MainView<'log, 'data> {
         let mut filter = Filter::new_unfiltered(&self.headers);
         filter.gps = Vec::new();
         MainView { log: self, filter }
     }
 
+    /// Returns a [`LogView`] that iterates based on main frames and *does*
+    /// include any data from GPS frames.
     pub fn merged_data<'log>(&'log self) -> MainView<'log, 'data> {
         let mut filter = Filter::new_unfiltered(&self.headers);
 
@@ -129,6 +133,7 @@ impl<'data> Log<'data> {
         MainView { log: self, filter }
     }
 
+    /// Returns a [`LogView`] that iterates over only GPS data.
     pub fn gps_data<'log>(&'log self) -> GpsView<'log, 'data> {
         GpsView { log: self }
     }
