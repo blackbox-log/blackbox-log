@@ -1,6 +1,6 @@
 #![no_main]
 
-use blackbox_log::parser::headers::{CurrentMeterConfig, Headers};
+use blackbox_log::headers::{CurrentMeterConfig, Headers};
 use blackbox_log::units::{si, ElectricCurrent, FromRaw};
 
 blackbox_fuzz::fuzz_target!(|input: (u16, i16, i16)| {

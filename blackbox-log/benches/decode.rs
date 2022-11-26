@@ -2,7 +2,7 @@ use std::fmt::Display;
 use std::iter;
 
 use blackbox_log::parser::decode::no_error as decode;
-use blackbox_log::parser::Reader;
+use blackbox_log::Reader;
 use criterion::measurement::WallTime;
 use criterion::{
     criterion_group, criterion_main, BatchSize, Bencher, BenchmarkGroup, BenchmarkId, Criterion,

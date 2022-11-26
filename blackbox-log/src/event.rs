@@ -2,7 +2,8 @@ use alloc::vec::Vec;
 
 use tracing::instrument;
 
-use crate::parser::{decode, InternalError, InternalResult, Reader};
+use crate::parser::{decode, InternalError, InternalResult};
+use crate::Reader;
 
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]

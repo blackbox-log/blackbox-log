@@ -2,10 +2,11 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::io::Read;
 
+use blackbox_log::data::Stats;
+use blackbox_log::event::Event;
 use blackbox_log::log::LogView;
-use blackbox_log::parser::{Event, Headers, Stats, Unit, Value};
 use blackbox_log::units::{si, Flag, FlagSet};
-use blackbox_log::Log;
+use blackbox_log::{Headers, Log, Unit, Value};
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 

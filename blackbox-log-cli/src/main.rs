@@ -6,8 +6,8 @@ use std::path::Path;
 use std::process::{ExitCode, Termination};
 
 use blackbox_log::log::LogView;
-use blackbox_log::parser::Value;
 use blackbox_log::units::si;
+use blackbox_log::Value;
 use mimalloc::MiMalloc;
 use rayon::prelude::*;
 

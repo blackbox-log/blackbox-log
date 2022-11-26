@@ -1,5 +1,3 @@
-use core::fmt;
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[non_exhaustive]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -13,44 +11,6 @@ pub enum FirmwareKind {
     Betaflight,
     INav,
     EmuFlight,
-}
-
-pub trait DisarmReason: TryFrom<u32, Error = DisarmReasonError> {}
-
-#[derive(Debug, Clone)]
-pub struct DisarmReasonError;
-
-// TODO: waiting on https://github.com/rust-lang/rust-clippy/pull/9545 to land
-#[allow(clippy::std_instead_of_core)]
-#[cfg(feature = "std")]
-impl std::error::Error for DisarmReasonError {}
-
-impl fmt::Display for DisarmReasonError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "invalid or unsupported disarm reason")
-    }
-}
-
-macro_rules! generate_disarm_reason {
-    ( $( $reason:ident = $value:literal ),+ $(,)? ) => {
-        #[non_exhaustive]
-        pub enum DisarmReason {
-            $( $reason = $value ),+
-        }
-
-        impl crate::common::DisarmReason for DisarmReason {}
-
-        impl TryFrom<u32> for DisarmReason {
-            type Error = crate::common::DisarmReasonError;
-
-            fn try_from(reason: u32) -> Result<Self, Self::Error> {
-                match reason {
-                    $( $value => Ok(Self::$reason), )+
-                    _ => Err(crate::common::DisarmReasonError),
-                }
-            }
-        }
-    }
 }
 
 macro_rules! byte_enum {

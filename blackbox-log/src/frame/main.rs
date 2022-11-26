@@ -2,17 +2,17 @@ use alloc::borrow::ToOwned;
 use alloc::vec::Vec;
 use core::iter;
 
-use predictor::PredictorContext;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty, Unit};
-use crate::parser::data::FrameSync;
-use crate::parser::{
-    as_signed, decode, predictor, to_base_field, Encoding, FrameKind, Headers, InternalResult,
-    ParseError, ParseResult, Predictor, Reader,
-};
+use crate::data::FrameSync;
+use crate::frame::FrameKind;
+use crate::parser::{decode, to_base_field, Encoding, InternalResult};
+use crate::predictor::{self, Predictor, PredictorContext};
 use crate::units::prelude::*;
 use crate::units::FromRaw;
+use crate::utils::as_signed;
+use crate::{Headers, ParseError, ParseResult, Reader};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MainFrame {

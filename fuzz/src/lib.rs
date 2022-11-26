@@ -3,7 +3,7 @@ use std::io::Write;
 use std::os::unix::io::AsRawFd;
 
 pub use blackbox_log::parser::decode::no_error as decode;
-use blackbox_log::parser::Reader;
+use blackbox_log::Reader;
 use blackbox_sys::stream::Stream;
 use libfuzzer_sys::arbitrary;
 pub use libfuzzer_sys::arbitrary::Arbitrary;

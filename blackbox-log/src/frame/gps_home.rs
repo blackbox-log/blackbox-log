@@ -4,10 +4,10 @@ use alloc::vec::Vec;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty};
-use crate::parser::{
-    Encoding, FrameKind, Headers, InternalResult, ParseError, ParseResult, Predictor,
-    PredictorContext, Reader,
-};
+use crate::frame::FrameKind;
+use crate::parser::{Encoding, InternalResult};
+use crate::predictor::{Predictor, PredictorContext};
+use crate::{Headers, ParseError, ParseResult, Reader};
 
 #[derive(Debug, Clone)]
 pub(crate) struct GpsHomeFrame(pub(crate) GpsPosition);

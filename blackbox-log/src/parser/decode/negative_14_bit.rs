@@ -1,5 +1,6 @@
 use super::variable;
-use crate::parser::{InternalResult, Reader};
+use crate::parser::InternalResult;
+use crate::Reader;
 
 pub(crate) fn negative_14_bit(data: &mut Reader) -> InternalResult<i32> {
     let result = variable(data)? as u16;

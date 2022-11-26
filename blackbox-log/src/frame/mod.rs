@@ -16,9 +16,24 @@ pub use self::gps::{GpsUnit, GpsValue};
 pub(crate) use self::gps_home::*;
 pub(crate) use self::main::*;
 pub(crate) use self::slow::*;
-use super::{Encoding, InternalResult, ParseError, ParseResult, Predictor, Reader};
-use crate::units;
+use crate::parser::{Encoding, InternalResult};
+use crate::predictor::Predictor;
 use crate::units::prelude::*;
+use crate::{units, ParseError, ParseResult, Reader};
+
+byte_enum! {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    #[cfg_attr(feature = "serde", derive(serde::Serialize))]
+    #[repr(u8)]
+    pub enum FrameKind {
+        Event = b'E',
+        Intra = b'I',
+        Inter = b'P',
+        Gps = b'G',
+        GpsHome = b'H',
+        Slow = b'S',
+    }
+}
 
 pub trait FieldDef {
     fn name(&self) -> &str;

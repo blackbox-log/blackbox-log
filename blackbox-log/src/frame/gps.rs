@@ -5,12 +5,13 @@ use core::iter;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty, GpsHomeFrame, MainFrame, Unit};
-use crate::parser::{
-    as_signed, decode, to_base_field, Encoding, FrameKind, Headers, InternalResult, ParseError,
-    ParseResult, Predictor, PredictorContext, Reader,
-};
+use crate::frame::FrameKind;
+use crate::parser::{decode, to_base_field, Encoding, InternalResult};
+use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
 use crate::units::FromRaw;
+use crate::utils::as_signed;
+use crate::{Headers, ParseError, ParseResult, Reader};
 
 #[derive(Debug, Clone)]
 pub struct GpsFrame {

@@ -1,28 +1,15 @@
 #[cfg(not(any(fuzzing, bench)))]
-mod decode;
+pub(crate) mod decode;
 #[cfg(any(fuzzing, bench))]
 pub mod decode;
-
-mod data;
-mod frame;
-pub mod headers;
-mod predictor;
-mod reader;
 
 use alloc::string::String;
 use core::fmt;
 
-pub(crate) use self::data::FrameSync;
-pub use self::data::{Data, Event, Stats};
 pub use self::decode::Encoding;
-pub(crate) use self::frame::{GpsFrame, GpsHomeFrame, MainFrame, SlowFrame};
-pub use self::frame::{GpsUnit, GpsValue, Unit, Value};
-pub use self::headers::Headers;
-pub(crate) use self::predictor::{Predictor, PredictorContext};
-pub use self::reader::Reader;
+use crate::frame::FrameKind;
 
 pub type ParseResult<T> = Result<T, ParseError>;
-pub(crate) const MARKER: &[u8] = b"H Product:Blackbox flight data recorder by Nicholas Sherlock\n";
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -74,32 +61,6 @@ impl From<ParseError> for InternalError {
     fn from(err: ParseError) -> Self {
         Self::Fatal(err)
     }
-}
-
-byte_enum! {
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-    #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-    #[repr(u8)]
-    pub enum FrameKind {
-        Event = b'E',
-        Intra = b'I',
-        Inter = b'P',
-        Gps = b'G',
-        GpsHome = b'H',
-        Slow = b'S',
-    }
-}
-
-#[allow(clippy::cast_possible_wrap)]
-#[inline(always)]
-pub(crate) const fn as_signed(x: u32) -> i32 {
-    x as i32
-}
-
-#[allow(clippy::cast_sign_loss)]
-#[inline(always)]
-pub(crate) const fn as_unsigned(x: i32) -> u32 {
-    x as u32
 }
 
 pub(crate) fn to_base_field(field: &str) -> &str {

@@ -3,13 +3,15 @@ use core::str;
 
 use hashbrown::HashMap;
 
-use super::frame::{
+use crate::common::{FirmwareKind, LogVersion};
+use crate::frame::{
     is_frame_def_header, parse_frame_def_header, DataFrameKind, GpsFrameDef, GpsFrameDefBuilder,
     GpsHomeFrameDef, GpsHomeFrameDefBuilder, GpsUnit, MainFrameDef, MainFrameDefBuilder, MainUnit,
     SlowFrameDef, SlowFrameDefBuilder, SlowUnit,
 };
-use super::{InternalError, InternalResult, ParseError, ParseResult, Predictor, Reader, Unit};
-use crate::common::{FirmwareKind, LogVersion};
+use crate::parser::{InternalError, InternalResult};
+use crate::predictor::Predictor;
+use crate::{ParseError, ParseResult, Reader, Unit};
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
@@ -63,7 +65,7 @@ impl<'data> Headers<'data> {
     pub fn parse(data: &mut Reader<'data>) -> ParseResult<Self> {
         // Skip product header
         let product = data.read_line();
-        debug_assert_eq!(Some(super::MARKER.strip_suffix(&[b'\n']).unwrap()), product);
+        debug_assert_eq!(Some(crate::MARKER.strip_suffix(&[b'\n']).unwrap()), product);
 
         let mut state = State::new();
 
@@ -170,7 +172,8 @@ impl Default for Headers<'static> {
             board_info: None,
             craft_name: None,
 
-            vbat: None,
+            vbat_reference: None,
+            vbat_scale: None,
             current_meter: None,
 
             acceleration_1g: None,
@@ -178,6 +181,8 @@ impl Default for Headers<'static> {
 
             min_throttle: None,
             motor_output_range: None,
+
+            unknown: HashMap::new(),
         }
     }
 }

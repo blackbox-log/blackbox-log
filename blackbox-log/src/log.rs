@@ -2,10 +2,10 @@ use alloc::vec::Vec;
 use core::cmp::Ordering;
 use core::iter::FusedIterator;
 
-use crate::parser::{
-    to_base_field, Data, Event, FrameSync, GpsUnit, GpsValue, Headers, ParseResult, Reader, Stats,
-    Unit, Value,
-};
+use crate::data::{Data, FrameSync, Stats};
+use crate::event::Event;
+use crate::parser::to_base_field;
+use crate::{GpsUnit, GpsValue, Headers, ParseResult, Reader, Unit, Value};
 
 #[derive(Debug)]
 pub struct Log<'data> {

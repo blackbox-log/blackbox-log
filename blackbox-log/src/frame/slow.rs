@@ -4,10 +4,10 @@ use core::iter;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty, Unit};
-use crate::parser::{
-    as_signed, Encoding, Headers, InternalResult, ParseResult, Predictor, PredictorContext, Reader,
-};
-use crate::units;
+use crate::parser::{Encoding, InternalResult, ParseResult};
+use crate::predictor::{Predictor, PredictorContext};
+use crate::utils::as_signed;
+use crate::{units, Headers, Reader};
 
 #[derive(Debug, Clone)]
 pub(crate) struct SlowFrame {

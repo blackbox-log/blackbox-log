@@ -8,7 +8,7 @@ pub use uom::si::f64::{
 };
 
 use crate::common::FirmwareKind;
-use crate::parser::Headers;
+use crate::Headers;
 
 pub(crate) mod prelude {
     pub use super::si::acceleration::meter_per_second_squared as mps2;

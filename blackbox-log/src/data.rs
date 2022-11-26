@@ -1,12 +1,9 @@
-mod event;
-
 use alloc::vec::Vec;
 
-pub use self::event::Event;
-use super::{
-    FrameKind, GpsFrame, GpsHomeFrame, Headers, InternalError, MainFrame, ParseResult, Reader,
-    SlowFrame,
-};
+use crate::event::{self, Event};
+use crate::frame::{FrameKind, GpsFrame, GpsHomeFrame, MainFrame, SlowFrame};
+use crate::parser::InternalError;
+use crate::{Headers, ParseResult, Reader};
 
 #[derive(Debug, Clone)]
 pub struct Data {

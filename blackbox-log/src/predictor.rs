@@ -1,7 +1,8 @@
 use core::ops::{Add, Div, Sub};
 
 use super::frame::GpsPosition;
-use super::{as_signed, as_unsigned, Headers};
+use crate::utils::{as_signed, as_unsigned};
+use crate::Headers;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(u16)]

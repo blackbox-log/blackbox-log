@@ -1,7 +1,7 @@
 #![no_main]
 
-use blackbox_log::parser::headers::Headers;
 use blackbox_log::units::{self, si, FromRaw};
+use blackbox_log::Headers;
 
 blackbox_fuzz::fuzz_target!(|input: (i32, f32)| {
     let (raw, scale_rad) = input;

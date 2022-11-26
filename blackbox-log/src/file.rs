@@ -4,7 +4,7 @@ use memchr::memmem;
 use tracing::instrument;
 
 use crate::parser::ParseResult;
-use crate::{parser, Log};
+use crate::Log;
 
 #[derive(Debug)]
 pub struct File<'data> {
@@ -14,7 +14,7 @@ pub struct File<'data> {
 
 impl<'data> File<'data> {
     pub fn new(data: &'data [u8]) -> Self {
-        let offsets = memmem::find_iter(data, parser::MARKER).collect();
+        let offsets = memmem::find_iter(data, crate::MARKER).collect();
         Self { offsets, data }
     }
 

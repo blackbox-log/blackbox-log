@@ -1,5 +1,6 @@
 use super::zig_zag_decode;
-use crate::parser::{InternalError, InternalResult, Reader};
+use crate::parser::{InternalError, InternalResult};
+use crate::Reader;
 
 pub(crate) fn variable(data: &mut Reader) -> InternalResult<u32> {
     let mut uvar: u32 = 0;

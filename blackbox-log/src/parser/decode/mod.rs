@@ -14,8 +14,9 @@ pub(crate) use self::tagged_16::tagged_16;
 pub(crate) use self::tagged_32::tagged_32;
 pub(crate) use self::tagged_variable::tagged_variable;
 pub(crate) use self::variable::{variable, variable_signed};
-use super::{InternalResult, Reader};
-use crate::parser::as_unsigned;
+use super::InternalResult;
+use crate::utils::as_unsigned;
+use crate::Reader;
 
 byte_enum! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -106,7 +107,7 @@ const fn zig_zag_decode(value: u32) -> i32 {
 
 #[cfg(any(fuzzing, bench))]
 pub mod no_error {
-    use crate::parser::Reader;
+    use crate::Reader;
 
     #[inline(always)]
     pub fn negative_14_bit(data: &mut Reader) -> Option<i32> {

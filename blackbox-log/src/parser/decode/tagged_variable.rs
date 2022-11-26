@@ -1,4 +1,5 @@
-use crate::parser::{InternalError, InternalResult, Reader};
+use crate::parser::{InternalError, InternalResult};
+use crate::Reader;
 
 pub(crate) fn tagged_variable(data: &mut Reader, extra: usize) -> InternalResult<[i32; 8]> {
     debug_assert!(extra < 8);

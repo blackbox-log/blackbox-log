@@ -1,5 +1,4 @@
-use blackbox_log::parser::{Headers, Reader};
-use blackbox_log::Log;
+use blackbox_log::{Headers, Log, Reader};
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
 
 static DATA: &[u8] = include_bytes!("../tests/logs/error-recovery.bbl");

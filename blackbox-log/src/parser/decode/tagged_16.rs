@@ -1,5 +1,6 @@
 use super::sign_extend;
-use crate::parser::{InternalError, InternalResult, Reader};
+use crate::parser::{InternalError, InternalResult};
+use crate::Reader;
 
 const COUNT: usize = 4;
 

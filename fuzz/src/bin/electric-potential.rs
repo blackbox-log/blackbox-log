@@ -1,15 +1,12 @@
 #![no_main]
 
-use blackbox_log::parser::headers::{Headers, VbatConfig};
 use blackbox_log::units::{si, ElectricPotential, FromRaw};
+use blackbox_log::Headers;
 
 blackbox_fuzz::fuzz_target!(|input: (u16, u8)| {
     let (raw, scale) = input;
     let mut headers = Headers::default();
-    headers.vbat = Some(VbatConfig {
-        reference: 0,
-        scale,
-    });
+    headers.vbat_scale = Some(scale);
 
     let mine = ElectricPotential::from_raw(raw.into(), &headers);
     let mine = mine.get::<si::electric_potential::millivolt>();
