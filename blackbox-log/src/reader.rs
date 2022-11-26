@@ -1,6 +1,4 @@
 use core::fmt;
-#[cfg(feature = "std")]
-use std::io::{self, Read};
 
 #[derive(Clone)]
 pub struct Reader<'data> {
@@ -13,7 +11,7 @@ pub struct RestorePoint(usize);
 
 impl<'data> Reader<'data> {
     #[must_use]
-    pub fn new(data: &'data [u8]) -> Self {
+    pub const fn new(data: &'data [u8]) -> Self {
         if data.len() == usize::MAX {
             panic!("cannot create a Reader containing usize::MAX bytes");
         }
@@ -21,17 +19,17 @@ impl<'data> Reader<'data> {
         Self { index: 0, data }
     }
 
-    pub fn get_restore_point(&self) -> RestorePoint {
+    pub(crate) fn get_restore_point(&self) -> RestorePoint {
         RestorePoint(self.index)
     }
 
-    pub fn restore(&mut self, restore: RestorePoint) {
+    pub(crate) fn restore(&mut self, restore: RestorePoint) {
         self.index = restore.0;
     }
 
     /// Advances past all bytes not matching any of the needles, returning
     /// `true` if any are found.
-    pub fn skip_until_any(&mut self, needles: &[u8]) -> bool {
+    pub(crate) fn skip_until_any(&mut self, needles: &[u8]) -> bool {
         debug_assert_ne!(
             needles.len(),
             0,
@@ -56,19 +54,16 @@ impl<'data> Reader<'data> {
     }
 
     #[must_use]
-    pub fn is_empty(&self) -> bool {
+    #[allow(dead_code)]
+    pub(crate) fn is_empty(&self) -> bool {
         self.remaining() == 0
     }
 
-    pub fn iter<'me>(&'me mut self) -> Bytes<'data, 'me> {
-        Bytes(self)
-    }
-
-    pub fn peek(&self) -> Option<u8> {
+    pub(crate) fn peek(&self) -> Option<u8> {
         self.data.get(self.index).copied()
     }
 
-    pub fn read_line(&mut self) -> Option<&'data [u8]> {
+    pub(crate) fn read_line(&mut self) -> Option<&'data [u8]> {
         let start = self.index;
 
         let rest = self.data.get(start..).filter(|x| !x.is_empty())?;
@@ -84,7 +79,7 @@ impl<'data> Reader<'data> {
         }
     }
 
-    pub fn read_n_bytes(&mut self, n: usize) -> &'data [u8] {
+    pub(crate) fn read_n_bytes(&mut self, n: usize) -> &'data [u8] {
         let len = n.min(self.remaining());
 
         let start = self.index;
@@ -94,7 +89,7 @@ impl<'data> Reader<'data> {
         slice
     }
 
-    pub fn read_u8(&mut self) -> Option<u8> {
+    pub(crate) fn read_u8(&mut self) -> Option<u8> {
         let byte = self.peek();
         if byte.is_some() {
             self.index += 1;
@@ -102,12 +97,12 @@ impl<'data> Reader<'data> {
         byte
     }
 
-    pub fn read_i8(&mut self) -> Option<i8> {
+    pub(crate) fn read_i8(&mut self) -> Option<i8> {
         #[allow(clippy::cast_possible_wrap)]
         self.read_u8().map(|x| x as i8)
     }
 
-    pub fn read_u24(&mut self) -> Option<u32> {
+    pub(crate) fn read_u24(&mut self) -> Option<u32> {
         if self.remaining() < 3 {
             return None;
         }
@@ -122,18 +117,15 @@ impl<'data> Reader<'data> {
         Some(u32::from_le_bytes(bytes))
     }
 
-    pub fn read_f32(&mut self) -> Option<f32> {
+    pub(crate) fn read_f32(&mut self) -> Option<f32> {
         self.read_u32().map(f32::from_bits)
-    }
-
-    pub fn read_f64(&mut self) -> Option<f64> {
-        self.read_u64().map(f64::from_bits)
     }
 }
 
 macro_rules! impl_read {
     ($read:ident, $type:ty, $iread:ident, $itype:ty) => {
-        pub fn $read(&mut self) -> Option<$type> {
+        #[allow(dead_code)]
+        pub(crate) fn $read(&mut self) -> Option<$type> {
             const BYTES: usize = (<$type>::BITS / 8) as usize;
 
             if self.remaining() < BYTES {
@@ -148,7 +140,8 @@ macro_rules! impl_read {
             Some(<$type>::from_le_bytes(bytes))
         }
 
-        pub fn $iread(&mut self) -> Option<$itype> {
+        #[allow(dead_code)]
+        pub(crate) fn $iread(&mut self) -> Option<$itype> {
             self.$read().map(|x| x as $itype)
         }
     };
@@ -169,31 +162,6 @@ impl fmt::Debug for Reader<'_> {
         f.debug_struct("Reader")
             .field("index", &self.index)
             .finish_non_exhaustive()
-    }
-}
-
-#[cfg(feature = "std")]
-impl<'data> Read for Reader<'data> {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        let len = buf.len().min(self.remaining());
-
-        let start = self.index;
-        let slice = &self.data[start..(start + len)];
-        buf[0..len].copy_from_slice(slice);
-
-        self.index += len;
-        Ok(len)
-    }
-}
-
-#[must_use]
-pub struct Bytes<'data: 'reader, 'reader>(&'reader mut Reader<'data>);
-
-impl Iterator for Bytes<'_, '_> {
-    type Item = u8;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.0.read_u8()
     }
 }
 
@@ -345,56 +313,5 @@ mod tests {
     fn bytes_read_line_empty() {
         let mut bytes = Reader::new(&[]);
         assert_eq!(None, bytes.read_line());
-    }
-
-    #[test]
-    #[cfg(feature = "std")]
-    fn bytes_read() {
-        let input = [0, 1, 2, 3];
-
-        let mut bytes = Reader::new(&input);
-
-        let mut buf = [0; 4];
-        let read = bytes.read(&mut buf).unwrap();
-
-        assert_eq!(read, input.len());
-        assert_eq!(buf, input);
-        assert!(bytes.is_empty());
-    }
-
-    #[test]
-    #[cfg(feature = "std")]
-    fn bytes_read_exact() {
-        let input = [0, 1, 2, 3];
-
-        let mut bytes = Reader::new(&input);
-
-        let mut buf = [0; 4];
-        bytes.read_exact(&mut buf).unwrap();
-
-        assert_eq!(buf, input);
-        assert!(bytes.is_empty());
-    }
-
-    #[test]
-    #[cfg(feature = "std")]
-    fn bytes_read_empty() {
-        let mut bytes = Reader::new(&[]);
-
-        let mut buf = [0; 1];
-        let read = bytes.read(&mut buf).unwrap();
-
-        assert_eq!([0], buf);
-        assert_eq!(read, 0);
-    }
-
-    #[test]
-    fn bytes_iter() {
-        let mut bytes = Reader::new(&[0]);
-        let mut iter = bytes.iter();
-
-        assert_eq!(Some(0), iter.next());
-        assert_eq!(None, iter.next());
-        assert!(bytes.is_empty());
     }
 }
