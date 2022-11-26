@@ -1,15 +1,25 @@
 use core::fmt;
 
+/// Wrapper around a byte slice used to efficiently read data from a blackbox
+/// log
 #[derive(Clone)]
 pub struct Reader<'data> {
+    /// Index of the next byte to read
     index: usize,
     data: &'data [u8],
 }
 
+/// Opaque type used to rewind a `Reader`
 #[derive(Debug, Clone)]
 pub struct RestorePoint(usize);
 
 impl<'data> Reader<'data> {
+    /// Creates a new `Reader` starting at the beginning of `data`.
+    ///
+    /// # Panics
+    ///
+    /// This will panic if `data` has a length of `usize::MAX`, since `Reader`
+    /// relies on being able to internally store an index `>= data.len()`.
     #[must_use]
     pub const fn new(data: &'data [u8]) -> Self {
         if data.len() == usize::MAX {
@@ -19,16 +29,19 @@ impl<'data> Reader<'data> {
         Self { index: 0, data }
     }
 
+    /// Returns a value that can be passed to [`Reader::restore`] to rewind to
+    /// the current index.
     pub(crate) fn get_restore_point(&self) -> RestorePoint {
         RestorePoint(self.index)
     }
 
+    /// Rewinds to a stored [`RestorePoint`] from [`Reader::get_restore_point`].
     pub(crate) fn restore(&mut self, restore: RestorePoint) {
         self.index = restore.0;
     }
 
     /// Advances past all bytes not matching any of the needles, returning
-    /// `true` if any are found.
+    /// `true` if any are found before the end of the buffer.
     pub(crate) fn skip_until_any(&mut self, needles: &[u8]) -> bool {
         debug_assert_ne!(
             needles.len(),
@@ -47,22 +60,36 @@ impl<'data> Reader<'data> {
         position.is_some()
     }
 
+    /// Returns the number of bytes that have not yet been read.
     #[must_use]
-    /// Counts the current byte if it has only been partially read
     fn remaining(&self) -> usize {
         self.data.len() - self.index
     }
 
+    /// Returns true if the [`Reader`] has reached the end of the underlying
+    /// buffer.
     #[must_use]
     #[allow(dead_code)]
     pub(crate) fn is_empty(&self) -> bool {
         self.remaining() == 0
     }
 
+    // /// Returns an iterator over the remaining bytes that will advance the
+    // /// `Reader` as it is used.
+    // pub(crate) fn iter<'me>(&'me mut self) -> Bytes<'data, 'me> {
+    //     Bytes(self)
+    // }
+
+    /// Returns the next byte without advancing.
     pub(crate) fn peek(&self) -> Option<u8> {
         self.data.get(self.index).copied()
     }
 
+    /// Reads all bytes up to, but not including, the next newline, or the end
+    /// of the buffer.
+    ///
+    /// This is roughly equivalent to `data.iter().take_while(|x| x != b'\n')`,
+    /// but is more concise and may be faster.
     pub(crate) fn read_line(&mut self) -> Option<&'data [u8]> {
         let start = self.index;
 
@@ -79,6 +106,8 @@ impl<'data> Reader<'data> {
         }
     }
 
+    /// Attempts to read the next `n` bytes, returning the rest of the buffer if
+    /// there are fewer than `n` remaining.
     pub(crate) fn read_n_bytes(&mut self, n: usize) -> &'data [u8] {
         let len = n.min(self.remaining());
 
@@ -89,6 +118,7 @@ impl<'data> Reader<'data> {
         slice
     }
 
+    /// Reads a single byte as a `u8`.
     pub(crate) fn read_u8(&mut self) -> Option<u8> {
         let byte = self.peek();
         if byte.is_some() {
@@ -97,11 +127,13 @@ impl<'data> Reader<'data> {
         byte
     }
 
+    /// Reads a single byte as an `i8`.
     pub(crate) fn read_i8(&mut self) -> Option<i8> {
         #[allow(clippy::cast_possible_wrap)]
         self.read_u8().map(|x| x as i8)
     }
 
+    /// Reads 3 bytes as the lower bytes of a `u32`.
     pub(crate) fn read_u24(&mut self) -> Option<u32> {
         if self.remaining() < 3 {
             return None;
