@@ -3,6 +3,7 @@
 use std::ffi::CString;
 use std::ptr;
 
+#[allow(missing_debug_implementations)]
 pub struct FlightLog(ffi::flightLog_t);
 
 impl FlightLog {

@@ -1,7 +1,7 @@
 mod cli;
 
-use std::fs::File;
-use std::io::{self, BufWriter, Read, Write};
+use std::fs::{self, File};
+use std::io::{self, BufWriter, Write};
 use std::path::Path;
 use std::process::{ExitCode, Termination};
 
@@ -60,7 +60,7 @@ fn main() -> QuietResult<()> {
         let span = tracing::info_span!("file", name = ?filename);
         let _span = span.enter();
 
-        let data = read_log_file(filename).map_err(|error| {
+        let data = fs::read(filename).map_err(|error| {
             tracing::error!(%error, "failed to read log file");
             exitcode::IOERR
         })?;
@@ -123,13 +123,6 @@ fn main() -> QuietResult<()> {
     } else {
         QuietResult::Ok(())
     }
-}
-
-fn read_log_file(filename: &Path) -> io::Result<Vec<u8>> {
-    let mut log = File::open(filename)?;
-    let mut data = Vec::new();
-    log.read_to_end(&mut data)?;
-    Ok(data)
 }
 
 fn get_output(

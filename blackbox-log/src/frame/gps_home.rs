@@ -13,9 +13,9 @@ use crate::{Headers, ParseError, ParseResult, Reader};
 pub(crate) struct GpsHomeFrame(pub(crate) GpsPosition);
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct GpsPosition {
-    pub latitude: i32,
-    pub longitude: i32,
+pub(crate) struct GpsPosition {
+    pub(crate) latitude: i32,
+    pub(crate) longitude: i32,
 }
 
 #[derive(Debug, Clone)]

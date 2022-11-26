@@ -36,7 +36,7 @@ impl fmt::Display for ParseError {
             }
             Self::IncompleteHeaders => write!(f, "end of file found before data section"),
             Self::MissingField(frame, field) => {
-                write!(f, "missing field `{field}` in `{frame:?}` frame definition")
+                write!(f, "missing field `{field}` in `{frame}` frame definition")
             }
         }
     }

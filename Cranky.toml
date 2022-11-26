@@ -1,6 +1,6 @@
 deny = [
-    "unsafe_code",
     "trivial_casts",
+    "unsafe_code",
     "clippy::as_underscore",
     "clippy::cast_lossless",
     "clippy::undocumented_unsafe_blocks",
@@ -8,6 +8,11 @@ deny = [
 ]
 
 warn = [
+    "explicit_outlives_requirements",
+    "macro_use_extern_crate",
+    "missing_debug_implementations",
+    "single_use_lifetimes",
+    "unused_qualifications",
     "clippy::alloc_instead_of_core",
     "clippy::allow_attributes_without_reason",
     "clippy::borrow_as_ptr",
@@ -43,6 +48,7 @@ warn = [
     "clippy::needless_for_each",
     "clippy::option_if_let_else",
     "clippy::option_if_let_else",
+    "clippy::print_stderr",
     "clippy::print_stdout",
     "clippy::redundant_closure_for_method_calls",
     "clippy::redundant_else",
@@ -52,18 +58,16 @@ warn = [
     "clippy::stable_sort_primitive",
     "clippy::str_to_string",
     "clippy::string_lit_as_bytes",
+    "clippy::todo",
     "clippy::trait_duplication_in_bounds",
+    "clippy::unimplemented",
     "clippy::unneeded_field_pattern",
     "clippy::unnested_or_patterns",
     "clippy::unseparated_literal_suffix",
+    "clippy::use_debug",
+    "clippy::verbose_file_reads",
     "clippy::wildcard_enum_match_arm",
 
     # TODO(rust 1.66):
     # "clippy::uninlined_format_args",
-
-    # TODO: enable closer to 1.0
-    # "clippy::print_stderr",
-    # "clippy::todo",
-    # "clippy::unimplemented",
-    # "clippy::use_debug",
 ]

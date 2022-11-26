@@ -6,7 +6,7 @@ use crate::Headers;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(u16)]
-pub enum Predictor {
+pub(crate) enum Predictor {
     Zero = 0,
     Previous,
     StraightLine,

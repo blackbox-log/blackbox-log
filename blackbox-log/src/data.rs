@@ -16,9 +16,9 @@ pub struct Data {
 
 #[derive(Debug, Clone)]
 pub(crate) struct FrameSync {
-    pub main: MainFrame,
-    pub slow: usize,
-    pub gps: Option<usize>,
+    pub(crate) main: MainFrame,
+    pub(crate) slow: usize,
+    pub(crate) gps: Option<usize>,
 }
 
 impl FrameSync {

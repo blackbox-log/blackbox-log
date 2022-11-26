@@ -65,7 +65,7 @@ impl<'data> Headers<'data> {
     pub fn parse(data: &mut Reader<'data>) -> ParseResult<Self> {
         // Skip product header
         let product = data.read_line();
-        debug_assert_eq!(Some(crate::MARKER.strip_suffix(&[b'\n']).unwrap()), product);
+        debug_assert_eq!(crate::MARKER.strip_suffix(&[b'\n']), product);
 
         let mut state = State::new();
 

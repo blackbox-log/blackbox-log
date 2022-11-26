@@ -10,6 +10,7 @@ pub use uom::si::f64::{
 use crate::common::FirmwareKind;
 use crate::Headers;
 
+#[allow(unreachable_pub)]
 pub(crate) mod prelude {
     pub use super::si::acceleration::meter_per_second_squared as mps2;
     pub use super::si::angular_velocity::degree_per_second;
@@ -24,6 +25,7 @@ pub(crate) mod prelude {
 }
 
 mod from_raw {
+    #[allow(unreachable_pub)]
     pub trait FromRaw {
         type Raw;
         fn from_raw(raw: Self::Raw, headers: &super::Headers) -> Self;
@@ -38,7 +40,7 @@ pub(crate) use from_raw::FromRaw;
 impl FromRaw for Time {
     type Raw = u64;
 
-    fn from_raw(raw: Self::Raw, _headers: &self::Headers) -> Self {
+    fn from_raw(raw: Self::Raw, _headers: &Headers) -> Self {
         Self::new::<prelude::microsecond>(raw as f64)
     }
 }
@@ -46,7 +48,7 @@ impl FromRaw for Time {
 impl FromRaw for Acceleration {
     type Raw = i32;
 
-    fn from_raw(raw: Self::Raw, headers: &self::Headers) -> Self {
+    fn from_raw(raw: Self::Raw, headers: &Headers) -> Self {
         // TODO: switch to `standard_gravity` instead of `mps2` once
         // https://github.com/iliekturtles/uom/pull/351 lands
 
@@ -58,7 +60,7 @@ impl FromRaw for Acceleration {
 impl FromRaw for AngularVelocity {
     type Raw = i32;
 
-    fn from_raw(raw: Self::Raw, headers: &self::Headers) -> Self {
+    fn from_raw(raw: Self::Raw, headers: &Headers) -> Self {
         let scale = headers.gyro_scale.unwrap();
         let rad = f64::from(scale) * f64::from(raw);
 
@@ -69,7 +71,7 @@ impl FromRaw for AngularVelocity {
 impl FromRaw for ElectricCurrent {
     type Raw = i32;
 
-    fn from_raw(raw: Self::Raw, _headers: &self::Headers) -> Self {
+    fn from_raw(raw: Self::Raw, _headers: &Headers) -> Self {
         new_amps(raw)
     }
 }
@@ -83,7 +85,7 @@ fn new_amps(raw: i32) -> ElectricCurrent {
 impl FromRaw for ElectricPotential {
     type Raw = u32;
 
-    fn from_raw(raw: Self::Raw, _headers: &self::Headers) -> Self {
+    fn from_raw(raw: Self::Raw, _headers: &Headers) -> Self {
         new_vbat(raw)
     }
 }
@@ -97,7 +99,7 @@ fn new_vbat(raw: u32) -> ElectricPotential {
 impl FromRaw for Velocity {
     type Raw = u32;
 
-    fn from_raw(raw: Self::Raw, _headers: &self::Headers) -> Self {
+    fn from_raw(raw: Self::Raw, _headers: &Headers) -> Self {
         Self::new::<si::velocity::centimeter_per_second>(raw.into())
     }
 }

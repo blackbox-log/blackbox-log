@@ -155,7 +155,7 @@ pub struct MainView<'log: 'data, 'data> {
     filter: Filter,
 }
 
-impl<'log: 'data, 'data> MainView<'log, 'data> {
+impl MainView<'_, '_> {
     pub fn update_filter<S: AsRef<str>>(&mut self, filter: &[S]) {
         self.filter.merge(&Filter::new(filter, &self.log.headers));
     }
@@ -246,7 +246,7 @@ impl<'a, V> FieldIter<'a, V> {
     }
 }
 
-impl<'view: 'log, 'log: 'data, 'data> Iterator for FieldIter<'view, MainView<'log, 'data>> {
+impl<'data> Iterator for FieldIter<'_, MainView<'_, 'data>> {
     type Item = (&'data str, Unit);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -274,7 +274,7 @@ impl<'view: 'log, 'log: 'data, 'data> Iterator for FieldIter<'view, MainView<'lo
     }
 }
 
-impl<'view: 'log, 'log: 'data, 'data> Iterator for FieldIter<'view, GpsView<'log, 'data>> {
+impl<'data> Iterator for FieldIter<'_, GpsView<'_, 'data>> {
     type Item = (&'data str, GpsUnit);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -289,8 +289,8 @@ impl<'view: 'log, 'log: 'data, 'data> Iterator for FieldIter<'view, GpsView<'log
     }
 }
 
-impl<'a, V> FusedIterator for FieldIter<'a, V> where Self: Iterator {}
-impl<'a, V> ExactSizeIterator for FieldIter<'a, V> where Self: Iterator {}
+impl<V> FusedIterator for FieldIter<'_, V> where Self: Iterator {}
+impl<V> ExactSizeIterator for FieldIter<'_, V> where Self: Iterator {}
 
 #[derive(Debug)]
 pub struct FrameIter<'a, V> {
@@ -326,8 +326,8 @@ impl<'v: 'd, 'd, V: LogView<'v, 'd>> Iterator for FrameIter<'v, V> {
     }
 }
 
-impl<'a, V> FusedIterator for FrameIter<'a, V> where Self: Iterator {}
-impl<'a, V> ExactSizeIterator for FrameIter<'a, V> where Self: Iterator {}
+impl<V> FusedIterator for FrameIter<'_, V> where Self: Iterator {}
+impl<V> ExactSizeIterator for FrameIter<'_, V> where Self: Iterator {}
 
 #[derive(Debug)]
 pub struct FieldValueIter<'a, V> {
@@ -346,7 +346,7 @@ impl<'a, V> FieldValueIter<'a, V> {
     }
 }
 
-impl<'view: 'log, 'log: 'data, 'data> Iterator for FieldValueIter<'view, MainView<'log, 'data>> {
+impl Iterator for FieldValueIter<'_, MainView<'_, '_>> {
     type Item = Value;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -375,7 +375,7 @@ impl<'view: 'log, 'log: 'data, 'data> Iterator for FieldValueIter<'view, MainVie
     }
 }
 
-impl<'view: 'log, 'log: 'data, 'data> Iterator for FieldValueIter<'view, GpsView<'log, 'data>> {
+impl Iterator for FieldValueIter<'_, GpsView<'_, '_>> {
     type Item = GpsValue;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -390,8 +390,8 @@ impl<'view: 'log, 'log: 'data, 'data> Iterator for FieldValueIter<'view, GpsView
     }
 }
 
-impl<'a, V> FusedIterator for FieldValueIter<'a, V> where Self: Iterator {}
-impl<'a, V> ExactSizeIterator for FieldValueIter<'a, V> where Self: Iterator {}
+impl<V> FusedIterator for FieldValueIter<'_, V> where Self: Iterator {}
+impl<V> ExactSizeIterator for FieldValueIter<'_, V> where Self: Iterator {}
 
 fn name_unit_into<T: Into<Unit>>((name, unit): (&str, T)) -> (&str, Unit) {
     (name, unit.into())

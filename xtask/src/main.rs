@@ -1,4 +1,4 @@
-#![allow(clippy::print_stdout)]
+#![allow(clippy::print_stdout, clippy::print_stderr)]
 
 use std::ffi::OsString;
 use std::path::PathBuf;

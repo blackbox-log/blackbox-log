@@ -11,7 +11,7 @@ pub struct Reader<'data> {
 
 /// Opaque type used to rewind a `Reader`
 #[derive(Debug, Clone)]
-pub struct RestorePoint(usize);
+pub(crate) struct RestorePoint(usize);
 
 impl<'data> Reader<'data> {
     /// Creates a new `Reader` starting at the beginning of `data`.
@@ -179,7 +179,7 @@ macro_rules! impl_read {
     };
 }
 
-impl<'data> Reader<'data> {
+impl Reader<'_> {
     impl_read!(read_u16, u16, read_i16, i16);
 
     impl_read!(read_u32, u32, read_i32, i32);

@@ -14,7 +14,7 @@ use crate::utils::as_signed;
 use crate::{Headers, ParseError, ParseResult, Reader};
 
 #[derive(Debug, Clone)]
-pub struct GpsFrame {
+pub(crate) struct GpsFrame {
     pub(crate) time: GpsValue,
     pub(crate) values: Vec<GpsValue>,
 }
@@ -87,7 +87,7 @@ impl<'data> GpsFrameDef<'data> {
     pub(crate) fn validate(
         &self,
         check_predictor: impl Fn(&'data str, Predictor) -> ParseResult<()>,
-        check_unit: impl Fn(&'data str, super::Unit) -> ParseResult<()>,
+        check_unit: impl Fn(&'data str, Unit) -> ParseResult<()>,
     ) -> ParseResult<()> {
         for GpsFieldDef {
             name,

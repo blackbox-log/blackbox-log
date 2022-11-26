@@ -9,6 +9,7 @@ mod slow;
 use alloc::borrow::ToOwned;
 use alloc::format;
 use alloc::vec::Vec;
+use core::fmt;
 use core::iter::Peekable;
 
 pub(crate) use self::gps::*;
@@ -35,7 +36,22 @@ byte_enum! {
     }
 }
 
-pub trait FieldDef {
+impl fmt::Display for FrameKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let kind = match self {
+            Self::Event => "event",
+            Self::Intra => "intra",
+            Self::Inter => "inter",
+            Self::Gps => "GPS",
+            Self::GpsHome => "GPS home",
+            Self::Slow => "slow",
+        };
+
+        f.write_str(kind)
+    }
+}
+
+trait FieldDef {
     fn name(&self) -> &str;
     fn predictor(&self) -> Predictor;
     fn encoding(&self) -> Encoding;
