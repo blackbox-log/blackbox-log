@@ -31,7 +31,7 @@ impl<'data> Reader<'data> {
 
     /// Returns a value that can be passed to [`Reader::restore`] to rewind to
     /// the current index.
-    pub(crate) fn get_restore_point(&self) -> RestorePoint {
+    pub(crate) const fn get_restore_point(&self) -> RestorePoint {
         RestorePoint(self.index)
     }
 
@@ -62,7 +62,7 @@ impl<'data> Reader<'data> {
 
     /// Returns the number of bytes that have not yet been read.
     #[must_use]
-    fn remaining(&self) -> usize {
+    const fn remaining(&self) -> usize {
         self.data.len() - self.index
     }
 

@@ -161,7 +161,7 @@ pub(crate) struct PredictorContext<'a, 'data> {
 }
 
 impl<'a, 'data> PredictorContext<'a, 'data> {
-    pub(crate) fn new(headers: &'a Headers<'data>) -> Self {
+    pub(crate) const fn new(headers: &'a Headers<'data>) -> Self {
         Self {
             headers,
             last: None,
@@ -171,7 +171,7 @@ impl<'a, 'data> PredictorContext<'a, 'data> {
         }
     }
 
-    pub(crate) fn with_skipped(headers: &'a Headers<'data>, skipped_frames: u32) -> Self {
+    pub(crate) const fn with_skipped(headers: &'a Headers<'data>, skipped_frames: u32) -> Self {
         Self {
             headers,
             last: None,
@@ -181,7 +181,10 @@ impl<'a, 'data> PredictorContext<'a, 'data> {
         }
     }
 
-    pub(crate) fn with_home(headers: &'a Headers<'data>, gps_home: Option<GpsPosition>) -> Self {
+    pub(crate) const fn with_home(
+        headers: &'a Headers<'data>,
+        gps_home: Option<GpsPosition>,
+    ) -> Self {
         Self {
             headers,
             last: None,

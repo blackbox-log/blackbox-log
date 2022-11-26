@@ -41,7 +41,7 @@ impl GpsFrame {
 }
 
 impl GpsValue {
-    fn new_unitless(value: u32, signed: bool) -> Self {
+    const fn new_unitless(value: u32, signed: bool) -> Self {
         if signed {
             Self::Signed(as_signed(value))
         } else {

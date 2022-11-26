@@ -26,7 +26,7 @@ pub(crate) enum SlowValue {
 }
 
 impl SlowValue {
-    fn new_unitless(value: u32, signed: bool) -> Self {
+    const fn new_unitless(value: u32, signed: bool) -> Self {
         if signed {
             Self::Signed(as_signed(value))
         } else {

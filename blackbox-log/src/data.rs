@@ -22,7 +22,7 @@ pub(crate) struct FrameSync {
 }
 
 impl FrameSync {
-    pub(crate) fn new(main: MainFrame, slow: &[SlowFrame], gps: &[GpsFrame]) -> Self {
+    pub(crate) const fn new(main: MainFrame, slow: &[SlowFrame], gps: &[GpsFrame]) -> Self {
         Self {
             main,
             slow: slow.len() - 1,

@@ -95,7 +95,7 @@ pub(crate) enum MainValue {
 }
 
 impl MainValue {
-    fn new_unitless(value: u32, signed: bool) -> Self {
+    const fn new_unitless(value: u32, signed: bool) -> Self {
         if signed {
             Self::Signed(as_signed(value))
         } else {
@@ -155,7 +155,7 @@ impl<'data> MainFrameDef<'data> {
         MainFrameDefBuilder::default()
     }
 
-    pub(crate) fn has_motor_0(&self) -> bool {
+    pub(crate) const fn has_motor_0(&self) -> bool {
         self.index_motor_0.is_some()
     }
 
