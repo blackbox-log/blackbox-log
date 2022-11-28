@@ -1,7 +1,7 @@
 use core::fmt;
 
 /// Wrapper around a byte slice used to efficiently read data from a blackbox
-/// log
+/// log.
 #[derive(Clone)]
 pub struct Reader<'data> {
     /// Index of the next byte to read
@@ -9,7 +9,7 @@ pub struct Reader<'data> {
     data: &'data [u8],
 }
 
-/// Opaque type used to rewind a `Reader`
+/// Opaque type used to rewind a `Reader`.
 #[derive(Debug, Clone)]
 pub(crate) struct RestorePoint(usize);
 
@@ -73,12 +73,6 @@ impl<'data> Reader<'data> {
     pub(crate) fn is_empty(&self) -> bool {
         self.remaining() == 0
     }
-
-    // /// Returns an iterator over the remaining bytes that will advance the
-    // /// `Reader` as it is used.
-    // pub(crate) fn iter<'me>(&'me mut self) -> Bytes<'data, 'me> {
-    //     Bytes(self)
-    // }
 
     /// Returns the next byte without advancing.
     pub(crate) fn peek(&self) -> Option<u8> {

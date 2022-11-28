@@ -121,7 +121,7 @@ impl<'data> Log<'data> {
     }
 
     /// Returns a [`LogView`] that iterates based on main frames and *does*
-    /// include any data from GPS frames.
+    /// include data from GPS frames.
     pub fn merged_data<'log>(&'log self) -> MainView<'log, 'data> {
         let mut filter = Filter::new_unfiltered(&self.headers);
 
