@@ -21,7 +21,7 @@ use crate::Reader;
 byte_enum! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     #[repr(u8)]
-    pub enum Encoding {
+    pub(crate) enum Encoding {
         /// Signed variable byte
         VariableSigned = 0,
         /// Unsigned variable byte

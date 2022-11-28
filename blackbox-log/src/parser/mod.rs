@@ -6,7 +6,7 @@ pub mod decode;
 use alloc::string::String;
 use core::fmt;
 
-pub use self::decode::Encoding;
+pub(crate) use self::decode::Encoding;
 use crate::frame::FrameKind;
 
 pub type ParseResult<T> = Result<T, ParseError>;
