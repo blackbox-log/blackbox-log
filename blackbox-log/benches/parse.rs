@@ -16,7 +16,7 @@ fn data(c: &mut Criterion) {
     c.bench_function("data", |b| {
         b.iter_batched(
             || (reader.clone(), headers.clone()),
-            |(data, headers)| Log::parse_with_headers(data, headers),
+            |(mut data, headers)| Log::parse_with_headers(&mut data, headers),
             BatchSize::SmallInput,
         );
     });

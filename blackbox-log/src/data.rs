@@ -59,7 +59,7 @@ impl Data {
         }
     }
 
-    pub(crate) fn parse(mut data: Reader, headers: &Headers) -> ParseResult<Self> {
+    pub(crate) fn parse(data: &mut Reader, headers: &Headers) -> ParseResult<Self> {
         let mut events = Vec::new();
         let mut main_frames = Vec::new();
         let mut slow_frames = Vec::new();
@@ -102,14 +102,14 @@ impl Data {
                     };
                 }
 
-                skip_to_frame(&mut data);
+                skip_to_frame(data);
                 continue;
             };
 
             tracing::trace!("trying to parse {kind:?} frame");
 
             let result = match kind {
-                FrameKind::Event => match Event::parse_into(&mut data, &mut events) {
+                FrameKind::Event => match Event::parse_into(data, &mut events) {
                     Ok(event::EventKind::End) => {
                         tracing::trace!("found the end event");
                         break;
@@ -118,7 +118,7 @@ impl Data {
                     Err(err) => Err(err),
                 },
                 FrameKind::Intra | FrameKind::Inter => {
-                    let frame = MainFrame::parse(&mut data, kind, &main_frames, headers);
+                    let frame = MainFrame::parse(data, kind, &main_frames, headers);
                     frame.map(|frame| {
                         main_frames.push(FrameSync::new(frame, &slow_frames, &gps_frames));
                     })
@@ -130,7 +130,7 @@ impl Data {
                     },
                     |gps| {
                         gps.parse(
-                            &mut data,
+                            data,
                             headers,
                             main_frames.last().map(|sync| &sync.main),
                             gps_home_frames.last(),
@@ -145,13 +145,13 @@ impl Data {
                     },
                     |gps_home| {
                         gps_home
-                            .parse(&mut data, headers)
+                            .parse(data, headers)
                             .map(|frame| gps_home_frames.push(frame))
                     },
                 ),
                 FrameKind::Slow => headers
                     .slow_frames
-                    .parse(&mut data, headers)
+                    .parse(data, headers)
                     .map(|frame| slow_frames.push(frame)),
             };
 
@@ -162,7 +162,7 @@ impl Data {
                 Err(InternalError::Retry) => {
                     tracing::debug!("found corrupted {kind:?} frame");
                     data.restore(restore);
-                    skip_to_frame(&mut data);
+                    skip_to_frame(data);
                 }
                 Err(InternalError::Eof) => {
                     tracing::debug!("found unexpected end of file in data section");

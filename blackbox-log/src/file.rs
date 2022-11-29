@@ -1,10 +1,9 @@
 use alloc::vec::Vec;
 
 use memchr::memmem;
-use tracing::instrument;
 
 use crate::parser::ParseResult;
-use crate::Log;
+use crate::{Log, Reader};
 
 /// Represents a complete blackbox log file containing zero or more logs.
 #[derive(Debug)]
@@ -33,20 +32,16 @@ impl<'data> File<'data> {
     /// The logs are parsed lazily --- no work will be done until
     /// `Iterator::next` is called.
     pub fn parse_iter<'a>(&'a self) -> impl Iterator<Item = ParseResult<Log<'data>>> + 'a {
-        (0..self.log_count()).map(|i| self.parse_by_index(i))
+        (0..self.log_count()).map(|i| Log::parse(&mut self.get_reader(i)))
     }
 
-    /// Parses a [`Log`] by index.
+    /// Returns a [`Reader`] aligned to the start of the `index`-th log.
     ///
     /// # Panics
     ///
-    /// This panics if given an `index` greater than or equal to the number of
-    /// logs in the file.
-    #[instrument(level = "trace", skip(self), fields(offset))]
-    pub fn parse_by_index(&self, index: usize) -> ParseResult<Log<'data>> {
+    /// This panics if `index >= self.log_count()`.
+    pub fn get_reader(&self, index: usize) -> Reader<'data> {
         let start = self.offsets[index];
-        tracing::Span::current().record("offset", start);
-
-        Log::parse(&self.data[start..])
+        Reader::new(&self.data[start..])
     }
 }

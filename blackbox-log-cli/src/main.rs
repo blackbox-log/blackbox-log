@@ -7,7 +7,7 @@ use std::process::{ExitCode, Termination};
 
 use blackbox_log::log::LogView;
 use blackbox_log::units::si;
-use blackbox_log::Value;
+use blackbox_log::{Log, Value};
 use mimalloc::MiMalloc;
 use rayon::prelude::*;
 
@@ -81,7 +81,8 @@ fn main() -> QuietResult<()> {
             let span = tracing::info_span!("log", index = human_i);
             let _span = span.enter();
 
-            let log = file.parse_by_index(i).map_err(|err| {
+            let mut log = file.get_reader(i);
+            let log = Log::parse(&mut log).map_err(|err| {
                 tracing::debug!("error from parse_by_index: {err}");
                 exitcode::DATAERR
             })?;
