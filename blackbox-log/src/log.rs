@@ -76,7 +76,8 @@ impl<'data> Log<'data> {
     }
 }
 
-pub trait LogView<'view: 'data, 'data>: 'view + Sized {
+/// Provides access to the parsed data section of a log.
+pub trait LogView<'view, 'data>: 'view {
     type Unit;
     type Value;
 
@@ -84,8 +85,8 @@ pub trait LogView<'view: 'data, 'data>: 'view + Sized {
     type FrameIter: Iterator<Item = Self::ValueIter>;
     type ValueIter: Iterator<Item = Self::Value>;
 
-    fn field_count(&self) -> usize;
-    fn frame_count(&self) -> usize;
+    fn field_count(&'view self) -> usize;
+    fn frame_count(&'view self) -> usize;
 
     fn fields(&'view self) -> Self::FieldIter;
     fn values(&'view self) -> Self::FrameIter;
@@ -103,7 +104,7 @@ impl MainView<'_, '_> {
     }
 }
 
-impl<'view: 'log, 'log: 'data, 'data> LogView<'view, 'data> for MainView<'log, 'data>
+impl<'view: 'data, 'data> LogView<'view, 'data> for MainView<'_, 'data>
 where
     Self: 'view,
 {
@@ -139,7 +140,7 @@ pub struct GpsView<'log: 'data, 'data> {
     log: &'log Log<'data>,
 }
 
-impl<'view: 'log, 'log: 'data, 'data> LogView<'view, 'data> for GpsView<'log, 'data>
+impl<'view: 'data, 'data> LogView<'view, 'data> for GpsView<'_, 'data>
 where
     Self: 'view,
 {
@@ -177,13 +178,13 @@ where
 }
 
 #[derive(Debug)]
-pub struct FieldIter<'a, V> {
-    view: &'a V,
+pub struct FieldIter<'v, V> {
+    view: &'v V,
     index: usize,
 }
 
-impl<'a, V> FieldIter<'a, V> {
-    const fn new(view: &'a V) -> Self {
+impl<'v, V> FieldIter<'v, V> {
+    const fn new(view: &'v V) -> Self {
         Self { view, index: 0 }
     }
 }
@@ -251,7 +252,7 @@ impl<'a, V> FrameIter<'a, V> {
     }
 }
 
-impl<'v: 'd, 'd, V: LogView<'v, 'd>> Iterator for FrameIter<'v, V> {
+impl<'v, 'd, V: LogView<'v, 'd>> Iterator for FrameIter<'v, V> {
     type Item = FieldValueIter<'v, V>;
 
     fn next(&mut self) -> Option<Self::Item> {
