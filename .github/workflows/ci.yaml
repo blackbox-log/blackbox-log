@@ -83,6 +83,9 @@ jobs:
 
       - name: Run tests
         run: cargo ci test
+      
+      - name: Run doctests
+        run: cargo test --doc
 
       - name: Generate coverage
         run: cargo ci test --coverage
