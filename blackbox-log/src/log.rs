@@ -14,70 +14,6 @@ pub struct Log<'data> {
     data: Data,
 }
 
-#[derive(Debug, Clone)]
-struct Filter {
-    main: Vec<usize>,
-    slow: Vec<usize>,
-    gps: Vec<usize>,
-}
-
-impl Filter {
-    fn len(&self) -> usize {
-        self.main.len() + self.slow.len() + self.gps.len()
-    }
-
-    fn new<S: AsRef<str>>(fields: &[S], headers: &Headers) -> Self {
-        let mut fields = fields
-            .iter()
-            .map(|s| to_base_field(s.as_ref()))
-            .collect::<Vec<_>>();
-        fields.sort_unstable();
-
-        let filter = |(i, field)| {
-            fields
-                .binary_search(&to_base_field(field))
-                .is_ok()
-                .then_some(i)
-        };
-
-        Self {
-            main: headers
-                .main_fields()
-                .map(|(name, _)| name)
-                .enumerate()
-                .filter_map(filter)
-                .collect(),
-            slow: headers
-                .slow_fields()
-                .map(|(name, _)| name)
-                .enumerate()
-                .filter_map(filter)
-                .collect(),
-            gps: headers
-                .gps_fields()
-                .map(|(name, _)| name)
-                .enumerate()
-                .filter_map(filter)
-                .collect(),
-        }
-    }
-
-    #[allow(clippy::redundant_closure_for_method_calls)]
-    fn new_unfiltered(headers: &Headers) -> Self {
-        Self {
-            main: (0..headers.main_frames.len()).collect(),
-            slow: (0..headers.slow_frames.len()).collect(),
-            gps: (0..headers.gps_frames.as_ref().map_or(0, |def| def.len())).collect(),
-        }
-    }
-
-    fn merge(&mut self, other: &Self) {
-        self.main = intersection(&self.main, &other.main);
-        self.slow = intersection(&self.slow, &other.slow);
-        self.gps = intersection(&self.gps, &other.gps);
-    }
-}
-
 impl<'data> Log<'data> {
     /// Attempts to parse a single blackbox log.
     ///
@@ -398,6 +334,70 @@ impl Iterator for FieldValueIter<'_, GpsView<'_, '_>> {
 
 impl<V> FusedIterator for FieldValueIter<'_, V> where Self: Iterator {}
 impl<V> ExactSizeIterator for FieldValueIter<'_, V> where Self: Iterator {}
+
+#[derive(Debug, Clone)]
+struct Filter {
+    main: Vec<usize>,
+    slow: Vec<usize>,
+    gps: Vec<usize>,
+}
+
+impl Filter {
+    fn len(&self) -> usize {
+        self.main.len() + self.slow.len() + self.gps.len()
+    }
+
+    fn new<S: AsRef<str>>(fields: &[S], headers: &Headers) -> Self {
+        let mut fields = fields
+            .iter()
+            .map(|s| to_base_field(s.as_ref()))
+            .collect::<Vec<_>>();
+        fields.sort_unstable();
+
+        let filter = |(i, field)| {
+            fields
+                .binary_search(&to_base_field(field))
+                .is_ok()
+                .then_some(i)
+        };
+
+        Self {
+            main: headers
+                .main_fields()
+                .map(|(name, _)| name)
+                .enumerate()
+                .filter_map(filter)
+                .collect(),
+            slow: headers
+                .slow_fields()
+                .map(|(name, _)| name)
+                .enumerate()
+                .filter_map(filter)
+                .collect(),
+            gps: headers
+                .gps_fields()
+                .map(|(name, _)| name)
+                .enumerate()
+                .filter_map(filter)
+                .collect(),
+        }
+    }
+
+    #[allow(clippy::redundant_closure_for_method_calls)]
+    fn new_unfiltered(headers: &Headers) -> Self {
+        Self {
+            main: (0..headers.main_frames.len()).collect(),
+            slow: (0..headers.slow_frames.len()).collect(),
+            gps: (0..headers.gps_frames.as_ref().map_or(0, |def| def.len())).collect(),
+        }
+    }
+
+    fn merge(&mut self, other: &Self) {
+        self.main = intersection(&self.main, &other.main);
+        self.slow = intersection(&self.slow, &other.slow);
+        self.gps = intersection(&self.gps, &other.gps);
+    }
+}
 
 fn name_unit_into<T: Into<Unit>>((name, unit): (&str, T)) -> (&str, Unit) {
     (name, unit.into())
