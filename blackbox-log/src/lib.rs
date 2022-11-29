@@ -5,7 +5,7 @@
 extern crate alloc;
 
 #[macro_use]
-pub mod common;
+mod utils;
 
 pub mod data;
 pub mod event;
@@ -17,7 +17,6 @@ pub mod parser;
 mod predictor;
 mod reader;
 pub mod units;
-mod utils;
 
 pub use self::file::File;
 pub use self::frame::{GpsUnit, GpsValue, Unit, Value};

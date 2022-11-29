@@ -7,7 +7,7 @@ pub use uom::si::f64::{
     Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Length, Time, Velocity,
 };
 
-use crate::common::FirmwareKind;
+use crate::headers::FirmwareKind;
 use crate::Headers;
 
 #[allow(unreachable_pub)]

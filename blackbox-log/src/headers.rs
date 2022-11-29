@@ -3,7 +3,6 @@ use core::str;
 
 use hashbrown::HashMap;
 
-use crate::common::{FirmwareKind, LogVersion};
 use crate::frame::{
     is_frame_def_header, parse_frame_def_header, DataFrameKind, GpsFrameDef, GpsFrameDefBuilder,
     GpsHomeFrameDef, GpsHomeFrameDefBuilder, GpsUnit, MainFrameDef, MainFrameDefBuilder, MainUnit,
@@ -185,6 +184,21 @@ impl Default for Headers<'static> {
             unknown: HashMap::new(),
         }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[non_exhaustive]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+pub enum LogVersion {
+    V2,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+pub enum FirmwareKind {
+    Betaflight,
+    INav,
+    EmuFlight,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
