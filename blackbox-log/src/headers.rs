@@ -1,16 +1,55 @@
 use alloc::borrow::ToOwned;
-use core::str;
+use alloc::string::String;
+use core::{fmt, str};
 
 use hashbrown::HashMap;
 
 use crate::frame::{
-    is_frame_def_header, parse_frame_def_header, DataFrameKind, GpsFrameDef, GpsFrameDefBuilder,
-    GpsHomeFrameDef, GpsHomeFrameDefBuilder, GpsUnit, MainFrameDef, MainFrameDefBuilder, MainUnit,
-    SlowFrameDef, SlowFrameDefBuilder, SlowUnit,
+    is_frame_def_header, parse_frame_def_header, DataFrameKind, FrameKind, GpsFrameDef,
+    GpsFrameDefBuilder, GpsHomeFrameDef, GpsHomeFrameDefBuilder, GpsUnit, MainFrameDef,
+    MainFrameDefBuilder, MainUnit, SlowFrameDef, SlowFrameDefBuilder, SlowUnit,
 };
 use crate::parser::{InternalError, InternalResult};
 use crate::predictor::Predictor;
-use crate::{ParseError, ParseResult, Reader, Unit};
+use crate::{Reader, Unit};
+
+pub type ParseResult<T> = Result<T, ParseError>;
+
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+pub enum ParseError {
+    UnsupportedVersion(String),
+    UnknownFirmware(String),
+    InvalidHeader(String, String),
+    // TODO: include header
+    MissingHeader,
+    IncompleteHeaders,
+    MissingField(FrameKind, String),
+}
+
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::UnsupportedVersion(v) => write!(f, "unsupported or invalid version: `{v}`"),
+            Self::UnknownFirmware(firmware) => write!(f, "unknown firmware: `{firmware}`"),
+            Self::InvalidHeader(header, value) => {
+                write!(f, "invalid value for header `{header}`: `{value}`")
+            }
+            Self::MissingHeader => {
+                write!(f, "one or more headers required for parsing are missing")
+            }
+            Self::IncompleteHeaders => write!(f, "end of file found before data section"),
+            Self::MissingField(frame, field) => {
+                write!(f, "missing field `{field}` in `{frame}` frame definition")
+            }
+        }
+    }
+}
+
+// TODO: waiting on https://github.com/rust-lang/rust-clippy/pull/9545 to land
+#[allow(clippy::std_instead_of_core)]
+#[cfg(feature = "std")]
+impl std::error::Error for ParseError {}
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
@@ -378,10 +417,7 @@ impl<'data> State<'data> {
             Some("emuflight") => FirmwareKind::EmuFlight,
             _ => {
                 tracing::error!("Could not parse firmware revision");
-                return Err(ParseError::InvalidHeader(
-                    "Firmware revision".to_owned(),
-                    firmware_revision.to_owned(),
-                ));
+                return Err(ParseError::UnknownFirmware(firmware_revision.to_owned()));
             }
         };
 

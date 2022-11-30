@@ -2,8 +2,7 @@ use alloc::vec::Vec;
 
 use memchr::memmem;
 
-use crate::parser::ParseResult;
-use crate::{Log, Reader};
+use crate::{HeadersParseResult, Log, Reader};
 
 /// Represents a complete blackbox log file containing zero or more logs.
 #[derive(Debug)]
@@ -31,7 +30,7 @@ impl<'data> File<'data> {
     ///
     /// The logs are parsed lazily --- no work will be done until
     /// `Iterator::next` is called.
-    pub fn parse_iter<'a>(&'a self) -> impl Iterator<Item = ParseResult<Log<'data>>> + 'a {
+    pub fn parse_iter<'a>(&'a self) -> impl Iterator<Item = HeadersParseResult<Log<'data>>> + 'a {
         (0..self.log_count()).map(|i| Log::parse(&mut self.get_reader(i)))
     }
 

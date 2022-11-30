@@ -11,7 +11,7 @@ use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
 use crate::units::FromRaw;
 use crate::utils::as_signed;
-use crate::{Headers, ParseError, ParseResult, Reader};
+use crate::{Headers, HeadersParseError, HeadersParseResult, Reader};
 
 #[derive(Debug, Clone)]
 pub(crate) struct GpsFrame {
@@ -86,9 +86,9 @@ impl<'data> GpsFrameDef<'data> {
 
     pub(crate) fn validate(
         &self,
-        check_predictor: impl Fn(&'data str, Predictor) -> ParseResult<()>,
-        check_unit: impl Fn(&'data str, Unit) -> ParseResult<()>,
-    ) -> ParseResult<()> {
+        check_predictor: impl Fn(&'data str, Predictor) -> HeadersParseResult<()>,
+        check_unit: impl Fn(&'data str, Unit) -> HeadersParseResult<()>,
+    ) -> HeadersParseResult<()> {
         for GpsFieldDef {
             name,
             predictor,
@@ -211,7 +211,7 @@ impl<'data> GpsFrameDefBuilder<'data> {
         }
     }
 
-    pub(crate) fn parse(self) -> ParseResult<Option<GpsFrameDef<'data>>> {
+    pub(crate) fn parse(self) -> HeadersParseResult<Option<GpsFrameDef<'data>>> {
         let kind = DataFrameKind::Gps;
 
         if self.names.is_none()
@@ -248,7 +248,10 @@ impl<'data> GpsFrameDefBuilder<'data> {
             }) => {}
             def => {
                 tracing::debug!(?def, "found invalid gps time field definition");
-                return Err(ParseError::MissingField(FrameKind::Gps, "time".to_owned()));
+                return Err(HeadersParseError::MissingField(
+                    FrameKind::Gps,
+                    "time".to_owned(),
+                ));
             }
         }
 

@@ -7,7 +7,7 @@ use super::{read_field_values, DataFrameKind, DataFrameProperty};
 use crate::frame::FrameKind;
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
-use crate::{Headers, ParseError, ParseResult, Reader};
+use crate::{Headers, HeadersParseError, HeadersParseResult, Reader};
 
 #[derive(Debug, Clone)]
 pub(crate) struct GpsHomeFrame(pub(crate) GpsPosition);
@@ -28,9 +28,9 @@ impl<'data> GpsHomeFrameDef<'data> {
 
     pub(crate) fn validate(
         &self,
-        check_predictor: impl Fn(&'data str, Predictor) -> ParseResult<()>,
-        _check_unit: impl Fn(&'data str, super::Unit) -> ParseResult<()>,
-    ) -> ParseResult<()> {
+        check_predictor: impl Fn(&'data str, Predictor) -> HeadersParseResult<()>,
+        _check_unit: impl Fn(&'data str, super::Unit) -> HeadersParseResult<()>,
+    ) -> HeadersParseResult<()> {
         for GpsHomeFieldDef {
             name, predictor, ..
         } in &self.0
@@ -110,7 +110,7 @@ impl<'data> GpsHomeFrameDefBuilder<'data> {
         }
     }
 
-    pub(crate) fn parse(self) -> ParseResult<Option<GpsHomeFrameDef<'data>>> {
+    pub(crate) fn parse(self) -> HeadersParseResult<Option<GpsHomeFrameDef<'data>>> {
         let kind = DataFrameKind::Gps;
 
         if self.names.is_none()
@@ -138,7 +138,7 @@ impl<'data> GpsHomeFrameDefBuilder<'data> {
                 }
             } else {
                 tracing::error!("missing GPS_home[0] field definition");
-                return Err(ParseError::MissingField(
+                return Err(HeadersParseError::MissingField(
                     FrameKind::GpsHome,
                     "GPS_home[0]".to_owned(),
                 ));
@@ -153,7 +153,7 @@ impl<'data> GpsHomeFrameDefBuilder<'data> {
                 }
             } else {
                 tracing::error!("missing GPS_home[1] field definition");
-                return Err(ParseError::MissingField(
+                return Err(HeadersParseError::MissingField(
                     FrameKind::GpsHome,
                     "GPS_home[1]".to_owned(),
                 ));

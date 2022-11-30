@@ -20,9 +20,10 @@ pub mod units;
 
 pub use self::file::File;
 pub use self::frame::{GpsUnit, GpsValue, Unit, Value};
-pub use self::headers::Headers;
+pub use self::headers::{
+    Headers, ParseError as HeadersParseError, ParseResult as HeadersParseResult,
+};
 pub use self::log::Log;
-pub use self::parser::{ParseError, ParseResult};
 pub use self::reader::Reader;
 
 const MARKER: &[u8] = b"H Product:Blackbox flight data recorder by Nicholas Sherlock\n";

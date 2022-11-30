@@ -5,7 +5,7 @@ use core::iter::FusedIterator;
 use crate::data::{Data, FrameSync, Stats};
 use crate::event::Event;
 use crate::parser::to_base_field;
-use crate::{GpsUnit, GpsValue, Headers, ParseResult, Reader, Unit, Value};
+use crate::{GpsUnit, GpsValue, Headers, HeadersParseResult, Reader, Unit, Value};
 
 /// Represents a single log out of a blackbox log file.
 #[derive(Debug)]
@@ -18,7 +18,7 @@ impl<'data> Log<'data> {
     /// Attempts to parse a single blackbox log.
     ///
     /// This assumes that `data` is already aligned to the beginning of the log.
-    pub fn parse(data: &mut Reader<'data>) -> ParseResult<Self> {
+    pub fn parse(data: &mut Reader<'data>) -> HeadersParseResult<Self> {
         let headers = Headers::parse(data)?;
         let data = Data::parse(data, &headers);
 

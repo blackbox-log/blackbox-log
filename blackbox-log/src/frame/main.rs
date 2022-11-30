@@ -12,7 +12,7 @@ use crate::predictor::{self, Predictor, PredictorContext};
 use crate::units::prelude::*;
 use crate::units::FromRaw;
 use crate::utils::as_signed;
-use crate::{Headers, ParseError, ParseResult, Reader};
+use crate::{Headers, HeadersParseError, HeadersParseResult, Reader};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MainFrame {
@@ -168,9 +168,9 @@ impl<'data> MainFrameDef<'data> {
 
     pub(crate) fn validate(
         &self,
-        check_predictor: impl Fn(&'data str, Predictor) -> ParseResult<()>,
-        check_unit: impl Fn(&'data str, Unit) -> ParseResult<()>,
-    ) -> ParseResult<()> {
+        check_predictor: impl Fn(&'data str, Predictor) -> HeadersParseResult<()>,
+        check_unit: impl Fn(&'data str, Unit) -> HeadersParseResult<()>,
+    ) -> HeadersParseResult<()> {
         for MainFieldDef {
             name,
             predictor_intra,
@@ -369,7 +369,7 @@ impl<'data> MainFrameDefBuilder<'data> {
         }
     }
 
-    pub(crate) fn parse(self) -> ParseResult<MainFrameDef<'data>> {
+    pub(crate) fn parse(self) -> HeadersParseResult<MainFrameDef<'data>> {
         let kind_intra = DataFrameKind::Intra;
         let kind_inter = DataFrameKind::Inter;
 
@@ -408,7 +408,7 @@ impl<'data> MainFrameDefBuilder<'data> {
             encoding_inter: Encoding::Null,
             ..
         }) = fields.next().transpose()? else {
-            return Err(ParseError::MissingField(
+            return Err(HeadersParseError::MissingField(
                 FrameKind::Intra,
                 "loopIteration".to_owned(),
             ));
@@ -422,7 +422,7 @@ impl<'data> MainFrameDefBuilder<'data> {
             encoding_inter: Encoding::VariableSigned,
             ..
         }) = fields.next().transpose()? else {
-            return Err(ParseError::MissingField(
+            return Err(HeadersParseError::MissingField(
                 FrameKind::Intra,
                 "time".to_owned(),
             ));

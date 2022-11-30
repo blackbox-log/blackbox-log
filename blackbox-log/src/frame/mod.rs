@@ -20,7 +20,7 @@ pub(crate) use self::slow::*;
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::Predictor;
 use crate::units::prelude::*;
-use crate::{units, ParseError, ParseResult, Reader};
+use crate::{units, HeadersParseError, HeadersParseResult, Reader};
 
 byte_enum! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -246,15 +246,15 @@ impl DataFrameProperty {
     }
 }
 
-fn missing_header_error(kind: DataFrameKind, property: &'static str) -> ParseError {
+fn missing_header_error(kind: DataFrameKind, property: &'static str) -> HeadersParseError {
     tracing::error!("missing header `Field {} {property}`", char::from(kind));
-    ParseError::MissingHeader
+    HeadersParseError::MissingHeader
 }
 
 fn parse_names(
     kind: DataFrameKind,
     names: Option<&str>,
-) -> ParseResult<impl Iterator<Item = &'_ str>> {
+) -> HeadersParseResult<impl Iterator<Item = &'_ str>> {
     let names = names.ok_or_else(|| missing_header_error(kind, "name"))?;
     Ok(names.split(','))
 }
@@ -264,11 +264,11 @@ fn parse_enum_list<'a, T>(
     property: &'static str,
     s: Option<&'a str>,
     parse: impl Fn(&str) -> Option<T> + 'a,
-) -> ParseResult<impl Iterator<Item = ParseResult<T>> + 'a> {
+) -> HeadersParseResult<impl Iterator<Item = HeadersParseResult<T>> + 'a> {
     let s = s.ok_or_else(|| missing_header_error(kind, property))?;
     Ok(s.split(',').map(move |s| {
         parse(s).ok_or_else(|| {
-            ParseError::InvalidHeader(
+            HeadersParseError::InvalidHeader(
                 format!("Field {} {property}", char::from(kind)),
                 s.to_owned(),
             )
@@ -280,7 +280,7 @@ fn parse_enum_list<'a, T>(
 fn parse_predictors(
     kind: DataFrameKind,
     predictors: Option<&'_ str>,
-) -> ParseResult<impl Iterator<Item = ParseResult<Predictor>> + '_> {
+) -> HeadersParseResult<impl Iterator<Item = HeadersParseResult<Predictor>> + '_> {
     parse_enum_list(kind, "predictor", predictors, Predictor::from_num_str)
 }
 
@@ -288,14 +288,14 @@ fn parse_predictors(
 fn parse_encodings(
     kind: DataFrameKind,
     encodings: Option<&'_ str>,
-) -> ParseResult<impl Iterator<Item = ParseResult<Encoding>> + '_> {
+) -> HeadersParseResult<impl Iterator<Item = HeadersParseResult<Encoding>> + '_> {
     parse_enum_list(kind, "encoding", encodings, Encoding::from_num_str)
 }
 
 fn parse_signs(
     kind: DataFrameKind,
     names: Option<&str>,
-) -> ParseResult<impl Iterator<Item = bool> + '_> {
+) -> HeadersParseResult<impl Iterator<Item = bool> + '_> {
     let names = names.ok_or_else(|| missing_header_error(kind, "signed"))?;
     Ok(names.split(',').map(|s| s.trim() != "0"))
 }
