@@ -20,11 +20,17 @@ pub type ParseResult<T> = Result<T, ParseError>;
 pub enum ParseError {
     UnsupportedVersion(String),
     UnknownFirmware(String),
-    InvalidHeader(String, String),
+    InvalidHeader {
+        header: String,
+        value: String,
+    },
     // TODO: include header
     MissingHeader,
     IncompleteHeaders,
-    MissingField(DataFrameKind, String),
+    MissingField {
+        frame: DataFrameKind,
+        field: String,
+    },
 }
 
 impl fmt::Display for ParseError {
@@ -32,14 +38,14 @@ impl fmt::Display for ParseError {
         match self {
             Self::UnsupportedVersion(v) => write!(f, "unsupported or invalid version: `{v}`"),
             Self::UnknownFirmware(firmware) => write!(f, "unknown firmware: `{firmware}`"),
-            Self::InvalidHeader(header, value) => {
+            Self::InvalidHeader { header, value } => {
                 write!(f, "invalid value for header `{header}`: `{value}`")
             }
             Self::MissingHeader => {
                 write!(f, "one or more headers required for parsing are missing")
             }
             Self::IncompleteHeaders => write!(f, "end of file found before data section"),
-            Self::MissingField(frame, field) => {
+            Self::MissingField { frame, field } => {
                 write!(f, "missing field `{field}` in `{frame}` frame definition")
             }
         }
@@ -124,7 +130,10 @@ impl<'data> Headers<'data> {
             };
 
             if !state.update(name, value) {
-                return Err(ParseError::InvalidHeader(name.to_owned(), value.to_owned()));
+                return Err(ParseError::InvalidHeader {
+                    header: name.to_owned(),
+                    value: value.to_owned(),
+                });
             }
         }
 

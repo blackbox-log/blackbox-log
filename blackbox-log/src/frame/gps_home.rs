@@ -137,10 +137,10 @@ impl<'data> GpsHomeFrameDefBuilder<'data> {
                 }
             } else {
                 tracing::error!("missing GPS_home[0] field definition");
-                return Err(HeadersParseError::MissingField(
-                    DataFrameKind::GpsHome,
-                    "GPS_home[0]".to_owned(),
-                ));
+                return Err(HeadersParseError::MissingField {
+                    frame: DataFrameKind::GpsHome,
+                    field: "GPS_home[0]".to_owned(),
+                });
             };
 
         let longitude =
@@ -152,10 +152,10 @@ impl<'data> GpsHomeFrameDefBuilder<'data> {
                 }
             } else {
                 tracing::error!("missing GPS_home[1] field definition");
-                return Err(HeadersParseError::MissingField(
-                    DataFrameKind::GpsHome,
-                    "GPS_home[1]".to_owned(),
-                ));
+                return Err(HeadersParseError::MissingField {
+                    frame: DataFrameKind::GpsHome,
+                    field: "GPS_home[1]".to_owned(),
+                });
             };
 
         let rest = fields

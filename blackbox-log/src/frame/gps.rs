@@ -247,10 +247,10 @@ impl<'data> GpsFrameDefBuilder<'data> {
             }) => {}
             def => {
                 tracing::debug!(?def, "found invalid gps time field definition");
-                return Err(HeadersParseError::MissingField(
-                    DataFrameKind::Gps,
-                    "time".to_owned(),
-                ));
+                return Err(HeadersParseError::MissingField {
+                    frame: DataFrameKind::Gps,
+                    field: "time".to_owned(),
+                });
             }
         }
 

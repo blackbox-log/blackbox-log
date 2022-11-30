@@ -407,10 +407,10 @@ impl<'data> MainFrameDefBuilder<'data> {
             encoding_inter: Encoding::Null,
             ..
         }) = fields.next().transpose()? else {
-            return Err(HeadersParseError::MissingField(
-                DataFrameKind::Intra,
-                "loopIteration".to_owned()
-            ));
+            return Err(HeadersParseError::MissingField {
+                frame: DataFrameKind::Intra,
+                field: "loopIteration".to_owned()
+            });
         };
 
         let Some(time @ MainFieldDef {
@@ -421,10 +421,10 @@ impl<'data> MainFrameDefBuilder<'data> {
             encoding_inter: Encoding::VariableSigned,
             ..
         }) = fields.next().transpose()? else {
-            return Err(HeadersParseError::MissingField(
-                DataFrameKind::Intra,
-                "time".to_owned()
-            ));
+            return Err(HeadersParseError::MissingField {
+                frame: DataFrameKind::Intra,
+                field: "time".to_owned()
+            });
         };
 
         let fields = fields.collect::<Result<Vec<_>, _>>()?;

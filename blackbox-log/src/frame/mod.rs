@@ -306,11 +306,9 @@ fn parse_enum_list<'a, T>(
 ) -> HeadersParseResult<impl Iterator<Item = HeadersParseResult<T>> + 'a> {
     let s = s.ok_or_else(|| missing_header_error(kind, property))?;
     Ok(s.split(',').map(move |s| {
-        parse(s).ok_or_else(|| {
-            HeadersParseError::InvalidHeader(
-                format!("Field {} {property}", char::from(kind)),
-                s.to_owned(),
-            )
+        parse(s).ok_or_else(|| HeadersParseError::InvalidHeader {
+            header: format!("Field {} {property}", char::from(kind)),
+            value: s.to_owned(),
         })
     }))
 }
