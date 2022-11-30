@@ -10,7 +10,7 @@ rust-version = "1.65"
 
 [workspace.dependencies]
 blackbox-log = { version = "0.1.0", path = "blackbox-log" }
-bpaf = { version = "0.7.4", features = ["derive"] }
+bpaf = { version = "0.7.6", features = ["derive"] }
 
 [profile.bench]
 strip = false
