@@ -3,7 +3,7 @@ use alloc::vec::Vec;
 use crate::event::{self, Event};
 use crate::frame::{FrameKind, GpsFrame, GpsHomeFrame, MainFrame, SlowFrame};
 use crate::parser::InternalError;
-use crate::{Headers, ParseResult, Reader};
+use crate::{Headers, Reader};
 
 #[derive(Debug, Clone)]
 pub(crate) struct Data {
@@ -59,7 +59,7 @@ impl Data {
         }
     }
 
-    pub(crate) fn parse(data: &mut Reader, headers: &Headers) -> ParseResult<Self> {
+    pub(crate) fn parse(data: &mut Reader, headers: &Headers) -> Self {
         let mut events = Vec::new();
         let mut main_frames = Vec::new();
         let mut slow_frames = Vec::new();
@@ -168,17 +168,16 @@ impl Data {
                     tracing::debug!("found unexpected end of file in data section");
                     break;
                 }
-                Err(InternalError::Fatal(err)) => return Err(err),
             }
         }
 
-        Ok(Self {
+        Self {
             events,
             main_frames,
             slow_frames,
             gps_frames,
             gps_home_frames,
-        })
+        }
     }
 }
 

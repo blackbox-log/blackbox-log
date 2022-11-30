@@ -51,16 +51,9 @@ pub(crate) type InternalResult<T> = Result<T, InternalError>;
 
 #[derive(Debug, Clone)]
 pub(crate) enum InternalError {
-    Fatal(ParseError),
     /// Found something unexpected, try to recover
     Retry,
     Eof,
-}
-
-impl From<ParseError> for InternalError {
-    fn from(err: ParseError) -> Self {
-        Self::Fatal(err)
-    }
 }
 
 pub(crate) fn to_base_field(field: &str) -> &str {

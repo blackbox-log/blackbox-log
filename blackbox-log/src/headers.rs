@@ -82,7 +82,6 @@ impl<'data> Headers<'data> {
                     break;
                 }
                 Err(InternalError::Eof) => return Err(ParseError::IncompleteHeaders),
-                Err(InternalError::Fatal(err)) => return Err(err),
             };
 
             if !state.update(name, value) {

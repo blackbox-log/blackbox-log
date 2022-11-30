@@ -20,7 +20,7 @@ impl<'data> Log<'data> {
     /// This assumes that `data` is already aligned to the beginning of the log.
     pub fn parse(data: &mut Reader<'data>) -> ParseResult<Self> {
         let headers = Headers::parse(data)?;
-        let data = Data::parse(data, &headers)?;
+        let data = Data::parse(data, &headers);
 
         Ok(Self { headers, data })
     }
@@ -29,12 +29,9 @@ impl<'data> Log<'data> {
     ///
     /// This assumes that `data` is already aligned to the beginning of the data
     /// section of the log.
-    pub fn parse_with_headers(
-        data: &mut Reader<'data>,
-        headers: Headers<'data>,
-    ) -> ParseResult<Self> {
-        let data = Data::parse(data, &headers)?;
-        Ok(Self { headers, data })
+    pub fn parse_with_headers(data: &mut Reader<'data>, headers: Headers<'data>) -> Self {
+        let data = Data::parse(data, &headers);
+        Self { headers, data }
     }
 
     pub const fn headers(&self) -> &Headers<'data> {
