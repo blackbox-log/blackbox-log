@@ -5,9 +5,9 @@ use core::{fmt, str};
 use hashbrown::HashMap;
 
 use crate::frame::{
-    is_frame_def_header, parse_frame_def_header, DataFrameKind, FrameKind, GpsFrameDef,
-    GpsFrameDefBuilder, GpsHomeFrameDef, GpsHomeFrameDefBuilder, GpsUnit, MainFrameDef,
-    MainFrameDefBuilder, MainUnit, SlowFrameDef, SlowFrameDefBuilder, SlowUnit,
+    is_frame_def_header, parse_frame_def_header, DataFrameKind, GpsFrameDef, GpsFrameDefBuilder,
+    GpsHomeFrameDef, GpsHomeFrameDefBuilder, GpsUnit, MainFrameDef, MainFrameDefBuilder, MainUnit,
+    SlowFrameDef, SlowFrameDefBuilder, SlowUnit,
 };
 use crate::parser::{InternalError, InternalResult};
 use crate::predictor::Predictor;
@@ -24,7 +24,7 @@ pub enum ParseError {
     // TODO: include header
     MissingHeader,
     IncompleteHeaders,
-    MissingField(FrameKind, String),
+    MissingField(DataFrameKind, String),
 }
 
 impl fmt::Display for ParseError {

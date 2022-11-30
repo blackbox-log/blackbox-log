@@ -1,7 +1,7 @@
 use alloc::vec::Vec;
 
 use crate::event::{self, Event};
-use crate::frame::{FrameKind, GpsFrame, GpsHomeFrame, MainFrame, SlowFrame};
+use crate::frame::{DataFrameKind, FrameKind, GpsFrame, GpsHomeFrame, MainFrame, SlowFrame};
 use crate::parser::InternalError;
 use crate::{Headers, Reader};
 
@@ -87,16 +87,16 @@ impl Data {
                         FrameKind::Event => {
                             events.pop();
                         }
-                        FrameKind::Intra | FrameKind::Inter => {
+                        FrameKind::Data(DataFrameKind::Intra | DataFrameKind::Inter) => {
                             main_frames.pop();
                         }
-                        FrameKind::Slow => {
+                        FrameKind::Data(DataFrameKind::Slow) => {
                             slow_frames.pop();
                         }
-                        FrameKind::Gps => {
+                        FrameKind::Data(DataFrameKind::Gps) => {
                             gps_frames.pop();
                         }
-                        FrameKind::GpsHome => {
+                        FrameKind::Data(DataFrameKind::GpsHome) => {
                             gps_home_frames.pop();
                         }
                     };
@@ -117,13 +117,13 @@ impl Data {
                     Ok(_) => Ok(()),
                     Err(err) => Err(err),
                 },
-                FrameKind::Intra | FrameKind::Inter => {
+                FrameKind::Data(DataFrameKind::Intra | DataFrameKind::Inter) => {
                     let frame = MainFrame::parse(data, kind, &main_frames, headers);
                     frame.map(|frame| {
                         main_frames.push(FrameSync::new(frame, &slow_frames, &gps_frames));
                     })
                 }
-                FrameKind::Gps => headers.gps_frames.as_ref().map_or_else(
+                FrameKind::Data(DataFrameKind::Gps) => headers.gps_frames.as_ref().map_or_else(
                     || {
                         tracing::debug!("found GPS frame without GPS frame definition");
                         Err(InternalError::Retry)
@@ -138,18 +138,22 @@ impl Data {
                         .map(|frame| gps_frames.push(frame))
                     },
                 ),
-                FrameKind::GpsHome => headers.gps_home_frames.as_ref().map_or_else(
-                    || {
-                        tracing::debug!("found GPS home frame without GPS home frame definition");
-                        Err(InternalError::Retry)
-                    },
-                    |gps_home| {
-                        gps_home
-                            .parse(data, headers)
-                            .map(|frame| gps_home_frames.push(frame))
-                    },
-                ),
-                FrameKind::Slow => headers
+                FrameKind::Data(DataFrameKind::GpsHome) => {
+                    headers.gps_home_frames.as_ref().map_or_else(
+                        || {
+                            tracing::debug!(
+                                "found GPS home frame without GPS home frame definition"
+                            );
+                            Err(InternalError::Retry)
+                        },
+                        |gps_home| {
+                            gps_home
+                                .parse(data, headers)
+                                .map(|frame| gps_home_frames.push(frame))
+                        },
+                    )
+                }
+                FrameKind::Data(DataFrameKind::Slow) => headers
                     .slow_frames
                     .parse(data, headers)
                     .map(|frame| slow_frames.push(frame)),
@@ -186,10 +190,10 @@ fn skip_to_frame(data: &mut Reader) {
     data.skip_until_any(
         &[
             FrameKind::Event,
-            FrameKind::Intra,
-            FrameKind::Slow,
-            FrameKind::Gps,
-            FrameKind::GpsHome,
+            FrameKind::Data(DataFrameKind::Intra),
+            FrameKind::Data(DataFrameKind::Slow),
+            FrameKind::Data(DataFrameKind::Gps),
+            FrameKind::Data(DataFrameKind::GpsHome),
         ]
         .map(u8::from),
     );

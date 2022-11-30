@@ -4,9 +4,8 @@ use core::iter;
 
 use tracing::instrument;
 
-use super::{read_field_values, DataFrameKind, DataFrameProperty, Unit};
+use super::{read_field_values, DataFrameKind, DataFrameProperty, FrameKind, Unit};
 use crate::data::FrameSync;
-use crate::frame::FrameKind;
 use crate::parser::{decode, to_base_field, Encoding, InternalResult};
 use crate::predictor::{self, Predictor, PredictorContext};
 use crate::units::prelude::*;
@@ -35,7 +34,7 @@ impl MainFrame {
         let last = current_idx.checked_sub(1).and_then(get_main_frame);
         let main = &headers.main_frames;
 
-        if kind == FrameKind::Intra {
+        if kind == FrameKind::Data(DataFrameKind::Intra) {
             main.parse_intra(data, headers, last)
         } else {
             let last_last = current_idx.checked_sub(2).and_then(get_main_frame);
@@ -409,8 +408,8 @@ impl<'data> MainFrameDefBuilder<'data> {
             ..
         }) = fields.next().transpose()? else {
             return Err(HeadersParseError::MissingField(
-                FrameKind::Intra,
-                "loopIteration".to_owned(),
+                DataFrameKind::Intra,
+                "loopIteration".to_owned()
             ));
         };
 
@@ -423,8 +422,8 @@ impl<'data> MainFrameDefBuilder<'data> {
             ..
         }) = fields.next().transpose()? else {
             return Err(HeadersParseError::MissingField(
-                FrameKind::Intra,
-                "time".to_owned(),
+                DataFrameKind::Intra,
+                "time".to_owned()
             ));
         };
 

@@ -22,12 +22,61 @@ use crate::predictor::Predictor;
 use crate::units::prelude::*;
 use crate::{units, HeadersParseError, HeadersParseResult, Reader};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[repr(u8)]
+pub enum FrameKind {
+    Event,
+    Data(DataFrameKind),
+}
+
+impl FrameKind {
+    pub(crate) const fn from_byte(byte: u8) -> Option<Self> {
+        match byte {
+            b'E' => Some(Self::Event),
+            _ => {
+                if let Some(kind) = DataFrameKind::from_byte(byte) {
+                    Some(Self::Data(kind))
+                } else {
+                    None
+                }
+            }
+        }
+    }
+}
+
+impl From<FrameKind> for char {
+    fn from(kind: FrameKind) -> Self {
+        match kind {
+            FrameKind::Event => 'E',
+            FrameKind::Data(kind) => kind.into(),
+        }
+    }
+}
+
+impl From<FrameKind> for u8 {
+    fn from(kind: FrameKind) -> Self {
+        match kind {
+            FrameKind::Event => b'E',
+            FrameKind::Data(kind) => kind.into(),
+        }
+    }
+}
+
+impl fmt::Display for FrameKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Event => f.write_str("event"),
+            Self::Data(kind) => kind.fmt(f),
+        }
+    }
+}
+
 byte_enum! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize))]
     #[repr(u8)]
-    pub enum FrameKind {
-        Event = b'E',
+    pub enum DataFrameKind {
         Intra = b'I',
         Inter = b'P',
         Gps = b'G',
@@ -36,10 +85,34 @@ byte_enum! {
     }
 }
 
-impl fmt::Display for FrameKind {
+impl DataFrameKind {
+    pub(crate) fn from_letter(s: &str) -> Option<Self> {
+        match s {
+            "G" => Some(Self::Gps),
+            "H" => Some(Self::GpsHome),
+            "I" => Some(Self::Intra),
+            "P" => Some(Self::Inter),
+            "S" => Some(Self::Slow),
+            _ => None,
+        }
+    }
+}
+
+impl From<DataFrameKind> for char {
+    fn from(kind: DataFrameKind) -> Self {
+        match kind {
+            DataFrameKind::Gps => 'G',
+            DataFrameKind::GpsHome => 'H',
+            DataFrameKind::Intra => 'I',
+            DataFrameKind::Inter => 'P',
+            DataFrameKind::Slow => 'S',
+        }
+    }
+}
+
+impl fmt::Display for DataFrameKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let kind = match self {
-            Self::Event => "event",
             Self::Intra => "intra",
             Self::Inter => "inter",
             Self::Gps => "GPS",
@@ -189,40 +262,6 @@ pub(crate) fn parse_frame_def_header(header: &str) -> Option<(DataFrameKind, Dat
         DataFrameKind::from_letter(kind)?,
         DataFrameProperty::from_name(property)?,
     ))
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum DataFrameKind {
-    Gps,
-    GpsHome,
-    Intra,
-    Inter,
-    Slow,
-}
-
-impl DataFrameKind {
-    pub(crate) fn from_letter(s: &str) -> Option<Self> {
-        match s {
-            "G" => Some(Self::Gps),
-            "H" => Some(Self::GpsHome),
-            "I" => Some(Self::Intra),
-            "P" => Some(Self::Inter),
-            "S" => Some(Self::Slow),
-            _ => None,
-        }
-    }
-}
-
-impl From<DataFrameKind> for char {
-    fn from(kind: DataFrameKind) -> Self {
-        match kind {
-            DataFrameKind::Gps => 'G',
-            DataFrameKind::GpsHome => 'H',
-            DataFrameKind::Intra => 'I',
-            DataFrameKind::Inter => 'P',
-            DataFrameKind::Slow => 'S',
-        }
-    }
 }
 
 // TODO: width?

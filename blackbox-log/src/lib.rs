@@ -10,7 +10,7 @@ mod utils;
 pub mod data;
 pub mod event;
 mod file;
-mod frame;
+pub mod frame;
 pub mod headers;
 pub mod log;
 pub mod parser;

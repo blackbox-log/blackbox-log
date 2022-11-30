@@ -5,7 +5,6 @@ use core::iter;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty, GpsHomeFrame, MainFrame, Unit};
-use crate::frame::FrameKind;
 use crate::parser::{decode, to_base_field, Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
@@ -249,7 +248,7 @@ impl<'data> GpsFrameDefBuilder<'data> {
             def => {
                 tracing::debug!(?def, "found invalid gps time field definition");
                 return Err(HeadersParseError::MissingField(
-                    FrameKind::Gps,
+                    DataFrameKind::Gps,
                     "time".to_owned(),
                 ));
             }

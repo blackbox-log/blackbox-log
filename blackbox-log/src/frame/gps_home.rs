@@ -4,7 +4,6 @@ use alloc::vec::Vec;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty};
-use crate::frame::FrameKind;
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::{Headers, HeadersParseError, HeadersParseResult, Reader};
@@ -139,7 +138,7 @@ impl<'data> GpsHomeFrameDefBuilder<'data> {
             } else {
                 tracing::error!("missing GPS_home[0] field definition");
                 return Err(HeadersParseError::MissingField(
-                    FrameKind::GpsHome,
+                    DataFrameKind::GpsHome,
                     "GPS_home[0]".to_owned(),
                 ));
             };
@@ -154,7 +153,7 @@ impl<'data> GpsHomeFrameDefBuilder<'data> {
             } else {
                 tracing::error!("missing GPS_home[1] field definition");
                 return Err(HeadersParseError::MissingField(
-                    FrameKind::GpsHome,
+                    DataFrameKind::GpsHome,
                     "GPS_home[1]".to_owned(),
                 ));
             };
