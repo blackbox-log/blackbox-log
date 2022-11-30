@@ -197,7 +197,7 @@ pub enum LogVersion {
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum FirmwareKind {
     Betaflight,
-    INav,
+    Inav,
     EmuFlight,
 }
 
@@ -375,7 +375,7 @@ impl<'data> State<'data> {
             .map(|(fw, _)| fw.to_ascii_lowercase());
         let firmware_kind = match firmware_kind.as_deref() {
             Some("betaflight") => FirmwareKind::Betaflight,
-            Some("inav") => FirmwareKind::INav,
+            Some("inav") => FirmwareKind::Inav,
             Some("emuflight") => FirmwareKind::EmuFlight,
             _ => {
                 tracing::error!("Could not parse firmware revision");

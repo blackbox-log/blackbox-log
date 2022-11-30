@@ -173,7 +173,7 @@ macro_rules! define_flag_set {
             const fn from_bit(bit: usize, firmware: FirmwareKind) -> Option<Self> {
                 match (bit, firmware) {
                     $($( ($beta, FirmwareKind::Betaflight | FirmwareKind::EmuFlight) => Some(Self::$flag), )?)*
-                    $($( ($inav, FirmwareKind::INav) => Some(Self::$flag), )?)*
+                    $($( ($inav, FirmwareKind::Inav) => Some(Self::$flag), )?)*
                     _ => None,
                 }
             }
@@ -181,7 +181,7 @@ macro_rules! define_flag_set {
             const fn to_bit(self, firmware: FirmwareKind) -> Option<usize> {
                 match (self, firmware) {
                     $($( (Self::$flag, FirmwareKind::Betaflight | FirmwareKind::EmuFlight) => Some($beta), )?)*
-                    $($( (Self::$flag, FirmwareKind::INav) => Some($inav), )?)*
+                    $($( (Self::$flag, FirmwareKind::Inav) => Some($inav), )?)*
                     _ => None,
                 }
             }
@@ -303,7 +303,7 @@ pub enum FailsafePhase {
 
 impl FailsafePhase {
     pub(crate) fn new(raw: u32, firmware: FirmwareKind) -> Self {
-        let mapping: &[Self] = if firmware == FirmwareKind::INav {
+        let mapping: &[Self] = if firmware == FirmwareKind::Inav {
             &[
                 Self::Idle,
                 Self::RxLossDetected,

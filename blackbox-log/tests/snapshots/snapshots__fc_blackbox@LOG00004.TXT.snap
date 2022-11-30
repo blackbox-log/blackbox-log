@@ -8,7 +8,7 @@ input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00004.TXT
     headers: Headers(
       version: V2,
       firmware_revision: "INAV 3.0.1 (753c4479) MATEKF405SE",
-      firmware_kind: INav,
+      firmware_kind: Inav,
       board_info: None,
       craft_name: Some(":WDTE"),
       vbat_reference: Some(1646),
