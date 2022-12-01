@@ -3,7 +3,7 @@ mod cli;
 use std::fs::{self, File};
 use std::io::{self, BufWriter, Write};
 use std::path::Path;
-use std::process::{ExitCode, Termination};
+use std::process;
 
 use blackbox_log::log::LogView;
 use blackbox_log::units::si;
@@ -16,28 +16,7 @@ use self::cli::Cli;
 #[global_allocator]
 static ALLOC: MiMalloc = MiMalloc;
 
-#[derive(Debug)]
-enum QuietResult<T> {
-    Ok(T),
-    Err(ExitCode),
-}
-
-impl<T> From<exitcode::ExitCode> for QuietResult<T> {
-    fn from(code: exitcode::ExitCode) -> Self {
-        Self::Err(ExitCode::from(u8::try_from(code).unwrap()))
-    }
-}
-
-impl Termination for QuietResult<()> {
-    fn report(self) -> ExitCode {
-        match self {
-            Self::Ok(()) => ExitCode::SUCCESS,
-            Self::Err(code) => code,
-        }
-    }
-}
-
-fn main() -> QuietResult<()> {
+fn main() {
     let cli = Cli::parse();
 
     tracing_subscriber::fmt()
@@ -47,12 +26,12 @@ fn main() -> QuietResult<()> {
     if cli.stdout {
         if cli.logs.len() > 1 {
             tracing::error!("cannot write multiple logs to stdout");
-            return QuietResult::from(exitcode::USAGE);
+            process::exit(exitcode::USAGE);
         }
 
         if cli.gps.separate || cli.gps.gpx {
             tracing::error!("only merged GPS data can be written to stdout");
-            return QuietResult::from(exitcode::USAGE);
+            process::exit(exitcode::USAGE);
         }
     }
 
@@ -120,9 +99,7 @@ fn main() -> QuietResult<()> {
     });
 
     if let Err(code) = result {
-        QuietResult::from(code)
-    } else {
-        QuietResult::Ok(())
+        process::exit(code);
     }
 }
 
