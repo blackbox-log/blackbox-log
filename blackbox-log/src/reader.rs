@@ -1,7 +1,6 @@
 use core::fmt;
 
-/// Wrapper around a byte slice used to efficiently read data from a blackbox
-/// log.
+/// A wrapper around a byte slice to efficiently read data from a blackbox log.
 #[derive(Clone)]
 pub struct Reader<'data> {
     /// Index of the next byte to read

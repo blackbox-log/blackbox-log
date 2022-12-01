@@ -1,3 +1,5 @@
+//! Types for the data section of blackbox logs.
+
 use alloc::vec::Vec;
 
 use crate::event::{self, Event};

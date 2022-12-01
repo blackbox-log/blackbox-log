@@ -1,3 +1,5 @@
+//! Types for blackbox log data frames.
+
 #[macro_use]
 mod trace_field;
 

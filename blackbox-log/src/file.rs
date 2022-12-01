@@ -4,7 +4,7 @@ use memchr::memmem;
 
 use crate::{HeadersParseResult, Log, Reader};
 
-/// Represents a complete blackbox log file containing zero or more logs.
+/// A complete blackbox log file containing zero or more logs.
 #[derive(Debug)]
 pub struct File<'data> {
     offsets: Vec<usize>,
@@ -27,9 +27,6 @@ impl<'data> File<'data> {
     }
 
     /// Returns an iterator over all parsed [`Log`]s in the file.
-    ///
-    /// The logs are parsed lazily --- no work will be done until
-    /// `Iterator::next` is called.
     pub fn parse_iter<'a>(&'a self) -> impl Iterator<Item = HeadersParseResult<Log<'data>>> + 'a {
         (0..self.log_count()).map(|i| Log::parse(&mut self.get_reader(i)))
     }

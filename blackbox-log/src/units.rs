@@ -107,19 +107,24 @@ impl FromRaw for Velocity {
 pub trait FlagSet {
     type Flag: Flag;
 
+    /// Checks if a given flag is enabled.
     fn is_set(&self, flag: Self::Flag) -> bool;
+
+    /// Returns the names of all enabled flags.
     fn as_names(&self) -> Vec<&'static str>;
 }
 
 pub trait Flag {
+    /// Returns the name of this flag.
     fn as_name(&self) -> &'static str;
 }
 
 macro_rules! define_flag_set {
-    ($set:ident, $flag_name:ident {
+    ($(#[$set_attr:meta])* $set:ident, $(#[$flag_attr:meta])* $flag_name:ident {
         $( $flag:ident : $($beta:literal)? / $($inav:literal)? ),* $(,)?
     }) => {
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+        $(#[$set_attr])*
         pub struct $set {
             firmware: FirmwareKind,
             raw: BitArray<[u32; 1], Lsb0>,
@@ -157,6 +162,7 @@ macro_rules! define_flag_set {
         }
 
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+        $(#[$flag_attr])*
         pub enum $flag_name {
             $( $flag ),*
         }
@@ -195,98 +201,109 @@ macro_rules! define_flag_set {
     };
 }
 
-define_flag_set!(FlightModeSet, FlightMode {
-    Angle:     1 /  0,
-    Horizon:   2 /  1,
-    HeadFree:  4 /  6,
-    Failsafe:  6 /  9,
-    Turtle:   27 / 15,
+define_flag_set! {
+    /// All currently enabled flight modes. See [`FlagSet`] and [`FlightMode`].
+    FlightModeSet,
+    /// A flight mode. See [`Flag`].
+    FlightMode {
+        Angle:     1 /  0,
+        Horizon:   2 /  1,
+        HeadFree:  4 /  6,
+        Failsafe:  6 /  9,
+        Turtle:   27 / 15,
 
-    Arm:            0 / ,
-    Mag:            3 / ,
-    Passthru:       5 / ,
-    GpsRescue:      7 / ,
-    Antigravity:    8 / ,
-    HeadAdjust:     9 / ,
-    CamStab:       10 / ,
-    BeeperOn:      11 / ,
-    LedLow:        12 / ,
-    Calib:         13 / ,
-    Osd:           14 / ,
-    Telemetry:     15 / ,
-    Servo1:        16 / ,
-    Servo2:        17 / ,
-    Servo3:        18 / ,
-    Blackbox:      19 / ,
-    Airmode:       20 / ,
-    ThreeD:        21 / ,
-    FpvAngleMix:   22 / ,
-    BlackboxErase: 23 / ,
-    Camera1:       24 / ,
-    Camera2:       25 / ,
-    Camera3:       26 / ,
-    Prearm:        28 / ,
-    BeepGpsCount:  29 / ,
-    VtxPitmode:    30 / ,
-    Paralyze:      31 / ,
+        Arm:            0 / ,
+        Mag:            3 / ,
+        Passthru:       5 / ,
+        GpsRescue:      7 / ,
+        Antigravity:    8 / ,
+        HeadAdjust:     9 / ,
+        CamStab:       10 / ,
+        BeeperOn:      11 / ,
+        LedLow:        12 / ,
+        Calib:         13 / ,
+        Osd:           14 / ,
+        Telemetry:     15 / ,
+        Servo1:        16 / ,
+        Servo2:        17 / ,
+        Servo3:        18 / ,
+        Blackbox:      19 / ,
+        Airmode:       20 / ,
+        ThreeD:        21 / ,
+        FpvAngleMix:   22 / ,
+        BlackboxErase: 23 / ,
+        Camera1:       24 / ,
+        Camera2:       25 / ,
+        Camera3:       26 / ,
+        Prearm:        28 / ,
+        BeepGpsCount:  29 / ,
+        VtxPitmode:    30 / ,
+        Paralyze:      31 / ,
 
-    // User1:               32 / ,
-    // User2:               33 / ,
-    // User3:               34 / ,
-    // User4:               35 / ,
-    // PidAudio:            36 / ,
-    // AcroTrainer:         37 / ,
-    // VtxControlDisable:   38 / ,
-    // LaunchControl:       39 / ,
-    // MspOverride:         40 / ,
-    // StickCommandDisable: 41 / ,
-    // BeeperMute:          42 / ,
+        // User1:               32 / ,
+        // User2:               33 / ,
+        // User3:               34 / ,
+        // User4:               35 / ,
+        // PidAudio:            36 / ,
+        // AcroTrainer:         37 / ,
+        // VtxControlDisable:   38 / ,
+        // LaunchControl:       39 / ,
+        // MspOverride:         40 / ,
+        // StickCommandDisable: 41 / ,
+        // BeeperMute:          42 / ,
 
-    Heading:       /  2,
-    NavAltHold:    /  3,
-    NavRth:        /  4,
-    NavPoshold:    /  5,
-    NavLaunch:     /  7,
-    Manual:        /  8,
-    AutoTune:      / 10,
-    NavWp:         / 11,
-    NavCourseHold: / 12,
-    Flaperon:      / 13,
-    TurnAssistant: / 14,
-    Soaring:       / 16,
-});
+        Heading:       /  2,
+        NavAltHold:    /  3,
+        NavRth:        /  4,
+        NavPoshold:    /  5,
+        NavLaunch:     /  7,
+        Manual:        /  8,
+        AutoTune:      / 10,
+        NavWp:         / 11,
+        NavCourseHold: / 12,
+        Flaperon:      / 13,
+        TurnAssistant: / 14,
+        Soaring:       / 16,
+    }
+}
 
-define_flag_set!(StateSet, State {
-    GpsFixHome: 0 / 0,
-    GpsFix:     1 / 1,
-    GpsFixEver: 2 /  ,
+define_flag_set! {
+    /// All currently enabled states. See [`FlagSet`] and [`State`].
+    StateSet,
+    /// A flight controller state. See [`Flag`].
+    State {
+        GpsFixHome: 0 / 0,
+        GpsFix:     1 / 1,
+        GpsFixEver: 2 /  ,
 
-    CalibrateMag:                 /  2,
-    SmallAngle:                   /  3,
-    FixedWingLegacy:              /  4,
-    AntiWindup:                   /  5,
-    FlaperonAvailable:            /  6,
-    NavMotorStopOrIdle:           /  7,
-    CompassCalibrated:            /  8,
-    AccelerometerCalibrated:      /  9,
-    NavCruiseBraking:             / 11,
-    NavCruiseBrakingBoost:        / 12,
-    NavCruiseBrakingLocked:       / 13,
-    NavExtraArmingSafetyBypassed: / 14,
-    AirmodeActive:                / 15,
-    EscSensorEnabled:             / 16,
-    Airplane:                     / 17,
-    Multirotor:                   / 18,
-    Rover:                        / 19,
-    Boat:                         / 20,
-    AltitudeControl:              / 21,
-    MoveForwardOnly:              / 22,
-    SetReversibleMotorsForward:   / 23,
-    FwHeadingUseYaw:              / 24,
-    AntiWindupDeactivated:        / 25,
-    LandingDetected:              / 26,
-});
+        CalibrateMag:                 /  2,
+        SmallAngle:                   /  3,
+        FixedWingLegacy:              /  4,
+        AntiWindup:                   /  5,
+        FlaperonAvailable:            /  6,
+        NavMotorStopOrIdle:           /  7,
+        CompassCalibrated:            /  8,
+        AccelerometerCalibrated:      /  9,
+        NavCruiseBraking:             / 11,
+        NavCruiseBrakingBoost:        / 12,
+        NavCruiseBrakingLocked:       / 13,
+        NavExtraArmingSafetyBypassed: / 14,
+        AirmodeActive:                / 15,
+        EscSensorEnabled:             / 16,
+        Airplane:                     / 17,
+        Multirotor:                   / 18,
+        Rover:                        / 19,
+        Boat:                         / 20,
+        AltitudeControl:              / 21,
+        MoveForwardOnly:              / 22,
+        SetReversibleMotorsForward:   / 23,
+        FwHeadingUseYaw:              / 24,
+        AntiWindupDeactivated:        / 25,
+        LandingDetected:              / 26,
+    }
+}
 
+/// The current failsafe phase. See [`Flag`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum FailsafePhase {
     Idle,

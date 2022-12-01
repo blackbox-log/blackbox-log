@@ -1,3 +1,5 @@
+//! Types for blackbox log events.
+
 use alloc::vec::Vec;
 
 use tracing::instrument;

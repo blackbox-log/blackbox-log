@@ -1,3 +1,5 @@
+//! Types for the header section of blackbox logs.
+
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use core::{fmt, str};
@@ -15,18 +17,24 @@ use crate::{Reader, Unit};
 
 pub type ParseResult<T> = Result<T, ParseError>;
 
+/// A fatal error encountered while parsing the headers of a log.
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum ParseError {
+    /// The log uses a format version that is unsupported.
     UnsupportedVersion(String),
+    /// The `Firmware revision` header did not contain a known firmware.
     UnknownFirmware(String),
+    /// Could not parse the value in header `header`.
     InvalidHeader {
         header: String,
         value: String,
     },
     // TODO: include header
+    /// Did not find a required header.
     MissingHeader,
     IncompleteHeaders,
+    /// Definition for frame type `frame` is missing required a required field.
     MissingField {
         frame: DataFrameKind,
         field: String,
@@ -57,10 +65,10 @@ impl fmt::Display for ParseError {
 #[cfg(feature = "std")]
 impl std::error::Error for ParseError {}
 
-#[allow(dead_code)]
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Headers<'data> {
+    /// The format version of the log.
     pub version: LogVersion,
 
     #[cfg_attr(feature = "serde", serde(skip))]
@@ -72,12 +80,14 @@ pub struct Headers<'data> {
     #[cfg_attr(feature = "serde", serde(skip))]
     pub(crate) gps_home_frames: Option<GpsHomeFrameDef<'data>>,
 
+    /// The full `Firmware revision` header.
     pub firmware_revision: &'data str,
+    /// The firmware that wrote the log.
     pub firmware_kind: FirmwareKind,
     pub board_info: Option<&'data str>,
     pub craft_name: Option<&'data str>,
 
-    /// Measured battery voltage at arm
+    /// The battery voltage measured at arm.
     pub vbat_reference: Option<u16>,
     pub vbat_scale: Option<u8>,
     pub current_meter: Option<CurrentMeterConfig>,
@@ -106,6 +116,13 @@ impl<'data> Headers<'data> {
         self.gps_frames.iter().flat_map(|def| def.iter())
     }
 
+    /// Parses only the headers of a blackbox log.
+    ///
+    /// `data` will be advanced to the start of the data section of the log,
+    /// ready to be passed to
+    /// [`Log::parse_with_headers`][`crate::Log::parse_with_headers`].
+    ///
+    /// **Note:** This assumes that `data` is aligned to the start of a log.
     pub fn parse(data: &mut Reader<'data>) -> ParseResult<Self> {
         // Skip product header
         let product = data.read_line();
@@ -138,6 +155,11 @@ impl<'data> Headers<'data> {
         }
 
         state.finish()
+    }
+
+    /// Returns `true` iff the headers required for GPS frames are present.
+    pub fn has_gps_defs(&self) -> bool {
+        self.gps_frames.is_some()
     }
 
     fn validate(&self) -> ParseResult<()> {
@@ -233,21 +255,31 @@ impl Default for Headers<'static> {
     }
 }
 
+/// A supported log format version. (`Data version` header)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-#[non_exhaustive]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[non_exhaustive]
 pub enum LogVersion {
     V2,
 }
 
+/// A supported firmware.
+///
+/// This is not the same as the `Firmware type` header since all modern
+/// firmwares set that to `Cleanflight`. This is instead decoded from `Firmware
+/// revision`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum FirmwareKind {
+    /// [Betaflight](https://github.com/betaflight/betaflight/)
     Betaflight,
+    /// [INAV](https://github.com/iNavFlight/inav/)
     Inav,
+    /// [EmuFlight](https://github.com/emuflight/EmuFlight)
     EmuFlight,
 }
 
+/// The `currentMeter` / `currentSensor` header.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CurrentMeterConfig {
@@ -255,6 +287,7 @@ pub struct CurrentMeterConfig {
     pub scale: i16,
 }
 
+/// The `motorOutput` header.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct MotorOutputRange(u16, u16);

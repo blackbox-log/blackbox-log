@@ -1,13 +1,16 @@
+//! [`Log`] and views into it.
+
 use alloc::vec::Vec;
 use core::cmp::Ordering;
 use core::iter::FusedIterator;
 
 use crate::data::{Data, FrameSync, Stats};
 use crate::event::Event;
+use crate::frame::{GpsUnit, GpsValue};
 use crate::parser::to_base_field;
-use crate::{GpsUnit, GpsValue, Headers, HeadersParseResult, Reader, Unit, Value};
+use crate::{Headers, HeadersParseResult, Reader, Unit, Value};
 
-/// Represents a single log out of a blackbox log file.
+/// A single blackbox log.
 #[derive(Debug)]
 pub struct Log<'data> {
     headers: Headers<'data>,
@@ -15,9 +18,10 @@ pub struct Log<'data> {
 }
 
 impl<'data> Log<'data> {
-    /// Attempts to parse a single blackbox log.
+    /// Attempts to fully parse a single blackbox log.
     ///
-    /// This assumes that `data` is already aligned to the beginning of the log.
+    /// **Note:** This assumes that `data` is already aligned to the beginning
+    /// of the log.
     pub fn parse(data: &mut Reader<'data>) -> HeadersParseResult<Self> {
         let headers = Headers::parse(data)?;
         let data = Data::parse(data, &headers);
@@ -27,26 +31,29 @@ impl<'data> Log<'data> {
 
     /// Attempts to parse a single blackbox log using pre-parsed `Headers`.
     ///
-    /// This assumes that `data` is already aligned to the beginning of the data
-    /// section of the log.
+    /// **Note:** This assumes that `data` is already aligned to the beginning
+    /// of the data section of the log.
     pub fn parse_with_headers(data: &mut Reader<'data>, headers: Headers<'data>) -> Self {
         let data = Data::parse(data, &headers);
         Self { headers, data }
     }
 
+    /// Returns the parsed headers.
     pub const fn headers(&self) -> &Headers<'data> {
         &self.headers
     }
 
+    /// Returns the parsed events.
     pub fn events(&self) -> &[Event] {
         &self.data.events
     }
 
+    /// Returns statistics about the log.
     pub fn stats(&self) -> Stats {
         self.data.to_stats()
     }
 
-    /// Returns a [`LogView`] that iterates based on main frames and *does not*
+    /// Returns a [`LogView`] that iterates over main frames and *does not*
     /// include any data from GPS frames.
     pub fn data<'log>(&'log self) -> MainView<'log, 'data> {
         let mut filter = Filter::new_unfiltered(&self.headers);
@@ -54,8 +61,13 @@ impl<'data> Log<'data> {
         MainView { log: self, filter }
     }
 
-    /// Returns a [`LogView`] that iterates based on main frames and *does*
-    /// include data from GPS frames.
+    /// Returns a [`LogView`] that iterates over main frames and *does* include
+    /// data from GPS frames.
+    ///
+    /// **Note:** This does mean that GPS data will likely be repeated, as main
+    /// frames are usually logged much more frequently than GPS frames. If there
+    /// are multiple GPS frames logged between main frames, only the last will
+    /// be included.
     pub fn merged_data<'log>(&'log self) -> MainView<'log, 'data> {
         let mut filter = Filter::new_unfiltered(&self.headers);
 
@@ -67,7 +79,7 @@ impl<'data> Log<'data> {
         MainView { log: self, filter }
     }
 
-    /// Returns a [`LogView`] that iterates over only GPS data.
+    /// Returns a [`LogView`] that iterates over only GPS frames.
     pub fn gps_data<'log>(&'log self) -> GpsView<'log, 'data> {
         GpsView { log: self }
     }
@@ -82,13 +94,23 @@ pub trait LogView<'view, 'data>: 'view {
     type FrameIter: Iterator<Item = Self::ValueIter>;
     type ValueIter: Iterator<Item = Self::Value>;
 
+    /// Returns the number of fields included in the view.
     fn field_count(&'view self) -> usize;
+
+    /// Returns the number of frames included in the view.
     fn frame_count(&'view self) -> usize;
 
+    /// Returns an iterator over the fields included in the view and their
+    /// units.
     fn fields(&'view self) -> Self::FieldIter;
+
+    /// Returns an iterator over the frames included in the view. Each frame is
+    /// an iterator over its values.
     fn values(&'view self) -> Self::FrameIter;
 }
 
+/// A [`LogView`] into a [`Log`]'s data that iterates over each main frame. See
+/// [`Log::data`] and [`Log::merged_data`].
 #[derive(Debug, Clone)]
 pub struct MainView<'log: 'data, 'data> {
     log: &'log Log<'data>,
@@ -132,6 +154,8 @@ where
     }
 }
 
+/// A [`LogView`] into a [`Log`]'s data that iterates over each GPS frames. See
+/// [`Log::gps_data`].
 #[derive(Debug, Clone)]
 pub struct GpsView<'log: 'data, 'data> {
     log: &'log Log<'data>,
@@ -174,6 +198,7 @@ where
     }
 }
 
+/// An iterator over field name & unit pairs. See [`LogView::fields`].
 #[derive(Debug)]
 pub struct FieldIter<'v, V> {
     view: &'v V,
@@ -232,6 +257,8 @@ impl<'data> Iterator for FieldIter<'_, GpsView<'_, 'data>> {
 impl<V> FusedIterator for FieldIter<'_, V> where Self: Iterator {}
 impl<V> ExactSizeIterator for FieldIter<'_, V> where Self: Iterator {}
 
+/// An iterator over the data frames included in a [`LogView`]. See
+/// [`LogView::values`].
 #[derive(Debug)]
 pub struct FrameIter<'a, V> {
     view: &'a V,
@@ -269,6 +296,7 @@ impl<'v, 'd, V: LogView<'v, 'd>> Iterator for FrameIter<'v, V> {
 impl<V> FusedIterator for FrameIter<'_, V> where Self: Iterator {}
 impl<V> ExactSizeIterator for FrameIter<'_, V> where Self: Iterator {}
 
+/// An iterator over the values in a single frame.
 #[derive(Debug)]
 pub struct FieldValueIter<'a, V> {
     view: &'a V,
