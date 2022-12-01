@@ -4,11 +4,11 @@
 	shallow = true
 
 [submodule "logs/fc-blackbox"]
-	path = blackbox-log/tests/logs/.fc-blackbox
+	path = .modules/fc-blackbox
 	url = https://github.com/ilya-epifanov/fc-blackbox.git
 	shallow = true
 
 [submodule "logs/gimbal-ghost"]
-	path = blackbox-log/tests/logs/.gimbal-ghost
+	path = .modules/gimbal-ghost
 	url = https://github.com/gimbal-ghost/gimbal-ghost.git
 	shallow = true
