@@ -181,6 +181,10 @@ fn main() -> Result<()> {
                     Ok(())
                 }
 
+                Fuzz::Check { target } => {
+                    cmd!(sh, "cargo +nightly fuzz check {dir_args...} {target...}").run()
+                }
+
                 Fuzz::Run {
                     target,
                     time,
@@ -360,6 +364,13 @@ enum Fuzz {
     #[bpaf(command)]
     /// List all fuzz targets
     List,
+
+    #[bpaf(command)]
+    /// Check fuzz target for errors
+    Check {
+        #[bpaf(positional("target"))]
+        target: Option<String>,
+    },
 
     #[bpaf(command)]
     /// Runs a fuzz target
