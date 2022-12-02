@@ -11,28 +11,42 @@ use blackbox_log::{Log, Value};
 use mimalloc::MiMalloc;
 use rayon::prelude::*;
 
-use self::cli::Cli;
+use self::cli::{Action, Cli};
 
 #[global_allocator]
 static ALLOC: MiMalloc = MiMalloc;
 
 fn main() {
-    let cli = Cli::parse();
+    let parser = lexopt::Parser::from_env();
+    let bin = parser
+        .bin_name()
+        .unwrap_or(env!("CARGO_BIN_NAME"))
+        .to_owned();
+
+    let cli = match Cli::parse(parser) {
+        Ok(Action::Run(cli)) => cli,
+        Ok(Action::Help) => {
+            cli::print_help(&bin);
+            process::exit(exitcode::OK);
+        }
+        Ok(Action::Version) => {
+            cli::print_version();
+            process::exit(exitcode::OK);
+        }
+        #[allow(clippy::print_stderr)]
+        Err(err) => {
+            eprintln!("{err}");
+            process::exit(exitcode::USAGE);
+        }
+    };
 
     tracing_subscriber::fmt()
         .with_max_level(cli.verbosity)
         .init();
 
-    if cli.stdout {
-        if cli.logs.len() > 1 {
-            tracing::error!("cannot write multiple logs to stdout");
-            process::exit(exitcode::USAGE);
-        }
-
-        if cli.gps.separate || cli.gps.gpx {
-            tracing::error!("only merged GPS data can be written to stdout");
-            process::exit(exitcode::USAGE);
-        }
+    if let Err(err) = cli.validate() {
+        tracing::error!("{err}");
+        process::exit(exitcode::USAGE);
     }
 
     let result = cli.logs.par_iter().try_for_each(|filename| {

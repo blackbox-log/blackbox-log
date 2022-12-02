@@ -7,7 +7,7 @@ edition.workspace = true
 rust-version.workspace = true
 
 [dependencies]
-bpaf.workspace = true
+bpaf = { version = "0.7.6", features = ["derive"] }
 serde = { version = "1.0.148", features = ["derive"] }
 toml = "0.5.9"
 xshell = "0.2.2"

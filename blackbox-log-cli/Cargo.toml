@@ -16,8 +16,8 @@ name = "blackbox-log"
 
 [dependencies]
 blackbox-log.workspace = true
-bpaf.workspace = true
 exitcode = "1.1.2"
+lexopt = "0.2.1"
 mimalloc = { version = "0.1.32", default-features = false }
 rayon = "1.6.0"
 tracing = { version = "0.1.37", default-features = false, features = ["release_max_level_debug"] }
