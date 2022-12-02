@@ -1,13 +1,14 @@
 use super::variable;
 use crate::parser::InternalResult;
+use crate::utils::as_i16;
 use crate::Reader;
 
 pub(crate) fn negative_14_bit(data: &mut Reader) -> InternalResult<i32> {
     let result = variable(data)? as u16;
-    let result = if (result & 0x2000) > 0 {
-        i32::from((result | 0xC000) as i16)
+    let result: i32 = if (result & 0x2000) > 0 {
+        as_i16(result | 0xC000).into()
     } else {
-        i32::from(result)
+        result.into()
     };
 
     Ok(-result)

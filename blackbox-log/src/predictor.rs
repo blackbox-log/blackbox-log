@@ -1,7 +1,7 @@
 use core::ops::{Add, Div, Sub};
 
 use super::frame::GpsPosition;
-use crate::utils::{as_signed, as_unsigned};
+use crate::utils::{as_i32, as_u32};
 use crate::Headers;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -35,9 +35,9 @@ impl Predictor {
             tracing::trace_span!(
                 "Predictor::apply",
                 ?self,
-                value = as_signed(value),
-                last = ctx.last.map(as_signed),
-                last_last = ctx.last_last.map(as_signed),
+                value = as_i32(value),
+                last = ctx.last.map(as_i32),
+                last_last = ctx.last_last.map(as_i32),
                 skipped_frames = ctx.skipped_frames,
             )
         } else {
@@ -57,9 +57,9 @@ impl Predictor {
             Self::Previous => ctx.last.unwrap_or(0),
             Self::StraightLine => {
                 if signed {
-                    as_unsigned(straight_line(
-                        ctx.last.map(as_signed),
-                        ctx.last_last.map(as_signed),
+                    as_u32(straight_line(
+                        ctx.last.map(as_i32),
+                        ctx.last_last.map(as_i32),
                     ))
                 } else {
                     straight_line(ctx.last, ctx.last_last)
@@ -67,10 +67,7 @@ impl Predictor {
             }
             Self::Average2 => {
                 if signed {
-                    as_unsigned(average(
-                        ctx.last.map(as_signed),
-                        ctx.last_last.map(as_signed),
-                    ))
+                    as_u32(average(ctx.last.map(as_i32), ctx.last_last.map(as_i32)))
                 } else {
                     average(ctx.last, ctx.last_last)
                 }
@@ -91,10 +88,10 @@ impl Predictor {
                 } else {
                     let skipped_frames = i32::try_from(ctx.skipped_frames)
                         .expect("never skip more than i32::MAX frames");
-                    as_unsigned(
+                    as_u32(
                         skipped_frames
                             .wrapping_add(1)
-                            .wrapping_add(as_signed(ctx.last.unwrap_or(0))),
+                            .wrapping_add(as_i32(ctx.last.unwrap_or(0))),
                     )
                 }
             }
@@ -105,7 +102,7 @@ impl Predictor {
                     0
                 },
                 |home| {
-                    as_unsigned(if self == Self::HomeLat {
+                    as_u32(if self == Self::HomeLat {
                         home.latitude
                     } else {
                         home.longitude
@@ -122,9 +119,9 @@ impl Predictor {
         };
 
         if signed {
-            let signed = as_signed(value).wrapping_add(as_signed(diff));
+            let signed = as_i32(value).wrapping_add(as_i32(diff));
             tracing::trace!(return = signed);
-            as_unsigned(signed)
+            as_u32(signed)
         } else {
             let x = value.wrapping_add(diff);
             tracing::trace!(return = x);

@@ -1,5 +1,7 @@
 use core::fmt;
 
+use crate::utils::as_i8;
+
 /// A wrapper around a byte slice to efficiently read data from a blackbox log.
 #[derive(Clone)]
 pub struct Reader<'data> {
@@ -122,8 +124,7 @@ impl<'data> Reader<'data> {
 
     /// Reads a single byte as an `i8`.
     pub(crate) fn read_i8(&mut self) -> Option<i8> {
-        #[allow(clippy::cast_possible_wrap)]
-        self.read_u8().map(|x| x as i8)
+        self.read_u8().map(as_i8)
     }
 
     /// Reads 3 bytes as the lower bytes of a `u32`.

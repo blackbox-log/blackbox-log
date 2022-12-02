@@ -6,7 +6,7 @@ use tracing::instrument;
 use super::{read_field_values, DataFrameKind, DataFrameProperty, Unit};
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
-use crate::utils::as_signed;
+use crate::utils::as_i32;
 use crate::{units, Headers, HeadersParseResult, Reader};
 
 #[derive(Debug, Clone)]
@@ -28,7 +28,7 @@ pub(crate) enum SlowValue {
 impl SlowValue {
     const fn new_unitless(value: u32, signed: bool) -> Self {
         if signed {
-            Self::Signed(as_signed(value))
+            Self::Signed(as_i32(value))
         } else {
             Self::Unsigned(value)
         }

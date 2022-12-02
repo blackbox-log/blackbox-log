@@ -10,7 +10,7 @@ use crate::parser::{decode, to_base_field, Encoding, InternalResult};
 use crate::predictor::{self, Predictor, PredictorContext};
 use crate::units::prelude::*;
 use crate::units::FromRaw;
-use crate::utils::as_signed;
+use crate::utils::as_i32;
 use crate::{Headers, HeadersParseError, HeadersParseResult, Reader};
 
 #[derive(Debug, Clone)]
@@ -55,7 +55,7 @@ impl MainFrame {
                 match def.unit {
                     MainUnit::Amperage => {
                         debug_assert!(def.signed);
-                        let raw = as_signed(raw);
+                        let raw = as_i32(raw);
                         MainValue::Amperage(ElectricCurrent::from_raw(raw, headers))
                     }
                     MainUnit::Voltage => {
@@ -64,12 +64,12 @@ impl MainFrame {
                     }
                     MainUnit::Acceleration => {
                         debug_assert!(def.signed);
-                        let raw = as_signed(raw);
+                        let raw = as_i32(raw);
                         MainValue::Acceleration(Acceleration::from_raw(raw, headers))
                     }
                     MainUnit::Rotation => {
                         debug_assert!(def.signed);
-                        let raw = as_signed(raw);
+                        let raw = as_i32(raw);
                         MainValue::Rotation(AngularVelocity::from_raw(raw, headers))
                     }
                     MainUnit::Unitless => MainValue::new_unitless(raw, def.signed),
@@ -96,7 +96,7 @@ pub(crate) enum MainValue {
 impl MainValue {
     const fn new_unitless(value: u32, signed: bool) -> Self {
         if signed {
-            Self::Signed(as_signed(value))
+            Self::Signed(as_i32(value))
         } else {
             Self::Unsigned(value)
         }

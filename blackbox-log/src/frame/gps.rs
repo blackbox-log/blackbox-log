@@ -9,7 +9,7 @@ use crate::parser::{decode, to_base_field, Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
 use crate::units::FromRaw;
-use crate::utils::as_signed;
+use crate::utils::as_i32;
 use crate::{Headers, HeadersParseError, HeadersParseResult, Reader};
 
 #[derive(Debug, Clone)]
@@ -42,7 +42,7 @@ impl GpsFrame {
 impl GpsValue {
     const fn new_unitless(value: u32, signed: bool) -> Self {
         if signed {
-            Self::Signed(as_signed(value))
+            Self::Signed(as_i32(value))
         } else {
             Self::Unsigned(value)
         }
@@ -143,13 +143,13 @@ impl<'data> GpsFrameDef<'data> {
                 GpsUnit::FrameTime => unreachable!(),
                 GpsUnit::Coordinate => {
                     assert!(field.signed);
-                    let value = as_signed(value);
+                    let value = as_i32(value);
 
                     GpsValue::Coordinate(f64::from(value) / 10000000.)
                 }
                 GpsUnit::Altitude => {
                     let altitude = if field.signed {
-                        as_signed(value).into()
+                        as_i32(value).into()
                     } else {
                         value.into()
                     };

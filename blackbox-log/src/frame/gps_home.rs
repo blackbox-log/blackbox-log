@@ -6,6 +6,7 @@ use tracing::instrument;
 use super::{read_field_values, DataFrameKind, DataFrameProperty};
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
+use crate::utils::as_i32;
 use crate::{Headers, HeadersParseError, HeadersParseResult, Reader};
 
 #[derive(Debug, Clone)]
@@ -64,10 +65,7 @@ impl<'data> GpsHomeFrameDef<'data> {
                     value,
                 );
 
-                #[allow(clippy::cast_possible_wrap)]
-                {
-                    value as i32
-                }
+                as_i32(value)
             })
             .collect::<Vec<_>>();
 

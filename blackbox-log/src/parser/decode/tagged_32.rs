@@ -1,5 +1,6 @@
 use super::sign_extend;
 use crate::parser::{InternalError, InternalResult};
+use crate::utils::{as_i16, as_i32, as_i8};
 use crate::Reader;
 
 const COUNT: usize = 3;
@@ -65,13 +66,13 @@ pub(crate) fn tagged_32(data: &mut Reader) -> InternalResult<[i32; COUNT]> {
                     // 8 bits
                     0 => {
                         let x = read_u8_or_eof(data)?;
-                        sign_extend::<8>(x.into()) as i32
+                        as_i8(x).into()
                     }
 
                     // 16 bits
                     1 => {
                         let value = data.read_u16().ok_or(InternalError::Eof)?;
-                        (value as i16).into()
+                        as_i16(value).into()
                     }
 
                     // 24 bits
@@ -83,7 +84,7 @@ pub(crate) fn tagged_32(data: &mut Reader) -> InternalResult<[i32; COUNT]> {
                     // 32 bits
                     3.. => {
                         let value = data.read_u32().ok_or(InternalError::Eof)?;
-                        value as i32
+                        as_i32(value)
                     }
                 }
             }

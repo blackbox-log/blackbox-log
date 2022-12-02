@@ -1,4 +1,3 @@
-#![allow(clippy::cast_possible_wrap)]
 #![allow(clippy::cast_possible_truncation)]
 
 mod negative_14_bit;
@@ -15,7 +14,7 @@ pub(crate) use self::tagged_32::tagged_32;
 pub(crate) use self::tagged_variable::tagged_variable;
 pub(crate) use self::variable::{variable, variable_signed};
 use super::InternalResult;
-use crate::utils::as_unsigned;
+use crate::utils::{as_i32, as_u32};
 use crate::Reader;
 
 byte_enum! {
@@ -74,17 +73,17 @@ impl Encoding {
     ) -> InternalResult<()> {
         let range = 0..=extra;
         match self {
-            Self::VariableSigned => into.push(as_unsigned(variable_signed(data)?)),
+            Self::VariableSigned => into.push(as_u32(variable_signed(data)?)),
             Self::Variable => into.push(variable(data)?),
 
-            Self::Negative14Bit => into.push(as_unsigned(negative_14_bit(data)?)),
+            Self::Negative14Bit => into.push(as_u32(negative_14_bit(data)?)),
 
             Self::TaggedVariable => {
-                into.extend_from_slice(&tagged_variable(data, extra)?.map(as_unsigned)[range]);
+                into.extend_from_slice(&tagged_variable(data, extra)?.map(as_u32)[range]);
             }
-            Self::Tagged32 => into.extend_from_slice(&tagged_32(data)?.map(as_unsigned)[range]),
+            Self::Tagged32 => into.extend_from_slice(&tagged_32(data)?.map(as_u32)[range]),
             Self::Tagged16 => {
-                into.extend_from_slice(&tagged_16(data)?.map(|x| as_unsigned(x.into()))[range]);
+                into.extend_from_slice(&tagged_16(data)?.map(|x| as_u32(x.into()))[range]);
             }
 
             Self::Null => into.push(0),
@@ -97,12 +96,12 @@ impl Encoding {
 #[inline]
 const fn sign_extend<const BITS: u32>(from: u32) -> i32 {
     let unused_bits = 32 - BITS;
-    (from << unused_bits) as i32 >> unused_bits
+    as_i32(from << unused_bits) >> unused_bits
 }
 
 #[inline]
 const fn zig_zag_decode(value: u32) -> i32 {
-    (value >> 1) as i32 ^ -(value as i32 & 1)
+    as_i32(value >> 1) ^ -(as_i32(value) & 1)
 }
 
 #[cfg(any(fuzzing, bench))]
