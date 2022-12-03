@@ -29,6 +29,9 @@ jobs:
       - name: Run rustdoc
         run: cargo doc --package blackbox-log --no-deps
 
+      - name: Add redirect
+        run: cp .github/workflows/pages.index.html target/doc/index.html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
