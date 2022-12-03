@@ -7,6 +7,9 @@ on:
       - '.github/workflows/pages.yaml'
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   clippy:
     runs-on: ubuntu-latest
