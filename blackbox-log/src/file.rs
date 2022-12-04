@@ -1,11 +1,11 @@
 use alloc::vec::Vec;
+use core::fmt;
 
 use memchr::memmem;
 
 use crate::{HeadersParseResult, Log, Reader};
 
 /// A complete blackbox log file containing zero or more logs.
-#[derive(Debug)]
 pub struct File<'data> {
     offsets: Vec<usize>,
     data: &'data [u8],
@@ -39,5 +39,13 @@ impl<'data> File<'data> {
     pub fn get_reader(&self, index: usize) -> Reader<'data> {
         let start = self.offsets[index];
         Reader::new(&self.data[start..])
+    }
+}
+
+impl fmt::Debug for File<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("File")
+            .field("offsets", &self.offsets)
+            .finish_non_exhaustive()
     }
 }
