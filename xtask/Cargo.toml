@@ -8,6 +8,6 @@ rust-version.workspace = true
 
 [dependencies]
 bpaf = { version = "0.7.6", features = ["derive"] }
-serde = { version = "1.0.148", features = ["derive"] }
+serde = { version = "1.0.149", features = ["derive"] }
 toml = "0.5.9"
 xshell = "0.2.2"
