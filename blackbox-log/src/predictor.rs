@@ -19,7 +19,6 @@ pub(crate) enum Predictor {
     VBatReference,
     LastMainFrameTime,
     MinMotor,
-    #[allow(dead_code)]
     HomeLon = 256,
 }
 
