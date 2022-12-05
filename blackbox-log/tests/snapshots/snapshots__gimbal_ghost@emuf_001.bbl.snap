@@ -1,7 +1,7 @@
 ---
 source: blackbox-log/tests/snapshots.rs
 expression: logs
-input_file: blackbox-log/tests/logs/.gimbal-ghost/test/emuf_001.bbl
+input_file: ".modules/gimbal-ghost/test/emuf_001.bbl"
 ---
 [
   Ok(LogSnapshot(

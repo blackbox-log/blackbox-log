@@ -1,7 +1,7 @@
 ---
 source: blackbox-log/tests/snapshots.rs
 expression: logs
-input_file: blackbox-log/tests/logs/.fc-blackbox/src/test-data/LOG00002.BFL
+input_file: ".modules/fc-blackbox/src/test-data/LOG00002.BFL"
 ---
 [
   Ok(LogSnapshot(
