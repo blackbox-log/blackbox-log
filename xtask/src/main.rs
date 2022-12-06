@@ -72,6 +72,13 @@ fn main() -> Result<()> {
             }
         }
 
+        Args::Doc { private, deps } => {
+            let private = private.then_some("--document-private-items");
+            let no_deps = (!deps).then_some("--no-deps");
+
+            cmd!(sh, "cargo doc -p blackbox-log {no_deps...} {private...}").run()
+        }
+
         Args::Test {
             coverage,
             ignored,
@@ -297,6 +304,18 @@ enum Args {
         #[bpaf(positional)]
         /// Extra arguments for clippy
         args: Vec<OsString>,
+    },
+
+    #[bpaf(command)]
+    /// Builds the documentation
+    Doc {
+        #[bpaf(long)]
+        /// Include docs for private items
+        private: bool,
+
+        #[bpaf(long)]
+        /// Include docs for dependencies
+        deps: bool,
     },
 
     #[bpaf(command)]

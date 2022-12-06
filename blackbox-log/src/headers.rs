@@ -26,19 +26,14 @@ pub enum ParseError {
     /// The `Firmware revision` header did not contain a known firmware.
     UnknownFirmware(String),
     /// Could not parse the value in header `header`.
-    InvalidHeader {
-        header: String,
-        value: String,
-    },
+    InvalidHeader { header: String, value: String },
     // TODO: include header
     /// Did not find a required header.
     MissingHeader,
+    /// The file ended before the start of the data section.
     IncompleteHeaders,
     /// Definition for frame type `frame` is missing required a required field.
-    MissingField {
-        frame: DataFrameKind,
-        field: String,
-    },
+    MissingField { frame: DataFrameKind, field: String },
 }
 
 impl fmt::Display for ParseError {
