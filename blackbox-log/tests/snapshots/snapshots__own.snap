@@ -12,15 +12,13 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
       board_info: Some("ZEEZ ZEEZF7V2"),
       craft_name: None,
       vbat_reference: Some(2466),
-      vbat_scale: Some(110),
-      current_meter: Some(CurrentMeterConfig(
-        offset: 0,
-        scale: 250,
-      )),
       acceleration_1g: Some(2048),
       gyro_scale: Some(0.017453292),
       min_throttle: Some(1070),
-      motor_output_range: Some(MotorOutputRange(158, 2047)),
+      motor_output_range: Some(MotorOutputRange(
+        min: 158,
+        max: 2047,
+      )),
       unknown: {
         "dyn_notch_width_percent": "0",
         "rc_smoothing_active_cutoffs": "68, 90",

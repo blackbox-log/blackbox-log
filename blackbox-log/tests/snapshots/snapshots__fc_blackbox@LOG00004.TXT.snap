@@ -12,15 +12,13 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
       board_info: None,
       craft_name: Some(":WDTE"),
       vbat_reference: Some(1646),
-      vbat_scale: Some(110),
-      current_meter: Some(CurrentMeterConfig(
-        offset: 0,
-        scale: 317,
-      )),
       acceleration_1g: Some(2048),
       gyro_scale: Some(0.017453292),
       min_throttle: Some(1042),
-      motor_output_range: Some(MotorOutputRange(1042, 1850)),
+      motor_output_range: Some(MotorOutputRange(
+        min: 1042,
+        max: 1850,
+      )),
       unknown: {
         "yaw_lpf_hz": "30",
         "deadband": "5",

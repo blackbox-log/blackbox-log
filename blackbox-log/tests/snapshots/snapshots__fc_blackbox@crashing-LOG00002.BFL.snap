@@ -12,12 +12,13 @@ input_file: ".modules/fc-blackbox/src/test-data/crashing-LOG00002.BFL"
       board_info: None,
       craft_name: Some("25x25_blaxkbox_s"),
       vbat_reference: None,
-      vbat_scale: None,
-      current_meter: None,
       acceleration_1g: Some(2048),
       gyro_scale: Some(0.017453292),
       min_throttle: Some(1070),
-      motor_output_range: Some(MotorOutputRange(1070, 2000)),
+      motor_output_range: Some(MotorOutputRange(
+        min: 1070,
+        max: 2000,
+      )),
       unknown: {
         "acc_hardware": "0",
         "emu_boost_yaw": "0",

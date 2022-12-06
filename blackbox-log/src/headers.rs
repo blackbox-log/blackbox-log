@@ -62,6 +62,7 @@ impl std::error::Error for ParseError {}
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[non_exhaustive]
 pub struct Headers<'data> {
     /// The format version of the log.
     pub version: LogVersion,
@@ -83,16 +84,13 @@ pub struct Headers<'data> {
     pub craft_name: Option<&'data str>,
 
     /// The battery voltage measured at arm.
-    pub vbat_reference: Option<u16>,
-    pub vbat_scale: Option<u8>,
-    pub current_meter: Option<CurrentMeterConfig>,
-
-    pub acceleration_1g: Option<u16>,
+    pub(crate) vbat_reference: Option<u16>,
+    pub(crate) acceleration_1g: Option<u16>,
     /// In radians / second
-    pub gyro_scale: Option<f32>,
+    pub(crate) gyro_scale: Option<f32>,
 
-    pub min_throttle: Option<u16>,
-    pub motor_output_range: Option<MotorOutputRange>,
+    pub(crate) min_throttle: Option<u16>,
+    pub(crate) motor_output_range: Option<MotorOutputRange>,
 
     pub unknown: HashMap<&'data str, &'data str>,
 }
@@ -236,9 +234,6 @@ impl Default for Headers<'static> {
             craft_name: None,
 
             vbat_reference: None,
-            vbat_scale: None,
-            current_meter: None,
-
             acceleration_1g: None,
             gyro_scale: None,
 
@@ -274,37 +269,20 @@ pub enum FirmwareKind {
     EmuFlight,
 }
 
-/// The `currentMeter` / `currentSensor` header.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct CurrentMeterConfig {
-    pub offset: i16,
-    pub scale: i16,
-}
-
-/// The `motorOutput` header.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct MotorOutputRange(u16, u16);
+pub(crate) struct MotorOutputRange {
+    pub(crate) min: u16,
+    #[allow(dead_code)]
+    pub(crate) max: u16,
+}
 
 impl MotorOutputRange {
-    pub const fn new(min: u16, max: u16) -> Self {
-        Self(min, max)
-    }
-
-    pub const fn min(&self) -> u16 {
-        self.0
-    }
-
-    pub const fn max(&self) -> u16 {
-        self.1
-    }
-
     pub(crate) fn from_str(s: &str) -> Option<Self> {
         s.split_once(',').and_then(|(min, max)| {
             let min = min.parse().ok()?;
             let max = max.parse().ok()?;
-            Some(MotorOutputRange::new(min, max))
+            Some(Self { min, max })
         })
     }
 }
@@ -323,9 +301,6 @@ struct State<'data> {
     craft_name: Option<&'data str>,
 
     vbat_reference: Option<u16>,
-    vbat_scale: Option<u8>,
-    current_meter: Option<CurrentMeterConfig>,
-
     acceleration_1g: Option<u16>,
     gyro_scale: Option<f32>,
 
@@ -350,9 +325,6 @@ impl<'data> State<'data> {
             craft_name: None,
 
             vbat_reference: None,
-            vbat_scale: None,
-            current_meter: None,
-
             acceleration_1g: None,
             gyro_scale: None,
 
@@ -383,17 +355,6 @@ impl<'data> State<'data> {
                 "vbatref" => {
                     let vbat_reference = value.parse().map_err(|_| ())?;
                     self.vbat_reference = Some(vbat_reference);
-                }
-                "vbatscale" | "vbat_scale" => {
-                    let vbat_scale = value.parse().map_err(|_| ())?;
-                    self.vbat_scale = Some(vbat_scale);
-                }
-                "currentMeter" | "currentSensor" => {
-                    let (offset, scale) = value.split_once(',').ok_or(())?;
-                    let offset = offset.parse().map_err(|_| ())?;
-                    let scale = scale.parse().map_err(|_| ())?;
-
-                    self.current_meter = Some(CurrentMeterConfig { offset, scale });
                 }
                 "acc_1G" => {
                     let one_g = value.parse().map_err(|_| ())?;
@@ -430,6 +391,10 @@ impl<'data> State<'data> {
                         DataFrameKind::GpsHome => self.gps_home_frames.update(property, value),
                     }
                 }
+
+                // Legacy calibration headers
+                "vbatscale" | "vbat_scale" | "currentMeter" | "currentSensor" => {}
+
                 header => {
                     tracing::debug!("skipping unknown header: `{header}` = `{value}`");
                     self.unknown.insert(header, value);
@@ -472,9 +437,6 @@ impl<'data> State<'data> {
             craft_name: self.craft_name.map(str::trim).filter(not_empty),
 
             vbat_reference: self.vbat_reference,
-            vbat_scale: self.vbat_scale,
-            current_meter: self.current_meter,
-
             acceleration_1g: self.acceleration_1g,
             gyro_scale: self.gyro_scale,
 

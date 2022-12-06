@@ -12,15 +12,13 @@ input_file: ".modules/gimbal-ghost/test/LOG00001.BFL"
       board_info: Some("MTKS MATEKF405CTR"),
       craft_name: None,
       vbat_reference: Some(1629),
-      vbat_scale: Some(110),
-      current_meter: Some(CurrentMeterConfig(
-        offset: 0,
-        scale: 179,
-      )),
       acceleration_1g: Some(2048),
       gyro_scale: Some(0.017453292),
       min_throttle: Some(1070),
-      motor_output_range: Some(MotorOutputRange(158, 2047)),
+      motor_output_range: Some(MotorOutputRange(
+        min: 158,
+        max: 2047,
+      )),
       unknown: {
         "acc_hardware": "0",
         "dterm_notch_cutoff": "0",

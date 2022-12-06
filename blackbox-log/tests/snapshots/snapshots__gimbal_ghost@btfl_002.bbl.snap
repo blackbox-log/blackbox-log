@@ -12,15 +12,13 @@ input_file: ".modules/gimbal-ghost/test/btfl_002.bbl"
       board_info: Some("MAMBA F722 I2C"),
       craft_name: Some("DIATONE ROMA F5"),
       vbat_reference: Some(2490),
-      vbat_scale: Some(110),
-      current_meter: Some(CurrentMeterConfig(
-        offset: 0,
-        scale: 115,
-      )),
       acceleration_1g: Some(2048),
       gyro_scale: Some(0.017453292),
       min_throttle: Some(1070),
-      motor_output_range: Some(MotorOutputRange(158, 2047)),
+      motor_output_range: Some(MotorOutputRange(
+        min: 158,
+        max: 2047,
+      )),
       unknown: {
         "dyn_notch_width_percent": "8",
         "rc_smoothing_active_cutoffs": "23, 90",
@@ -632,15 +630,13 @@ input_file: ".modules/gimbal-ghost/test/btfl_002.bbl"
       board_info: Some("MAMBA F722 I2C"),
       craft_name: Some("DIATONE ROMA F5"),
       vbat_reference: Some(2489),
-      vbat_scale: Some(110),
-      current_meter: Some(CurrentMeterConfig(
-        offset: 0,
-        scale: 115,
-      )),
       acceleration_1g: Some(2048),
       gyro_scale: Some(0.017453292),
       min_throttle: Some(1070),
-      motor_output_range: Some(MotorOutputRange(158, 2047)),
+      motor_output_range: Some(MotorOutputRange(
+        min: 158,
+        max: 2047,
+      )),
       unknown: {
         "dyn_notch_width_percent": "8",
         "rc_smoothing_active_cutoffs": "23, 90",
@@ -1246,15 +1242,13 @@ input_file: ".modules/gimbal-ghost/test/btfl_002.bbl"
       board_info: Some("MAMBA F722 I2C"),
       craft_name: Some("DIATONE ROMA F5"),
       vbat_reference: Some(2482),
-      vbat_scale: Some(110),
-      current_meter: Some(CurrentMeterConfig(
-        offset: 0,
-        scale: 115,
-      )),
       acceleration_1g: Some(2048),
       gyro_scale: Some(0.017453292),
       min_throttle: Some(1070),
-      motor_output_range: Some(MotorOutputRange(158, 2047)),
+      motor_output_range: Some(MotorOutputRange(
+        min: 158,
+        max: 2047,
+      )),
       unknown: {
         "dyn_notch_width_percent": "8",
         "rc_smoothing_active_cutoffs": "23, 90",

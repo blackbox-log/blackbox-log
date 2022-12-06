@@ -12,15 +12,13 @@ input_file: ".modules/gimbal-ghost/test/emuf_001.bbl"
       board_info: None,
       craft_name: Some("XL7_HELIO"),
       vbat_reference: Some(248),
-      vbat_scale: Some(110),
-      current_meter: Some(CurrentMeterConfig(
-        offset: 0,
-        scale: 250,
-      )),
       acceleration_1g: Some(2048),
       gyro_scale: Some(0.017453292),
       min_throttle: Some(1070),
-      motor_output_range: Some(MotorOutputRange(158, 1587)),
+      motor_output_range: Some(MotorOutputRange(
+        min: 158,
+        max: 1587,
+      )),
       unknown: {
         "acc_hardware": "0",
         "emu_boost_yaw": "100",
@@ -615,15 +613,13 @@ input_file: ".modules/gimbal-ghost/test/emuf_001.bbl"
       board_info: None,
       craft_name: Some("XL7_HELIO"),
       vbat_reference: Some(248),
-      vbat_scale: Some(110),
-      current_meter: Some(CurrentMeterConfig(
-        offset: 0,
-        scale: 250,
-      )),
       acceleration_1g: Some(2048),
       gyro_scale: Some(0.017453292),
       min_throttle: Some(1070),
-      motor_output_range: Some(MotorOutputRange(158, 1587)),
+      motor_output_range: Some(MotorOutputRange(
+        min: 158,
+        max: 1587,
+      )),
       unknown: {
         "acc_hardware": "0",
         "emu_boost_yaw": "100",

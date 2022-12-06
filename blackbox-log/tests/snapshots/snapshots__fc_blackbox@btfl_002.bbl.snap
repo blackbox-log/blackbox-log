@@ -12,12 +12,13 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_002.bbl"
       board_info: Some("AIKO AIKONF7"),
       craft_name: Some("Gecko"),
       vbat_reference: Some(1653),
-      vbat_scale: Some(110),
-      current_meter: None,
       acceleration_1g: Some(2048),
       gyro_scale: Some(0.017453292),
       min_throttle: Some(1070),
-      motor_output_range: Some(MotorOutputRange(158, 2047)),
+      motor_output_range: Some(MotorOutputRange(
+        min: 158,
+        max: 2047,
+      )),
       unknown: {
         "dyn_notch_width_percent": "5",
         "rc_smoothing_active_cutoffs": "100, 80",

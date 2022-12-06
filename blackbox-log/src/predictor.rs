@@ -114,7 +114,7 @@ impl Predictor {
                 tracing::debug!("found unhandled {self:?}");
                 0
             }
-            Self::MinMotor => ctx.headers.motor_output_range.unwrap().min().into(),
+            Self::MinMotor => ctx.headers.motor_output_range.unwrap().min.into(),
         };
 
         if signed {

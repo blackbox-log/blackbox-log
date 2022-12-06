@@ -12,12 +12,13 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00007.BFL"
       board_info: Some("AIRB OMNIBUSF4"),
       craft_name: None,
       vbat_reference: Some(0),
-      vbat_scale: Some(110),
-      current_meter: None,
       acceleration_1g: Some(2048),
       gyro_scale: Some(0.017453292),
       min_throttle: Some(1070),
-      motor_output_range: Some(MotorOutputRange(158, 2047)),
+      motor_output_range: Some(MotorOutputRange(
+        min: 158,
+        max: 2047,
+      )),
       unknown: {
         "dyn_notch_width_percent": "0",
         "rc_smoothing_active_cutoffs": "0, 90",
