@@ -60,6 +60,7 @@ impl fmt::Display for ParseError {
 #[cfg(feature = "std")]
 impl std::error::Error for ParseError {}
 
+/// Decoded headers containing metadata for a blackbox log.
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[non_exhaustive]
@@ -85,13 +86,15 @@ pub struct Headers<'data> {
 
     /// The battery voltage measured at arm.
     pub(crate) vbat_reference: Option<u16>,
+    /// Calibration for the accelerometer.
     pub(crate) acceleration_1g: Option<u16>,
-    /// In radians / second
+    /// Calibration for the gyro in radians / second.
     pub(crate) gyro_scale: Option<f32>,
 
     pub(crate) min_throttle: Option<u16>,
     pub(crate) motor_output_range: Option<MotorOutputRange>,
 
+    /// Any unknown headers with unparsed values
     pub unknown: HashMap<&'data str, &'data str>,
 }
 

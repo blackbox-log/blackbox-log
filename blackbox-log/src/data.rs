@@ -33,10 +33,12 @@ impl FrameSync {
     }
 }
 
+/// Statistics about a decoded log.
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[non_exhaustive]
 pub struct Stats {
+    /// The number of valid frames found of each type.
     pub counts: FrameCounts,
 }
 

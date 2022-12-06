@@ -10,7 +10,7 @@ use crate::frame::{GpsUnit, GpsValue};
 use crate::parser::to_base_field;
 use crate::{Headers, HeadersParseResult, Reader, Unit, Value};
 
-/// A single blackbox log.
+/// A single parsed blackbox log.
 #[derive(Debug)]
 pub struct Log<'data> {
     headers: Headers<'data>,
@@ -118,6 +118,12 @@ pub struct MainView<'log: 'data, 'data> {
 }
 
 impl MainView<'_, '_> {
+    /// Restricts the field filter to the intersection of `filter` and any
+    /// existing filter.
+    ///
+    /// Fields are matched without any suffixed index. For example, `axisP[0]`,
+    /// `axisP[1]`, and `axisP[2]` will all be included if the filter includes
+    /// `axisP`.
     pub fn update_filter<S: AsRef<str>>(&mut self, filter: &[S]) {
         self.filter.merge(&Filter::new(filter, &self.log.headers));
     }

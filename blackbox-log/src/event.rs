@@ -7,6 +7,7 @@ use tracing::instrument;
 use crate::parser::{decode, InternalError, InternalResult};
 use crate::Reader;
 
+/// A decoded blackbox log event.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum Event {
@@ -30,6 +31,8 @@ pub enum Event {
     End,
 }
 
+/// A new value decoded from an
+/// [`InflightAdjustment`](`Event::InflightAdjustment`) event.
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum AdjustedValue {
