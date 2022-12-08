@@ -3,7 +3,7 @@ name = "blackbox-log"
 version = "0.1.0"
 description = "Ergonomic parser for BetaFlight blackbox logs"
 repository = "https://github.com/wetheredge/blackbox"
-categories = ["parser-implementations", "no-std", "encoding"]
+categories = ["aerospace::drones", "aerospace::unmanned-aerial-vehicles", "parser-implementations", "no-std", "encoding"]
 keywords = ["betaflight", "blackbox"]
 
 exclude = ["/tests/logs/", "/tests/snapshots/"]
