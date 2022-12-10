@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 #[test]
 fn readme() -> io::Result<()> {
-    let readme = File::open("../README.md")?;
+    let readme = File::open("README.md")?;
     let readme = BufReader::new(readme);
 
     let msrv = readme
