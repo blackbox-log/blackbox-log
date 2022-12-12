@@ -2,20 +2,21 @@
 
 [![license](https://img.shields.io/github/license/wetheredge/blackbox)](https://github.com/wetheredge/blackbox/blob/main/COPYING)
 
-This is a cli frontend for the `blackbox-log` crate inspired by the interface of the original `blackbox_decode`.
+This is a cli frontend for `blackbox-log` inspired by the original
+`blackbox_decode`.
 
 ## Feature comparison
 
-|                            | `blackbox-log-cli` | `blackbox_decode`  |
-|----------------------------|:------------------:|:------------------:|
-| Log format v1              |         :x:        | :heavy_check_mark: |
-| Recent Betaflight versions | :heavy_check_mark: |         :x:        |
-| Raw log output             |         :x:        | :heavy_check_mark: |
-| Current meter simulation   |         :x:        | :heavy_check_mark: |
-| IMU simulation             |         :x:        | :heavy_check_mark: |
-| Output unit custimization  |         :x:        | :heavy_check_mark: |
-| Output field filter        | :heavy_check_mark: |         :x:        |
-| Parallel log parsing       | :heavy_check_mark: |         :x:        |
+|                          | `blackbox_decode` | `blackbox-log-cli` |
+|--------------------------|:-----------------:|:------------------:|
+| Log format v1            | ✔️ | ❌ |
+| Recent Betaflight logs   | ❌ | ✔️ |
+| Raw output               | ✔️ | ❌ |
+| Current meter simulation | ✔️ | ❌ |
+| IMU simulation           | ✔️ | ❌ |
+| Change output units      | ✔️ | ❌ |
+| Filter output fields     | ❌ | ✔️ |
+| Parallel log parsing     | ❌ | ✔️ |
 
 ## Benchmarks
 
