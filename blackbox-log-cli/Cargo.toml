@@ -3,6 +3,7 @@ name = "blackbox-log-cli"
 version = "0.1.0"
 description = "Ergonomic cli for parsing BetaFlight blackbox logs"
 repository = "https://github.com/wetheredge/blackbox"
+readme = "README.md"
 categories = ["aerospace::drones", "aerospace::unmanned-aerial-vehicles", "command-line-utilities", "parser-implementations"]
 keywords = ["blackbox_decode", "betaflight", "blackbox"]
 
