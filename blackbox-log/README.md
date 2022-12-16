@@ -2,7 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/blackbox-log)](https://crates.io/blackbox-log)
 [![docs.rs](https://img.shields.io/docsrs/blackbox-log)](https://docs.rs/blackbox-log)
-[![MSRV](https://img.shields.io/static/v1?logo=rust&label=MSRV&color=dea584&message=1.65)](https://github.com/rust-lang/rust/blob/master/RELEASES.md)
+[![MSRV](https://img.shields.io/static/v1?logo=rust&label=MSRV&color=dea584&message=1.66)](https://github.com/rust-lang/rust/blob/master/RELEASES.md)
 [![license](https://img.shields.io/github/license/wetheredge/blackbox)](https://github.com/wetheredge/blackbox/blob/main/COPYING)
 
 This is a port of Betaflight's & INAV's blackbox tools. Check the [monorepo

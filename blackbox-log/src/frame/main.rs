@@ -253,15 +253,7 @@ impl<'data> MainFrameDef<'data> {
 
             let time = predictor::straight_line(last.map(|f| f.time), last_last);
             let offset = decode::variable_signed(data)?;
-
-            // TODO (rust 1.66): replace with time.saturating_add_unsigned(offset.into())
-            let add = offset > 0;
-            let offset = offset.unsigned_abs().into();
-            let time = if add {
-                time.saturating_add(offset)
-            } else {
-                time.saturating_sub(offset)
-            };
+            let time = time.saturating_add_signed(offset.into());
 
             tracing::trace!(time, offset);
             time
