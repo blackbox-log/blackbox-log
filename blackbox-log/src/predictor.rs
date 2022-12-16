@@ -190,15 +190,13 @@ impl<'a, 'data> PredictorContext<'a, 'data> {
         }
     }
 
-    pub(crate) fn set_last(&mut self, last: Option<u32>) -> &mut Self {
+    pub(crate) fn set_last(&mut self, last: Option<u32>) {
         self.last = last;
-        self
     }
 
-    pub(crate) fn set_last_2(&mut self, last: Option<u32>, last_last: Option<u32>) -> &mut Self {
+    pub(crate) fn set_last_2(&mut self, last: Option<u32>, last_last: Option<u32>) {
         self.last = last;
         self.last_last = last_last;
-        self
     }
 }
 

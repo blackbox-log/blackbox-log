@@ -195,36 +195,25 @@ impl<'data> MainFrameDef<'data> {
         headers: &Headers,
         last: Option<&MainFrame>,
     ) -> InternalResult<MainFrame> {
+        fn get_update_ctx(
+            last: Option<&'_ MainFrame>,
+        ) -> impl Fn(&mut PredictorContext, usize) + '_ {
+            move |ctx: &mut PredictorContext, i| ctx.set_last(last.map(|l| l.values[i]))
+        }
+
         let iteration = decode::variable(data)?;
         tracing::trace!(iteration);
         let time = decode::variable(data)?.into();
         tracing::trace!(time);
 
-        let raw = read_field_values(data, &self.fields, |f| f.encoding_intra)?;
-
-        let mut ctx = PredictorContext::new(headers);
-        let mut values = Vec::with_capacity(raw.len());
-
-        for (i, field) in self.fields.iter().enumerate() {
-            let raw = raw[i];
-            let signed = field.encoding_intra.is_signed();
-
-            ctx.set_last(last.map(|l| l.values[i]));
-
-            trace_field!(pre, field = field, enc = field.encoding_intra, raw = raw);
-
-            let value = field
-                .predictor_intra
-                .apply(raw, signed, Some(&values), &ctx);
-            values.push(value);
-
-            trace_field!(
-                post,
-                field = field,
-                pred = field.predictor_intra,
-                final = value
-            );
-        }
+        let values = parse_impl(
+            PredictorContext::new(headers),
+            &read_field_values(data, &self.fields, |f| f.encoding_intra)?,
+            &self.fields,
+            |f| f.encoding_intra,
+            |f| f.predictor_intra,
+            get_update_ctx(last),
+        );
 
         Ok(MainFrame {
             intra: true,
@@ -243,10 +232,20 @@ impl<'data> MainFrameDef<'data> {
         last_last: Option<&MainFrame>,
         skipped_frames: u32,
     ) -> InternalResult<MainFrame> {
+        fn get_update_ctx<'a>(
+            last: Option<&'a MainFrame>,
+            last_last: Option<&'a MainFrame>,
+        ) -> impl Fn(&mut PredictorContext<'_, '_>, usize) + 'a {
+            move |ctx: &mut PredictorContext, i| {
+                ctx.set_last_2(last.map(|l| l.values[i]), last_last.map(|l| l.values[i]));
+            }
+        }
+
         let iteration = 1 + last.map_or(0, |f| f.iteration) + skipped_frames;
         tracing::trace!(iteration);
 
         let time = {
+            // Get the time from last_last if last was an interframe
             let last_last = last
                 .filter(|f| !f.intra)
                 .and_then(|_| last_last.map(|f| f.time));
@@ -259,31 +258,14 @@ impl<'data> MainFrameDef<'data> {
             time
         };
 
-        let raw = read_field_values(data, &self.fields, |f| f.encoding_inter)?;
-
-        let mut ctx = PredictorContext::with_skipped(headers, skipped_frames);
-        let mut values = Vec::with_capacity(raw.len());
-
-        for (i, field) in self.fields.iter().enumerate() {
-            let raw = raw[i];
-            let signed = field.encoding_inter.is_signed();
-
-            ctx.set_last_2(last.map(|l| l.values[i]), last_last.map(|l| l.values[i]));
-
-            trace_field!(pre, field = field, enc = field.encoding_inter, raw = raw);
-
-            let value = field
-                .predictor_inter
-                .apply(raw, signed, Some(&values), &ctx);
-            values.push(value);
-
-            trace_field!(
-                post,
-                field = field,
-                pred = field.predictor_inter,
-                final = value
-            );
-        }
+        let values = parse_impl(
+            PredictorContext::with_skipped(headers, skipped_frames),
+            &read_field_values(data, &self.fields, |f| f.encoding_inter)?,
+            &self.fields,
+            |f| f.encoding_inter,
+            |f| f.predictor_inter,
+            get_update_ctx(last, last_last),
+        );
 
         Ok(MainFrame {
             intra: false,
@@ -292,6 +274,41 @@ impl<'data> MainFrameDef<'data> {
             values,
         })
     }
+}
+
+fn parse_impl<'data>(
+    mut ctx: PredictorContext<'_, 'data>,
+    raw: &[u32],
+    fields: &[MainFieldDef<'data>],
+    get_encoding: impl Fn(&MainFieldDef) -> Encoding,
+    get_predictor: impl Fn(&MainFieldDef) -> Predictor,
+    update_ctx: impl Fn(&mut PredictorContext<'_, 'data>, usize),
+) -> Vec<u32> {
+    let mut values = Vec::with_capacity(raw.len());
+
+    for (i, field) in fields.iter().enumerate() {
+        let encoding = get_encoding(field);
+        let predictor = get_predictor(field);
+
+        let raw = raw[i];
+        let signed = encoding.is_signed();
+
+        update_ctx(&mut ctx, i);
+
+        trace_field!(pre, field = field, enc = encoding, raw = raw);
+
+        let value = predictor.apply(raw, signed, Some(&values), &ctx);
+        values.push(value);
+
+        trace_field!(
+            post,
+            field = field,
+            pred = predictor,
+            final = value
+        );
+    }
+
+    values
 }
 
 #[cfg(fuzzing)]
