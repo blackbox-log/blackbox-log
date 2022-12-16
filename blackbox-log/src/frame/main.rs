@@ -4,7 +4,7 @@ use core::iter;
 
 use tracing::instrument;
 
-use super::{read_field_values, DataFrameKind, DataFrameProperty, FrameKind, Unit};
+use super::{read_field_values, DataFrameKind, DataFrameProperty, FieldDef, FrameKind, Unit};
 use crate::data::FrameSync;
 use crate::parser::{decode, to_base_field, Encoding, InternalResult};
 use crate::predictor::{self, Predictor, PredictorContext};
@@ -206,12 +206,10 @@ impl<'data> MainFrameDef<'data> {
         let time = decode::variable(data)?.into();
         tracing::trace!(time);
 
-        let values = parse_impl(
+        let values = super::parse_impl(
             PredictorContext::new(headers),
             &read_field_values(data, &self.fields, |f| f.encoding_intra)?,
-            &self.fields,
-            |f| f.encoding_intra,
-            |f| f.predictor_intra,
+            self.fields.iter().map(IntraFieldDef),
             get_update_ctx(last),
         );
 
@@ -258,12 +256,10 @@ impl<'data> MainFrameDef<'data> {
             time
         };
 
-        let values = parse_impl(
+        let values = super::parse_impl(
             PredictorContext::with_skipped(headers, skipped_frames),
             &read_field_values(data, &self.fields, |f| f.encoding_inter)?,
-            &self.fields,
-            |f| f.encoding_inter,
-            |f| f.predictor_inter,
+            self.fields.iter().map(InterFieldDef),
             get_update_ctx(last, last_last),
         );
 
@@ -274,41 +270,6 @@ impl<'data> MainFrameDef<'data> {
             values,
         })
     }
-}
-
-fn parse_impl<'data>(
-    mut ctx: PredictorContext<'_, 'data>,
-    raw: &[u32],
-    fields: &[MainFieldDef<'data>],
-    get_encoding: impl Fn(&MainFieldDef) -> Encoding,
-    get_predictor: impl Fn(&MainFieldDef) -> Predictor,
-    update_ctx: impl Fn(&mut PredictorContext<'_, 'data>, usize),
-) -> Vec<u32> {
-    let mut values = Vec::with_capacity(raw.len());
-
-    for (i, field) in fields.iter().enumerate() {
-        let encoding = get_encoding(field);
-        let predictor = get_predictor(field);
-
-        let raw = raw[i];
-        let signed = encoding.is_signed();
-
-        update_ctx(&mut ctx, i);
-
-        trace_field!(pre, field = field, enc = encoding, raw = raw);
-
-        let value = predictor.apply(raw, signed, Some(&values), &ctx);
-        values.push(value);
-
-        trace_field!(
-            post,
-            field = field,
-            pred = predictor,
-            final = value
-        );
-    }
-
-    values
 }
 
 #[cfg(fuzzing)]
@@ -343,6 +304,48 @@ pub(crate) struct MainFieldDef<'data> {
     encoding_inter: Encoding,
     pub(crate) signed: bool,
     pub(crate) unit: MainUnit,
+}
+
+#[derive(Debug)]
+struct InterFieldDef<'a, 'data>(&'a MainFieldDef<'data>);
+
+impl<'data> FieldDef<'data> for InterFieldDef<'_, 'data> {
+    fn name(&self) -> &'data str {
+        self.0.name
+    }
+
+    fn predictor(&self) -> Predictor {
+        self.0.predictor_inter
+    }
+
+    fn encoding(&self) -> Encoding {
+        self.0.encoding_inter
+    }
+
+    fn signed(&self) -> bool {
+        self.0.signed
+    }
+}
+
+#[derive(Debug)]
+struct IntraFieldDef<'a, 'data>(&'a MainFieldDef<'data>);
+
+impl<'data> FieldDef<'data> for IntraFieldDef<'_, 'data> {
+    fn name(&self) -> &'data str {
+        self.0.name
+    }
+
+    fn predictor(&self) -> Predictor {
+        self.0.predictor_intra
+    }
+
+    fn encoding(&self) -> Encoding {
+        self.0.encoding_intra
+    }
+
+    fn signed(&self) -> bool {
+        self.0.signed
+    }
 }
 
 #[derive(Debug, Default)]

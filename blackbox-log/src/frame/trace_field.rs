@@ -1,7 +1,7 @@
 macro_rules! trace_field {
     (_impl pre $field:expr, $enc:expr, $signed:expr, $raw:expr) => {
         tracing::trace!(
-            field = $field.name,
+            field = $field.name(),
             encoding = ?$enc,
             signed_encoding = $signed,
             raw = $raw,
@@ -9,7 +9,7 @@ macro_rules! trace_field {
     };
     (_impl post $field:expr, $pred:expr, $signed:expr, $final:expr) => {
         tracing::trace!(
-            field = $field.name,
+            field = $field.name(),
             predictor = ?$pred,
             signed = $signed,
             value = $final,
@@ -24,10 +24,10 @@ macro_rules! trace_field {
         }
     };
     (post, field = $field:expr, pred = $pred:expr, final = $final:expr $(,)?) => {
-        if $field.signed {
-            trace_field!(_impl post $field, $pred, $field.signed, $crate::utils::as_i32($final));
+        if $field.signed() {
+            trace_field!(_impl post $field, $pred, $field.signed(), $crate::utils::as_i32($final));
         } else {
-            trace_field!(_impl post $field, $pred, $field.signed, $final);
+            trace_field!(_impl post $field, $pred, $field.signed(), $final);
         }
     };
 }
