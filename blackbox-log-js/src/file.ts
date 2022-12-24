@@ -1,5 +1,7 @@
-import { WasmPointer, WasmObject, Module } from './wasm';
-import { Log, Headers } from './log';
+import { Headers, Log } from './log';
+import { WasmPointer } from './wasm';
+
+import type { Module, WasmObject } from './wasm';
 
 export class File implements WasmObject {
 	readonly #wasm: Module;
@@ -12,7 +14,7 @@ export class File implements WasmObject {
 		this.#wasm = wasm.exports;
 
 		const dataPtr = this.#wasm.data_alloc(data.length);
-		if (dataPtr == 0) {
+		if (dataPtr === 0) {
 			throw new Error('file is too large');
 		}
 
@@ -32,8 +34,7 @@ export class File implements WasmObject {
 	}
 
 	get logCount(): number {
-		const ptr = this.#ptr.ptr;
-		return this.#wasm.file_logCount(ptr);
+		return this.#wasm.file_logCount(this.#ptr.ptr);
 	}
 
 	parseHeaders(index: number): Headers | undefined {

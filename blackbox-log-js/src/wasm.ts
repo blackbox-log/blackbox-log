@@ -1,7 +1,7 @@
-export interface WasmObject {
-	free(): void;
+export type WasmObject = {
 	isAlive: boolean;
-}
+	free(): void;
+};
 
 export type Module = {
 	memory: WebAssembly.Memory;
@@ -26,15 +26,14 @@ export type Module = {
 };
 
 export class WasmPointer {
-	#ptr?: number;
-	readonly #free;
-
 	static #dealloc = ({ ptr, free }: { ptr: number; free: (ptr: number) => void }) => {
 		console.log('running dealloc...');
 		free(ptr);
 	};
 
-	#registry = new FinalizationRegistry(WasmPointer.#dealloc);
+	#ptr: number | undefined;
+	readonly #free;
+	readonly #registry = new FinalizationRegistry(WasmPointer.#dealloc);
 
 	constructor(ptr: number, free: (ptr: number) => void) {
 		this.#ptr = ptr;
@@ -43,7 +42,7 @@ export class WasmPointer {
 	}
 
 	free() {
-		if (this.#ptr != null) {
+		if (this.#ptr !== undefined) {
 			this.#free(this.#ptr);
 			this.#registry.unregister(this);
 			this.#ptr = undefined;
@@ -51,11 +50,11 @@ export class WasmPointer {
 	}
 
 	get isAlive(): boolean {
-		return this.#ptr != null;
+		return this.#ptr !== undefined;
 	}
 
 	get ptr(): number {
-		if (this.#ptr == null) {
+		if (this.#ptr === undefined) {
 			throw new Error('backing WebAssembly object has been freed');
 		}
 

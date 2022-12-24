@@ -3,3 +3,7 @@ singleQuote = true
 tabWidth = 4
 trailingComma = "all"
 useTabs = true
+
+[[overrides]]
+files = "**.yaml"
+options.tabWidth = 2
