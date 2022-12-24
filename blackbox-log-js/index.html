@@ -76,8 +76,8 @@
 
 				const log = file.parseLog(value - 1);
 				document.querySelector('#firmware-revision').innerText = log.firmwareRevision;
-				document.querySelector('#board-info').innerText = log.boardInfo;
-				document.querySelector('#craft-name').innerText = log.craftName;
+				document.querySelector('#board-info').innerText = log.boardInfo ?? '';
+				document.querySelector('#craft-name').innerText = log.craftName ?? '';
 				document.querySelector('#main-count').innerText = log.mainFrameCount;
 				document.querySelector('#gps-count').innerText = log.gpsFrameCount;
 			}
