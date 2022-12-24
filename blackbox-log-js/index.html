@@ -34,7 +34,7 @@
 			GPS frames: <span id="gps-count"></span>
 		</p>
 
-		<script type="module">
+		<script async type="module">
 			import { File, init } from './src/main.ts';
 
 			const wasm = await init();
@@ -48,7 +48,7 @@
 				const view = new Uint8Array(buffer);
 				file = new File(wasm, view);
 
-				logNum.value = file.logCount > 0 ? 1 : null;
+				logNum.value = file.logCount > 0 ? 1 : undefined;
 				logNum.max = file.logCount;
 				document.querySelector('#log-count').innerText = file.logCount;
 				logHandler();
@@ -65,7 +65,7 @@
 				const { value } = logNum;
 				const logInfo = document.querySelector('#log-info');
 
-				if (value == null) {
+				if (value === undefined) {
 					logNum.disabled = true;
 					logInfo.classList.add('hidden');
 					return;
