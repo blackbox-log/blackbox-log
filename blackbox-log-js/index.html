@@ -1,90 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>blackbox-log</title>
 
-<head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>blackbox-log</title>
+		<style>
+			.hidden {
+				display: none;
+			}
+		</style>
+	</head>
 
-	<style>
-		.hidden {
-			display: none;
-		}
-	</style>
-</head>
-
-<body>
-	<input id="upload" type="file" />
-	<br />
-	<button id="run" type="file">Run</button>
-
-	<p>Log count: <span id="log-count">0</span></p>
-	<p>
-		<label for="log">Log:</label>
-		<input id="log" type="number" min="1" disabled />
-	</p>
-	<p id="log-info" class="hidden">
-		Firmware revision: <span id="firmware-revision"></span>
+	<body>
+		<input id="upload" type="file" />
 		<br />
-		Board info: <span id="board-info"></span>
-		<br />
-		Craft name: <span id="craft-name"></span>
-		<br />
-		Main frames: <span id="main-count"></span>
-		<br />
-		GPS frames: <span id="gps-count"></span>
-	</p>
+		<button id="run" type="file">Run</button>
 
-	<script type="module">
-		import {File, init} from './src/main.ts';
+		<p>Log count: <span id="log-count">0</span></p>
+		<p>
+			<label for="log">Log:</label>
+			<input id="log" type="number" min="1" disabled />
+		</p>
+		<p id="log-info" class="hidden">
+			Firmware revision: <span id="firmware-revision"></span>
+			<br />
+			Board info: <span id="board-info"></span>
+			<br />
+			Craft name: <span id="craft-name"></span>
+			<br />
+			Main frames: <span id="main-count"></span>
+			<br />
+			GPS frames: <span id="gps-count"></span>
+		</p>
 
-		const wasm = await init();
-		let file;
+		<script type="module">
+			import { File, init } from './src/main.ts';
 
-		const upload = document.querySelector('#upload');
-		const logNum = document.querySelector('#log');
+			const wasm = await init();
+			let file;
 
-		async function fileHandler() {
-			const buffer = await upload.files[0].arrayBuffer();
-			const view = new Uint8Array(buffer);
-			file = new File(wasm, view);
+			const upload = document.querySelector('#upload');
+			const logNum = document.querySelector('#log');
 
-			logNum.value = file.logCount > 0 ? 1 : null;
-			logNum.max = file.logCount;
-			document.querySelector('#log-count').innerText = file.logCount;
-			logHandler();
-		}
+			async function fileHandler() {
+				const buffer = await upload.files[0].arrayBuffer();
+				const view = new Uint8Array(buffer);
+				file = new File(wasm, view);
 
-		upload.addEventListener('change', fileHandler);
-		document.querySelector('#run').addEventListener('click', fileHandler);
-
-		if (upload.files.length > 0) {
-			fileHandler();
-		}
-
-		function logHandler() {
-			const {value} = logNum;
-			const logInfo = document.querySelector('#log-info');
-
-			if (value == null) {
-				logNum.disabled = true;
-				logInfo.classList.add('hidden');
-				return;
+				logNum.value = file.logCount > 0 ? 1 : null;
+				logNum.max = file.logCount;
+				document.querySelector('#log-count').innerText = file.logCount;
+				logHandler();
 			}
 
-			logNum.disabled = false;
-			logInfo.classList.remove('hidden');
+			upload.addEventListener('change', fileHandler);
+			document.querySelector('#run').addEventListener('click', fileHandler);
 
-			const log = file.parseLog(value - 1);
-			document.querySelector('#firmware-revision').innerText = log.firmwareRevision;
-			document.querySelector('#board-info').innerText = log.boardInfo;
-			document.querySelector('#craft-name').innerText = log.craftName;
-			document.querySelector('#main-count').innerText = log.mainFrameCount;
-			document.querySelector('#gps-count').innerText = log.gpsFrameCount;
-		}
+			if (upload.files.length > 0) {
+				fileHandler();
+			}
 
-		logNum.addEventListener('change', logHandler);
-	</script>
-</body>
+			function logHandler() {
+				const { value } = logNum;
+				const logInfo = document.querySelector('#log-info');
 
+				if (value == null) {
+					logNum.disabled = true;
+					logInfo.classList.add('hidden');
+					return;
+				}
+
+				logNum.disabled = false;
+				logInfo.classList.remove('hidden');
+
+				const log = file.parseLog(value - 1);
+				document.querySelector('#firmware-revision').innerText = log.firmwareRevision;
+				document.querySelector('#board-info').innerText = log.boardInfo;
+				document.querySelector('#craft-name').innerText = log.craftName;
+				document.querySelector('#main-count').innerText = log.mainFrameCount;
+				document.querySelector('#gps-count').innerText = log.gpsFrameCount;
+			}
+
+			logNum.addEventListener('change', logHandler);
+		</script>
+	</body>
 </html>
