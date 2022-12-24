@@ -4,7 +4,6 @@ specifiers:
   typescript: ^4.6.4
   typescript-memoize: ^1.1.1
   vite: ^3.2.3
-  vite-plugin-wasm: ^3.1.0
 
 dependencies:
   typescript-memoize: 1.1.1
@@ -12,7 +11,6 @@ dependencies:
 devDependencies:
   typescript: 4.9.3
   vite: 3.2.4
-  vite-plugin-wasm: 3.1.0
 
 packages:
 
@@ -327,19 +325,6 @@ packages:
     resolution: {integrity: sha512-CIfGzTelbKNEnLpLdGFgdyKhG23CKdKgQPOBc+OUNrkJ2vr+KSzsSV5kq5iWhEQbok+quxgGzrAtGWCyU7tHnA==}
     engines: {node: '>=4.2.0'}
     hasBin: true
-    dev: true
-
-  /vite-plugin-wasm/3.1.0:
-    resolution: {integrity: sha512-RzqOR+zMqqNZOhplq7XM9bkFNfW/Cs1VVj7p+aAdOznCBGwxYLqqzLGxuRwTV31HOGtDGjA8nvgcZG3GwmeVZQ==}
-    dependencies:
-      vite: 3.2.4
-    transitivePeerDependencies:
-      - '@types/node'
-      - less
-      - sass
-      - stylus
-      - sugarss
-      - terser
     dev: true
 
   /vite/3.2.4:
