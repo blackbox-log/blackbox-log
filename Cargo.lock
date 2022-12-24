@@ -118,6 +118,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "blackbox-log-wasm"
+version = "0.1.0"
+dependencies = [
+ "blackbox-log",
+]
+
+[[package]]
 name = "blackbox-sys"
 version = "0.1.0"
 dependencies = [

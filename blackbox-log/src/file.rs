@@ -21,6 +21,7 @@ impl<'data> File<'data> {
         Self { offsets, data }
     }
 
+    #[inline]
     /// Returns the number of log start markers in the file.
     pub fn log_count(&self) -> usize {
         self.offsets.len()
