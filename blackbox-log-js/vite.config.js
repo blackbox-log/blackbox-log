@@ -1,6 +1,6 @@
-import { viteStaticCopy as staticCopy } from 'vite-plugin-static-copy';
 import fs from 'fs';
 import { defineConfig } from 'vite';
+import { viteStaticCopy as staticCopy } from 'vite-plugin-static-copy';
 
 export default defineConfig({
 	build: {
