@@ -284,6 +284,26 @@ fn main() -> Result<()> {
 
             cmd!(sh, "cargo install --locked --").args(tools).run()
         }
+
+        Args::Wasm => {
+            let _push_dir = sh.push_dir(get_root(&sh)?);
+
+            let target = "wasm32-unknown-unknown";
+            cmd!(
+                sh,
+                "cargo build --package blackbox-log-wasm --target {target} --release"
+            )
+            .run()?;
+
+            #[rustfmt::skip]
+            cmd!(
+                sh,
+                "wasm-opt -O3 target/{target}/release/blackbox_log_wasm.wasm -o blackbox-log-js/src/blackbox-log.wasm"
+            )
+            .run()?;
+
+            Ok(())
+        }
     }
 }
 
@@ -374,6 +394,11 @@ enum Args {
     #[bpaf(command)]
     /// Installs necessary dev tools
     Install,
+
+    #[bpaf(command)]
+    /// Builds and optimizes the WebAssembly build of blackbox-log-wasm and adds
+    /// it to blackbox-log-js
+    Wasm,
 }
 
 #[derive(Debug, Clone, Bpaf)]
