@@ -35,9 +35,13 @@
 		</p>
 
 		<script async type="module">
-			import { File, init } from './src/main.ts';
+			// import Parser from './src/main.ts';
+			// const parser = await Parser.init();
 
-			const wasm = await init();
+			import Parser from './src/slim.ts';
+			import wasm from './src/blackbox-log.wasm?url';
+			const parser = await Parser.init(wasm);
+
 			let file;
 
 			const upload = document.querySelector('#upload');
@@ -46,7 +50,7 @@
 			async function fileHandler() {
 				const buffer = await upload.files[0].arrayBuffer();
 				const view = new Uint8Array(buffer);
-				file = new File(wasm, view);
+				file = parser.loadFile(view);
 
 				logNum.value = file.logCount > 0 ? 1 : undefined;
 				logNum.max = file.logCount;

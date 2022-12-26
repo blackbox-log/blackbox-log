@@ -1,19 +1,19 @@
 import { Memoize as memoize } from 'typescript-memoize';
 
 import { getOptionalWasmStr, getWasmStr } from './str';
-import { type Module, type WasmObject, WasmPointer } from './wasm';
+import { type WasmExports, type WasmObject, WasmPointer } from './wasm';
 
-type HeaderView = {
+export type HeaderView = {
 	firmwareRevision: string;
 	boardInfo: string | undefined;
 	craftName: string | undefined;
 };
 
 export class Headers implements HeaderView, WasmObject {
-	readonly #wasm: Module;
+	readonly #wasm: WasmExports;
 	readonly #ptr: WasmPointer;
 
-	constructor(wasm: Module, file: number, log: number) {
+	constructor(wasm: WasmExports, file: number, log: number) {
 		this.#wasm = wasm;
 		const ptr = this.#wasm.file_getHeaders(file, log);
 		this.#ptr = new WasmPointer(ptr, this.#wasm.headers_free);
@@ -47,10 +47,10 @@ export class Headers implements HeaderView, WasmObject {
 }
 
 export class Log implements HeaderView, WasmObject {
-	readonly #wasm: Module;
+	readonly #wasm: WasmExports;
 	readonly #ptr: WasmPointer;
 
-	constructor(wasm: Module, file: number, log: number) {
+	constructor(wasm: WasmExports, file: number, log: number) {
 		this.#wasm = wasm;
 		const ptr = this.#wasm.file_getLog(file, log);
 		this.#ptr = new WasmPointer(ptr, this.#wasm.log_free);

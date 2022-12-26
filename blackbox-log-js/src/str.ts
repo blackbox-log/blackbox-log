@@ -1,6 +1,6 @@
-import type { Module } from './wasm';
+import type { WasmExports } from './wasm';
 
-export function getWasmStr(ptr: number, wasm: Module): string {
+export function getWasmStr(ptr: number, wasm: WasmExports): string {
 	try {
 		const [len, strPtr] = new Uint32Array(wasm.memory.buffer, ptr, 2);
 		const bytes = new Uint8Array(wasm.memory.buffer, strPtr, len);
@@ -15,7 +15,7 @@ export function getWasmStr(ptr: number, wasm: Module): string {
 	}
 }
 
-export function getOptionalWasmStr(ptr: number, wasm: Module): string | undefined {
+export function getOptionalWasmStr(ptr: number, wasm: WasmExports): string | undefined {
 	if (ptr === 0) {
 		return undefined;
 	}

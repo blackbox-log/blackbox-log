@@ -1,17 +1,17 @@
 import { Headers, Log } from './log';
 import { WasmPointer } from './wasm';
 
-import type { Module, WasmObject } from './wasm';
+import type { WasmExports, WasmObject } from './wasm';
 
 export class File implements WasmObject {
-	readonly #wasm: Module;
+	readonly #wasm: WasmExports;
 	readonly #ptr: WasmPointer;
 
 	#headers: Array<WeakRef<Headers>> = [];
 	#logs: Array<WeakRef<Log>> = [];
 
-	constructor(wasm: WebAssembly.Instance & { exports: Module }, data: Uint8Array) {
-		this.#wasm = wasm.exports;
+	constructor(wasm: WasmExports, data: Uint8Array) {
+		this.#wasm = wasm;
 
 		const dataPtr = this.#wasm.data_alloc(data.length);
 		if (dataPtr === 0) {

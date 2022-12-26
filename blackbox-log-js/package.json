@@ -3,6 +3,22 @@
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
+	"files": [
+		"dist"
+	],
+	"main": "./dist/main.cjs",
+	"module": "./dist/slim.js",
+	"exports": {
+		".": {
+			"import": "./dist/main.js",
+			"require": "./dist/main.cjs"
+		},
+		"./slim": {
+			"import": "./dist/slim.js",
+			"require": "./dist/slim.cjs"
+		},
+		"./wasm": "./dist/blackbox-log.wasm"
+	},
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc && vite build",
@@ -23,7 +39,8 @@
 		"eslint-plugin-prettier": "^4.2.1",
 		"prettier": "^2.8.1",
 		"typescript": "^4.6.4",
-		"vite": "^3.2.3"
+		"vite": "^3.2.3",
+		"vite-plugin-static-copy": "^0.13.0"
 	},
 	"dependencies": {
 		"typescript-memoize": "^1.1.1"

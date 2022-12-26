@@ -3,7 +3,7 @@ export type WasmObject = {
 	free(): void;
 };
 
-export type Module = {
+export type WasmExports = {
 	memory: WebAssembly.Memory;
 
 	data_alloc: (length: number) => number;
