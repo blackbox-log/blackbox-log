@@ -23,7 +23,8 @@ Neither is all that great for building other software with:
   JavaScript, which limits the places it can reasonably be embedded.
 
 This project aims to fill that niche. An ergonomic, up-to-date API usable
-anywhere that supports Rust or (soon) WebAssembly.
+anywhere that supports Rust or
+([soon](https://github.com/wetheredge/blackbox/tree/wasm)) WebAssembly.
 
 ## Roadmap
 
