@@ -4,6 +4,10 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "/blackbox-log-js"
+    schedule:
+      interval: "daily"
   - package-ecosystem: "gitsubmodule"
     directory: "/"
     schedule:
