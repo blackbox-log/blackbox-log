@@ -13,6 +13,7 @@ export default defineConfig({
 				return `${entry}.${ext}`;
 			},
 		},
+		sourcemap: true,
 	},
 	plugins: [
 		{
@@ -21,7 +22,10 @@ export default defineConfig({
 				if (id.endsWith('.wasm?inline')) {
 					const path = id.replace('?inline', '');
 					const wasm = await fs.promises.readFile(path, { encoding: 'base64' });
-					return `export default '${wasm}'`;
+					return {
+						code: `export default '${wasm}'`,
+						map: { mappings: '' },
+					};
 				}
 			},
 		},
