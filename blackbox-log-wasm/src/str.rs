@@ -1,27 +1,20 @@
-use crate::borrowing::Borrowing;
-use crate::WasmFfi;
-
+// The string data will be immediately copied out by JS, so this doesn't use
+// `Borrowing`. That way it can be passed by value and doesn't need a `*_free`
+// function. `wasm-bindgen` does something similar in the impl of `IntoWasmAbi`
+// for `str`.
 #[repr(C)]
-pub(crate) struct WasmStr {
-    len: u32,
-    ptr: *const u8,
-}
+pub struct WasmStr(usize, *const u8);
 
-pub struct LogStr(Borrowing<WasmStr, Box<[u8]>>);
-
-impl LogStr {
-    pub(crate) fn new(s: Borrowing<&str, Box<[u8]>>) -> Self {
-        Self(s.map(|s| {
-            let len = s.len().try_into().unwrap_or(u32::MAX);
-            let ptr = s.as_ptr();
-            WasmStr { len, ptr }
-        }))
+impl From<&str> for WasmStr {
+    #[inline]
+    fn from(s: &str) -> Self {
+        Self(s.len(), s.as_ptr())
     }
 }
 
-impl WasmFfi for LogStr {}
-
-#[no_mangle]
-pub unsafe extern "wasm" fn str_free(ptr: *mut LogStr) {
-    LogStr::drop(ptr);
+impl From<Option<&str>> for WasmStr {
+    #[inline]
+    fn from(s: Option<&str>) -> Self {
+        s.map_or(Self(0, std::ptr::null()), Self::from)
+    }
 }

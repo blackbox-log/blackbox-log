@@ -1,8 +1,6 @@
-use std::ptr;
-
 use blackbox_log::{Headers, Log, Reader};
 
-use crate::str::LogStr;
+use crate::str::WasmStr;
 use crate::{Borrowing, WasmFfi};
 
 pub struct WasmHeaders(Borrowing<Headers<'static>, Box<[u8]>>);
@@ -55,7 +53,7 @@ pub unsafe extern "wasm" fn log_free(ptr: *mut WasmLog) {
 
 #[no_mangle]
 #[allow(non_snake_case)]
-pub unsafe extern "wasm" fn headers_firmwareRevision(ptr: *mut (), is_log: bool) -> *mut LogStr {
+pub unsafe extern "wasm" fn headers_firmwareRevision(ptr: *mut (), is_log: bool) -> WasmStr {
     let get = |headers: &Headers<'static>| headers.firmware_revision;
 
     let firmware = if is_log {
@@ -70,13 +68,12 @@ pub unsafe extern "wasm" fn headers_firmwareRevision(ptr: *mut (), is_log: bool)
         firmware
     };
 
-    let firmware = LogStr::new(firmware);
-    Box::new(firmware).into_wasm()
+    (*firmware).into()
 }
 
 #[no_mangle]
 #[allow(non_snake_case)]
-pub unsafe extern "wasm" fn headers_boardInfo(ptr: *mut (), is_log: bool) -> *mut LogStr {
+pub unsafe extern "wasm" fn headers_boardInfo(ptr: *mut (), is_log: bool) -> WasmStr {
     let get = |headers: &Headers<'static>| headers.board_info;
 
     let info = if is_log {
@@ -91,14 +88,12 @@ pub unsafe extern "wasm" fn headers_boardInfo(ptr: *mut (), is_log: bool) -> *mu
         info
     };
 
-    info.transpose().map_or(ptr::null_mut(), |name| {
-        Box::new(LogStr::new(name)).into_wasm()
-    })
+    (*info).into()
 }
 
 #[no_mangle]
 #[allow(non_snake_case)]
-pub unsafe extern "wasm" fn headers_craftName(ptr: *mut (), is_log: bool) -> *mut LogStr {
+pub unsafe extern "wasm" fn headers_craftName(ptr: *mut (), is_log: bool) -> WasmStr {
     let get = |headers: &Headers<'static>| headers.craft_name;
 
     let name = if is_log {
@@ -113,9 +108,7 @@ pub unsafe extern "wasm" fn headers_craftName(ptr: *mut (), is_log: bool) -> *mu
         name
     };
 
-    name.transpose().map_or(ptr::null_mut(), |name| {
-        Box::new(LogStr::new(name)).into_wasm()
-    })
+    (*name).into()
 }
 
 #[no_mangle]

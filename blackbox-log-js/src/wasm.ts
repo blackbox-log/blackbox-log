@@ -1,3 +1,9 @@
+import { getOptionalWasmStr, getWasmStr } from './str';
+
+import type { WasmStr } from './str';
+
+export { getWasmStr, getOptionalWasmStr };
+
 export type WasmObject = {
 	isAlive: boolean;
 	free(): void;
@@ -7,7 +13,6 @@ export type WasmExports = {
 	memory: WebAssembly.Memory;
 
 	data_alloc: (length: number) => number;
-	str_free: (ptr: number) => void;
 
 	file_free: (ptr: number) => void;
 	file_new: (ptr: number, length: number) => number;
@@ -16,9 +21,9 @@ export type WasmExports = {
 	file_getLog: (ptr: number, log: number) => number;
 
 	headers_free: (ptr: number) => void;
-	headers_firmwareRevision: (ptr: number, isLog: boolean) => number;
-	headers_boardInfo: (ptr: number, isLog: boolean) => number;
-	headers_craftName: (ptr: number, isLog: boolean) => number;
+	headers_firmwareRevision: (ptr: number, isLog: boolean) => WasmStr;
+	headers_boardInfo: (ptr: number, isLog: boolean) => WasmStr;
+	headers_craftName: (ptr: number, isLog: boolean) => WasmStr;
 
 	log_free: (ptr: number) => void;
 	log_mainFrameCount: (ptr: number) => number;

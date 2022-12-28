@@ -39,15 +39,6 @@ impl<T, D> Borrowing<T, D> {
     }
 }
 
-impl<T, D> Borrowing<Option<T>, D> {
-    pub(crate) fn transpose(self) -> Option<Borrowing<T, D>> {
-        Some(Borrowing {
-            borrower: self.borrower?,
-            data: self.data,
-        })
-    }
-}
-
 impl<T, D> Deref for Borrowing<T, D> {
     type Target = T;
 

@@ -1,7 +1,8 @@
 import { Memoize as memoize } from 'typescript-memoize';
 
-import { getOptionalWasmStr, getWasmStr } from './str';
-import { type WasmExports, type WasmObject, WasmPointer } from './wasm';
+import { WasmPointer, getOptionalWasmStr, getWasmStr } from './wasm';
+
+import type { WasmExports, WasmObject } from './wasm';
 
 export type HeaderView = {
 	firmwareRevision: string;

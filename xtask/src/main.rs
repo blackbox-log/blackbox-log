@@ -298,7 +298,7 @@ fn main() -> Result<()> {
             #[rustfmt::skip]
             cmd!(
                 sh,
-                "wasm-opt -O3 target/{target}/release/blackbox_log_wasm.wasm -o blackbox-log-js/src/blackbox-log.wasm"
+                "wasm-opt -O3 target/{target}/release/blackbox_log_wasm.wasm -o blackbox-log-js/src/blackbox-log.wasm --enable-multivalue"
             )
             .run()?;
 
