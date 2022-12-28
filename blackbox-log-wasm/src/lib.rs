@@ -1,3 +1,4 @@
+#![feature(wasm_abi)]
 #![allow(unsafe_code)]
 
 mod borrowing;
@@ -24,7 +25,7 @@ trait WasmFfi {
 }
 
 #[no_mangle]
-pub extern "C" fn data_alloc(len: usize) -> *mut u8 {
+pub extern "wasm" fn data_alloc(len: usize) -> *mut u8 {
     use std::alloc::{alloc, Layout};
 
     let Ok(layout) = Layout::array::<u8>(len) else { return ptr::null_mut(); };

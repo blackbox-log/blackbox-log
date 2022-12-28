@@ -22,6 +22,6 @@ impl LogStr {
 impl WasmFfi for LogStr {}
 
 #[no_mangle]
-pub unsafe extern "C" fn str_free(ptr: *mut LogStr) {
+pub unsafe extern "wasm" fn str_free(ptr: *mut LogStr) {
     LogStr::drop(ptr);
 }

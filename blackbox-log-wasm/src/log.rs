@@ -20,7 +20,7 @@ impl WasmHeaders {
 impl WasmFfi for WasmHeaders {}
 
 #[no_mangle]
-pub unsafe extern "C" fn headers_free(ptr: *mut WasmHeaders) {
+pub unsafe extern "wasm" fn headers_free(ptr: *mut WasmHeaders) {
     let headers = WasmHeaders::from_wasm(ptr);
     drop(headers);
 }
@@ -48,14 +48,14 @@ impl WasmLog {
 impl WasmFfi for WasmLog {}
 
 #[no_mangle]
-pub unsafe extern "C" fn log_free(ptr: *mut WasmLog) {
+pub unsafe extern "wasm" fn log_free(ptr: *mut WasmLog) {
     let log = WasmLog::from_wasm(ptr);
     drop(log);
 }
 
 #[no_mangle]
 #[allow(non_snake_case)]
-pub unsafe extern "C" fn headers_firmwareRevision(ptr: *mut (), is_log: bool) -> *mut LogStr {
+pub unsafe extern "wasm" fn headers_firmwareRevision(ptr: *mut (), is_log: bool) -> *mut LogStr {
     let get = |headers: &Headers<'static>| headers.firmware_revision;
 
     let firmware = if is_log {
@@ -76,7 +76,7 @@ pub unsafe extern "C" fn headers_firmwareRevision(ptr: *mut (), is_log: bool) ->
 
 #[no_mangle]
 #[allow(non_snake_case)]
-pub unsafe extern "C" fn headers_boardInfo(ptr: *mut (), is_log: bool) -> *mut LogStr {
+pub unsafe extern "wasm" fn headers_boardInfo(ptr: *mut (), is_log: bool) -> *mut LogStr {
     let get = |headers: &Headers<'static>| headers.board_info;
 
     let info = if is_log {
@@ -98,7 +98,7 @@ pub unsafe extern "C" fn headers_boardInfo(ptr: *mut (), is_log: bool) -> *mut L
 
 #[no_mangle]
 #[allow(non_snake_case)]
-pub unsafe extern "C" fn headers_craftName(ptr: *mut (), is_log: bool) -> *mut LogStr {
+pub unsafe extern "wasm" fn headers_craftName(ptr: *mut (), is_log: bool) -> *mut LogStr {
     let get = |headers: &Headers<'static>| headers.craft_name;
 
     let name = if is_log {
@@ -120,7 +120,7 @@ pub unsafe extern "C" fn headers_craftName(ptr: *mut (), is_log: bool) -> *mut L
 
 #[no_mangle]
 #[allow(non_snake_case)]
-pub unsafe extern "C" fn log_mainFrameCount(ptr: *mut WasmLog) -> usize {
+pub unsafe extern "wasm" fn log_mainFrameCount(ptr: *mut WasmLog) -> usize {
     let log = WasmLog::from_wasm(ptr);
     let count = log.main_frame_count();
     log.into_wasm();
@@ -129,7 +129,7 @@ pub unsafe extern "C" fn log_mainFrameCount(ptr: *mut WasmLog) -> usize {
 
 #[no_mangle]
 #[allow(non_snake_case)]
-pub unsafe extern "C" fn log_gpsFrameCount(ptr: *mut WasmLog) -> usize {
+pub unsafe extern "wasm" fn log_gpsFrameCount(ptr: *mut WasmLog) -> usize {
     let log = WasmLog::from_wasm(ptr);
     let count = log.gps_frame_count();
     log.into_wasm();

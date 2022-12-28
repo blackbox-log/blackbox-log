@@ -291,7 +291,7 @@ fn main() -> Result<()> {
             let target = "wasm32-unknown-unknown";
             cmd!(
                 sh,
-                "cargo build --package blackbox-log-wasm --target {target} --release"
+                "cargo +nightly build --package blackbox-log-wasm --target {target} --release"
             )
             .run()?;
 
