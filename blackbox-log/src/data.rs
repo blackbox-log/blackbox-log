@@ -2,7 +2,7 @@
 
 use alloc::vec::Vec;
 
-use crate::event::{self, Event};
+use crate::event::Event;
 use crate::frame::{DataFrameKind, FrameKind, GpsFrame, GpsHomeFrame, MainFrame, SlowFrame};
 use crate::parser::InternalError;
 use crate::{Headers, Reader};
@@ -113,12 +113,18 @@ impl Data {
             tracing::trace!("trying to parse {kind:?} frame");
 
             let result = match kind {
-                FrameKind::Event => match Event::parse_into(data, &mut events) {
-                    Ok(event::EventKind::End) => {
-                        tracing::trace!("found the end event");
-                        break;
+                FrameKind::Event => match Event::parse(data) {
+                    Ok(event) => {
+                        let is_end = matches!(event, Event::End { .. });
+                        events.push(event);
+
+                        if is_end {
+                            tracing::trace!("found the end event");
+                            break;
+                        }
+
+                        Ok(())
                     }
-                    Ok(_) => Ok(()),
                     Err(err) => Err(err),
                 },
                 FrameKind::Data(DataFrameKind::Intra | DataFrameKind::Inter) => {

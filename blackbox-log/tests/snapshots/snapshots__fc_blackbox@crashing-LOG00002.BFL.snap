@@ -119,7 +119,9 @@ input_file: ".modules/fc-blackbox/src/test-data/crashing-LOG00002.BFL"
       ),
     ),
     events: [
-      End,
+      End(
+        disarm_reason: None,
+      ),
     ],
     main: Fields([
       FieldSnapshot(

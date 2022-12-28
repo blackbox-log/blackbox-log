@@ -134,7 +134,9 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00037.BFL"
     events: [
       SyncBeep(451840837),
       Disarm(4),
-      End,
+      End(
+        disarm_reason: None,
+      ),
     ],
     main: Fields([
       FieldSnapshot(

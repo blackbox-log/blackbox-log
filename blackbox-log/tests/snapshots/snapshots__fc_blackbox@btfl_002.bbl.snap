@@ -142,7 +142,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_002.bbl"
         last_flags: 268435459,
       ),
       Disarm(4),
-      End,
+      End(
+        disarm_reason: None,
+      ),
     ],
     main: Fields([
       FieldSnapshot(

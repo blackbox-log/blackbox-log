@@ -138,7 +138,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_001.bbl"
         last_flags: 1,
       ),
       Disarm(4),
-      End,
+      End(
+        disarm_reason: None,
+      ),
     ],
     main: Fields([
       FieldSnapshot(
@@ -648,7 +650,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_001.bbl"
         last_flags: 1,
       ),
       Disarm(4),
-      End,
+      End(
+        disarm_reason: None,
+      ),
     ],
     main: Fields([
       FieldSnapshot(
