@@ -293,12 +293,13 @@ fn main() -> Result<()> {
                 sh,
                 "cargo +nightly build --package blackbox-log-wasm --target {target} --release"
             )
+            .env("RUSTFLAGS", "-C target-feature=+bulk-memory")
             .run()?;
 
             #[rustfmt::skip]
             cmd!(
                 sh,
-                "wasm-opt -O3 target/{target}/release/blackbox_log_wasm.wasm -o blackbox-log-js/src/blackbox-log.wasm --enable-multivalue"
+                "wasm-opt -O3 target/{target}/release/blackbox_log_wasm.wasm -o blackbox-log-js/src/blackbox-log.wasm --enable-multivalue --enable-bulk-memory"
             )
             .run()?;
 
