@@ -13,6 +13,8 @@ export default defineConfig({
 				return `${entry}.${ext}`;
 			},
 		},
+		// Vite default + wasm sign-extension, multi-value, and bulk memory
+		target: ['es2020', 'firefox79', 'safari15', 'chrome87', 'edge88'],
 		sourcemap: true,
 	},
 	plugins: [
