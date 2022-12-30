@@ -6,7 +6,7 @@
 [![license](https://img.shields.io/github/license/wetheredge/blackbox)](https://github.com/wetheredge/blackbox/blob/main/COPYING)
 
 This is a Rust port of the Betaflight and INAV blackbox tools. It includes a
-[Rust library](./blackbox-log) and a [cli](./blackbox-log-cli).
+[Rust library](./blackbox-log) and a [cli](./bbl2csv).
 
 ## Why?
 

@@ -1,4 +1,4 @@
-# `blackbox-log-cli`
+# `bbl2csv`
 
 [![license](https://img.shields.io/github/license/wetheredge/blackbox)](https://github.com/wetheredge/blackbox/blob/main/COPYING)
 
@@ -7,8 +7,8 @@ This is a cli frontend for `blackbox-log` inspired by the original
 
 ## Feature comparison
 
-|                          | `blackbox_decode` | `blackbox-log-cli` |
-|--------------------------|:-----------------:|:------------------:|
+|                          | `blackbox_decode` | `bbl2csv` |
+|--------------------------|:-----------------:|:---------:|
 | Log format v1            | ✔️ | ❌ |
 | Recent Betaflight logs   | ❌ | ✔️ |
 | Raw output               | ✔️ | ❌ |

@@ -61,6 +61,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e1b586273c5702936fe7b7d6896644d8be71e6314cfe09d3167c95f712589e8"
 
 [[package]]
+name = "bbl2csv"
+version = "0.1.0"
+dependencies = [
+ "blackbox-log",
+ "exitcode",
+ "lexopt",
+ "mimalloc",
+ "rayon",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "bitflags"
 version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -102,19 +115,6 @@ dependencies = [
  "test-case",
  "tracing",
  "uom",
-]
-
-[[package]]
-name = "blackbox-log-cli"
-version = "0.1.0"
-dependencies = [
- "blackbox-log",
- "exitcode",
- "lexopt",
- "mimalloc",
- "rayon",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]
