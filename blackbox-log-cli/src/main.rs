@@ -60,15 +60,7 @@ fn main() {
 
         let file = blackbox_log::File::new(&data);
 
-        let log_count = file.log_count();
-        if cli.stdout && log_count > 1 && cli.index.len() != 1 {
-            tracing::error!(
-                "found {log_count} logs, choose exactly one to write to stdout with `--index`"
-            );
-            return Err(exitcode::USAGE);
-        }
-
-        (0..log_count).into_par_iter().try_for_each(|i| {
+        (0..file.log_count()).into_par_iter().try_for_each(|i| {
             let human_i = i + 1;
 
             let span = tracing::info_span!("log", index = human_i);
@@ -94,14 +86,14 @@ fn main() {
                 data
             };
 
-            let mut out = get_output(cli.stdout, filename, human_i, "csv")?;
+            let mut out = get_output(filename, human_i, "csv")?;
             if let Err(error) = write_csv(&mut out, &data) {
                 tracing::error!(%error, "failed to write csv");
                 return Err(exitcode::IOERR);
             }
 
             if cli.gps.separate {
-                let mut out = get_output(cli.stdout, filename, human_i, "gps.csv")?;
+                let mut out = get_output(filename, human_i, "gps.csv")?;
                 if let Err(error) = write_csv(&mut out, &data) {
                     tracing::error!(%error, "failed to write gps csv");
                     return Err(exitcode::IOERR);
@@ -118,27 +110,21 @@ fn main() {
 }
 
 fn get_output(
-    stdout: bool,
     filename: &Path,
     index: usize,
     extension: &str,
-) -> Result<BufWriter<Box<dyn Write>>, exitcode::ExitCode> {
-    let out: Box<dyn Write> = if stdout {
-        Box::new(io::stdout().lock())
-    } else {
-        let mut out = filename.to_owned();
-        out.set_extension(format!("{index:0>2}.{extension}"));
+) -> Result<BufWriter<File>, exitcode::ExitCode> {
+    let mut out = filename.to_owned();
+    out.set_extension(format!("{index:0>2}.{extension}"));
 
-        let file = File::create(&out).map_err(|error| {
-            tracing::error!(%error, file = %out.display(), "failed to open output file");
-            exitcode::CANTCREAT
-        })?;
+    let file = File::create(&out).map_err(|error| {
+        tracing::error!(%error, file = %out.display(), "failed to open output file");
+        exitcode::CANTCREAT
+    })?;
 
-        tracing::info!("Writing to '{}'", out.display());
-        Box::new(file)
-    };
+    tracing::info!("Writing to '{}'", out.display());
 
-    Ok(BufWriter::new(out))
+    Ok(BufWriter::new(file))
 }
 
 fn write_csv<'v: 'd, 'd, V: LogView<'v, 'd>>(out: &mut impl Write, log: &'v V) -> io::Result<()>

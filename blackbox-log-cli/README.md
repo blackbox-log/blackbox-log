@@ -12,6 +12,7 @@ This is a cli frontend for `blackbox-log` inspired by the original
 | Log format v1            | ✔️ | ❌ |
 | Recent Betaflight logs   | ❌ | ✔️ |
 | Raw output               | ✔️ | ❌ |
+| Write output to stdout   | ✔️ | ❌ |
 | Current meter simulation | ✔️ | ❌ |
 | IMU simulation           | ✔️ | ❌ |
 | Change output units      | ✔️ | ❌ |
