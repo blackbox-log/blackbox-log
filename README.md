@@ -34,7 +34,6 @@ anywhere that supports Rust or
     - [ ] 4.4
   - [ ] INAV (versions TBD)
   - [ ] EmuFlight (versions TBD)
-- [ ] GPX output from `blackbox-log-cli`
 - [ ] WebAssembly
   - [ ] JavaScript
 - [ ] Future: web-native log viewer?

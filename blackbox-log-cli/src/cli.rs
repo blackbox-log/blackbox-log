@@ -34,7 +34,7 @@ OPTIONS:
                                   (applies to all files & can be repeated)
       --limits                    Print the limits and range of each field (TODO)
       --altitude-offset <offset>  Altitude offset in meters (TODO)
-      --gps <format>              One or more formats for GPS data (merged, separate (csv), gpx)
+      --gps                       Write GPS data into .gps.csv files
   -f, --filter <fields>           Select fields to output by name, excluding any suffixed index
                                   (comma separated)
   -v, --verbose                   Increase debug output up to {max_verbose} times
@@ -61,17 +61,10 @@ pub(crate) struct Cli {
     pub index: Vec<usize>,
     pub limits: bool,
     pub altitude_offset: i16,
-    pub gps: GpsFormats,
+    pub gps: bool,
     pub filter: Option<Vec<String>>,
     pub verbosity: LevelFilter,
     pub logs: Vec<PathBuf>,
-}
-
-#[derive(Debug, Clone, Copy, Default)]
-pub(crate) struct GpsFormats {
-    pub merged: bool,
-    pub separate: bool,
-    pub gpx: bool,
 }
 
 impl Cli {
@@ -81,7 +74,7 @@ impl Cli {
         let mut index = Vec::new();
         let mut limits = false;
         let mut altitude_offset = 0;
-        let mut gps = GpsFormats::default();
+        let mut gps = false;
         let mut filter = None;
         let mut verbosity = DEFAULT_VERBOSITY;
         let mut logs = Vec::new();
@@ -91,12 +84,7 @@ impl Cli {
                 Short('i') | Long("index") => index.push(parser.value()?.parse()?),
                 Long("limits") => limits = true,
                 Long("altitude-offset") => altitude_offset = parser.value()?.parse()?,
-                Long("gps") => match parser.value()?.into_string().as_deref() {
-                    Ok("merged") => gps.merged = true,
-                    Ok("separate") => gps.separate = true,
-                    Ok("gpx") => gps.gpx = true,
-                    _ => return Err("expected merged, separate, or gpx".into()),
-                },
+                Long("gps") => gps = true,
                 Short('f') | Long("filter") => {
                     filter = Some(parser.value()?.parse_with::<_, _, Infallible>(|s| {
                         Ok(s.split(',')

@@ -13,6 +13,7 @@ This is a cli frontend for `blackbox-log` inspired by the original
 | Recent Betaflight logs   | ❌ | ✔️ |
 | Raw output               | ✔️ | ❌ |
 | Write output to stdout   | ✔️ | ❌ |
+| GPS data                 | merged, separate, or gpx | separate |
 | Current meter simulation | ✔️ | ❌ |
 | IMU simulation           | ✔️ | ❌ |
 | Change output units      | ✔️ | ❌ |

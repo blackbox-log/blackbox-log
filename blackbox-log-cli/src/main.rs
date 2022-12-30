@@ -73,11 +73,7 @@ fn main() {
             })?;
 
             let data = {
-                let mut data = if cli.gps.merged {
-                    log.merged_data()
-                } else {
-                    log.data()
-                };
+                let mut data = log.data();
 
                 if let Some(filter) = &cli.filter {
                     data.update_filter(filter);
@@ -92,7 +88,7 @@ fn main() {
                 return Err(exitcode::IOERR);
             }
 
-            if cli.gps.separate {
+            if cli.gps {
                 let mut out = get_output(filename, human_i, "gps.csv")?;
                 if let Err(error) = write_csv(&mut out, &data) {
                     tracing::error!(%error, "failed to write gps csv");
