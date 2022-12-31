@@ -17,7 +17,7 @@ export class Headers implements HeaderView, WasmObject {
 	constructor(wasm: WasmExports, file: number, log: number) {
 		this.#wasm = wasm;
 		const ptr = this.#wasm.file_getHeaders(file, log);
-		this.#ptr = new WasmPointer(ptr, this.#wasm.headers_free);
+		this.#ptr = new WasmPointer(ptr, wasm.headers_free);
 	}
 
 	free() {
@@ -54,7 +54,7 @@ export class Log implements HeaderView, WasmObject {
 	constructor(wasm: WasmExports, file: number, log: number) {
 		this.#wasm = wasm;
 		const ptr = this.#wasm.file_getLog(file, log);
-		this.#ptr = new WasmPointer(ptr, this.#wasm.log_free);
+		this.#ptr = new WasmPointer(ptr, wasm.log_free);
 	}
 
 	free() {

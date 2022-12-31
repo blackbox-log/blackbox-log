@@ -30,26 +30,27 @@ export type WasmExports = {
 	log_gpsFrameCount: (ptr: number) => number;
 };
 
-export class WasmPointer {
-	static #dealloc = ({ ptr, free }: { ptr: number; free: (ptr: number) => void }) => {
-		console.log('running dealloc...');
-		free(ptr);
-	};
+const registry = new FinalizationRegistry(dealloc);
 
+function dealloc({ ptr, free }: { ptr: number; free: (ptr: number) => void }) {
+	console.log(`running dealloc for ${ptr}`);
+	free(ptr);
+}
+
+export class WasmPointer {
 	#ptr: number | undefined;
 	readonly #free;
-	readonly #registry = new FinalizationRegistry(WasmPointer.#dealloc);
 
 	constructor(ptr: number, free: (ptr: number) => void) {
 		this.#ptr = ptr;
 		this.#free = free;
-		this.#registry.register(this, { ptr, free }, this);
+		registry.register(this, { ptr, free }, this);
 	}
 
 	free() {
 		if (this.#ptr !== undefined) {
 			this.#free(this.#ptr);
-			this.#registry.unregister(this);
+			registry.unregister(this);
 			this.#ptr = undefined;
 		}
 	}

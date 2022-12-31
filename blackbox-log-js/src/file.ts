@@ -22,7 +22,7 @@ export class File implements WasmObject {
 		buffer.set(data);
 
 		const filePtr = this.#wasm.file_new(dataPtr, data.length);
-		this.#ptr = new WasmPointer(filePtr, this.#wasm.file_free);
+		this.#ptr = new WasmPointer(filePtr, wasm.file_free);
 	}
 
 	free() {
