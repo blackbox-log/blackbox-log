@@ -5,7 +5,7 @@ use blackbox_log::File;
 use crate::log::{WasmHeaders, WasmLog};
 use crate::{Borrowing, WasmFfi};
 
-pub struct WasmFile(Borrowing<File<'static>, Box<[u8]>>);
+pub struct WasmFile(Borrowing<File<'static>>);
 
 impl WasmFile {
     pub fn new(data: Box<[u8]>) -> Self {

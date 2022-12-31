@@ -3,14 +3,14 @@ use blackbox_log::{Headers, Log, Reader};
 use crate::str::WasmStr;
 use crate::{Borrowing, WasmFfi};
 
-pub struct WasmHeaders(Borrowing<Headers<'static>, Box<[u8]>>);
+pub struct WasmHeaders(Borrowing<Headers<'static>>);
 
 impl WasmHeaders {
-    pub(crate) fn new(reader: Borrowing<Reader<'static>, Box<[u8]>>) -> Self {
+    pub(crate) fn new(reader: Borrowing<Reader<'static>>) -> Self {
         Self(reader.map(|mut reader| Headers::parse(&mut reader).unwrap()))
     }
 
-    fn get_header<T>(&self, get: impl FnOnce(&Headers<'static>) -> T) -> Borrowing<T, Box<[u8]>> {
+    fn get_header<T>(&self, get: impl FnOnce(&Headers<'static>) -> T) -> Borrowing<T> {
         self.0.new_borrow(get)
     }
 }
@@ -23,14 +23,14 @@ pub unsafe extern "wasm" fn headers_free(ptr: *mut WasmHeaders) {
     drop(headers);
 }
 
-pub struct WasmLog(Borrowing<Log<'static>, Box<[u8]>>);
+pub struct WasmLog(Borrowing<Log<'static>>);
 
 impl WasmLog {
-    pub(crate) fn new(reader: Borrowing<Reader<'static>, Box<[u8]>>) -> Self {
+    pub(crate) fn new(reader: Borrowing<Reader<'static>>) -> Self {
         Self(reader.map(|mut reader| Log::parse(&mut reader).unwrap()))
     }
 
-    fn get_header<T>(&self, get: impl FnOnce(&Headers<'static>) -> T) -> Borrowing<T, Box<[u8]>> {
+    fn get_header<T>(&self, get: impl FnOnce(&Headers<'static>) -> T) -> Borrowing<T> {
         self.0.new_borrow(|log| get(log.headers()))
     }
 
