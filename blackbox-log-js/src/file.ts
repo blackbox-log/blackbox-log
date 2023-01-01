@@ -15,7 +15,7 @@ export class File implements WasmObject {
 
 		const dataPtr = this.#wasm.data_alloc(data.length);
 		if (dataPtr === 0) {
-			throw new Error('file is too large');
+			throw new Error('file allocation failed');
 		}
 
 		const buffer = new Uint8Array(this.#wasm.memory.buffer, dataPtr, data.length);
