@@ -6,7 +6,7 @@ use std::path::Path;
 use std::process;
 
 use blackbox_log::data::ParseEvent;
-use blackbox_log::frame::{Frame as _, GpsFrame, MainFrame, SlowFrame};
+use blackbox_log::frame::{Frame as _, FrameDef as _, GpsFrame, MainFrame, SlowFrame};
 use blackbox_log::units::si;
 use blackbox_log::{DataParser, Headers, Value};
 use mimalloc::MiMalloc;

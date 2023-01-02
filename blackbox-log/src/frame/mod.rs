@@ -26,7 +26,23 @@ use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
 use crate::{units, HeadersParseError, HeadersParseResult, Reader};
 
-pub trait Frame {
+mod seal {
+    pub trait Seal {}
+}
+
+/// A parsed data frame definition.
+#[allow(clippy::len_without_is_empty)]
+pub trait FrameDef: seal::Seal {
+    type Unit: Into<Unit>;
+
+    /// Returns the number of fields.
+    fn len(&self) -> usize;
+
+    /// Get the name and unit of a field by its index.
+    fn get(&self, index: usize) -> Option<(&str, Self::Unit)>;
+}
+
+pub trait Frame: seal::Seal {
     type Value: Into<Value>;
 
     fn get(&self, index: usize) -> Option<Self::Value>;

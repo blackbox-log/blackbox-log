@@ -19,6 +19,8 @@ pub struct MainFrame<'data, 'headers, 'parser> {
     raw: &'parser RawMainFrame,
 }
 
+impl super::seal::Seal for MainFrame<'_, '_, '_> {}
+
 impl super::Frame for MainFrame<'_, '_, '_> {
     type Value = MainValue;
 
@@ -134,12 +136,27 @@ pub struct MainFrameDef<'data> {
     index_motor_0: Option<usize>,
 }
 
-impl<'data> MainFrameDef<'data> {
-    #[allow(clippy::len_without_is_empty)]
-    pub fn len(&self) -> usize {
+impl super::seal::Seal for MainFrameDef<'_> {}
+
+impl super::FrameDef for MainFrameDef<'_> {
+    type Unit = MainUnit;
+
+    fn len(&self) -> usize {
         2 + self.fields.len()
     }
 
+    fn get(&self, index: usize) -> Option<(&str, MainUnit)> {
+        let field = match index {
+            0 => &self.iteration,
+            1 => &self.time,
+            _ => self.fields.get(index - 2)?,
+        };
+
+        Some((field.name, field.unit))
+    }
+}
+
+impl<'data> MainFrameDef<'data> {
     pub fn iter(&self) -> impl Iterator<Item = (&str, MainUnit)> {
         let Self {
             iteration,

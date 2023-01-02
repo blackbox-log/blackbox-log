@@ -87,7 +87,7 @@ pub mod parser;
 #[cfg(not(any(bench, fuzzing)))]
 mod parser;
 
-pub use self::data::DataParser;
+pub use self::data::{DataParser, ParseEvent};
 pub use self::file::File;
 pub use self::frame::{Unit, Value};
 pub use self::headers::{

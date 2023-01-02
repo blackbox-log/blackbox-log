@@ -14,6 +14,8 @@ pub struct SlowFrame<'data, 'headers> {
     raw: RawSlowFrame,
 }
 
+impl super::seal::Seal for SlowFrame<'_, '_> {}
+
 impl super::Frame for SlowFrame<'_, '_> {
     type Value = SlowValue;
 
@@ -86,12 +88,21 @@ pub enum SlowUnit {
 #[cfg_attr(fuzzing, derive(Default))]
 pub struct SlowFrameDef<'data>(pub(crate) Vec<SlowFieldDef<'data>>);
 
-impl<'data> SlowFrameDef<'data> {
-    #[allow(clippy::len_without_is_empty)]
-    pub fn len(&self) -> usize {
+impl super::seal::Seal for SlowFrameDef<'_> {}
+
+impl super::FrameDef for SlowFrameDef<'_> {
+    type Unit = SlowUnit;
+
+    fn len(&self) -> usize {
         self.0.len()
     }
 
+    fn get(&self, index: usize) -> Option<(&str, SlowUnit)> {
+        self.0.get(index).map(|f| (f.name, f.unit))
+    }
+}
+
+impl<'data> SlowFrameDef<'data> {
     pub fn iter(&self) -> impl Iterator<Item = (&str, SlowUnit)> {
         self.0.iter().map(|f| (f.name, f.unit))
     }

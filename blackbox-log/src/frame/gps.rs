@@ -18,6 +18,8 @@ pub struct GpsFrame<'data, 'headers> {
     raw: RawGpsFrame,
 }
 
+impl super::seal::Seal for GpsFrame<'_, '_> {}
+
 impl super::Frame for GpsFrame<'_, '_> {
     type Value = GpsValue;
 
@@ -110,12 +112,25 @@ pub enum GpsUnit {
 #[derive(Debug, Clone)]
 pub struct GpsFrameDef<'data>(pub(crate) Vec<GpsFieldDef<'data>>);
 
-impl<'data> GpsFrameDef<'data> {
-    #[allow(clippy::len_without_is_empty)]
-    pub fn len(&self) -> usize {
+impl super::seal::Seal for GpsFrameDef<'_> {}
+
+impl<'data> super::FrameDef for GpsFrameDef<'data> {
+    type Unit = GpsUnit;
+
+    fn len(&self) -> usize {
         1 + self.0.len()
     }
 
+    fn get(&self, index: usize) -> Option<(&'data str, GpsUnit)> {
+        if index == 0 {
+            Some(("time", GpsUnit::FrameTime))
+        } else {
+            self.0.get(index - 1).map(|field| (field.name, field.unit))
+        }
+    }
+}
+
+impl<'data> GpsFrameDef<'data> {
     pub fn iter(&self) -> impl Iterator<Item = (&str, GpsUnit)> {
         iter::once(("time", GpsUnit::FrameTime)).chain(self.0.iter().map(|f| (f.name, f.unit)))
     }
