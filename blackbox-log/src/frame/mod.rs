@@ -35,18 +35,21 @@ mod seal {
 pub trait FrameDef: seal::Seal {
     type Unit: Into<Unit>;
 
-    /// Returns the number of fields.
+    /// Returns the number of fields in the frame.
     fn len(&self) -> usize;
 
     /// Get the name and unit of a field by its index.
     fn get(&self, index: usize) -> Option<(&str, Self::Unit)>;
 }
 
+/// A parsed data frame.
 pub trait Frame: seal::Seal {
     type Value: Into<Value>;
 
+    /// Get the value of a field by its index.
     fn get(&self, index: usize) -> Option<Self::Value>;
 
+    /// Iterate over all field values in order.
     fn iter(&self) -> FrameIter<'_, Self>
     where
         Self: Sized,
@@ -58,6 +61,7 @@ pub trait Frame: seal::Seal {
     }
 }
 
+/// An iterator over the values of the fields of a parsed frame.
 #[derive(Debug)]
 pub struct FrameIter<'f, F> {
     frame: &'f F,

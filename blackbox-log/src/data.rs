@@ -8,6 +8,7 @@ use crate::frame::{DataFrameKind, FrameKind, GpsHomeFrame};
 use crate::parser::InternalError;
 use crate::{Headers, Reader};
 
+/// An pseudo-event-based parser for the data section of blackbox logs.
 #[derive(Debug)]
 pub struct DataParser<'data, 'reader, 'headers> {
     headers: &'headers Headers<'data>,
@@ -19,6 +20,7 @@ pub struct DataParser<'data, 'reader, 'headers> {
 }
 
 impl<'data, 'reader, 'headers> DataParser<'data, 'reader, 'headers> {
+    /// Constructs a new parser without beginning parsing.
     pub fn new(data: &'reader mut Reader<'data>, headers: &'headers Headers<'data>) -> Self {
         Self {
             headers,
@@ -30,14 +32,18 @@ impl<'data, 'reader, 'headers> DataParser<'data, 'reader, 'headers> {
         }
     }
 
+    /// Returns the current stats.
     pub fn stats(&self) -> &Stats {
         &self.stats
     }
 
+    /// Returns `true` if the parser has reached the end of the log.
     pub fn is_done(&self) -> bool {
         self.done
     }
 
+    /// Continues parsing until the next [`ParseEvent`] can be returned. Returns
+    /// `None` if the parser finds the end of the log.
     pub fn next<'parser>(&'parser mut self) -> Option<ParseEvent<'data, 'headers, 'parser>> {
         if self.done {
             return None;

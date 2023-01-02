@@ -13,20 +13,30 @@
 //! The simplest way to extract a few fields of interest:
 //!
 //! ```
-//! use blackbox_log::LogView;
+//! use blackbox_log::prelude::*;
 //!
 //! let file = b"...";
-//! for log in blackbox_log::File::new(file).parse_iter() {
-//!     let log = log.unwrap();
-//!     let mut view = log.data();
+//! for mut reader in blackbox_log::File::new(file).iter() {
+//!     let headers = Headers::parse(&mut reader).unwrap();
+//!     let mut parser = DataParser::new(&mut reader, &headers);
+//!     // let mut view = log.data();
 //!
-//!     // This restricts the included fields to `time`, `rcCommand[0]`, `rcCommand[1]`,
-//!     // `rcCommand[2]`, and `rcCommand[3]`
-//!     view.update_filter(&["time", "rcCommand"]);
+//!     // This restricts the included fields to `time` and `rcCommand[0]` through `rcCommand[3]`
+//!     // TODO: view.update_filter(&["time", "rcCommand"]);
 //!
-//!     for frame in view.values() {
-//!         for (value, (name, _)) in frame.zip(view.fields()) {
-//!             println!("{name}: {value:?}");
+//!     while let Some(event) = parser.next() {
+//!         match event {
+//!             ParseEvent::Main(main) => {
+//!                 for (value, (name, _)) in main.iter().zip(headers.main_def().iter()) {
+//!                     println!("{name}: {value:?}");
+//!                 }
+//!             }
+//!             ParseEvent::Slow(slow) => {
+//!                 for (value, (name, _)) in slow.iter().zip(headers.slow_def().iter()) {
+//!                     println!("{name}: {value:?}");
+//!                 }
+//!             }
+//!             ParseEvent::Event(_) | ParseEvent::Gps(_) => {}
 //!         }
 //!     }
 //! }
@@ -35,21 +45,22 @@
 //! Get only the GPS data without parsing logs that cannot contain GPS frames:
 //!
 //! ```
-//! use blackbox_log::{Headers, Log, LogView};
+//! use blackbox_log::prelude::*;
 //!
 //! let file = b"...";
 //! let file = blackbox_log::File::new(file);
 //!
-//! for mut reader in (0..file.log_count()).map(|i| file.get_reader(i)) {
+//! for mut reader in file.iter() {
 //!     let headers = Headers::parse(&mut reader).unwrap();
 //!
-//!     if headers.has_gps_defs() {
-//!         let log = Log::parse(&mut reader).unwrap();
-//!         let mut view = log.gps_data();
+//!     if let Some(gps_def) = headers.gps_def() {
+//!         let mut parser = DataParser::new(&mut reader, &headers);
 //!
-//!         for frame in view.values() {
-//!             for (value, (name, _)) in frame.zip(view.fields()) {
-//!                 println!("{name}: {value:?}");
+//!         while let Some(event) = parser.next() {
+//!             if let ParseEvent::Gps(gps) = event {
+//!                 for (value, name) in gps.iter().zip(gps_def.iter_names()) {
+//!                     println!("{name}: {value:?}");
+//!                 }
 //!             }
 //!         }
 //!     }

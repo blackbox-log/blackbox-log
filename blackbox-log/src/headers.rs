@@ -99,14 +99,17 @@ pub struct Headers<'data> {
 }
 
 impl<'data> Headers<'data> {
+    /// Returns the parsed definition for main frames.
     pub fn main_def(&self) -> &MainFrameDef {
         &self.main_frames
     }
 
+    /// Returns the parsed definition for slow frames.
     pub fn slow_def(&self) -> &SlowFrameDef {
         &self.slow_frames
     }
 
+    /// Returns the parsed definition for GPS frames, if present.
     pub fn gps_def(&self) -> Option<&GpsFrameDef> {
         self.gps_frames.as_ref()
     }

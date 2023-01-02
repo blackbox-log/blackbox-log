@@ -8,6 +8,7 @@ use crate::predictor::{Predictor, PredictorContext};
 use crate::utils::as_i32;
 use crate::{units, Headers, HeadersParseResult, Reader};
 
+/// Data parsed from a slow frame.
 #[derive(Debug, Clone)]
 pub struct SlowFrame<'data, 'headers> {
     headers: &'headers Headers<'data>,
@@ -84,6 +85,7 @@ pub enum SlowUnit {
     Unitless,
 }
 
+/// The parsed frame definition for slow frames.
 #[derive(Debug, Clone)]
 #[cfg_attr(fuzzing, derive(Default))]
 pub struct SlowFrameDef<'data>(pub(crate) Vec<SlowFieldDef<'data>>);
@@ -103,10 +105,12 @@ impl super::FrameDef for SlowFrameDef<'_> {
 }
 
 impl<'data> SlowFrameDef<'data> {
+    /// Iterates over the name and unit of each field.
     pub fn iter(&self) -> impl Iterator<Item = (&str, SlowUnit)> {
         self.0.iter().map(|f| (f.name, f.unit))
     }
 
+    /// Iterates over the names of each field.
     pub fn iter_names(&self) -> impl Iterator<Item = &str> {
         self.0.iter().map(|f| f.name)
     }

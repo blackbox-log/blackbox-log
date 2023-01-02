@@ -12,6 +12,7 @@ use crate::units::FromRaw;
 use crate::utils::as_i32;
 use crate::{Headers, HeadersParseError, HeadersParseResult, Reader};
 
+/// Data parsed from a GPS frame.
 #[derive(Debug, Clone)]
 pub struct GpsFrame<'data, 'headers> {
     headers: &'headers Headers<'data>,
@@ -109,6 +110,7 @@ pub enum GpsUnit {
     Unitless,
 }
 
+/// The parsed frame definition for GPS frames.
 #[derive(Debug, Clone)]
 pub struct GpsFrameDef<'data>(pub(crate) Vec<GpsFieldDef<'data>>);
 
@@ -131,10 +133,12 @@ impl<'data> super::FrameDef for GpsFrameDef<'data> {
 }
 
 impl<'data> GpsFrameDef<'data> {
+    /// Iterates over the name and unit of each field.
     pub fn iter(&self) -> impl Iterator<Item = (&str, GpsUnit)> {
         iter::once(("time", GpsUnit::FrameTime)).chain(self.0.iter().map(|f| (f.name, f.unit)))
     }
 
+    /// Iterates over the names of each field.
     pub fn iter_names(&self) -> impl Iterator<Item = &str> {
         iter::once("time").chain(self.0.iter().map(|f| f.name))
     }

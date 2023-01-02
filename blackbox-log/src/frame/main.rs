@@ -13,6 +13,7 @@ use crate::units::FromRaw;
 use crate::utils::as_i32;
 use crate::{Headers, HeadersParseError, HeadersParseResult, Reader};
 
+/// Data parsed from a main frame.
 #[derive(Debug)]
 pub struct MainFrame<'data, 'headers, 'parser> {
     headers: &'headers Headers<'data>,
@@ -127,6 +128,7 @@ pub enum MainUnit {
     Unitless,
 }
 
+/// The parsed frame definition for main frames.
 #[derive(Debug, Clone)]
 pub struct MainFrameDef<'data> {
     pub(crate) iteration: MainFieldDef<'data>,
@@ -157,6 +159,7 @@ impl super::FrameDef for MainFrameDef<'_> {
 }
 
 impl<'data> MainFrameDef<'data> {
+    /// Iterates over the name and unit of each field.
     pub fn iter(&self) -> impl Iterator<Item = (&str, MainUnit)> {
         let Self {
             iteration,
@@ -170,6 +173,7 @@ impl<'data> MainFrameDef<'data> {
             .chain(fields.iter().map(|f| (f.name, f.unit)))
     }
 
+    /// Iterates over the names of each field.
     pub fn iter_names(&self) -> impl Iterator<Item = &str> {
         let Self {
             iteration,
