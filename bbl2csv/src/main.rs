@@ -89,6 +89,8 @@ fn main() {
             }
 
             if cli.gps {
+                let data = log.gps_data();
+
                 let mut out = get_output(filename, human_i, "gps.csv")?;
                 if let Err(error) = write_csv(&mut out, &data) {
                     tracing::error!(%error, "failed to write gps csv");
