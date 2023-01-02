@@ -1,14 +1,12 @@
-use std::ptr;
-
 use blackbox_log::File;
 
 use crate::log::{WasmHeaders, WasmLog};
-use crate::{Borrowing, WasmFfi};
+use crate::{Borrowing, OwnedSlice, WasmFfi};
 
 pub struct WasmFile(Borrowing<File<'static>>);
 
 impl WasmFile {
-    pub fn new(data: Box<[u8]>) -> Self {
+    pub(crate) fn new(data: OwnedSlice) -> Self {
         Self(Borrowing::new(data, |data| File::new(data)))
     }
 
@@ -38,8 +36,7 @@ pub unsafe extern "wasm" fn file_free(ptr: *mut WasmFile) {
 
 #[no_mangle]
 pub unsafe extern "wasm" fn file_new(data: *mut u8, len: usize) -> *mut WasmFile {
-    let data = ptr::slice_from_raw_parts_mut(data, len);
-    let data = Box::from_raw(data);
+    let data = OwnedSlice::new(data, len);
     let file = Box::new(WasmFile::new(data));
     file.into_wasm()
 }

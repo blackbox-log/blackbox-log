@@ -4,11 +4,13 @@
 mod borrowing;
 mod file;
 mod log;
+mod owned_slice;
 mod str;
 
 use std::ptr;
 
 pub(crate) use borrowing::Borrowing;
+pub(crate) use owned_slice::OwnedSlice;
 
 trait WasmFfi {
     unsafe fn from_wasm(ptr: *mut Self) -> Box<Self> {
@@ -25,10 +27,6 @@ trait WasmFfi {
 }
 
 #[no_mangle]
-pub extern "wasm" fn data_alloc(len: usize) -> *mut u8 {
-    use std::alloc::{alloc, Layout};
-
-    let Ok(layout) = Layout::array::<u8>(len) else { return ptr::null_mut(); };
-    // SAFETY: [u8; _] is a non-zero-sized type
-    unsafe { alloc(layout) }
+pub unsafe extern "wasm" fn data_alloc(len: usize) -> *mut u8 {
+    OwnedSlice::alloc(len).unwrap_or(ptr::null_mut())
 }
