@@ -79,6 +79,7 @@ mod file;
 pub mod frame;
 pub mod headers;
 mod predictor;
+pub mod prelude;
 mod reader;
 pub mod units;
 
