@@ -1,4 +1,6 @@
-use blackbox_log::{Headers, Log, Reader};
+use blackbox_log::data::ParseEvent;
+use blackbox_log::frame::Frame as _;
+use blackbox_log::{DataParser, Headers, Reader};
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
 
 static DATA: &[u8] = include_bytes!("../tests/logs/error-recovery.bbl");
@@ -16,10 +18,24 @@ fn data(c: &mut Criterion) {
     c.bench_function("data", |b| {
         b.iter_batched(
             || (reader.clone(), headers.clone()),
-            |(mut data, headers)| Log::parse_with_headers(&mut data, headers),
+            |(mut data, headers)| {
+                let mut parser = DataParser::new(&mut data, &headers);
+                while let Some(event) = parser.next() {
+                    match event {
+                        ParseEvent::Event(event) => black_box(event),
+                        ParseEvent::Main(main) => main.iter().for_each(black_box),
+                        ParseEvent::Slow(slow) => slow.iter().for_each(black_box),
+                        ParseEvent::Gps(gps) => gps.iter().for_each(black_box),
+                    }
+                }
+            },
             BatchSize::SmallInput,
         );
     });
+}
+
+fn black_box<T>(x: T) {
+    std::hint::black_box(x);
 }
 
 criterion_group!(benches, headers, data);

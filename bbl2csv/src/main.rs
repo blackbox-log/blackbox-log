@@ -5,9 +5,10 @@ use std::io::{self, BufWriter, Write};
 use std::path::Path;
 use std::process;
 
-use blackbox_log::log::LogView;
+use blackbox_log::data::ParseEvent;
+use blackbox_log::frame::{Frame as _, GpsFrame, MainFrame, SlowFrame};
 use blackbox_log::units::si;
-use blackbox_log::{Log, Value};
+use blackbox_log::{DataParser, Headers, Value};
 use mimalloc::MiMalloc;
 use rayon::prelude::*;
 
@@ -67,35 +68,74 @@ fn main() {
             let _span = span.enter();
 
             let mut log = file.get_reader(i);
-            let log = Log::parse(&mut log).map_err(|err| {
-                tracing::debug!("error from parse_by_index: {err}");
+            let headers = Headers::parse(&mut log).map_err(|err| {
+                tracing::debug!("header parse error: {err}");
                 exitcode::DATAERR
             })?;
 
-            let data = {
-                let mut data = log.data();
+            if cli.filter.is_some() {
+                todo!("filters");
+            }
 
-                if let Some(filter) = &cli.filter {
-                    data.update_filter(filter);
-                }
-
-                data
-            };
+            let field_names = headers
+                .main_def()
+                .iter_names()
+                .chain(headers.slow_def().iter_names());
 
             let mut out = get_output(filename, human_i, "csv")?;
-            if let Err(error) = write_csv(&mut out, &data) {
-                tracing::error!(%error, "failed to write csv");
+            if let Err(error) = write_csv_line(&mut out, field_names) {
+                tracing::error!(%error, "failed to write csv header");
                 return Err(exitcode::IOERR);
             }
 
-            if cli.gps {
-                let data = log.gps_data();
+            let mut gps_out = match headers.gps_def() {
+                Some(def) if cli.gps => {
+                    let mut out = get_output(filename, human_i, "gps.csv")?;
 
-                let mut out = get_output(filename, human_i, "gps.csv")?;
-                if let Err(error) = write_csv(&mut out, &data) {
-                    tracing::error!(%error, "failed to write gps csv");
-                    return Err(exitcode::IOERR);
+                    if let Err(error) = write_csv_line(&mut out, def.iter_names()) {
+                        tracing::error!(%error, "failed to write gps csv header");
+                        return Err(exitcode::IOERR);
+                    }
+
+                    Some(out)
                 }
+                _ => None,
+            };
+
+            let mut parser = DataParser::new(&mut log, &headers);
+            let mut slow: String = ",".repeat(headers.slow_def().len().saturating_sub(1));
+            while let Some(frame) = parser.next() {
+                match frame {
+                    ParseEvent::Event(_) => {}
+                    ParseEvent::Slow(frame) => {
+                        slow.clear();
+                        write_slow_frame(&mut slow, frame);
+                    }
+                    ParseEvent::Main(main) => {
+                        if let Err(error) = write_main_frame(&mut out, main, &slow) {
+                            tracing::error!(%error, "failed to write csv");
+                            return Err(exitcode::IOERR);
+                        }
+                    }
+                    ParseEvent::Gps(gps) => {
+                        if let Some(ref mut out) = gps_out {
+                            if let Err(error) = write_gps_frame(out, gps) {
+                                tracing::error!(%error, "failed to write gps csv");
+                                return Err(exitcode::IOERR);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if let Err(error) = out.flush() {
+                tracing::error!(%error, "failed to flush csv");
+                return Err(exitcode::IOERR);
+            }
+
+            if let Some(Err(error)) = gps_out.map(|mut out| out.flush()) {
+                tracing::error!(%error, "failed to flush gps csv");
+                return Err(exitcode::IOERR);
             }
 
             Ok(())
@@ -125,45 +165,66 @@ fn get_output(
     Ok(BufWriter::new(file))
 }
 
-fn write_csv<'v: 'd, 'd, V: LogView<'v, 'd>>(out: &mut impl Write, log: &'v V) -> io::Result<()>
-where
-    V::Value: Into<Value>,
-{
-    write_csv_line(out, log.fields().map(|(name, _unit)| name))?;
+fn write_main_frame(out: &mut impl Write, main: MainFrame, slow: &str) -> io::Result<()> {
+    let mut fields = main.iter().map(|v| format_value(v.into()));
 
-    for frame in log.values() {
-        write_csv_line(
-            out,
-            frame.map(|value| match value.into() {
-                Value::FrameTime(t) => format!("{:.0}", t.get::<si::time::microsecond>()),
-                Value::Amperage(a) => format_float(a.get::<si::electric_current::ampere>()),
-                Value::Voltage(v) => format_float(v.get::<si::electric_potential::volt>()),
-                Value::Acceleration(a) => {
-                    format_float(a.get::<si::acceleration::meter_per_second_squared>())
-                }
-                Value::Rotation(r) => {
-                    format_float(r.get::<si::angular_velocity::degree_per_second>())
-                }
-                Value::FlightMode(f) => f.to_string(),
-                Value::State(s) => s.to_string(),
-                Value::FailsafePhase(f) => f.to_string(),
-                Value::Boolean(b) => b.to_string(),
-                Value::GpsCoordinate(c) => format!("{:.7}", c),
-                Value::Altitude(a) => format!("{:.0}", a.get::<si::length::meter>()),
-                Value::Velocity(v) => format_float(v.get::<si::velocity::meter_per_second>()),
-                Value::GpsHeading(h) => format!("{h:.1}"),
-                Value::Unsigned(u) => u.to_string(),
-                Value::Signed(s) => s.to_string(),
-                Value::Missing => String::new(),
-            }),
-        )?;
+    if let Some(first) = fields.next() {
+        out.write_all(first.as_bytes())?;
+
+        for field in fields {
+            out.write_all(b",")?;
+            out.write_all(field.as_bytes())?;
+        }
+
+        if !slow.is_empty() {
+            out.write_all(b",")?;
+        }
     }
 
-    out.flush()
+    out.write_all(slow.as_bytes())?;
+    out.write_all(b"\n")
 }
 
-fn format_float(f: f64) -> String {
-    format!("{f:.2}")
+fn write_slow_frame(out: &mut String, slow: SlowFrame) {
+    let mut fields = slow.iter().map(|v| format_value(v.into()));
+
+    if let Some(first) = fields.next() {
+        out.push_str(&first);
+
+        for field in fields {
+            out.push(',');
+            out.push_str(&field);
+        }
+    }
+}
+
+fn write_gps_frame(out: &mut impl Write, gps: GpsFrame) -> io::Result<()> {
+    write_csv_line(out, gps.iter().map(Value::from).map(format_value))
+}
+fn format_value(value: Value) -> String {
+    fn format_float(f: f64) -> String {
+        format!("{f:.2}")
+    }
+
+    match value {
+        Value::FrameTime(t) => format!("{:.0}", t.get::<si::time::microsecond>()),
+        Value::Amperage(a) => format_float(a.get::<si::electric_current::ampere>()),
+        Value::Voltage(v) => format_float(v.get::<si::electric_potential::volt>()),
+        Value::Acceleration(a) => {
+            format_float(a.get::<si::acceleration::meter_per_second_squared>())
+        }
+        Value::Rotation(r) => format_float(r.get::<si::angular_velocity::degree_per_second>()),
+        Value::FlightMode(f) => f.to_string(),
+        Value::State(s) => s.to_string(),
+        Value::FailsafePhase(f) => f.to_string(),
+        Value::Boolean(b) => b.to_string(),
+        Value::GpsCoordinate(c) => format!("{:.7}", c),
+        Value::Altitude(a) => format!("{:.0}", a.get::<si::length::meter>()),
+        Value::Velocity(v) => format_float(v.get::<si::velocity::meter_per_second>()),
+        Value::GpsHeading(h) => format!("{h:.1}"),
+        Value::Unsigned(u) => u.to_string(),
+        Value::Signed(s) => s.to_string(),
+    }
 }
 
 fn write_csv_line<T: AsRef<str>>(
@@ -179,5 +240,7 @@ fn write_csv_line<T: AsRef<str>>(
         }
     }
 
-    out.write_all(b"\n")
+    out.write_all(b"\n")?;
+
+    Ok(())
 }

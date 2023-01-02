@@ -3,7 +3,8 @@ use core::fmt;
 
 use memchr::memmem;
 
-use crate::{HeadersParseResult, Log, Reader};
+// use crate::{HeadersParseResult, Log, Reader};
+use crate::Reader;
 
 /// A complete blackbox log file containing zero or more logs.
 pub struct File<'data> {
@@ -26,10 +27,16 @@ impl<'data> File<'data> {
         self.offsets.len()
     }
 
-    /// Returns an iterator over all parsed [`Log`]s in the file.
-    pub fn parse_iter<'a>(&'a self) -> impl Iterator<Item = HeadersParseResult<Log<'data>>> + 'a {
-        (0..self.log_count()).map(|i| Log::parse(&mut self.get_reader(i)))
+    pub fn iter(&self) -> impl Iterator<Item = Reader<'data>> + '_ {
+        self.offsets
+            .iter()
+            .map(|&offset| Reader::new(&self.data[offset..]))
     }
+
+    // /// Returns an iterator over all parsed [`Log`]s in the file.
+    // pub fn parse_iter<'a>(&'a self) -> impl Iterator<Item =
+    // HeadersParseResult<Log<'data>>> + 'a {     (0..self.log_count()).map(|i|
+    // Log::parse(&mut self.get_reader(i))) }
 
     /// Returns a [`Reader`] aligned to the start of the `index`-th log.
     ///

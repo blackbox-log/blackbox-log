@@ -125,8 +125,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_001.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 4,
         main: 98,
-        slow: 3,
+        slow: 2,
         gps: 0,
         gps_home: 0,
       ),
@@ -478,11 +479,13 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_001.bbl"
           histogram: (10, 12, 8, 9, 4, 4, 1, 4, 0, 1, 2, 0, 0, 16, 18, 9),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
         history: {
-          "Arm": 84,
+          "Arm": 1,
         },
       ),
       FieldSnapshot(
@@ -494,14 +497,14 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_001.bbl"
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 97,
+          "Idle": 2,
         },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 97,
+          yes: 2,
           no: 0,
         ),
       ),
@@ -509,7 +512,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_001.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 97,
+          yes: 2,
           no: 0,
         ),
       ),
@@ -637,8 +640,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_001.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 3,
         main: 24893,
-        slow: 9,
+        slow: 8,
         gps: 0,
         gps_home: 0,
       ),
@@ -650,9 +654,6 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_001.bbl"
         last_flags: 1,
       ),
       Disarm(4),
-      End(
-        disarm_reason: None,
-      ),
     ],
     main: Fields([
       FieldSnapshot(
@@ -995,11 +996,13 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_001.bbl"
           histogram: (1321, 1267, 1289, 1251, 1208, 1178, 1207, 1134, 1137, 1230, 1178, 1217, 1964, 5422, 1508, 1382),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
         history: {
-          "Arm": 24878,
+          "Arm": 7,
         },
       ),
       FieldSnapshot(
@@ -1011,14 +1014,14 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_001.bbl"
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 24892,
+          "Idle": 8,
         },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 24892,
+          yes: 8,
           no: 0,
         ),
       ),
@@ -1026,7 +1029,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_001.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 24892,
+          yes: 8,
           no: 0,
         ),
       ),

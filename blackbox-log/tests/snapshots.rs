@@ -2,11 +2,10 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::io::Read;
 
-use blackbox_log::data::Stats;
+use blackbox_log::data::{ParseEvent, Stats};
 use blackbox_log::event::Event;
-use blackbox_log::log::LogView;
 use blackbox_log::units::{si, Flag, FlagSet};
-use blackbox_log::{Headers, Log, Unit, Value};
+use blackbox_log::{DataParser, Headers, Unit, Value};
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 
@@ -19,8 +18,13 @@ macro_rules! run {
 
             let file = blackbox_log::File::new(&data);
             let logs = file
-                .parse_iter()
-                .map(|r| r.map(LogSnapshot::from))
+                .iter()
+                .map(|mut reader| {
+                    Headers::parse(&mut reader).map(|headers| {
+                        let data = DataParser::new(&mut reader, &headers);
+                        LogSnapshot::new(&headers, data)
+                    })
+                })
                 .collect::<Vec<_>>();
 
             insta::assert_ron_snapshot!(logs);
@@ -46,38 +50,43 @@ fn gimbal_ghost() {
 }
 
 #[derive(Debug, Serialize)]
-struct LogSnapshot<'a> {
-    headers: Headers<'a>,
+struct LogSnapshot<'data> {
+    headers: Headers<'data>,
     stats: Stats,
     events: Vec<Event>,
     main: Fields,
+    slow: Fields,
     gps: Fields,
 }
 
-impl<'a> From<Log<'a>> for LogSnapshot<'a> {
-    fn from(log: Log<'a>) -> Self {
-        let data = log.data();
-        let main = data.fields().collect::<Fields>();
-        let main = data.values().fold(main, |mut fields, frame| {
-            fields.update(frame);
-            fields
-        });
+impl<'data> LogSnapshot<'data> {
+    fn new(headers: &Headers<'data>, mut data: DataParser<'data, '_, '_>) -> Self {
+        let headers = headers.clone();
 
-        let data = log.gps_data();
-        let gps = data
-            .fields()
-            .map(|(name, unit)| (name, unit.into()))
+        let mut events = Vec::new();
+        let mut main = headers.main_def().iter().collect::<Fields>();
+        let mut slow = headers.slow_def().iter().collect::<Fields>();
+        let mut gps = headers
+            .gps_def()
+            .iter()
+            .flat_map(|def| def.iter())
             .collect::<Fields>();
-        let gps = data.values().fold(gps, |mut fields, frame| {
-            fields.update(frame.map(Into::into));
-            fields
-        });
+
+        while let Some(frame) = data.next() {
+            match frame {
+                ParseEvent::Event(event) => events.push(event),
+                ParseEvent::Main(frame) => main.update(frame),
+                ParseEvent::Slow(frame) => slow.update(frame),
+                ParseEvent::Gps(frame) => gps.update(frame),
+            }
+        }
 
         Self {
-            headers: log.headers().clone(),
-            stats: log.stats(),
-            events: log.events().to_owned(),
+            headers,
+            stats: data.stats().clone(),
+            events,
             main,
+            slow,
             gps,
         }
     }
@@ -87,21 +96,22 @@ impl<'a> From<Log<'a>> for LogSnapshot<'a> {
 struct Fields(Vec<FieldSnapshot>);
 
 impl Fields {
-    fn update(&mut self, frame: impl Iterator<Item = Value>) {
-        for (field, value) in self.0.iter_mut().zip(frame) {
-            field.update(value);
+    fn update<F: blackbox_log::frame::Frame>(&mut self, frame: F) {
+        for (field, value) in self.0.iter_mut().zip(frame.iter()) {
+            field.update(value.into());
         }
     }
 }
 
-impl<T> FromIterator<(T, Unit)> for Fields
+impl<T, U> FromIterator<(T, U)> for Fields
 where
     T: Into<String>,
+    U: Into<Unit>,
 {
-    fn from_iter<I: IntoIterator<Item = (T, Unit)>>(iter: I) -> Self {
+    fn from_iter<I: IntoIterator<Item = (T, U)>>(iter: I) -> Self {
         Self(
             iter.into_iter()
-                .map(|(name, unit)| FieldSnapshot::new(name.into(), unit))
+                .map(|(name, unit)| FieldSnapshot::new(name.into(), unit.into()))
                 .collect(),
         )
     }
@@ -156,10 +166,6 @@ impl FieldSnapshot {
 
     #[allow(clippy::wildcard_enum_match_arm, clippy::cast_possible_truncation)]
     fn update(&mut self, value: Value) {
-        if value == Value::Missing {
-            return;
-        }
-
         match &mut self.history {
             History::Int(history) => history.update(match value {
                 Value::FrameTime(t) => t.get::<si::time::microsecond>().round() as i128,

@@ -5,7 +5,7 @@ use core::iter;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty, FieldDef, FrameKind, Unit};
-use crate::data::FrameSync;
+use crate::data::MainFrameHistory;
 use crate::parser::{decode, to_base_field, Encoding, InternalResult};
 use crate::predictor::{self, Predictor, PredictorContext};
 use crate::units::prelude::*;
@@ -13,64 +13,42 @@ use crate::units::FromRaw;
 use crate::utils::as_i32;
 use crate::{Headers, HeadersParseError, HeadersParseResult, Reader};
 
-#[derive(Debug, Clone)]
-pub(crate) struct MainFrame {
-    intra: bool,
-    pub(crate) iteration: u32,
-    pub(crate) time: u64,
-    pub(crate) values: Vec<u32>,
+#[derive(Debug)]
+pub struct MainFrame<'data, 'headers, 'parser> {
+    headers: &'headers Headers<'data>,
+    raw: &'parser RawMainFrame,
 }
 
-impl MainFrame {
-    pub(crate) fn parse(
-        data: &mut Reader,
-        kind: FrameKind,
-        main_frames: &[FrameSync],
-        headers: &Headers,
-    ) -> InternalResult<Self> {
-        let get_main_frame = |i| main_frames.get(i).map(|sync: &FrameSync| &sync.main);
+impl super::Frame for MainFrame<'_, '_, '_> {
+    type Value = MainValue;
 
-        let current_idx = main_frames.len();
-        let last = current_idx.checked_sub(1).and_then(get_main_frame);
-        let main = &headers.main_frames;
-
-        if kind == FrameKind::Data(DataFrameKind::Intra) {
-            main.parse_intra(data, headers, last)
-        } else {
-            let last_last = current_idx.checked_sub(2).and_then(get_main_frame);
-            let skipped = 0; // FIXME
-
-            main.parse_inter(data, headers, last, last_last, skipped)
-        }
-    }
-
-    pub(crate) fn get(&self, index: usize, headers: &Headers) -> Option<MainValue> {
+    fn get(&self, index: usize) -> Option<MainValue> {
         let value = match index {
-            0 => MainValue::Unsigned(self.iteration),
-            1 => MainValue::FrameTime(Time::from_raw(self.time, headers)),
+            0 => MainValue::Unsigned(self.raw.iteration),
+            1 => MainValue::FrameTime(Time::from_raw(self.raw.time, self.headers)),
             _ => {
                 let index = index - 2;
-                let def = headers.main_frames.fields.get(index)?;
-                let raw = self.values[index];
+                let def = self.headers.main_frames.fields.get(index)?;
+                let raw = self.raw.values[index];
                 match def.unit {
                     MainUnit::Amperage => {
                         debug_assert!(def.signed);
                         let raw = as_i32(raw);
-                        MainValue::Amperage(ElectricCurrent::from_raw(raw, headers))
+                        MainValue::Amperage(ElectricCurrent::from_raw(raw, self.headers))
                     }
                     MainUnit::Voltage => {
                         debug_assert!(!def.signed);
-                        MainValue::Voltage(ElectricPotential::from_raw(raw, headers))
+                        MainValue::Voltage(ElectricPotential::from_raw(raw, self.headers))
                     }
                     MainUnit::Acceleration => {
                         debug_assert!(def.signed);
                         let raw = as_i32(raw);
-                        MainValue::Acceleration(Acceleration::from_raw(raw, headers))
+                        MainValue::Acceleration(Acceleration::from_raw(raw, self.headers))
                     }
                     MainUnit::Rotation => {
                         debug_assert!(def.signed);
                         let raw = as_i32(raw);
-                        MainValue::Rotation(AngularVelocity::from_raw(raw, headers))
+                        MainValue::Rotation(AngularVelocity::from_raw(raw, self.headers))
                     }
                     MainUnit::Unitless => MainValue::new_unitless(raw, def.signed),
                     MainUnit::FrameTime => unreachable!(),
@@ -82,8 +60,42 @@ impl MainFrame {
     }
 }
 
+impl<'data, 'headers, 'parser> MainFrame<'data, 'headers, 'parser> {
+    pub(crate) fn new(headers: &'headers Headers<'data>, raw: &'parser RawMainFrame) -> Self {
+        Self { headers, raw }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct RawMainFrame {
+    intra: bool,
+    pub(crate) iteration: u32,
+    pub(crate) time: u64,
+    pub(crate) values: Vec<u32>,
+}
+
+impl RawMainFrame {
+    pub(crate) fn parse(
+        data: &mut Reader,
+        headers: &Headers,
+        kind: FrameKind,
+        history: &MainFrameHistory,
+    ) -> InternalResult<Self> {
+        let last = history.last();
+        let def = &headers.main_frames;
+
+        if kind == FrameKind::Data(DataFrameKind::Intra) {
+            def.parse_intra(data, headers, last)
+        } else {
+            let skipped = 0; // FIXME
+
+            def.parse_inter(data, headers, last, history.last_last(), skipped)
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub(crate) enum MainValue {
+pub enum MainValue {
     FrameTime(Time),
     Amperage(ElectricCurrent),
     Voltage(ElectricPotential),
@@ -104,7 +116,7 @@ impl MainValue {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub(crate) enum MainUnit {
+pub enum MainUnit {
     FrameTime,
     Amperage,
     Voltage,
@@ -114,7 +126,7 @@ pub(crate) enum MainUnit {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct MainFrameDef<'data> {
+pub struct MainFrameDef<'data> {
     pub(crate) iteration: MainFieldDef<'data>,
     pub(crate) time: MainFieldDef<'data>,
     pub(crate) fields: Vec<MainFieldDef<'data>>,
@@ -123,21 +135,12 @@ pub(crate) struct MainFrameDef<'data> {
 }
 
 impl<'data> MainFrameDef<'data> {
-    pub(crate) fn len(&self) -> usize {
+    #[allow(clippy::len_without_is_empty)]
+    pub fn len(&self) -> usize {
         2 + self.fields.len()
     }
 
-    pub(crate) fn get(&self, index: usize) -> Option<(&str, MainUnit)> {
-        let field = match index {
-            0 => &self.iteration,
-            1 => &self.time,
-            _ => self.fields.get(index - 2)?,
-        };
-
-        Some((field.name, field.unit))
-    }
-
-    pub(crate) fn iter(&self) -> impl Iterator<Item = (&str, MainUnit)> {
+    pub fn iter(&self) -> impl Iterator<Item = (&str, MainUnit)> {
         let Self {
             iteration,
             time,
@@ -148,6 +151,19 @@ impl<'data> MainFrameDef<'data> {
         iter::once((iteration.name, iteration.unit))
             .chain(iter::once((time.name, time.unit)))
             .chain(fields.iter().map(|f| (f.name, f.unit)))
+    }
+
+    pub fn iter_names(&self) -> impl Iterator<Item = &str> {
+        let Self {
+            iteration,
+            time,
+            fields,
+            ..
+        } = self;
+
+        iter::once(iteration.name)
+            .chain(iter::once(time.name))
+            .chain(fields.iter().map(|f| f.name))
     }
 
     pub(crate) fn builder() -> MainFrameDefBuilder<'data> {
@@ -193,10 +209,10 @@ impl<'data> MainFrameDef<'data> {
         &self,
         data: &mut Reader,
         headers: &Headers,
-        last: Option<&MainFrame>,
-    ) -> InternalResult<MainFrame> {
+        last: Option<&RawMainFrame>,
+    ) -> InternalResult<RawMainFrame> {
         fn get_update_ctx(
-            last: Option<&'_ MainFrame>,
+            last: Option<&'_ RawMainFrame>,
         ) -> impl Fn(&mut PredictorContext, usize) + '_ {
             move |ctx: &mut PredictorContext, i| ctx.set_last(last.map(|l| l.values[i]))
         }
@@ -213,7 +229,7 @@ impl<'data> MainFrameDef<'data> {
             get_update_ctx(last),
         );
 
-        Ok(MainFrame {
+        Ok(RawMainFrame {
             intra: true,
             iteration,
             time,
@@ -226,13 +242,13 @@ impl<'data> MainFrameDef<'data> {
         &self,
         data: &mut Reader,
         headers: &Headers,
-        last: Option<&MainFrame>,
-        last_last: Option<&MainFrame>,
+        last: Option<&RawMainFrame>,
+        last_last: Option<&RawMainFrame>,
         skipped_frames: u32,
-    ) -> InternalResult<MainFrame> {
+    ) -> InternalResult<RawMainFrame> {
         fn get_update_ctx<'a>(
-            last: Option<&'a MainFrame>,
-            last_last: Option<&'a MainFrame>,
+            last: Option<&'a RawMainFrame>,
+            last_last: Option<&'a RawMainFrame>,
         ) -> impl Fn(&mut PredictorContext<'_, '_>, usize) + 'a {
             move |ctx: &mut PredictorContext, i| {
                 ctx.set_last_2(last.map(|l| l.values[i]), last_last.map(|l| l.values[i]));
@@ -263,7 +279,7 @@ impl<'data> MainFrameDef<'data> {
             get_update_ctx(last, last_last),
         );
 
-        Ok(MainFrame {
+        Ok(RawMainFrame {
             intra: false,
             iteration,
             time,

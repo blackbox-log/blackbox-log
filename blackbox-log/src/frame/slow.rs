@@ -1,28 +1,66 @@
 use alloc::vec::Vec;
-use core::iter;
 
 use tracing::instrument;
 
-use super::{read_field_values, DataFrameKind, DataFrameProperty, Unit};
+use super::{read_field_values, DataFrameKind, DataFrameProperty, FieldDef, Unit};
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::utils::as_i32;
 use crate::{units, Headers, HeadersParseResult, Reader};
 
 #[derive(Debug, Clone)]
-pub(crate) struct SlowFrame {
-    pub(crate) values: Vec<SlowValue>,
+pub struct SlowFrame<'data, 'headers> {
+    headers: &'headers Headers<'data>,
+    raw: RawSlowFrame,
 }
 
+impl super::Frame for SlowFrame<'_, '_> {
+    type Value = SlowValue;
+
+    fn get(&self, index: usize) -> Option<Self::Value> {
+        let def = self.headers.slow_frames.0.get(index)?;
+        let raw = self.raw.0[index];
+
+        let firmware = self.headers.firmware_kind;
+        let value = match def.unit {
+            SlowUnit::FlightMode => SlowValue::FlightMode(units::FlightModeSet::new(raw, firmware)),
+            SlowUnit::State => SlowValue::State(units::StateSet::new(raw, firmware)),
+            SlowUnit::FailsafePhase => {
+                SlowValue::FailsafePhase(units::FailsafePhase::new(raw, firmware))
+            }
+            SlowUnit::Boolean => {
+                if raw > 1 {
+                    tracing::debug!("invalid boolean ({raw:0>#8x})");
+                }
+
+                SlowValue::Boolean(raw != 0)
+            }
+            SlowUnit::Unitless => SlowValue::new_unitless(raw, def.signed),
+        };
+
+        Some(value)
+    }
+}
+
+impl<'data, 'headers> SlowFrame<'data, 'headers> {
+    pub(crate) fn new(headers: &'headers Headers<'data>, raw: RawSlowFrame) -> Self {
+        Self { headers, raw }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct RawSlowFrame(Vec<u32>);
+
+impl RawSlowFrame {}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub(crate) enum SlowValue {
+pub enum SlowValue {
     FlightMode(units::FlightModeSet),
     State(units::StateSet),
     FailsafePhase(units::FailsafePhase),
     Boolean(bool),
     Unsigned(u32),
     Signed(i32),
-    Missing,
 }
 
 impl SlowValue {
@@ -36,7 +74,7 @@ impl SlowValue {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub(crate) enum SlowUnit {
+pub enum SlowUnit {
     FlightMode,
     State,
     FailsafePhase,
@@ -46,19 +84,20 @@ pub(crate) enum SlowUnit {
 
 #[derive(Debug, Clone)]
 #[cfg_attr(fuzzing, derive(Default))]
-pub(crate) struct SlowFrameDef<'data>(pub(crate) Vec<SlowFieldDef<'data>>);
+pub struct SlowFrameDef<'data>(pub(crate) Vec<SlowFieldDef<'data>>);
 
 impl<'data> SlowFrameDef<'data> {
-    pub(crate) fn len(&self) -> usize {
+    #[allow(clippy::len_without_is_empty)]
+    pub fn len(&self) -> usize {
         self.0.len()
     }
 
-    pub(crate) fn get(&self, index: usize) -> Option<(&str, SlowUnit)> {
-        self.0.get(index).map(|f| (f.name, f.unit))
+    pub fn iter(&self) -> impl Iterator<Item = (&str, SlowUnit)> {
+        self.0.iter().map(|f| (f.name, f.unit))
     }
 
-    pub(crate) fn iter(&self) -> impl Iterator<Item = (&str, SlowUnit)> {
-        self.0.iter().map(|f| (f.name, f.unit))
+    pub fn iter_names(&self) -> impl Iterator<Item = &str> {
+        self.0.iter().map(|f| f.name)
     }
 
     pub(crate) fn builder() -> SlowFrameDefBuilder<'data> {
@@ -85,51 +124,19 @@ impl<'data> SlowFrameDef<'data> {
     }
 
     #[instrument(level = "trace", name = "SlowFrameDef::parse", skip_all)]
-    pub(crate) fn parse(&self, data: &mut Reader, headers: &Headers) -> InternalResult<SlowFrame> {
-        let raw = read_field_values(data, &self.0, |f| f.encoding)?;
+    pub(crate) fn parse(
+        &self,
+        data: &mut Reader,
+        headers: &Headers,
+    ) -> InternalResult<RawSlowFrame> {
+        let values = super::parse_impl(
+            PredictorContext::new(headers),
+            &read_field_values(data, &self.0, |f| f.encoding)?,
+            self.0.iter(),
+            |_, _| {},
+        );
 
-        let ctx = PredictorContext::new(headers);
-        let values = raw
-            .iter()
-            .zip(self.0.iter())
-            .map(|(&raw_value, field)| {
-                let value = field.predictor.apply(raw_value, field.signed, None, &ctx);
-
-                tracing::trace!(
-                    field = field.name,
-                    encoding = ?field.encoding,
-                    predictor = ?field.predictor,
-                    raw = raw_value,
-                    value,
-                );
-
-                let firmware = headers.firmware_kind;
-                match field.unit {
-                    SlowUnit::FlightMode => {
-                        SlowValue::FlightMode(units::FlightModeSet::new(value, firmware))
-                    }
-                    SlowUnit::State => SlowValue::State(units::StateSet::new(value, firmware)),
-                    SlowUnit::FailsafePhase => {
-                        SlowValue::FailsafePhase(units::FailsafePhase::new(value, firmware))
-                    }
-                    SlowUnit::Boolean => {
-                        if value > 1 {
-                            tracing::debug!("invalid boolean ({value:0>#8x})");
-                        }
-
-                        SlowValue::Boolean(value != 0)
-                    }
-                    SlowUnit::Unitless => SlowValue::new_unitless(value, field.signed),
-                }
-            })
-            .collect::<Vec<_>>();
-
-        Ok(SlowFrame { values })
-    }
-
-    pub(crate) fn empty_frame(&self) -> SlowFrame {
-        let values = iter::repeat(SlowValue::Missing).take(self.len()).collect();
-        SlowFrame { values }
+        Ok(RawSlowFrame(values))
     }
 }
 
@@ -140,6 +147,24 @@ pub(crate) struct SlowFieldDef<'data> {
     pub(crate) encoding: Encoding,
     pub(crate) unit: SlowUnit,
     pub(crate) signed: bool,
+}
+
+impl<'data> FieldDef<'data> for &SlowFieldDef<'data> {
+    fn name(&self) -> &'data str {
+        self.name
+    }
+
+    fn predictor(&self) -> Predictor {
+        self.predictor
+    }
+
+    fn encoding(&self) -> Encoding {
+        self.encoding
+    }
+
+    fn signed(&self) -> bool {
+        self.signed
+    }
 }
 
 #[derive(Debug, Default)]

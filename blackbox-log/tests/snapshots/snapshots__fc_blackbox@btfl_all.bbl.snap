@@ -125,8 +125,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 6,
         main: 205,
-        slow: 2,
+        slow: 1,
         gps: 0,
         gps_home: 0,
       ),
@@ -141,6 +142,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         flags: 524289,
         last_flags: 268435459,
       ),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -476,12 +478,14 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           histogram: (15, 10, 13, 19, 15, 15, 16, 11, 7, 13, 10, 12, 17, 13, 7, 12),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
         history: {
-          "Arm": 204,
-          "Blackbox": 204,
+          "Arm": 1,
+          "Blackbox": 1,
         },
       ),
       FieldSnapshot(
@@ -493,14 +497,14 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 204,
+          "Idle": 1,
         },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 204,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -508,7 +512,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 204,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -636,8 +640,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 2,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
@@ -955,6 +960,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -1110,13 +1117,27 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
-        main: 0,
-        slow: 1,
+        event: 9,
+        main: 72455,
+        slow: 18,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
+      Resume(
+        log_iteration: 12544,
+        time: 19936397,
+      ),
+      SyncBeep(18247228),
+      FlightMode(
+        flags: 524289,
+        last_flags: 268435459,
+      ),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -1128,8 +1149,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 1171718,
+          unique: 72455,
+          histogram: (4529, 4529, 4529, 4529, 4529, 4529, 4529, 4528, 4528, 4528, 4528, 4528, 4528, 4528, 4528, 4528),
         ),
       ),
       FieldSnapshot(
@@ -1137,134 +1159,149 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: FrameTime,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 165469399,
+          unique: 72455,
+          histogram: (4419, 4626, 4642, 4470, 4384, 4554, 2587, 6291, 4328, 4882, 4758, 4476, 4576, 4634, 2631, 6197),
         ),
       ),
       FieldSnapshot(
         name: "axisP[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -141,
+          max: 165,
+          unique: 173,
+          histogram: (23726, 18108, 11155, 6699, 3977, 2519, 1690, 1139, 802, 639, 526, 432, 336, 276, 229, 202),
         ),
       ),
       FieldSnapshot(
         name: "axisP[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -242,
+          max: 188,
+          unique: 160,
+          histogram: (25738, 18347, 10648, 5834, 3458, 2250, 1668, 1171, 860, 632, 528, 392, 322, 257, 182, 168),
         ),
       ),
       FieldSnapshot(
         name: "axisP[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -410,
+          max: 215,
+          unique: 153,
+          histogram: (29408, 19393, 9921, 5078, 2877, 1763, 1198, 789, 527, 404, 285, 242, 227, 150, 120, 73),
         ),
       ),
       FieldSnapshot(
         name: "axisI[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -132,
+          max: 54,
+          unique: 149,
+          histogram: (11128, 14341, 12339, 7706, 4889, 3601, 3170, 2774, 1899, 1838, 1573, 1514, 1479, 1213, 1673, 1318),
         ),
       ),
       FieldSnapshot(
         name: "axisI[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -192,
+          max: 57,
+          unique: 146,
+          histogram: (7846, 10042, 10468, 8097, 7512, 6360, 5397, 4121, 3268, 2772, 1764, 1268, 1179, 992, 717, 652),
         ),
       ),
       FieldSnapshot(
         name: "axisI[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -400,
+          max: 63,
+          unique: 208,
+          histogram: (7420, 7340, 6619, 5593, 5448, 4734, 4620, 4205, 3781, 3417, 3075, 3457, 3936, 3312, 2823, 2675),
         ),
       ),
       FieldSnapshot(
         name: "axisD[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -264,
+          max: 315,
+          unique: 293,
+          histogram: (9674, 8960, 8254, 7571, 6823, 5844, 5044, 4232, 3537, 2960, 2391, 2021, 1677, 1364, 1131, 972),
         ),
       ),
       FieldSnapshot(
         name: "axisD[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -201,
+          max: 261,
+          unique: 183,
+          histogram: (12423, 11492, 10338, 8619, 7183, 5640, 4358, 3286, 2364, 1826, 1348, 1120, 872, 650, 516, 420),
         ),
       ),
       FieldSnapshot(
         name: "axisF[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -195,
+          max: 273,
+          unique: 262,
+          histogram: (32353, 13619, 7951, 5219, 3428, 2369, 1753, 1283, 1046, 859, 658, 519, 391, 383, 332, 292),
         ),
       ),
       FieldSnapshot(
         name: "axisF[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -35,
+          max: 31,
+          unique: 63,
+          histogram: (43199, 12779, 6492, 3734, 2370, 1393, 833, 548, 347, 220, 191, 123, 71, 77, 46, 32),
         ),
       ),
       FieldSnapshot(
         name: "axisF[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -67,
+          max: 35,
+          unique: 96,
+          histogram: (46455, 12080, 5278, 2771, 1752, 1205, 776, 508, 391, 300, 238, 193, 168, 131, 115, 94),
         ),
       ),
       FieldSnapshot(
         name: "rcCommand[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -499,
+          max: 499,
+          unique: 977,
+          histogram: (6109, 4206, 5546, 5355, 4546, 4366, 4647, 4022, 4212, 4566, 3554, 4706, 4558, 3307, 4284, 4471),
         ),
       ),
       FieldSnapshot(
         name: "rcCommand[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -232,
+          max: 308,
+          unique: 514,
+          histogram: (8209, 2926, 6127, 4686, 5079, 4580, 5138, 3865, 4190, 4988, 3085, 4060, 4150, 3360, 3705, 4307),
         ),
       ),
       FieldSnapshot(
         name: "rcCommand[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -437,
+          max: 315,
+          unique: 751,
+          histogram: (4941, 3550, 5854, 5443, 4192, 4533, 4850, 4607, 4256, 4647, 3733, 4440, 4544, 3520, 4242, 5103),
         ),
       ),
       FieldSnapshot(
@@ -1272,35 +1309,39 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 1940,
+          unique: 910,
+          histogram: (5298, 5318, 5023, 3133, 4243, 4656, 4269, 3696, 5758, 4161, 4675, 4094, 5237, 4609, 5002, 3283),
         ),
       ),
       FieldSnapshot(
         name: "setpoint[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -701,
+          max: 702,
+          unique: 949,
+          histogram: (6546, 6634, 5063, 5737, 4053, 4545, 4426, 4795, 4043, 4653, 3841, 3616, 3930, 3959, 3390, 3224),
         ),
       ),
       FieldSnapshot(
         name: "setpoint[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -102,
+          max: 173,
+          unique: 258,
+          histogram: (9005, 9518, 6081, 7321, 4194, 5187, 4633, 4502, 3303, 4280, 3057, 2528, 2486, 2688, 1936, 1736),
         ),
       ),
       FieldSnapshot(
         name: "setpoint[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -434,
+          max: 181,
+          unique: 578,
+          histogram: (5137, 6454, 5487, 6580, 4764, 4783, 4353, 4690, 3996, 4593, 3387, 4039, 3810, 4331, 3129, 2922),
         ),
       ),
       FieldSnapshot(
@@ -1308,8 +1349,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 933,
+          unique: 882,
+          histogram: (5900, 4157, 3887, 4290, 4248, 4609, 4676, 4573, 5238, 4462, 4028, 4769, 4197, 4220, 4512, 4689),
         ),
       ),
       FieldSnapshot(
@@ -1317,8 +1359,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 16490,
+          unique: 408,
+          histogram: (8657, 0, 9057, 0, 8598, 0, 9130, 0, 9476, 0, 9522, 0, 8908, 0, 9107, 0),
         ),
       ),
       FieldSnapshot(
@@ -1327,7 +1370,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -1335,62 +1378,69 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 671,
+          unique: 221,
+          histogram: (4133, 3590, 4283, 4435, 4372, 4883, 4181, 4818, 4086, 4983, 4679, 4386, 5384, 5027, 4635, 4580),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[0]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -717,
+          max: 729,
+          unique: 1013,
+          histogram: (5234, 6508, 5960, 5464, 5063, 4785, 4579, 4448, 4390, 4060, 4010, 3763, 3678, 3655, 3480, 3378),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[1]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -157,
+          max: 187,
+          unique: 286,
+          histogram: (6264, 9736, 7796, 6538, 5670, 4946, 4522, 4493, 3943, 3734, 3216, 2791, 2376, 2389, 2117, 1924),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[2]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -435,
+          max: 317,
+          unique: 595,
+          histogram: (5018, 6869, 6151, 5910, 5218, 4574, 4465, 4296, 4351, 4010, 3876, 4004, 3823, 3603, 3235, 3052),
         ),
       ),
       FieldSnapshot(
         name: "accSmooth[0]",
         unit: Acceleration,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -2463,
+          max: 199,
+          unique: 1289,
+          histogram: (4556, 4613, 4810, 4625, 4500, 4560, 4450, 4644, 4482, 4569, 4429, 4557, 4402, 4543, 4324, 4391),
         ),
       ),
       FieldSnapshot(
         name: "accSmooth[1]",
         unit: Acceleration,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -1600,
+          max: 943,
+          unique: 1647,
+          histogram: (4459, 4643, 4680, 4517, 4518, 4559, 4442, 4532, 4481, 4662, 4426, 4723, 4535, 4376, 4503, 4399),
         ),
       ),
       FieldSnapshot(
         name: "accSmooth[2]",
         unit: Acceleration,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -155,
+          max: 5396,
+          unique: 3890,
+          histogram: (4420, 4481, 4516, 4629, 4459, 4551, 4545, 4554, 4597, 4596, 4564, 4504, 4492, 4587, 4417, 4543),
         ),
       ),
       FieldSnapshot(
@@ -1398,8 +1448,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 2076,
+          unique: 1610,
+          histogram: (4619, 4525, 4457, 4527, 4553, 4502, 4504, 4471, 4481, 4398, 4556, 4565, 4608, 4487, 4665, 4537),
         ),
       ),
       FieldSnapshot(
@@ -1407,8 +1458,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 2017,
+          unique: 1643,
+          histogram: (4476, 4531, 4574, 4483, 4549, 4467, 4489, 4413, 4489, 4574, 4557, 4575, 4596, 4641, 4498, 4543),
         ),
       ),
       FieldSnapshot(
@@ -1416,8 +1468,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 2022,
+          unique: 1635,
+          histogram: (4434, 4594, 4532, 4468, 4499, 4514, 4482, 4541, 4477, 4469, 4553, 4579, 4632, 4664, 4518, 4499),
         ),
       ),
       FieldSnapshot(
@@ -1425,14 +1478,20 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 2050,
+          unique: 1598,
+          histogram: (4584, 4520, 4541, 4466, 4474, 4499, 4493, 4522, 4525, 4543, 4527, 4525, 4618, 4592, 4480, 4546),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
-        history: {},
+        history: {
+          "Arm": 18,
+          "Blackbox": 18,
+        },
       ),
       FieldSnapshot(
         name: "stateFlags",
@@ -1442,13 +1501,15 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 18,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 0,
+          yes: 18,
           no: 0,
         ),
       ),
@@ -1456,7 +1517,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 0,
+          yes: 18,
           no: 0,
         ),
       ),
@@ -1584,8 +1645,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 8,
         main: 72455,
-        slow: 19,
+        slow: 18,
         gps: 0,
         gps_home: 0,
       ),
@@ -1600,6 +1662,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         flags: 524289,
         last_flags: 268435459,
       ),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -1945,12 +2010,14 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           histogram: (4584, 4520, 4541, 4466, 4474, 4499, 4493, 4522, 4525, 4543, 4527, 4525, 4618, 4592, 4480, 4546),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
         history: {
-          "Arm": 72454,
-          "Blackbox": 72454,
+          "Arm": 18,
+          "Blackbox": 18,
         },
       ),
       FieldSnapshot(
@@ -1962,14 +2029,14 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 72454,
+          "Idle": 18,
         },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 72454,
+          yes: 18,
           no: 0,
         ),
       ),
@@ -1977,7 +2044,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 72454,
+          yes: 18,
           no: 0,
         ),
       ),
@@ -2105,13 +2172,16 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 4,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -2424,6 +2494,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -2579,13 +2651,15 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 3,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -2898,6 +2972,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -3053,8 +3129,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 2,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
@@ -3372,6 +3449,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -3527,8 +3606,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 2,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
@@ -3846,6 +3926,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -4001,14 +4083,16 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 3,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
       Disarm(6),
+      Disarm(4),
       End(
         disarm_reason: None,
       ),
@@ -4320,6 +4404,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -4475,8 +4561,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 2,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
@@ -4794,6 +4881,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -4949,13 +5038,42 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
-        main: 0,
-        slow: 1,
+        event: 18,
+        main: 3742,
+        slow: 2,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
+      Resume(
+        log_iteration: 5120,
+        time: 19652148,
+      ),
+      SyncBeep(18885711),
+      FlightMode(
+        flags: 524289,
+        last_flags: 268435459,
+      ),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Resume(
+        log_iteration: 2560,
+        time: 67627896,
+      ),
+      SyncBeep(67186726),
+      FlightMode(
+        flags: 524289,
+        last_flags: 268435459,
+      ),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -4967,8 +5085,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 50697,
+          unique: 3018,
+          histogram: (235, 235, 235, 235, 234, 234, 234, 234, 234, 234, 233, 233, 233, 233, 233, 233),
         ),
       ),
       FieldSnapshot(
@@ -4976,116 +5095,129 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: FrameTime,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 69396400,
+          unique: 3742,
+          histogram: (378, 350, 298, 159, 340, 199, 196, 308, 223, 251, 170, 223, 118, 220, 97, 212),
         ),
       ),
       FieldSnapshot(
         name: "axisP[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -32,
+          max: 21,
+          unique: 41,
+          histogram: (1062, 885, 756, 514, 274, 147, 42, 21, 18, 9, 4, 2, 2, 2, 2, 2),
         ),
       ),
       FieldSnapshot(
         name: "axisP[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -48,
+          max: 30,
+          unique: 64,
+          histogram: (1274, 1143, 706, 322, 129, 64, 23, 12, 9, 11, 10, 8, 9, 10, 6, 6),
         ),
       ),
       FieldSnapshot(
         name: "axisP[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -38,
+          max: 36,
+          unique: 75,
+          histogram: (1098, 733, 405, 216, 117, 88, 88, 99, 103, 126, 125, 132, 95, 108, 122, 87),
         ),
       ),
       FieldSnapshot(
         name: "axisI[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
+          min: -38,
           max: 0,
-          unique: 0,
+          unique: 39,
+          histogram: (1774, 138, 76, 114, 547, 246, 219, 118, 106, 171, 36, 34, 38, 40, 45, 40),
         ),
       ),
       FieldSnapshot(
         name: "axisI[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -17,
+          max: 44,
+          unique: 62,
+          histogram: (1704, 94, 8, 7, 7, 8, 8, 9, 73, 108, 190, 556, 317, 122, 394, 137),
         ),
       ),
       FieldSnapshot(
         name: "axisI[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -19,
+          max: 1,
+          unique: 21,
+          histogram: (1806, 239, 363, 312, 152, 186, 106, 152, 104, 47, 35, 25, 111, 37, 22, 45),
         ),
       ),
       FieldSnapshot(
         name: "axisD[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -126,
+          max: 127,
+          unique: 107,
+          histogram: (403, 350, 370, 349, 311, 274, 249, 230, 214, 185, 186, 170, 129, 99, 113, 110),
         ),
       ),
       FieldSnapshot(
         name: "axisD[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -70,
+          max: 49,
+          unique: 81,
+          histogram: (574, 552, 464, 429, 333, 270, 219, 197, 156, 129, 101, 109, 63, 59, 50, 37),
         ),
       ),
       FieldSnapshot(
         name: "axisF[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -5,
+          max: 6,
+          unique: 12,
+          histogram: (2849, 588, 195, 75, 27, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "axisF[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -8,
+          max: 7,
+          unique: 16,
+          histogram: (3307, 131, 108, 66, 79, 36, 9, 5, 1, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "axisF[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -4,
+          max: 9,
+          unique: 14,
+          histogram: (3415, 245, 56, 7, 5, 2, 4, 5, 2, 1, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "rcCommand[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -58,
+          max: 166,
+          unique: 215,
+          histogram: (116, 167, 644, 663, 308, 742, 233, 129, 136, 40, 73, 54, 107, 104, 123, 103),
         ),
       ),
       FieldSnapshot(
@@ -5093,17 +5225,19 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 151,
+          unique: 152,
+          histogram: (3113, 35, 48, 78, 48, 35, 40, 57, 29, 41, 35, 33, 45, 29, 25, 51),
         ),
       ),
       FieldSnapshot(
         name: "rcCommand[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -156,
+          max: 7,
+          unique: 161,
+          histogram: (1429, 72, 481, 487, 42, 42, 50, 68, 141, 429, 94, 127, 61, 78, 102, 39),
         ),
       ),
       FieldSnapshot(
@@ -5111,17 +5245,19 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 1452,
+          unique: 278,
+          histogram: (113, 78, 48, 85, 102, 106, 55, 80, 1718, 80, 156, 182, 370, 441, 63, 65),
         ),
       ),
       FieldSnapshot(
         name: "setpoint[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -15,
+          max: 61,
+          unique: 77,
+          histogram: (606, 1466, 67, 136, 120, 95, 199, 156, 130, 170, 90, 79, 117, 155, 121, 35),
         ),
       ),
       FieldSnapshot(
@@ -5129,17 +5265,19 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 53,
+          unique: 54,
+          histogram: (3132, 67, 42, 103, 52, 88, 56, 21, 22, 26, 14, 24, 22, 26, 26, 21),
         ),
       ),
       FieldSnapshot(
         name: "setpoint[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -56,
+          max: 1,
+          unique: 58,
+          histogram: (1863, 527, 25, 53, 37, 107, 543, 166, 57, 119, 19, 46, 54, 69, 22, 35),
         ),
       ),
       FieldSnapshot(
@@ -5147,8 +5285,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 417,
+          unique: 262,
+          histogram: (1775, 77, 74, 110, 193, 109, 98, 124, 76, 76, 74, 62, 303, 427, 77, 87),
         ),
       ),
       FieldSnapshot(
@@ -5156,8 +5295,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 16510,
+          unique: 90,
+          histogram: (382, 0, 521, 0, 384, 0, 476, 0, 443, 0, 482, 0, 421, 0, 633, 0),
         ),
       ),
       FieldSnapshot(
@@ -5166,7 +5306,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -5174,53 +5314,59 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 706,
+          unique: 45,
+          histogram: (299, 300, 248, 226, 581, 650, 250, 250, 50, 50, 0, 100, 100, 140, 249, 249),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[0]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -20,
+          max: 66,
+          unique: 86,
+          histogram: (348, 655, 526, 476, 294, 191, 161, 185, 130, 122, 117, 99, 82, 137, 109, 110),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[1]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -7,
+          max: 67,
+          unique: 72,
+          histogram: (709, 1371, 832, 360, 124, 95, 48, 34, 26, 13, 23, 17, 22, 18, 28, 22),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[2]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -58,
+          max: 38,
+          unique: 97,
+          histogram: (326, 400, 257, 215, 248, 305, 349, 351, 228, 219, 167, 144, 141, 128, 158, 106),
         ),
       ),
       FieldSnapshot(
         name: "accSmooth[0]",
         unit: Acceleration,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -319,
+          max: 6,
+          unique: 298,
+          histogram: (310, 279, 241, 191, 164, 158, 149, 157, 152, 176, 205, 242, 277, 335, 340, 366),
         ),
       ),
       FieldSnapshot(
         name: "accSmooth[1]",
         unit: Acceleration,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -448,
+          max: 57,
+          unique: 416,
+          histogram: (244, 251, 259, 258, 217, 260, 232, 286, 225, 221, 208, 209, 196, 226, 202, 248),
         ),
       ),
       FieldSnapshot(
@@ -5228,8 +5374,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Acceleration,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 2357,
+          unique: 816,
+          histogram: (226, 186, 171, 179, 188, 218, 207, 217, 256, 270, 312, 286, 281, 296, 234, 215),
         ),
       ),
       FieldSnapshot(
@@ -5237,8 +5384,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 1018,
+          unique: 688,
+          histogram: (232, 242, 217, 235, 277, 223, 192, 237, 231, 275, 244, 241, 215, 215, 222, 244),
         ),
       ),
       FieldSnapshot(
@@ -5246,8 +5394,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 1011,
+          unique: 681,
+          histogram: (227, 242, 246, 254, 238, 221, 222, 210, 225, 208, 273, 225, 234, 250, 233, 234),
         ),
       ),
       FieldSnapshot(
@@ -5255,8 +5404,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 925,
+          unique: 645,
+          histogram: (236, 228, 221, 254, 243, 236, 232, 224, 193, 234, 225, 269, 232, 277, 232, 206),
         ),
       ),
       FieldSnapshot(
@@ -5264,14 +5414,20 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 1032,
+          unique: 669,
+          histogram: (235, 217, 233, 224, 233, 222, 250, 237, 224, 224, 236, 232, 245, 243, 222, 265),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
-        history: {},
+        history: {
+          "Arm": 2,
+          "Blackbox": 2,
+        },
       ),
       FieldSnapshot(
         name: "stateFlags",
@@ -5281,13 +5437,15 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 2,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 0,
+          yes: 2,
           no: 0,
         ),
       ),
@@ -5295,7 +5453,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 0,
+          yes: 2,
           no: 0,
         ),
       ),
@@ -5423,7 +5581,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
-        main: 2858,
+        event: 17,
+        main: 3742,
         slow: 2,
         gps: 0,
         gps_home: 0,
@@ -5440,6 +5599,24 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         last_flags: 268435459,
       ),
       Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Resume(
+        log_iteration: 2560,
+        time: 67627896,
+      ),
+      SyncBeep(67186726),
+      FlightMode(
+        flags: 524289,
+        last_flags: 268435459,
+      ),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
       End(
         disarm_reason: None,
       ),
@@ -5451,8 +5628,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 50697,
-          unique: 2858,
-          histogram: (179, 179, 179, 179, 179, 179, 179, 179, 179, 179, 178, 178, 178, 178, 178, 178),
+          unique: 3018,
+          histogram: (235, 235, 235, 235, 234, 234, 234, 234, 234, 234, 233, 233, 233, 233, 233, 233),
         ),
       ),
       FieldSnapshot(
@@ -5460,9 +5637,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: FrameTime,
         history: FieldSnapshot(
           min: 0,
-          max: 25385273,
-          unique: 2858,
-          histogram: (222, 259, 154, 124, 332, 179, 110, 243, 186, 144, 111, 203, 109, 206, 85, 191),
+          max: 69396400,
+          unique: 3742,
+          histogram: (378, 350, 298, 159, 340, 199, 196, 308, 223, 251, 170, 223, 118, 220, 97, 212),
         ),
       ),
       FieldSnapshot(
@@ -5472,7 +5649,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -32,
           max: 21,
           unique: 41,
-          histogram: (874, 707, 530, 358, 183, 108, 37, 20, 18, 9, 4, 2, 2, 2, 2, 2),
+          histogram: (1062, 885, 756, 514, 274, 147, 42, 21, 18, 9, 4, 2, 2, 2, 2, 2),
         ),
       ),
       FieldSnapshot(
@@ -5482,7 +5659,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -48,
           max: 30,
           unique: 64,
-          histogram: (872, 832, 579, 285, 124, 63, 22, 12, 9, 11, 10, 8, 9, 10, 6, 6),
+          histogram: (1274, 1143, 706, 322, 129, 64, 23, 12, 9, 11, 10, 8, 9, 10, 6, 6),
         ),
       ),
       FieldSnapshot(
@@ -5490,9 +5667,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: -38,
-          max: 34,
-          unique: 73,
-          histogram: (1016, 660, 350, 155, 67, 61, 44, 60, 59, 70, 66, 70, 45, 45, 55, 35),
+          max: 36,
+          unique: 75,
+          histogram: (1098, 733, 405, 216, 117, 88, 88, 99, 103, 126, 125, 132, 95, 108, 122, 87),
         ),
       ),
       FieldSnapshot(
@@ -5502,7 +5679,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -38,
           max: 0,
           unique: 39,
-          histogram: (890, 138, 76, 114, 547, 246, 219, 118, 106, 171, 36, 34, 38, 40, 45, 40),
+          histogram: (1774, 138, 76, 114, 547, 246, 219, 118, 106, 171, 36, 34, 38, 40, 45, 40),
         ),
       ),
       FieldSnapshot(
@@ -5512,7 +5689,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -17,
           max: 44,
           unique: 62,
-          histogram: (820, 94, 8, 7, 7, 8, 8, 9, 73, 108, 190, 556, 317, 122, 394, 137),
+          histogram: (1704, 94, 8, 7, 7, 8, 8, 9, 73, 108, 190, 556, 317, 122, 394, 137),
         ),
       ),
       FieldSnapshot(
@@ -5522,7 +5699,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -19,
           max: 1,
           unique: 21,
-          histogram: (922, 239, 363, 312, 152, 186, 106, 152, 104, 47, 35, 25, 111, 37, 22, 45),
+          histogram: (1806, 239, 363, 312, 152, 186, 106, 152, 104, 47, 35, 25, 111, 37, 22, 45),
         ),
       ),
       FieldSnapshot(
@@ -5532,7 +5709,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -126,
           max: 127,
           unique: 107,
-          histogram: (331, 299, 286, 259, 253, 215, 200, 176, 159, 141, 144, 117, 85, 61, 68, 64),
+          histogram: (403, 350, 370, 349, 311, 274, 249, 230, 214, 185, 186, 170, 129, 99, 113, 110),
         ),
       ),
       FieldSnapshot(
@@ -5542,7 +5719,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -70,
           max: 49,
           unique: 81,
-          histogram: (468, 439, 385, 342, 244, 197, 160, 149, 108, 82, 65, 67, 43, 44, 35, 30),
+          histogram: (574, 552, 464, 429, 333, 270, 219, 197, 156, 129, 101, 109, 63, 59, 50, 37),
         ),
       ),
       FieldSnapshot(
@@ -5552,7 +5729,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -5,
           max: 6,
           unique: 12,
-          histogram: (2135, 419, 194, 75, 27, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+          histogram: (2849, 588, 195, 75, 27, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -5562,7 +5739,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -8,
           max: 7,
           unique: 16,
-          histogram: (2423, 131, 108, 66, 79, 36, 9, 5, 1, 0, 0, 0, 0, 0, 0, 0),
+          histogram: (3307, 131, 108, 66, 79, 36, 9, 5, 1, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -5572,7 +5749,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -4,
           max: 9,
           unique: 14,
-          histogram: (2532, 244, 56, 7, 5, 2, 4, 5, 2, 1, 0, 0, 0, 0, 0, 0),
+          histogram: (3415, 245, 56, 7, 5, 2, 4, 5, 2, 1, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -5582,7 +5759,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -58,
           max: 166,
           unique: 215,
-          histogram: (116, 167, 638, 366, 128, 341, 233, 129, 136, 40, 73, 54, 107, 104, 123, 103),
+          histogram: (116, 167, 644, 663, 308, 742, 233, 129, 136, 40, 73, 54, 107, 104, 123, 103),
         ),
       ),
       FieldSnapshot(
@@ -5592,7 +5769,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: 0,
           max: 151,
           unique: 152,
-          histogram: (2229, 35, 48, 78, 48, 35, 40, 57, 29, 41, 35, 33, 45, 29, 25, 51),
+          histogram: (3113, 35, 48, 78, 48, 35, 40, 57, 29, 41, 35, 33, 45, 29, 25, 51),
         ),
       ),
       FieldSnapshot(
@@ -5602,7 +5779,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -156,
           max: 7,
           unique: 161,
-          histogram: (1428, 70, 52, 35, 42, 42, 50, 68, 141, 429, 94, 127, 61, 78, 102, 39),
+          histogram: (1429, 72, 481, 487, 42, 42, 50, 68, 141, 429, 94, 127, 61, 78, 102, 39),
         ),
       ),
       FieldSnapshot(
@@ -5612,7 +5789,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: 0,
           max: 1452,
           unique: 278,
-          histogram: (113, 78, 48, 85, 102, 106, 55, 80, 834, 80, 156, 182, 370, 441, 63, 65),
+          histogram: (113, 78, 48, 85, 102, 106, 55, 80, 1718, 80, 156, 182, 370, 441, 63, 65),
         ),
       ),
       FieldSnapshot(
@@ -5622,7 +5799,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -15,
           max: 61,
           unique: 77,
-          histogram: (601, 587, 67, 136, 120, 95, 199, 156, 130, 170, 90, 79, 117, 155, 121, 35),
+          histogram: (606, 1466, 67, 136, 120, 95, 199, 156, 130, 170, 90, 79, 117, 155, 121, 35),
         ),
       ),
       FieldSnapshot(
@@ -5632,7 +5809,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: 0,
           max: 53,
           unique: 54,
-          histogram: (2248, 67, 42, 103, 52, 88, 56, 21, 22, 26, 14, 24, 22, 26, 26, 21),
+          histogram: (3132, 67, 42, 103, 52, 88, 56, 21, 22, 26, 14, 24, 22, 26, 26, 21),
         ),
       ),
       FieldSnapshot(
@@ -5642,7 +5819,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -56,
           max: 1,
           unique: 58,
-          histogram: (1446, 60, 25, 53, 37, 107, 543, 166, 57, 119, 19, 46, 54, 69, 22, 35),
+          histogram: (1863, 527, 25, 53, 37, 107, 543, 166, 57, 119, 19, 46, 54, 69, 22, 35),
         ),
       ),
       FieldSnapshot(
@@ -5652,7 +5829,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: 0,
           max: 417,
           unique: 262,
-          histogram: (891, 77, 74, 110, 193, 109, 98, 124, 76, 76, 74, 62, 303, 427, 77, 87),
+          histogram: (1775, 77, 74, 110, 193, 109, 98, 124, 76, 76, 74, 62, 303, 427, 77, 87),
         ),
       ),
       FieldSnapshot(
@@ -5661,8 +5838,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 16570,
-          unique: 89,
-          histogram: (287, 0, 364, 0, 343, 0, 376, 0, 302, 0, 512, 0, 273, 0, 401, 0),
+          unique: 90,
+          histogram: (384, 0, 476, 0, 443, 0, 482, 0, 421, 0, 633, 0, 382, 0, 521, 0),
         ),
       ),
       FieldSnapshot(
@@ -5680,8 +5857,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 706,
-          unique: 43,
-          histogram: (299, 300, 248, 175, 149, 249, 250, 250, 50, 50, 0, 100, 100, 140, 249, 249),
+          unique: 45,
+          histogram: (299, 300, 248, 226, 581, 650, 250, 250, 50, 50, 0, 100, 100, 140, 249, 249),
         ),
       ),
       FieldSnapshot(
@@ -5691,7 +5868,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -20,
           max: 66,
           unique: 86,
-          histogram: (251, 424, 316, 280, 186, 154, 156, 185, 130, 122, 117, 99, 82, 137, 109, 110),
+          histogram: (348, 655, 526, 476, 294, 191, 161, 185, 130, 122, 117, 99, 82, 137, 109, 110),
         ),
       ),
       FieldSnapshot(
@@ -5701,7 +5878,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -7,
           max: 67,
           unique: 72,
-          histogram: (461, 937, 667, 327, 121, 94, 48, 34, 26, 13, 23, 17, 22, 18, 28, 22),
+          histogram: (709, 1371, 832, 360, 124, 95, 48, 34, 26, 13, 23, 17, 22, 18, 28, 22),
         ),
       ),
       FieldSnapshot(
@@ -5709,9 +5886,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Rotation,
         history: FieldSnapshot(
           min: -58,
-          max: 36,
-          unique: 95,
-          histogram: (279, 325, 197, 150, 197, 258, 285, 290, 185, 158, 124, 104, 76, 83, 80, 67),
+          max: 38,
+          unique: 97,
+          histogram: (326, 400, 257, 215, 248, 305, 349, 351, 228, 219, 167, 144, 141, 128, 158, 106),
         ),
       ),
       FieldSnapshot(
@@ -5721,7 +5898,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: -319,
           max: 6,
           unique: 298,
-          histogram: (217, 210, 201, 167, 152, 156, 148, 154, 140, 151, 161, 157, 182, 211, 208, 243),
+          histogram: (310, 279, 241, 191, 164, 158, 149, 157, 152, 176, 205, 242, 277, 335, 340, 366),
         ),
       ),
       FieldSnapshot(
@@ -5730,8 +5907,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: -448,
           max: 57,
-          unique: 410,
-          histogram: (187, 192, 201, 213, 161, 200, 183, 213, 161, 171, 155, 165, 139, 174, 152, 191),
+          unique: 416,
+          histogram: (244, 251, 259, 258, 217, 260, 232, 286, 225, 221, 208, 209, 196, 226, 202, 248),
         ),
       ),
       FieldSnapshot(
@@ -5741,7 +5918,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           min: 0,
           max: 2357,
           unique: 816,
-          histogram: (168, 158, 162, 160, 172, 190, 182, 184, 207, 183, 212, 194, 187, 197, 153, 149),
+          histogram: (226, 186, 171, 179, 188, 218, 207, 217, 256, 270, 312, 286, 281, 296, 234, 215),
         ),
       ),
       FieldSnapshot(
@@ -5750,8 +5927,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 1018,
-          unique: 660,
-          histogram: (182, 170, 164, 185, 222, 182, 147, 187, 164, 207, 184, 181, 166, 167, 174, 176),
+          unique: 688,
+          histogram: (232, 242, 217, 235, 277, 223, 192, 237, 231, 275, 244, 241, 215, 215, 222, 244),
         ),
       ),
       FieldSnapshot(
@@ -5760,8 +5937,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 1011,
-          unique: 637,
-          histogram: (177, 196, 201, 184, 181, 155, 167, 164, 175, 157, 198, 183, 192, 174, 182, 172),
+          unique: 681,
+          histogram: (227, 242, 246, 254, 238, 221, 222, 210, 225, 208, 273, 225, 234, 250, 233, 234),
         ),
       ),
       FieldSnapshot(
@@ -5770,8 +5947,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 925,
-          unique: 631,
-          histogram: (173, 173, 175, 188, 180, 161, 174, 177, 143, 183, 187, 208, 180, 224, 176, 156),
+          unique: 645,
+          histogram: (236, 228, 221, 254, 243, 236, 232, 224, 193, 234, 225, 269, 232, 277, 232, 206),
         ),
       ),
       FieldSnapshot(
@@ -5780,16 +5957,18 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 1032,
-          unique: 636,
-          histogram: (178, 165, 170, 167, 175, 176, 189, 184, 168, 173, 205, 180, 172, 178, 171, 207),
+          unique: 669,
+          histogram: (235, 217, 233, 224, 233, 222, 250, 237, 224, 224, 236, 232, 245, 243, 222, 265),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
         history: {
-          "Arm": 2857,
-          "Blackbox": 2857,
+          "Arm": 2,
+          "Blackbox": 2,
         },
       ),
       FieldSnapshot(
@@ -5801,14 +5980,14 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 2857,
+          "Idle": 2,
         },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 2857,
+          yes: 2,
           no: 0,
         ),
       ),
@@ -5816,7 +5995,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 2857,
+          yes: 2,
           no: 0,
         ),
       ),
@@ -5944,13 +6123,31 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
-        main: 0,
+        event: 13,
+        main: 884,
         slow: 1,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Resume(
+        log_iteration: 2560,
+        time: 67627896,
+      ),
+      SyncBeep(67186726),
+      FlightMode(
+        flags: 524289,
+        last_flags: 268435459,
+      ),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -5962,8 +6159,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 16643,
+          unique: 884,
+          histogram: (56, 56, 56, 56, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55),
         ),
       ),
       FieldSnapshot(
@@ -5971,35 +6169,39 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: FrameTime,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 69396400,
+          unique: 884,
+          histogram: (156, 91, 144, 35, 8, 20, 86, 65, 37, 107, 59, 20, 9, 14, 12, 21),
         ),
       ),
       FieldSnapshot(
         name: "axisP[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -7,
+          max: 5,
+          unique: 13,
+          histogram: (188, 178, 226, 156, 91, 39, 5, 1, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "axisP[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -6,
+          max: 3,
+          unique: 10,
+          histogram: (402, 311, 127, 37, 5, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "axisP[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -37,
+          max: 36,
+          unique: 74,
+          histogram: (82, 73, 55, 61, 50, 27, 44, 39, 44, 56, 59, 62, 50, 63, 67, 52),
         ),
       ),
       FieldSnapshot(
@@ -6008,7 +6210,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -6017,7 +6219,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -6026,34 +6228,37 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
         name: "axisD[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -28,
+          max: 26,
+          unique: 55,
+          histogram: (72, 51, 84, 90, 58, 59, 49, 54, 55, 44, 42, 53, 44, 38, 45, 46),
         ),
       ),
       FieldSnapshot(
         name: "axisD[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -19,
+          max: 23,
+          unique: 38,
+          histogram: (106, 113, 79, 87, 89, 73, 59, 48, 48, 47, 36, 42, 20, 15, 15, 7),
         ),
       ),
       FieldSnapshot(
         name: "axisF[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -2,
+          max: 1,
+          unique: 4,
+          histogram: (714, 169, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -6062,7 +6267,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -6070,17 +6275,19 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 1,
+          unique: 2,
+          histogram: (883, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "rcCommand[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
+          min: -5,
           max: 0,
-          unique: 0,
+          unique: 4,
+          histogram: (0, 0, 6, 297, 180, 401, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -6089,16 +6296,17 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
         name: "rcCommand[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
+          min: -3,
           max: 0,
-          unique: 0,
+          unique: 4,
+          histogram: (1, 2, 429, 452, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -6106,17 +6314,18 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 1000,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
         name: "setpoint[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
+          min: -1,
           max: 0,
-          unique: 0,
+          unique: 2,
+          histogram: (5, 879, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -6125,16 +6334,17 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
         name: "setpoint[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
+          min: -1,
           max: 0,
-          unique: 0,
+          unique: 2,
+          histogram: (417, 467, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -6143,7 +6353,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -6151,8 +6361,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 16620,
+          unique: 23,
+          histogram: (97, 0, 112, 0, 100, 0, 106, 0, 119, 0, 121, 0, 109, 0, 120, 0),
         ),
       ),
       FieldSnapshot(
@@ -6161,7 +6372,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -6169,53 +6380,59 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 629,
+          unique: 3,
+          histogram: (0, 0, 0, 51, 432, 401, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[0]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -6,
+          max: 5,
+          unique: 12,
+          histogram: (97, 234, 210, 196, 108, 35, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[1]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -3,
+          max: 5,
+          unique: 9,
+          histogram: (249, 433, 165, 33, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[2]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -36,
+          max: 38,
+          unique: 73,
+          histogram: (48, 74, 60, 65, 52, 48, 62, 60, 45, 60, 42, 40, 66, 46, 76, 40),
         ),
       ),
       FieldSnapshot(
         name: "accSmooth[0]",
         unit: Acceleration,
         history: FieldSnapshot(
-          min: 0,
+          min: -103,
           max: 0,
-          unique: 0,
+          unique: 17,
+          histogram: (90, 60, 39, 21, 9, 2, 5, 4, 15, 30, 47, 88, 98, 122, 135, 119),
         ),
       ),
       FieldSnapshot(
         name: "accSmooth[1]",
         unit: Acceleration,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -49,
+          max: 4,
+          unique: 52,
+          histogram: (55, 56, 56, 49, 53, 57, 51, 80, 59, 50, 51, 49, 53, 55, 52, 58),
         ),
       ),
       FieldSnapshot(
@@ -6223,8 +6440,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Acceleration,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 933,
+          unique: 21,
+          histogram: (56, 30, 13, 21, 21, 33, 26, 33, 47, 84, 99, 90, 95, 98, 78, 60),
         ),
       ),
       FieldSnapshot(
@@ -6232,8 +6450,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 404,
+          unique: 237,
+          histogram: (48, 70, 51, 53, 53, 47, 39, 50, 67, 72, 61, 57, 48, 47, 54, 67),
         ),
       ),
       FieldSnapshot(
@@ -6241,8 +6460,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 386,
+          unique: 244,
+          histogram: (51, 48, 48, 69, 50, 70, 54, 44, 47, 50, 75, 40, 44, 79, 60, 55),
         ),
       ),
       FieldSnapshot(
@@ -6250,8 +6470,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 366,
+          unique: 195,
+          histogram: (58, 59, 46, 66, 59, 76, 59, 44, 54, 49, 41, 60, 51, 55, 58, 49),
         ),
       ),
       FieldSnapshot(
@@ -6259,14 +6480,20 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 389,
+          unique: 228,
+          histogram: (59, 51, 59, 57, 59, 46, 65, 51, 58, 52, 32, 46, 76, 66, 51, 56),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
-        history: {},
+        history: {
+          "Arm": 1,
+          "Blackbox": 1,
+        },
       ),
       FieldSnapshot(
         name: "stateFlags",
@@ -6276,13 +6503,15 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 1,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 0,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -6290,7 +6519,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 0,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -6418,13 +6647,30 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
-        main: 0,
+        event: 12,
+        main: 884,
         slow: 1,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
+      Disarm(4),
+      Resume(
+        log_iteration: 2560,
+        time: 67627896,
+      ),
+      SyncBeep(67186726),
+      FlightMode(
+        flags: 524289,
+        last_flags: 268435459,
+      ),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -6436,8 +6682,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 16643,
+          unique: 884,
+          histogram: (56, 56, 56, 56, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55),
         ),
       ),
       FieldSnapshot(
@@ -6445,35 +6692,39 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: FrameTime,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 69396400,
+          unique: 884,
+          histogram: (156, 91, 144, 35, 8, 20, 86, 65, 37, 107, 59, 20, 9, 14, 12, 21),
         ),
       ),
       FieldSnapshot(
         name: "axisP[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -7,
+          max: 5,
+          unique: 13,
+          histogram: (188, 178, 226, 156, 91, 39, 5, 1, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "axisP[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -6,
+          max: 3,
+          unique: 10,
+          histogram: (402, 311, 127, 37, 5, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "axisP[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -37,
+          max: 36,
+          unique: 74,
+          histogram: (82, 73, 55, 61, 50, 27, 44, 39, 44, 56, 59, 62, 50, 63, 67, 52),
         ),
       ),
       FieldSnapshot(
@@ -6482,7 +6733,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -6491,7 +6742,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -6500,34 +6751,37 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
         name: "axisD[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -28,
+          max: 26,
+          unique: 55,
+          histogram: (72, 51, 84, 90, 58, 59, 49, 54, 55, 44, 42, 53, 44, 38, 45, 46),
         ),
       ),
       FieldSnapshot(
         name: "axisD[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -19,
+          max: 23,
+          unique: 38,
+          histogram: (106, 113, 79, 87, 89, 73, 59, 48, 48, 47, 36, 42, 20, 15, 15, 7),
         ),
       ),
       FieldSnapshot(
         name: "axisF[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -2,
+          max: 1,
+          unique: 4,
+          histogram: (714, 169, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -6536,7 +6790,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -6544,17 +6798,19 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 1,
+          unique: 2,
+          histogram: (883, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "rcCommand[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
+          min: -5,
           max: 0,
-          unique: 0,
+          unique: 4,
+          histogram: (0, 0, 6, 297, 180, 401, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -6563,16 +6819,17 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
         name: "rcCommand[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
+          min: -3,
           max: 0,
-          unique: 0,
+          unique: 4,
+          histogram: (1, 2, 429, 452, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -6580,17 +6837,18 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 1000,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
         name: "setpoint[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
+          min: -1,
           max: 0,
-          unique: 0,
+          unique: 2,
+          histogram: (5, 879, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -6599,16 +6857,17 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
         name: "setpoint[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
+          min: -1,
           max: 0,
-          unique: 0,
+          unique: 2,
+          histogram: (417, 467, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -6617,7 +6876,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -6625,8 +6884,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 16590,
+          unique: 23,
+          histogram: (120, 0, 97, 0, 112, 0, 100, 0, 106, 0, 119, 0, 121, 0, 109, 0),
         ),
       ),
       FieldSnapshot(
@@ -6635,7 +6895,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -6643,53 +6903,59 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 629,
+          unique: 3,
+          histogram: (0, 0, 0, 51, 432, 401, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[0]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -6,
+          max: 5,
+          unique: 12,
+          histogram: (97, 234, 210, 196, 108, 35, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[1]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -3,
+          max: 5,
+          unique: 9,
+          histogram: (249, 433, 165, 33, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[2]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -36,
+          max: 38,
+          unique: 73,
+          histogram: (48, 74, 60, 65, 52, 48, 62, 60, 45, 60, 42, 40, 66, 46, 76, 40),
         ),
       ),
       FieldSnapshot(
         name: "accSmooth[0]",
         unit: Acceleration,
         history: FieldSnapshot(
-          min: 0,
+          min: -103,
           max: 0,
-          unique: 0,
+          unique: 17,
+          histogram: (90, 60, 39, 21, 9, 2, 5, 4, 15, 30, 47, 88, 98, 122, 135, 119),
         ),
       ),
       FieldSnapshot(
         name: "accSmooth[1]",
         unit: Acceleration,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -49,
+          max: 4,
+          unique: 52,
+          histogram: (55, 56, 56, 49, 53, 57, 51, 80, 59, 50, 51, 49, 53, 55, 52, 58),
         ),
       ),
       FieldSnapshot(
@@ -6697,8 +6963,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Acceleration,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 933,
+          unique: 21,
+          histogram: (56, 30, 13, 21, 21, 33, 26, 33, 47, 84, 99, 90, 95, 98, 78, 60),
         ),
       ),
       FieldSnapshot(
@@ -6706,8 +6973,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 404,
+          unique: 237,
+          histogram: (48, 70, 51, 53, 53, 47, 39, 50, 67, 72, 61, 57, 48, 47, 54, 67),
         ),
       ),
       FieldSnapshot(
@@ -6715,8 +6983,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 386,
+          unique: 244,
+          histogram: (51, 48, 48, 69, 50, 70, 54, 44, 47, 50, 75, 40, 44, 79, 60, 55),
         ),
       ),
       FieldSnapshot(
@@ -6724,8 +6993,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 366,
+          unique: 195,
+          histogram: (58, 59, 46, 66, 59, 76, 59, 44, 54, 49, 41, 60, 51, 55, 58, 49),
         ),
       ),
       FieldSnapshot(
@@ -6733,14 +7003,20 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 389,
+          unique: 228,
+          histogram: (59, 51, 59, 57, 59, 46, 65, 51, 58, 52, 32, 46, 76, 66, 51, 56),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
-        history: {},
+        history: {
+          "Arm": 1,
+          "Blackbox": 1,
+        },
       ),
       FieldSnapshot(
         name: "stateFlags",
@@ -6750,13 +7026,15 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 1,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 0,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -6764,7 +7042,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 0,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -6892,13 +7170,29 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
-        main: 0,
+        event: 11,
+        main: 884,
         slow: 1,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
+      Resume(
+        log_iteration: 2560,
+        time: 67627896,
+      ),
+      SyncBeep(67186726),
+      FlightMode(
+        flags: 524289,
+        last_flags: 268435459,
+      ),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -6910,8 +7204,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 16643,
+          unique: 884,
+          histogram: (56, 56, 56, 56, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55),
         ),
       ),
       FieldSnapshot(
@@ -6919,35 +7214,39 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: FrameTime,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 69396400,
+          unique: 884,
+          histogram: (156, 91, 144, 35, 8, 20, 86, 65, 37, 107, 59, 20, 9, 14, 12, 21),
         ),
       ),
       FieldSnapshot(
         name: "axisP[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -7,
+          max: 5,
+          unique: 13,
+          histogram: (188, 178, 226, 156, 91, 39, 5, 1, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "axisP[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -6,
+          max: 3,
+          unique: 10,
+          histogram: (402, 311, 127, 37, 5, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "axisP[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -37,
+          max: 36,
+          unique: 74,
+          histogram: (82, 73, 55, 61, 50, 27, 44, 39, 44, 56, 59, 62, 50, 63, 67, 52),
         ),
       ),
       FieldSnapshot(
@@ -6956,7 +7255,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -6965,7 +7264,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -6974,34 +7273,37 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
         name: "axisD[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -28,
+          max: 26,
+          unique: 55,
+          histogram: (72, 51, 84, 90, 58, 59, 49, 54, 55, 44, 42, 53, 44, 38, 45, 46),
         ),
       ),
       FieldSnapshot(
         name: "axisD[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -19,
+          max: 23,
+          unique: 38,
+          histogram: (106, 113, 79, 87, 89, 73, 59, 48, 48, 47, 36, 42, 20, 15, 15, 7),
         ),
       ),
       FieldSnapshot(
         name: "axisF[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -2,
+          max: 1,
+          unique: 4,
+          histogram: (714, 169, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -7010,7 +7312,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -7018,17 +7320,19 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 1,
+          unique: 2,
+          histogram: (883, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "rcCommand[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
+          min: -5,
           max: 0,
-          unique: 0,
+          unique: 4,
+          histogram: (0, 0, 6, 297, 180, 401, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -7037,16 +7341,17 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
         name: "rcCommand[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
+          min: -3,
           max: 0,
-          unique: 0,
+          unique: 4,
+          histogram: (1, 2, 429, 452, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -7054,17 +7359,18 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 1000,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
         name: "setpoint[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
+          min: -1,
           max: 0,
-          unique: 0,
+          unique: 2,
+          histogram: (5, 879, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -7073,16 +7379,17 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
         name: "setpoint[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
+          min: -1,
           max: 0,
-          unique: 0,
+          unique: 2,
+          histogram: (417, 467, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -7091,7 +7398,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -7099,8 +7406,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 16590,
+          unique: 23,
+          histogram: (120, 0, 97, 0, 112, 0, 100, 0, 106, 0, 119, 0, 121, 0, 109, 0),
         ),
       ),
       FieldSnapshot(
@@ -7109,7 +7417,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -7117,53 +7425,59 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 629,
+          unique: 3,
+          histogram: (0, 0, 0, 51, 432, 401, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[0]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -6,
+          max: 5,
+          unique: 12,
+          histogram: (97, 234, 210, 196, 108, 35, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[1]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -3,
+          max: 5,
+          unique: 9,
+          histogram: (249, 433, 165, 33, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[2]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -36,
+          max: 38,
+          unique: 73,
+          histogram: (48, 74, 60, 65, 52, 48, 62, 60, 45, 60, 42, 40, 66, 46, 76, 40),
         ),
       ),
       FieldSnapshot(
         name: "accSmooth[0]",
         unit: Acceleration,
         history: FieldSnapshot(
-          min: 0,
+          min: -103,
           max: 0,
-          unique: 0,
+          unique: 17,
+          histogram: (90, 60, 39, 21, 9, 2, 5, 4, 15, 30, 47, 88, 98, 122, 135, 119),
         ),
       ),
       FieldSnapshot(
         name: "accSmooth[1]",
         unit: Acceleration,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -49,
+          max: 4,
+          unique: 52,
+          histogram: (55, 56, 56, 49, 53, 57, 51, 80, 59, 50, 51, 49, 53, 55, 52, 58),
         ),
       ),
       FieldSnapshot(
@@ -7171,8 +7485,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Acceleration,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 933,
+          unique: 21,
+          histogram: (56, 30, 13, 21, 21, 33, 26, 33, 47, 84, 99, 90, 95, 98, 78, 60),
         ),
       ),
       FieldSnapshot(
@@ -7180,8 +7495,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 404,
+          unique: 237,
+          histogram: (48, 70, 51, 53, 53, 47, 39, 50, 67, 72, 61, 57, 48, 47, 54, 67),
         ),
       ),
       FieldSnapshot(
@@ -7189,8 +7505,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 386,
+          unique: 244,
+          histogram: (51, 48, 48, 69, 50, 70, 54, 44, 47, 50, 75, 40, 44, 79, 60, 55),
         ),
       ),
       FieldSnapshot(
@@ -7198,8 +7515,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 366,
+          unique: 195,
+          histogram: (58, 59, 46, 66, 59, 76, 59, 44, 54, 49, 41, 60, 51, 55, 58, 49),
         ),
       ),
       FieldSnapshot(
@@ -7207,14 +7525,20 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 389,
+          unique: 228,
+          histogram: (59, 51, 59, 57, 59, 46, 65, 51, 58, 52, 32, 46, 76, 66, 51, 56),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
-        history: {},
+        history: {
+          "Arm": 1,
+          "Blackbox": 1,
+        },
       ),
       FieldSnapshot(
         name: "stateFlags",
@@ -7224,13 +7548,15 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 1,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 0,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -7238,7 +7564,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 0,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -7366,8 +7692,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 10,
         main: 884,
-        slow: 2,
+        slow: 1,
         gps: 0,
         gps_home: 0,
       ),
@@ -7382,6 +7709,11 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         flags: 524289,
         last_flags: 268435459,
       ),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -7719,12 +8051,14 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           histogram: (59, 51, 59, 57, 59, 46, 65, 51, 58, 52, 32, 46, 76, 66, 51, 56),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
         history: {
-          "Arm": 883,
-          "Blackbox": 883,
+          "Arm": 1,
+          "Blackbox": 1,
         },
       ),
       FieldSnapshot(
@@ -7736,14 +8070,14 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 883,
+          "Idle": 1,
         },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 883,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -7751,7 +8085,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 883,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -7879,13 +8213,18 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 6,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -8198,6 +8537,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -8353,13 +8694,17 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 5,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -8672,6 +9017,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -8827,13 +9174,16 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 4,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -9146,6 +9496,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -9301,13 +9653,15 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 3,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -9620,6 +9974,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -9775,8 +10131,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 2,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
@@ -10094,6 +10451,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -10249,13 +10608,19 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 7,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -10568,6 +10933,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -10723,13 +11090,18 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 6,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -11042,6 +11414,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -11197,13 +11571,17 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 5,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -11516,6 +11894,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -11671,13 +12051,16 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 4,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -11990,6 +12373,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -12145,13 +12530,15 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 3,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -12464,6 +12851,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -12619,8 +13008,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 2,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
@@ -12938,6 +13328,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -13093,8 +13485,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 5,
         main: 694,
-        slow: 2,
+        slow: 1,
         gps: 0,
         gps_home: 0,
       ),
@@ -13443,12 +13836,14 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           histogram: (62, 49, 40, 37, 58, 43, 33, 33, 32, 39, 36, 50, 44, 59, 45, 34),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
         history: {
-          "Arm": 693,
-          "Blackbox": 693,
+          "Arm": 1,
+          "Blackbox": 1,
         },
       ),
       FieldSnapshot(
@@ -13460,14 +13855,14 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 693,
+          "Idle": 1,
         },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 693,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -13475,7 +13870,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 693,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -13603,8 +13998,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 2,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
@@ -13922,6 +14318,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -14077,8 +14475,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 2,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
@@ -14396,6 +14795,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -14551,8 +14952,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 2,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
@@ -14870,6 +15272,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -15025,13 +15429,25 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
-        main: 0,
+        event: 7,
+        main: 738,
         slow: 1,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
+      Disarm(4),
+      Resume(
+        log_iteration: 8192,
+        time: 61922397,
+      ),
+      SyncBeep(60775593),
+      FlightMode(
+        flags: 524289,
+        last_flags: 268435459,
+      ),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -15043,8 +15459,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 19969,
+          unique: 738,
+          histogram: (47, 47, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46),
         ),
       ),
       FieldSnapshot(
@@ -15052,35 +15469,39 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: FrameTime,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 63401147,
+          unique: 738,
+          histogram: (20, 58, 33, 33, 20, 69, 35, 54, 30, 36, 123, 45, 67, 46, 25, 44),
         ),
       ),
       FieldSnapshot(
         name: "axisP[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -12,
+          max: 10,
+          unique: 22,
+          histogram: (76, 90, 87, 75, 96, 111, 77, 60, 32, 18, 11, 4, 1, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "axisP[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -9,
+          max: 9,
+          unique: 19,
+          histogram: (74, 94, 93, 116, 110, 95, 82, 54, 15, 5, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "axisP[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -39,
+          max: 41,
+          unique: 80,
+          histogram: (50, 59, 65, 50, 49, 50, 46, 31, 44, 32, 33, 45, 35, 50, 51, 48),
         ),
       ),
       FieldSnapshot(
@@ -15089,7 +15510,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -15098,7 +15519,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -15107,34 +15528,37 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
         name: "axisD[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -57,
+          max: 47,
+          unique: 101,
+          histogram: (48, 51, 38, 69, 39, 44, 52, 37, 51, 46, 52, 46, 47, 35, 42, 41),
         ),
       ),
       FieldSnapshot(
         name: "axisD[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -45,
+          max: 44,
+          unique: 87,
+          histogram: (54, 65, 41, 50, 46, 48, 45, 46, 50, 44, 46, 38, 42, 57, 34, 32),
         ),
       ),
       FieldSnapshot(
         name: "axisF[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -1,
+          max: 1,
+          unique: 3,
+          histogram: (697, 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -15143,7 +15567,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -15152,16 +15576,17 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
         name: "rcCommand[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
+          min: -13,
           max: 0,
-          unique: 0,
+          unique: 14,
+          histogram: (332, 35, 91, 92, 6, 8, 2, 13, 8, 10, 2, 12, 35, 92, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -15170,7 +15595,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -15179,7 +15604,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -15187,17 +15612,18 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 1000,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
         name: "setpoint[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: 0,
+          min: -3,
           max: 0,
-          unique: 0,
+          unique: 4,
+          histogram: (451, 126, 34, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -15206,7 +15632,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -15215,7 +15641,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -15224,7 +15650,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -15232,8 +15658,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Voltage,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 15830,
+          unique: 52,
+          histogram: (95, 0, 99, 0, 113, 0, 108, 0, 58, 0, 98, 0, 78, 0, 89, 0),
         ),
       ),
       FieldSnapshot(
@@ -15242,7 +15669,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         history: FieldSnapshot(
           min: 0,
           max: 0,
-          unique: 0,
+          unique: 1,
         ),
       ),
       FieldSnapshot(
@@ -15250,44 +15677,49 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 643,
+          unique: 5,
+          histogram: (150, 50, 0, 147, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 191, 200),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[0]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -10,
+          max: 11,
+          unique: 22,
+          histogram: (53, 99, 90, 102, 84, 116, 81, 56, 29, 20, 7, 1, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[1]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -9,
+          max: 8,
+          unique: 18,
+          histogram: (65, 94, 129, 128, 115, 115, 59, 22, 10, 1, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
         name: "gyroADC[2]",
         unit: Rotation,
         history: FieldSnapshot(
-          min: 0,
-          max: 0,
-          unique: 0,
+          min: -39,
+          max: 38,
+          unique: 78,
+          histogram: (54, 44, 56, 43, 59, 51, 38, 61, 51, 52, 50, 39, 32, 41, 42, 25),
         ),
       ),
       FieldSnapshot(
         name: "accSmooth[0]",
         unit: Acceleration,
         history: FieldSnapshot(
-          min: 0,
+          min: -121,
           max: 0,
-          unique: 0,
+          unique: 25,
+          histogram: (34, 35, 21, 22, 29, 32, 57, 50, 50, 58, 70, 69, 64, 46, 50, 51),
         ),
       ),
       FieldSnapshot(
@@ -15295,8 +15727,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Acceleration,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 64,
+          unique: 62,
+          histogram: (51, 42, 54, 51, 46, 39, 38, 56, 54, 46, 33, 39, 47, 54, 50, 38),
         ),
       ),
       FieldSnapshot(
@@ -15304,8 +15737,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Acceleration,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 954,
+          unique: 33,
+          histogram: (31, 37, 29, 13, 22, 37, 30, 34, 44, 41, 63, 108, 74, 73, 59, 43),
         ),
       ),
       FieldSnapshot(
@@ -15313,8 +15747,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 588,
+          unique: 327,
+          histogram: (50, 33, 54, 51, 59, 43, 32, 40, 41, 39, 39, 49, 54, 54, 70, 30),
         ),
       ),
       FieldSnapshot(
@@ -15322,8 +15757,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 545,
+          unique: 326,
+          histogram: (50, 64, 50, 48, 52, 41, 48, 36, 45, 46, 41, 47, 38, 60, 41, 31),
         ),
       ),
       FieldSnapshot(
@@ -15331,8 +15767,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 529,
+          unique: 297,
+          histogram: (42, 44, 44, 49, 39, 60, 32, 47, 49, 43, 36, 53, 45, 51, 49, 55),
         ),
       ),
       FieldSnapshot(
@@ -15340,14 +15777,20 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 0,
-          unique: 0,
+          max: 581,
+          unique: 316,
+          histogram: (41, 53, 56, 41, 36, 40, 41, 39, 52, 35, 36, 44, 42, 68, 63, 51),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
-        history: {},
+        history: {
+          "Arm": 1,
+          "Blackbox": 1,
+        },
       ),
       FieldSnapshot(
         name: "stateFlags",
@@ -15357,13 +15800,15 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 1,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 0,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -15371,7 +15816,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 0,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -15499,8 +15944,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 6,
         main: 738,
-        slow: 2,
+        slow: 1,
         gps: 0,
         gps_home: 0,
       ),
@@ -15515,6 +15961,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         flags: 524289,
         last_flags: 268435459,
       ),
+      Disarm(4),
       Disarm(4),
       End(
         disarm_reason: None,
@@ -15849,12 +16296,14 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           histogram: (41, 53, 56, 41, 36, 40, 41, 39, 52, 35, 36, 44, 42, 68, 63, 51),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
         history: {
-          "Arm": 737,
-          "Blackbox": 737,
+          "Arm": 1,
+          "Blackbox": 1,
         },
       ),
       FieldSnapshot(
@@ -15866,14 +16315,14 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 737,
+          "Idle": 1,
         },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 737,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -15881,7 +16330,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 737,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -16009,8 +16458,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 2,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
@@ -16328,6 +16778,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -16483,8 +16935,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 12,
         main: 654,
-        slow: 2,
+        slow: 1,
         gps: 0,
         gps_home: 0,
       ),
@@ -16500,9 +16953,14 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         last_flags: 268435459,
       ),
       Disarm(4),
-      End(
-        disarm_reason: None,
-      ),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
     ],
     main: Fields([
       FieldSnapshot(
@@ -16833,12 +17291,14 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           histogram: (40, 38, 46, 37, 38, 46, 52, 40, 42, 38, 41, 39, 36, 36, 52, 33),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
         history: {
-          "Arm": 653,
-          "Blackbox": 653,
+          "Arm": 1,
+          "Blackbox": 1,
         },
       ),
       FieldSnapshot(
@@ -16850,14 +17310,14 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 653,
+          "Idle": 1,
         },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 653,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -16865,7 +17325,7 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 653,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -16993,17 +17453,22 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 8,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
       Disarm(4),
-      End(
-        disarm_reason: None,
-      ),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
     ],
     main: Fields([
       FieldSnapshot(
@@ -17312,6 +17777,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -17467,17 +17934,21 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 7,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
       Disarm(4),
-      End(
-        disarm_reason: None,
-      ),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
     ],
     main: Fields([
       FieldSnapshot(
@@ -17786,6 +18257,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -17941,17 +18414,20 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 6,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
       Disarm(4),
-      End(
-        disarm_reason: None,
-      ),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
     ],
     main: Fields([
       FieldSnapshot(
@@ -18260,6 +18736,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -18415,17 +18893,19 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 5,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
       Disarm(4),
-      End(
-        disarm_reason: None,
-      ),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
     ],
     main: Fields([
       FieldSnapshot(
@@ -18734,6 +19214,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -18889,17 +19371,18 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 4,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
       Disarm(4),
-      End(
-        disarm_reason: None,
-      ),
+      Disarm(4),
+      Disarm(4),
+      Disarm(4),
     ],
     main: Fields([
       FieldSnapshot(
@@ -19208,6 +19691,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -19363,17 +19848,17 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 3,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
       Disarm(4),
-      End(
-        disarm_reason: None,
-      ),
+      Disarm(4),
+      Disarm(4),
     ],
     main: Fields([
       FieldSnapshot(
@@ -19682,6 +20167,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -19837,17 +20324,16 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 2,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
       Disarm(4),
-      End(
-        disarm_reason: None,
-      ),
+      Disarm(4),
     ],
     main: Fields([
       FieldSnapshot(
@@ -20156,6 +20642,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -20311,17 +20799,15 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 1,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
       Disarm(4),
-      End(
-        disarm_reason: None,
-      ),
     ],
     main: Fields([
       FieldSnapshot(
@@ -20630,6 +21116,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
@@ -20785,8 +21273,9 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 0,
         main: 0,
-        slow: 1,
+        slow: 0,
         gps: 0,
         gps_home: 0,
       ),
@@ -21099,6 +21588,8 @@ input_file: ".modules/fc-blackbox/src/test-data/btfl_all.bbl"
           unique: 0,
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,

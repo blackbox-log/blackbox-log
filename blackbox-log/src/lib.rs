@@ -78,7 +78,6 @@ pub mod event;
 mod file;
 pub mod frame;
 pub mod headers;
-pub mod log;
 mod predictor;
 mod reader;
 pub mod units;
@@ -88,12 +87,12 @@ pub mod parser;
 #[cfg(not(any(bench, fuzzing)))]
 mod parser;
 
+pub use self::data::DataParser;
 pub use self::file::File;
 pub use self::frame::{Unit, Value};
 pub use self::headers::{
     Headers, ParseError as HeadersParseError, ParseResult as HeadersParseResult,
 };
-pub use self::log::{Log, LogView};
 pub use self::reader::Reader;
 
 /// The first line of any blackbox log.

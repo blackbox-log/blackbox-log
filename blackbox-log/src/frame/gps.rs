@@ -4,9 +4,7 @@ use core::iter;
 
 use tracing::instrument;
 
-use super::{
-    read_field_values, DataFrameKind, DataFrameProperty, FieldDef, GpsHomeFrame, MainFrame, Unit,
-};
+use super::{read_field_values, DataFrameKind, DataFrameProperty, FieldDef, GpsHomeFrame, Unit};
 use crate::parser::{decode, to_base_field, Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
@@ -15,9 +13,67 @@ use crate::utils::as_i32;
 use crate::{Headers, HeadersParseError, HeadersParseResult, Reader};
 
 #[derive(Debug, Clone)]
-pub(crate) struct GpsFrame {
-    pub(crate) time: GpsValue,
-    pub(crate) values: Vec<GpsValue>,
+pub struct GpsFrame<'data, 'headers> {
+    headers: &'headers Headers<'data>,
+    raw: RawGpsFrame,
+}
+
+impl super::Frame for GpsFrame<'_, '_> {
+    type Value = GpsValue;
+
+    fn get(&self, index: usize) -> Option<Self::Value> {
+        let value = if index == 0 {
+            GpsValue::FrameTime(Time::from_raw(self.raw.time, self.headers))
+        } else {
+            let index = index - 1;
+
+            let def = self.headers.gps_frames.as_ref().unwrap();
+            let def = def.0.get(index)?;
+            let raw = self.raw.values[index];
+
+            match def.unit {
+                GpsUnit::FrameTime => unreachable!(),
+                GpsUnit::Coordinate => {
+                    assert!(def.signed);
+                    let value = as_i32(raw);
+
+                    GpsValue::Coordinate(f64::from(value) / 10000000.)
+                }
+                GpsUnit::Altitude => {
+                    let altitude = if def.signed {
+                        as_i32(raw).into()
+                    } else {
+                        raw.into()
+                    };
+
+                    GpsValue::Altitude(Length::new::<meter>(altitude))
+                }
+                GpsUnit::Velocity => {
+                    assert!(!def.signed);
+                    GpsValue::Velocity(Velocity::from_raw(raw, self.headers))
+                }
+                GpsUnit::Heading => {
+                    assert!(!def.signed);
+                    GpsValue::Heading(f64::from(raw) / 10.)
+                }
+                GpsUnit::Unitless => GpsValue::new_unitless(raw, def.signed),
+            }
+        };
+
+        Some(value)
+    }
+}
+
+impl<'data, 'headers> GpsFrame<'data, 'headers> {
+    pub(crate) fn new(headers: &'headers Headers<'data>, raw: RawGpsFrame) -> Self {
+        Self { headers, raw }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct RawGpsFrame {
+    pub(crate) time: u64,
+    pub(crate) values: Vec<u32>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -29,16 +85,6 @@ pub enum GpsValue {
     Heading(f64),
     Unsigned(u32),
     Signed(i32),
-    Missing,
-}
-
-impl GpsFrame {
-    pub(crate) fn get(&self, index: usize) -> Option<GpsValue> {
-        match index {
-            0 => Some(self.time),
-            _ => self.values.get(index - 1).copied(),
-        }
-    }
 }
 
 impl GpsValue {
@@ -62,23 +108,20 @@ pub enum GpsUnit {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct GpsFrameDef<'data>(pub(crate) Vec<GpsFieldDef<'data>>);
+pub struct GpsFrameDef<'data>(pub(crate) Vec<GpsFieldDef<'data>>);
 
 impl<'data> GpsFrameDef<'data> {
-    pub(crate) fn len(&self) -> usize {
+    #[allow(clippy::len_without_is_empty)]
+    pub fn len(&self) -> usize {
         1 + self.0.len()
     }
 
-    pub(crate) fn get(&self, index: usize) -> Option<(&str, GpsUnit)> {
-        if index == 0 {
-            Some(("time", GpsUnit::FrameTime))
-        } else {
-            self.0.get(index - 1).map(|field| (field.name, field.unit))
-        }
+    pub fn iter(&self) -> impl Iterator<Item = (&str, GpsUnit)> {
+        iter::once(("time", GpsUnit::FrameTime)).chain(self.0.iter().map(|f| (f.name, f.unit)))
     }
 
-    pub(crate) fn iter(&self) -> impl Iterator<Item = (&str, GpsUnit)> {
-        iter::once(("time", GpsUnit::FrameTime)).chain(self.0.iter().map(|f| (f.name, f.unit)))
+    pub fn iter_names(&self) -> impl Iterator<Item = &str> {
+        iter::once("time").chain(self.0.iter().map(|f| f.name))
     }
 
     pub(crate) fn builder() -> GpsFrameDefBuilder<'data> {
@@ -109,16 +152,16 @@ impl<'data> GpsFrameDef<'data> {
         &self,
         data: &mut Reader,
         headers: &Headers,
-        last_main: Option<&MainFrame>,
+        last_main_time: Option<u64>,
         last_home: Option<&GpsHomeFrame>,
-    ) -> InternalResult<GpsFrame> {
+    ) -> InternalResult<RawGpsFrame> {
         let time = {
-            let time = last_main.map_or(0, |main| main.time);
+            let time = last_main_time.unwrap_or(0);
             let offset = decode::variable(data)?.into();
 
             let time = time.saturating_add(offset);
             tracing::trace!(time, offset);
-            GpsValue::FrameTime(Time::from_raw(time, headers))
+            time
         };
 
         let raw = read_field_values(data, &self.0, |f| f.encoding)?;
@@ -141,44 +184,10 @@ impl<'data> GpsFrameDef<'data> {
                 final = value
             );
 
-            values.push(match field.unit {
-                GpsUnit::FrameTime => unreachable!(),
-                GpsUnit::Coordinate => {
-                    assert!(field.signed);
-                    let value = as_i32(value);
-
-                    GpsValue::Coordinate(f64::from(value) / 10000000.)
-                }
-                GpsUnit::Altitude => {
-                    let altitude = if field.signed {
-                        as_i32(value).into()
-                    } else {
-                        value.into()
-                    };
-
-                    GpsValue::Altitude(Length::new::<meter>(altitude))
-                }
-                GpsUnit::Velocity => {
-                    assert!(!field.signed);
-                    GpsValue::Velocity(Velocity::from_raw(value, headers))
-                }
-                GpsUnit::Heading => {
-                    assert!(!field.signed);
-                    GpsValue::Heading(f64::from(value) / 10.)
-                }
-                GpsUnit::Unitless => GpsValue::new_unitless(value, signed),
-            });
+            values.push(value);
         }
 
-        Ok(GpsFrame { time, values })
-    }
-
-    pub(crate) fn empty_frame(&self) -> GpsFrame {
-        let values = iter::repeat(GpsValue::Missing).take(self.0.len()).collect();
-        GpsFrame {
-            time: GpsValue::Missing,
-            values,
-        }
+        Ok(RawGpsFrame { time, values })
     }
 }
 
