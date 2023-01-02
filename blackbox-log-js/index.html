@@ -49,6 +49,8 @@
 			const logNum = document.querySelector('#log');
 
 			async function fileHandler() {
+				file?.free();
+
 				const buffer = await upload.files[0].arrayBuffer();
 				const view = new Uint8Array(buffer);
 				file = parser.loadFile(view);

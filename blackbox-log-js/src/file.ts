@@ -26,6 +26,14 @@ export class File implements WasmObject {
 	}
 
 	free() {
+		for (const headers of this.#headers) {
+			headers.deref()?.free();
+		}
+
+		for (const log of this.#logs) {
+			log.deref()?.free();
+		}
+
 		this.#ptr.free();
 	}
 
