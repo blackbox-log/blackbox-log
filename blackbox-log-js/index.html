@@ -17,6 +17,7 @@
 		<br />
 		<button id="run" type="file">Run</button>
 
+		<p>Memory size: <span id="memory">0</span></p>
 		<p>Log count: <span id="log-count">0</span></p>
 		<p>
 			<label for="log">Log:</label>
@@ -84,6 +85,9 @@
 				document.querySelector('#craft-name').innerText = log.craftName ?? '';
 				document.querySelector('#main-count').innerText = log.mainFrameCount;
 				document.querySelector('#gps-count').innerText = log.gpsFrameCount;
+
+				const memory = Math.round((file.memorySize / 1024 / 1024) * 100) / 100;
+				document.querySelector('#memory').innerText = `${memory} MiB`;
 			}
 
 			logNum.addEventListener('change', logHandler);

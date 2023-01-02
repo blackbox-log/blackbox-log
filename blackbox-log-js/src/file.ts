@@ -64,4 +64,8 @@ export class File implements WasmObject {
 		this.#logs[index] = new WeakRef(log);
 		return log;
 	}
+
+	get memorySize(): number {
+		return this.#wasm.memory.buffer.byteLength;
+	}
 }
