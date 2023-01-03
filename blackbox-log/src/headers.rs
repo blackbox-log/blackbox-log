@@ -8,8 +8,8 @@ use hashbrown::HashMap;
 
 use crate::frame::{
     is_frame_def_header, parse_frame_def_header, DataFrameKind, GpsFrameDef, GpsFrameDefBuilder,
-    GpsHomeFrameDef, GpsHomeFrameDefBuilder, GpsUnit, MainFrameDef, MainFrameDefBuilder, MainUnit,
-    SlowFrameDef, SlowFrameDefBuilder, SlowUnit,
+    GpsHomeFrameDef, GpsHomeFrameDefBuilder, MainFrameDef, MainFrameDefBuilder, SlowFrameDef,
+    SlowFrameDefBuilder,
 };
 use crate::parser::{InternalError, InternalResult};
 use crate::predictor::Predictor;
@@ -99,24 +99,41 @@ pub struct Headers<'data> {
 }
 
 impl<'data> Headers<'data> {
-    pub(crate) fn main_fields(&self) -> impl Iterator<Item = (&str, MainUnit)> {
-        self.main_frames.iter()
+    /// Returns the parsed definition for main frames.
+    pub fn main_def(&self) -> &MainFrameDef<'data> {
+        &self.main_frames
     }
 
-    pub(crate) fn slow_fields(&self) -> impl Iterator<Item = (&str, SlowUnit)> {
-        self.slow_frames.iter()
+    /// Returns a mutable reference to the parsed definition for main frames.
+    pub fn main_def_mut<'a>(&'a mut self) -> &'a mut MainFrameDef<'data> {
+        &mut self.main_frames
     }
 
-    #[allow(clippy::redundant_closure_for_method_calls)]
-    pub(crate) fn gps_fields(&self) -> impl Iterator<Item = (&str, GpsUnit)> {
-        self.gps_frames.iter().flat_map(|def| def.iter())
+    /// Returns the parsed definition for slow frames.
+    pub fn slow_def(&self) -> &SlowFrameDef<'data> {
+        &self.slow_frames
+    }
+
+    /// Returns a mutable reference to the parsed definition for slow frames.
+    pub fn slow_def_mut<'a>(&'a mut self) -> &'a mut SlowFrameDef<'data> {
+        &mut self.slow_frames
+    }
+
+    /// Returns the parsed definition for GPS frames, if present.
+    pub fn gps_def(&self) -> Option<&GpsFrameDef<'data>> {
+        self.gps_frames.as_ref()
+    }
+
+    /// Returns a mutable reference to the parsed definition for GPS frames, if
+    /// present.
+    pub fn gps_def_mut<'a>(&'a mut self) -> Option<&'a mut GpsFrameDef<'data>> {
+        self.gps_frames.as_mut()
     }
 
     /// Parses only the headers of a blackbox log.
     ///
     /// `data` will be advanced to the start of the data section of the log,
-    /// ready to be passed to
-    /// [`Log::parse_with_headers`][`crate::Log::parse_with_headers`].
+    /// ready to be passed to [`DataParser::new`][`crate::DataParser::new`].
     ///
     /// **Note:** This assumes that `data` is aligned to the start of a log.
     pub fn parse(data: &mut Reader<'data>) -> ParseResult<Self> {
@@ -153,14 +170,10 @@ impl<'data> Headers<'data> {
         state.finish()
     }
 
-    /// Returns `true` iff the headers required for GPS frames are present.
-    pub fn has_gps_defs(&self) -> bool {
-        self.gps_frames.is_some()
-    }
-
     fn validate(&self) -> ParseResult<()> {
         let has_accel = self.acceleration_1g.is_some();
         let has_min_throttle = self.min_throttle.is_some();
+        // TODO: also check it is in a main frame
         let has_motor_0 = self.main_frames.has_motor_0();
         let has_vbat_ref = self.vbat_reference.is_some();
         let has_min_motor = self.motor_output_range.is_some();

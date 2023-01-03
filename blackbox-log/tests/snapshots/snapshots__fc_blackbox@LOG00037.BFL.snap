@@ -125,16 +125,19 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00037.BFL"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 3,
         main: 16774,
-        slow: 4,
-        gps: 87,
+        slow: 3,
+        gps: 86,
         gps_home: 1,
       ),
     ),
     events: [
       SyncBeep(451840837),
       Disarm(4),
-      End,
+      End(
+        disarm_reason: None,
+      ),
     ],
     main: Fields([
       FieldSnapshot(
@@ -555,34 +558,36 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00037.BFL"
           histogram: (1032, 1067, 1018, 1055, 1030, 1063, 997, 1030, 1048, 1040, 1044, 1088, 1201, 1049, 1013, 999),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
         history: {
-          "Arm": 16773,
-          "Blackbox": 16773,
+          "Arm": 3,
+          "Blackbox": 3,
         },
       ),
       FieldSnapshot(
         name: "stateFlags",
         unit: State,
         history: {
-          "GpsFix": 16773,
-          "GpsFixHome": 16773,
+          "GpsFix": 3,
+          "GpsFixHome": 3,
         },
       ),
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 16773,
+          "Idle": 3,
         },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 16773,
+          yes: 3,
           no: 0,
         ),
       ),
@@ -590,7 +595,7 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00037.BFL"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 16773,
+          yes: 3,
           no: 0,
         ),
       ),

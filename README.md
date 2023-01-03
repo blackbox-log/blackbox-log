@@ -6,7 +6,7 @@
 [![license](https://img.shields.io/github/license/wetheredge/blackbox)](https://github.com/wetheredge/blackbox/blob/main/COPYING)
 
 This is a Rust port of the Betaflight and INAV blackbox tools. It includes a
-[Rust library](./blackbox-log) and a [cli](./blackbox-log-cli).
+[Rust library](./blackbox-log) and a [cli](./bbl2csv).
 
 ## Why?
 
@@ -23,7 +23,8 @@ Neither is all that great for building other software with:
   JavaScript, which limits the places it can reasonably be embedded.
 
 This project aims to fill that niche. An ergonomic, up-to-date API usable
-anywhere that supports Rust or (soon) WebAssembly.
+anywhere that supports Rust or
+([soon](https://github.com/wetheredge/blackbox/tree/wasm)) WebAssembly.
 
 ## Roadmap
 
@@ -33,7 +34,6 @@ anywhere that supports Rust or (soon) WebAssembly.
     - [ ] 4.4
   - [ ] INAV (versions TBD)
   - [ ] EmuFlight (versions TBD)
-- [ ] GPX output from `blackbox-log-cli`
 - [ ] WebAssembly
   - [ ] JavaScript
 - [ ] Future: web-native log viewer?

@@ -125,7 +125,8 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
     ),
     stats: Stats(
       counts: FrameCounts(
-        main: 2,
+        event: 3,
+        main: 5,
         slow: 1,
         gps: 0,
         gps_home: 0,
@@ -134,7 +135,9 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
     events: [
       SyncBeep(32887122),
       Disarm(4),
-      End,
+      End(
+        disarm_reason: None,
+      ),
     ],
     main: Fields([
       FieldSnapshot(
@@ -143,8 +146,8 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
         history: FieldSnapshot(
           min: 0,
           max: 256,
-          unique: 2,
-          histogram: (2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+          unique: 5,
+          histogram: (2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -153,8 +156,8 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
         history: FieldSnapshot(
           min: 0,
           max: 33043646,
-          unique: 2,
-          histogram: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1),
+          unique: 5,
+          histogram: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2),
         ),
       ),
       FieldSnapshot(
@@ -173,7 +176,7 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
           min: -2,
           max: 0,
           unique: 2,
-          histogram: (1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+          histogram: (4, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -217,9 +220,9 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: -1,
-          max: 0,
-          unique: 2,
-          histogram: (1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+          max: 2,
+          unique: 4,
+          histogram: (1, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -227,9 +230,9 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: -3,
-          max: 0,
-          unique: 2,
-          histogram: (1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+          max: 2,
+          unique: 3,
+          histogram: (1, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -283,7 +286,8 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
         history: FieldSnapshot(
           min: 0,
           max: 1,
-          unique: 1,
+          unique: 2,
+          histogram: (3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -338,7 +342,7 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
           min: 0,
           max: 24630,
           unique: 2,
-          histogram: (0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0),
+          histogram: (0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 4, 0),
         ),
       ),
       FieldSnapshot(
@@ -348,7 +352,7 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
           min: 0,
           max: 760,
           unique: 2,
-          histogram: (1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+          histogram: (4, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -358,7 +362,7 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
           min: 0,
           max: 279,
           unique: 2,
-          histogram: (0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+          histogram: (0, 1, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -386,7 +390,7 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
           min: 0,
           max: 1,
           unique: 2,
-          histogram: (1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+          histogram: (4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -404,8 +408,8 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
         history: FieldSnapshot(
           min: -21,
           max: 0,
-          unique: 2,
-          histogram: (0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+          unique: 3,
+          histogram: (0, 0, 1, 3, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -414,8 +418,8 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
         history: FieldSnapshot(
           min: -19,
           max: 0,
-          unique: 2,
-          histogram: (0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+          unique: 4,
+          histogram: (0, 2, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1),
         ),
       ),
       FieldSnapshot(
@@ -423,9 +427,9 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
         unit: Acceleration,
         history: FieldSnapshot(
           min: 0,
-          max: 984,
-          unique: 2,
-          histogram: (0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+          max: 985,
+          unique: 3,
+          histogram: (0, 0, 0, 0, 0, 0, 1, 0, 3, 1, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -433,9 +437,9 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 169,
-          unique: 2,
-          histogram: (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0),
+          max: 178,
+          unique: 5,
+          histogram: (0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0),
         ),
       ),
       FieldSnapshot(
@@ -444,8 +448,8 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
         history: FieldSnapshot(
           min: 0,
           max: 183,
-          unique: 2,
-          histogram: (0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+          unique: 4,
+          histogram: (0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0),
         ),
       ),
       FieldSnapshot(
@@ -453,9 +457,9 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 161,
-          unique: 2,
-          histogram: (0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+          max: 179,
+          unique: 5,
+          histogram: (0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1),
         ),
       ),
       FieldSnapshot(
@@ -464,14 +468,18 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
         history: FieldSnapshot(
           min: 0,
           max: 183,
-          unique: 2,
-          histogram: (0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0),
+          unique: 5,
+          histogram: (0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
-        history: {},
+        history: {
+          "Arm": 1,
+        },
       ),
       FieldSnapshot(
         name: "stateFlags",
@@ -481,13 +489,15 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
-        history: {},
+        history: {
+          "Idle": 1,
+        },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 0,
+          yes: 1,
           no: 0,
         ),
       ),
@@ -495,7 +505,7 @@ input_file: blackbox-log/tests/logs/error-recovery.bbl
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 0,
+          yes: 1,
           no: 0,
         ),
       ),

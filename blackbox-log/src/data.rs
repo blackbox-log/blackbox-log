@@ -1,149 +1,95 @@
 //! Types for the data section of blackbox logs.
 
-use alloc::vec::Vec;
-
-use crate::event::{self, Event};
-use crate::frame::{DataFrameKind, FrameKind, GpsFrame, GpsHomeFrame, MainFrame, SlowFrame};
+use crate::event::Event;
+use crate::frame::gps::{GpsFrame, RawGpsFrame};
+use crate::frame::main::{MainFrame, RawMainFrame};
+use crate::frame::slow::{RawSlowFrame, SlowFrame};
+use crate::frame::{DataFrameKind, FrameKind, GpsHomeFrame};
 use crate::parser::InternalError;
 use crate::{Headers, Reader};
 
-#[derive(Debug, Clone)]
-pub(crate) struct Data {
-    pub(crate) events: Vec<Event>,
-    pub(crate) main_frames: Vec<FrameSync>,
-    pub(crate) slow_frames: Vec<SlowFrame>,
-    pub(crate) gps_frames: Vec<GpsFrame>,
-    pub(crate) gps_home_frames: Vec<GpsHomeFrame>,
+/// An pseudo-event-based parser for the data section of blackbox logs.
+#[derive(Debug)]
+pub struct DataParser<'data, 'reader, 'headers> {
+    headers: &'headers Headers<'data>,
+    data: &'reader mut Reader<'data>,
+    stats: Stats,
+    main_frames: MainFrameHistory,
+    gps_home_frame: Option<GpsHomeFrame>,
+    done: bool,
 }
 
-#[derive(Debug, Clone)]
-pub(crate) struct FrameSync {
-    pub(crate) main: MainFrame,
-    pub(crate) slow: usize,
-    pub(crate) gps: Option<usize>,
-}
-
-impl FrameSync {
-    pub(crate) const fn new(main: MainFrame, slow: &[SlowFrame], gps: &[GpsFrame]) -> Self {
+impl<'data, 'reader, 'headers> DataParser<'data, 'reader, 'headers> {
+    /// Constructs a new parser without beginning parsing.
+    pub fn new(data: &'reader mut Reader<'data>, headers: &'headers Headers<'data>) -> Self {
         Self {
-            main,
-            slow: slow.len() - 1,
-            gps: gps.len().checked_sub(1),
-        }
-    }
-}
-
-/// Statistics about a decoded log.
-#[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
-#[non_exhaustive]
-pub struct Stats {
-    /// The number of valid frames found of each type.
-    pub counts: FrameCounts,
-}
-
-#[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct FrameCounts {
-    pub main: usize,
-    pub slow: usize,
-    pub gps: usize,
-    pub gps_home: usize,
-}
-
-impl Data {
-    pub(crate) fn to_stats(&self) -> Stats {
-        Stats {
-            counts: FrameCounts {
-                main: self.main_frames.len(),
-                slow: self.slow_frames.len(),
-                gps: self.gps_frames.len(),
-                gps_home: self.gps_home_frames.len(),
-            },
+            headers,
+            data,
+            stats: Stats::default(),
+            main_frames: MainFrameHistory::default(),
+            gps_home_frame: None,
+            done: false,
         }
     }
 
-    pub(crate) fn parse(data: &mut Reader, headers: &Headers) -> Self {
-        let mut events = Vec::new();
-        let mut main_frames = Vec::new();
-        let mut slow_frames = Vec::new();
-        let mut gps_frames = Vec::new();
-        let mut gps_home_frames = Vec::new();
+    /// Returns the current stats.
+    pub fn stats(&self) -> &Stats {
+        &self.stats
+    }
 
-        slow_frames.push(headers.slow_frames.empty_frame());
+    /// Returns `true` if the parser has reached the end of the log.
+    pub fn is_done(&self) -> bool {
+        self.done
+    }
 
-        if let Some(def) = &headers.gps_frames {
-            gps_frames.push(def.empty_frame());
+    /// Continues parsing until the next [`ParseEvent`] can be returned. Returns
+    /// `None` if the parser finds the end of the log.
+    pub fn next<'parser>(&'parser mut self) -> Option<ParseEvent<'data, 'headers, 'parser>> {
+        if self.done {
+            return None;
         }
 
-        let mut restore;
-        let mut last_kind = None;
-        while let Some(byte) = data.read_u8() {
-            restore = data.get_restore_point();
+        loop {
+            let byte = self.data.read_u8()?;
+            let restore = self.data.get_restore_point();
 
             let Some(kind) = FrameKind::from_byte(byte) else {
-                tracing::debug!("found invalid frame byte: {byte:0>#2x}");
-
-                if let Some(last_kind) = last_kind.take() {
-                    data.restore(restore);
-
-                    match last_kind {
-                        FrameKind::Event => {
-                            events.pop();
-                        }
-                        FrameKind::Data(DataFrameKind::Intra | DataFrameKind::Inter) => {
-                            main_frames.pop();
-                        }
-                        FrameKind::Data(DataFrameKind::Slow) => {
-                            slow_frames.pop();
-                        }
-                        FrameKind::Data(DataFrameKind::Gps) => {
-                            gps_frames.pop();
-                        }
-                        FrameKind::Data(DataFrameKind::GpsHome) => {
-                            gps_home_frames.pop();
-                        }
-                    };
-                }
-
-                skip_to_frame(data);
+                skip_to_frame(self.data);
                 continue;
             };
 
             tracing::trace!("trying to parse {kind:?} frame");
 
             let result = match kind {
-                FrameKind::Event => match Event::parse_into(data, &mut events) {
-                    Ok(event::EventKind::End) => {
-                        tracing::trace!("found the end event");
-                        break;
-                    }
-                    Ok(_) => Ok(()),
-                    Err(err) => Err(err),
-                },
+                FrameKind::Event => Event::parse(self.data).map(InternalFrame::Event),
                 FrameKind::Data(DataFrameKind::Intra | DataFrameKind::Inter) => {
-                    let frame = MainFrame::parse(data, kind, &main_frames, headers);
-                    frame.map(|frame| {
-                        main_frames.push(FrameSync::new(frame, &slow_frames, &gps_frames));
-                    })
+                    RawMainFrame::parse(self.data, self.headers, kind, &self.main_frames)
+                        .map(InternalFrame::Main)
                 }
-                FrameKind::Data(DataFrameKind::Gps) => headers.gps_frames.as_ref().map_or_else(
-                    || {
-                        tracing::debug!("found GPS frame without GPS frame definition");
-                        Err(InternalError::Retry)
-                    },
-                    |gps| {
-                        gps.parse(
-                            data,
-                            headers,
-                            main_frames.last().map(|sync| &sync.main),
-                            gps_home_frames.last(),
-                        )
-                        .map(|frame| gps_frames.push(frame))
-                    },
-                ),
+                FrameKind::Data(DataFrameKind::Slow) => self
+                    .headers
+                    .slow_frames
+                    .parse(self.data, self.headers)
+                    .map(InternalFrame::Slow),
+                FrameKind::Data(DataFrameKind::Gps) => {
+                    self.headers.gps_frames.as_ref().map_or_else(
+                        || {
+                            tracing::debug!("found GPS frame without GPS frame definition");
+                            Err(InternalError::Retry)
+                        },
+                        |gps| {
+                            gps.parse(
+                                self.data,
+                                self.headers,
+                                self.main_frames.last().map(|frame| frame.time),
+                                self.gps_home_frame.as_ref(),
+                            )
+                            .map(InternalFrame::Gps)
+                        },
+                    )
+                }
                 FrameKind::Data(DataFrameKind::GpsHome) => {
-                    headers.gps_home_frames.as_ref().map_or_else(
+                    self.headers.gps_home_frames.as_ref().map_or_else(
                         || {
                             tracing::debug!(
                                 "found GPS home frame without GPS home frame definition"
@@ -152,41 +98,90 @@ impl Data {
                         },
                         |gps_home| {
                             gps_home
-                                .parse(data, headers)
-                                .map(|frame| gps_home_frames.push(frame))
+                                .parse(self.data, self.headers)
+                                .map(InternalFrame::GpsHome)
                         },
                     )
                 }
-                FrameKind::Data(DataFrameKind::Slow) => headers
-                    .slow_frames
-                    .parse(data, headers)
-                    .map(|frame| slow_frames.push(frame)),
             };
 
             match result {
-                Ok(()) => {
-                    last_kind = Some(kind);
+                // Check for a good frame kind byte, or EOF
+                Ok(frame)
+                    if self
+                        .data
+                        .peek()
+                        .map_or(true, |byte| FrameKind::from_byte(byte).is_some()) =>
+                {
+                    match frame {
+                        InternalFrame::Event(event) => {
+                            if matches!(event, Event::End { .. }) {
+                                self.done = true;
+                            }
+
+                            self.stats.counts.event += 1;
+                            return Some(ParseEvent::Event(event));
+                        }
+                        InternalFrame::Main(main) => {
+                            self.stats.counts.main += 1;
+                            let main = self.main_frames.push(main);
+
+                            return Some(ParseEvent::Main(MainFrame::new(self.headers, main)));
+                        }
+                        InternalFrame::Slow(slow) => {
+                            self.stats.counts.slow += 1;
+                            return Some(ParseEvent::Slow(SlowFrame::new(self.headers, slow)));
+                        }
+                        InternalFrame::Gps(gps) => {
+                            self.stats.counts.gps += 1;
+                            return Some(ParseEvent::Gps(GpsFrame::new(self.headers, gps)));
+                        }
+                        InternalFrame::GpsHome(gps_home) => {
+                            self.stats.counts.gps_home += 1;
+                            self.gps_home_frame = Some(gps_home);
+                            continue;
+                        }
+                    }
                 }
-                Err(InternalError::Retry) => {
+                Ok(_) | Err(InternalError::Retry) => {
                     tracing::debug!("found corrupted {kind:?} frame");
-                    data.restore(restore);
-                    skip_to_frame(data);
+                    self.data.restore(restore);
+                    skip_to_frame(self.data);
                 }
                 Err(InternalError::Eof) => {
                     tracing::debug!("found unexpected end of file in data section");
-                    break;
+                    return None;
                 }
             }
         }
-
-        Self {
-            events,
-            main_frames,
-            slow_frames,
-            gps_frames,
-            gps_home_frames,
-        }
     }
+}
+
+/// Statistics about a decoded log.
+#[derive(Debug, Clone, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[non_exhaustive]
+pub struct Stats {
+    /// The number of valid frames found of each type.
+    pub counts: FrameCounts,
+}
+
+#[derive(Debug, Clone, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+pub struct FrameCounts {
+    pub event: usize,
+    pub main: usize,
+    pub slow: usize,
+    pub gps: usize,
+    pub gps_home: usize,
+}
+
+#[derive(Debug)]
+pub enum ParseEvent<'data, 'headers, 'parser> {
+    Event(Event),
+    Main(MainFrame<'data, 'headers, 'parser>),
+    Slow(SlowFrame<'data, 'headers>),
+    Gps(GpsFrame<'data, 'headers>),
 }
 
 #[cold]
@@ -201,4 +196,40 @@ fn skip_to_frame(data: &mut Reader) {
         ]
         .map(u8::from),
     );
+}
+
+#[derive(Debug, Default)]
+pub(crate) struct MainFrameHistory {
+    history: [Option<RawMainFrame>; 2],
+    index_new: usize,
+}
+
+impl MainFrameHistory {
+    #[inline(always)]
+    fn index_old(&self) -> usize {
+        (self.index_new + 1) % self.history.len()
+    }
+
+    fn push(&mut self, frame: RawMainFrame) -> &RawMainFrame {
+        self.index_new = self.index_old();
+        self.history[self.index_new] = Some(frame);
+        self.last().unwrap()
+    }
+
+    pub(crate) fn last(&self) -> Option<&RawMainFrame> {
+        self.history[self.index_new].as_ref()
+    }
+
+    pub(crate) fn last_last(&self) -> Option<&RawMainFrame> {
+        self.history[self.index_old()].as_ref()
+    }
+}
+
+#[derive(Debug)]
+enum InternalFrame {
+    Event(Event),
+    Main(RawMainFrame),
+    Slow(RawSlowFrame),
+    Gps(RawGpsFrame),
+    GpsHome(GpsHomeFrame),
 }

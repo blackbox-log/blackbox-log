@@ -112,14 +112,17 @@ input_file: ".modules/fc-blackbox/src/test-data/crashing-LOG00002.BFL"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 1,
         main: 171694,
-        slow: 12,
+        slow: 11,
         gps: 0,
         gps_home: 0,
       ),
     ),
     events: [
-      End,
+      End(
+        disarm_reason: None,
+      ),
     ],
     main: Fields([
       FieldSnapshot(
@@ -439,12 +442,14 @@ input_file: ".modules/fc-blackbox/src/test-data/crashing-LOG00002.BFL"
           histogram: (5557, 5408, 5347, 5345, 5438, 5241, 5386, 5221, 5229, 4996, 5105, 5332, 5559, 56175, 40208, 6147),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
         history: {
-          "Arm": 171693,
-          "ThreeD": 171693,
+          "Arm": 11,
+          "ThreeD": 11,
         },
       ),
       FieldSnapshot(
@@ -456,14 +461,14 @@ input_file: ".modules/fc-blackbox/src/test-data/crashing-LOG00002.BFL"
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 171693,
+          "Idle": 11,
         },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 171693,
+          yes: 11,
           no: 0,
         ),
       ),
@@ -471,7 +476,7 @@ input_file: ".modules/fc-blackbox/src/test-data/crashing-LOG00002.BFL"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 171693,
+          yes: 11,
           no: 0,
         ),
       ),

@@ -83,10 +83,11 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
     ),
     stats: Stats(
       counts: FrameCounts(
-        main: 199851,
-        slow: 698,
-        gps: 4170,
-        gps_home: 137,
+        event: 31,
+        main: 199855,
+        slow: 730,
+        gps: 4180,
+        gps_home: 167,
       ),
     ),
     events: [
@@ -204,6 +205,7 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         log_iteration: 1546,
         time: 1426,
       ),
+      Disarm(1866),
     ],
     main: Fields([
       FieldSnapshot(
@@ -213,7 +215,7 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
           min: 0,
           max: 399682,
           unique: 199845,
-          histogram: (12492, 12492, 12491, 12490, 12490, 12490, 12490, 12490, 12491, 12490, 12490, 12490, 12491, 12492, 12492, 12490),
+          histogram: (12492, 12493, 12491, 12490, 12490, 12490, 12490, 12491, 12491, 12490, 12490, 12490, 12492, 12492, 12493, 12490),
         ),
       ),
       FieldSnapshot(
@@ -222,8 +224,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 513485143,
-          unique: 199851,
-          histogram: (12504, 12513, 12614, 12393, 12500, 12451, 12730, 12351, 12408, 12465, 12354, 12478, 12463, 12573, 12713, 12341),
+          unique: 199855,
+          histogram: (12504, 12513, 12614, 12394, 12500, 12451, 12730, 12352, 12408, 12466, 12355, 12478, 12463, 12573, 12713, 12341),
         ),
       ),
       FieldSnapshot(
@@ -232,8 +234,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -5760,
           max: 2361,
-          unique: 453,
-          histogram: (64407, 10264, 14131, 8745, 10915, 11473, 7169, 12046, 8110, 7034, 10207, 6804, 9565, 6543, 5535, 6903),
+          unique: 454,
+          histogram: (64409, 10264, 14131, 8745, 10915, 11473, 7169, 12046, 8110, 7035, 10207, 6804, 9566, 6543, 5535, 6903),
         ),
       ),
       FieldSnapshot(
@@ -242,8 +244,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -93220666,
           max: 138,
-          unique: 298,
-          histogram: (102269, 17744, 13747, 11054, 9488, 7622, 7113, 6540, 5341, 3267, 2770, 4862, 2323, 1883, 1984, 1844),
+          unique: 299,
+          histogram: (102270, 17744, 13747, 11054, 9488, 7622, 7113, 6540, 5342, 3267, 2771, 4863, 2323, 1883, 1984, 1844),
         ),
       ),
       FieldSnapshot(
@@ -252,8 +254,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -1163,
           max: 4794,
-          unique: 16,
-          histogram: (187159, 4155, 6163, 1302, 1064, 2, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1),
+          unique: 20,
+          histogram: (187160, 4155, 6163, 1302, 1064, 3, 2, 1, 0, 0, 1, 1, 1, 1, 0, 1),
         ),
       ),
       FieldSnapshot(
@@ -263,7 +265,7 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
           min: -133090235,
           max: 8178,
           unique: 108,
-          histogram: (57685, 47591, 34420, 23127, 13784, 8568, 5468, 2837, 1745, 1238, 877, 647, 487, 499, 528, 350),
+          histogram: (57686, 47592, 34420, 23127, 13784, 8568, 5468, 2838, 1745, 1238, 877, 647, 487, 499, 529, 350),
         ),
       ),
       FieldSnapshot(
@@ -273,7 +275,7 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
           min: -841,
           max: 34556220,
           unique: 201,
-          histogram: (46066, 41062, 31553, 22771, 15901, 11348, 8336, 5556, 4188, 3160, 2375, 1822, 1501, 2727, 769, 716),
+          histogram: (46066, 41063, 31553, 22771, 15901, 11348, 8336, 5556, 4188, 3160, 2376, 1823, 1502, 2727, 769, 716),
         ),
       ),
       FieldSnapshot(
@@ -282,18 +284,18 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -48234111,
           max: 340,
-          unique: 94,
-          histogram: (30152, 26456, 24681, 20786, 18203, 15820, 14065, 12368, 9109, 7856, 6098, 4287, 3365, 2980, 2147, 1478),
+          unique: 95,
+          histogram: (30153, 26457, 24681, 20786, 18203, 15820, 14065, 12369, 9109, 7856, 6099, 4287, 3365, 2980, 2147, 1478),
         ),
       ),
       FieldSnapshot(
         name: "axisI[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -107,
+          min: -842,
           max: 165,
-          unique: 273,
-          histogram: (24088, 13406, 12782, 13638, 12533, 13779, 11895, 11280, 11535, 11093, 12935, 10960, 10185, 11090, 9551, 9101),
+          unique: 274,
+          histogram: (24088, 13407, 12782, 13638, 12533, 13779, 11895, 11280, 11535, 11093, 12936, 10961, 10186, 11090, 9551, 9101),
         ),
       ),
       FieldSnapshot(
@@ -301,9 +303,9 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         unit: Unitless,
         history: FieldSnapshot(
           min: -397,
-          max: 1402,
-          unique: 216,
-          histogram: (25841, 15905, 13788, 13172, 12293, 12703, 12281, 12234, 11723, 11992, 11285, 10926, 9929, 9200, 8325, 8254),
+          max: 6285,
+          unique: 217,
+          histogram: (25842, 15905, 13788, 13173, 12293, 12703, 12281, 12235, 11723, 11992, 11285, 10926, 9929, 9201, 8325, 8254),
         ),
       ),
       FieldSnapshot(
@@ -312,18 +314,18 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -1422,
           max: 2525,
-          unique: 178,
-          histogram: (20271, 10519, 14942, 17050, 24144, 35379, 5906, 6164, 5880, 6160, 7092, 8382, 10936, 8974, 8649, 9403),
+          unique: 179,
+          histogram: (20271, 10520, 14942, 17050, 24144, 35379, 5906, 6165, 5880, 6160, 7092, 8382, 10937, 8974, 8649, 9404),
         ),
       ),
       FieldSnapshot(
         name: "axisD[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -1083,
+          min: -6288,
           max: 40,
-          unique: 9,
-          histogram: (199843, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0),
+          unique: 13,
+          histogram: (199844, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 2, 0),
         ),
       ),
       FieldSnapshot(
@@ -332,8 +334,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -3700,
           max: 940,
-          unique: 8,
-          histogram: (199844, 1, 0, 0, 1, 0, 0, 2, 1, 0, 0, 0, 2, 0, 0, 0),
+          unique: 12,
+          histogram: (199845, 1, 0, 1, 1, 0, 0, 2, 1, 0, 1, 0, 2, 0, 0, 1),
         ),
       ),
       FieldSnapshot(
@@ -342,18 +344,18 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -2947,
           max: 46,
-          unique: 8,
-          histogram: (199843, 0, 2, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 1, 0),
+          unique: 11,
+          histogram: (199843, 0, 3, 1, 0, 0, 0, 0, 0, 2, 2, 0, 0, 3, 1, 0),
         ),
       ),
       FieldSnapshot(
         name: "fwAltP",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -9,
+          min: -42,
           max: 1275,
-          unique: 15,
-          histogram: (199577, 11, 10, 10, 27, 30, 31, 40, 41, 70, 0, 3, 0, 0, 1, 0),
+          unique: 17,
+          histogram: (199577, 11, 10, 10, 27, 30, 31, 41, 42, 70, 2, 3, 0, 0, 1, 0),
         ),
       ),
       FieldSnapshot(
@@ -362,8 +364,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -878,
           max: 3307,
-          unique: 10,
-          histogram: (199717, 127, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 1, 0, 2, 0),
+          unique: 13,
+          histogram: (199718, 127, 0, 0, 0, 1, 0, 0, 0, 2, 2, 2, 1, 0, 2, 0),
         ),
       ),
       FieldSnapshot(
@@ -372,8 +374,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -3886,
           max: 3316,
-          unique: 27,
-          histogram: (199597, 1, 20, 0, 21, 21, 0, 20, 31, 21, 31, 20, 40, 27, 1, 0),
+          unique: 29,
+          histogram: (199598, 1, 20, 0, 21, 21, 0, 21, 31, 21, 32, 20, 40, 27, 2, 0),
         ),
       ),
       FieldSnapshot(
@@ -381,19 +383,19 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         unit: Unitless,
         history: FieldSnapshot(
           min: -1072,
-          max: 24,
-          unique: 25,
-          histogram: (199597, 80, 41, 10, 20, 2, 20, 0, 19, 11, 10, 0, 10, 10, 0, 21),
+          max: 247,
+          unique: 28,
+          histogram: (199598, 80, 41, 10, 20, 2, 20, 1, 19, 13, 10, 0, 10, 10, 0, 21),
         ),
       ),
       FieldSnapshot(
         name: "fwPosP",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -51,
+          min: -63,
           max: 1128,
-          unique: 14,
-          histogram: (199576, 1, 1, 1, 40, 50, 31, 37, 43, 70, 0, 1, 0, 0, 0, 0),
+          unique: 17,
+          histogram: (199577, 1, 1, 1, 40, 51, 31, 38, 43, 70, 0, 1, 0, 0, 0, 1),
         ),
       ),
       FieldSnapshot(
@@ -402,8 +404,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -1203,
           max: 3417,
-          unique: 9,
-          histogram: (199706, 137, 0, 2, 0, 0, 0, 0, 1, 4, 1, 0, 0, 0, 0, 0),
+          unique: 12,
+          histogram: (199706, 137, 1, 2, 0, 0, 0, 0, 1, 5, 2, 0, 1, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -412,18 +414,18 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -1122,
           max: 63,
-          unique: 16,
-          histogram: (199646, 20, 22, 40, 117, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 3),
+          unique: 19,
+          histogram: (199646, 20, 22, 41, 117, 0, 0, 0, 0, 0, 3, 1, 0, 1, 0, 4),
         ),
       ),
       FieldSnapshot(
         name: "fwPosOut",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -814,
+          min: -942,
           max: 1217,
-          unique: 18,
-          histogram: (199597, 22, 0, 1, 17, 20, 30, 20, 10, 10, 62, 21, 20, 20, 1, 0),
+          unique: 21,
+          histogram: (199597, 22, 1, 1, 17, 20, 30, 20, 10, 10, 63, 21, 20, 20, 3, 0),
         ),
       ),
       FieldSnapshot(
@@ -432,8 +434,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -3593,
           max: 2011,
-          unique: 462,
-          histogram: (7083, 6129, 9728, 9051, 6116, 9216, 8618, 5172, 10036, 11232, 5302, 22723, 55641, 17306, 5707, 10791),
+          unique: 466,
+          histogram: (7083, 6129, 9728, 9051, 6116, 9216, 8621, 5172, 10036, 11232, 5303, 22723, 55641, 17306, 5707, 10791),
         ),
       ),
       FieldSnapshot(
@@ -442,8 +444,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -4994,
           max: 1646,
-          unique: 358,
-          histogram: (6560, 5533, 7770, 7543, 5458, 8060, 7334, 3944, 10884, 33021, 4800, 52313, 24530, 7652, 4256, 10193),
+          unique: 362,
+          histogram: (6560, 5533, 7772, 7543, 5458, 8061, 7334, 3944, 10884, 33022, 4800, 52313, 24530, 7652, 4256, 10193),
         ),
       ),
       FieldSnapshot(
@@ -452,8 +454,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -1712,
           max: 1591,
-          unique: 99,
-          histogram: (1724, 1149, 3173, 954, 2388, 3348, 1559, 1278, 2959, 4947, 783, 7919, 115573, 48131, 625, 3341),
+          unique: 102,
+          histogram: (1724, 1150, 3173, 954, 2388, 3348, 1560, 1278, 2959, 4947, 783, 7920, 115573, 48131, 625, 3342),
         ),
       ),
       FieldSnapshot(
@@ -462,18 +464,18 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -1290,
           max: 2011,
-          unique: 483,
-          histogram: (18433, 11942, 6269, 5551, 9281, 12862, 7482, 7387, 16459, 22229, 15299, 9842, 16221, 18433, 9677, 12484),
+          unique: 486,
+          histogram: (18434, 11942, 6270, 5551, 9281, 12862, 7482, 7388, 16459, 22229, 15299, 9842, 16222, 18433, 9677, 12484),
         ),
       ),
       FieldSnapshot(
         name: "rcCommand[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -465,
+          min: -844,
           max: 5108,
-          unique: 584,
-          histogram: (84441, 9186, 8565, 9335, 11627, 8164, 6714, 7524, 7256, 6271, 7573, 7668, 7269, 5524, 6697, 6037),
+          unique: 585,
+          histogram: (84442, 9186, 8565, 9335, 11627, 8164, 6716, 7524, 7256, 6271, 7573, 7668, 7270, 5524, 6697, 6037),
         ),
       ),
       FieldSnapshot(
@@ -483,17 +485,17 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
           min: -502,
           max: 51,
           unique: 340,
-          histogram: (92001, 9200, 9164, 7506, 8937, 7544, 6193, 6414, 6200, 4792, 18645, 5145, 5333, 4637, 4388, 3752),
+          histogram: (92001, 9200, 9165, 7506, 8938, 7544, 6193, 6414, 6201, 4792, 18646, 5145, 5333, 4637, 4388, 3752),
         ),
       ),
       FieldSnapshot(
         name: "rcCommand[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -41,
+          min: -57,
           max: 34,
-          unique: 51,
-          histogram: (177431, 3116, 3446, 1564, 2713, 1676, 758, 713, 1113, 715, 1373, 2603, 1197, 522, 533, 378),
+          unique: 54,
+          histogram: (177431, 3116, 3446, 1564, 2713, 1677, 759, 713, 1113, 716, 1373, 2603, 1198, 522, 533, 378),
         ),
       ),
       FieldSnapshot(
@@ -502,8 +504,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 12200,
-          unique: 642,
-          histogram: (12332, 15721, 21340, 28334, 6388, 8728, 9994, 16374, 16669, 7329, 8921, 14111, 6854, 8811, 6288, 11657),
+          unique: 646,
+          histogram: (12332, 15721, 21340, 28334, 6389, 8728, 9995, 16374, 16669, 7330, 8922, 14111, 6854, 8811, 6288, 11657),
         ),
       ),
       FieldSnapshot(
@@ -512,8 +514,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 42949655410,
-          unique: 291,
-          histogram: (24464, 0, 22099, 0, 25079, 0, 27180, 0, 24978, 0, 26429, 0, 24526, 0, 25096, 0),
+          unique: 293,
+          histogram: (24464, 0, 22100, 0, 25080, 0, 27180, 0, 24979, 0, 26429, 0, 24526, 0, 25097, 0),
         ),
       ),
       FieldSnapshot(
@@ -522,8 +524,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -2459,
           max: 4738,
-          unique: 3164,
-          histogram: (12254, 11803, 11413, 11413, 11942, 17796, 12621, 11700, 11645, 12583, 13220, 12192, 12690, 12145, 12268, 12166),
+          unique: 3168,
+          histogram: (12254, 11803, 11413, 11413, 11943, 17796, 12621, 11700, 11646, 12584, 13221, 12192, 12690, 12145, 12268, 12166),
         ),
       ),
       FieldSnapshot(
@@ -532,8 +534,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -1265,
           max: 26493,
-          unique: 2433,
-          histogram: (12131, 11766, 11924, 13079, 14950, 11413, 10711, 12530, 12432, 13161, 12185, 11496, 14119, 13311, 12131, 12512),
+          unique: 2436,
+          histogram: (12132, 11766, 11924, 13080, 14950, 11413, 10712, 12530, 12432, 13161, 12185, 11496, 14120, 13311, 12131, 12512),
         ),
       ),
       FieldSnapshot(
@@ -542,8 +544,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 9687,
-          unique: 180,
-          histogram: (9340, 6403, 4602, 4312, 16403, 4216, 9926, 5241, 6407, 4265, 11312, 8972, 5562, 6426, 3815, 92649),
+          unique: 183,
+          histogram: (9342, 6403, 4602, 4312, 16403, 4216, 9926, 5241, 6408, 4265, 11312, 8972, 5563, 6426, 3815, 92649),
         ),
       ),
       FieldSnapshot(
@@ -552,8 +554,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -4961,
           max: 1191,
-          unique: 584,
-          histogram: (14076, 17898, 16097, 15428, 14292, 14196, 13683, 13203, 12763, 11829, 10957, 10373, 9389, 9028, 8406, 8233),
+          unique: 585,
+          histogram: (14077, 17898, 16097, 15429, 14292, 14196, 13683, 13203, 12763, 11829, 10957, 10373, 9390, 9028, 8406, 8234),
         ),
       ),
       FieldSnapshot(
@@ -563,7 +565,7 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
           min: -1861,
           max: 134,
           unique: 298,
-          histogram: (16475, 22119, 20754, 19654, 17624, 16120, 14677, 12597, 11297, 10021, 8659, 7554, 6511, 5911, 5202, 4676),
+          histogram: (16475, 22120, 20754, 19654, 17624, 16121, 14677, 12597, 11297, 10021, 8659, 7554, 6513, 5911, 5202, 4676),
         ),
       ),
       FieldSnapshot(
@@ -573,7 +575,7 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
           min: -44,
           max: 99,
           unique: 142,
-          histogram: (15764, 22284, 20176, 18618, 17511, 15236, 13343, 12679, 10565, 10105, 9485, 9562, 7735, 6438, 5695, 4655),
+          histogram: (15764, 22285, 20176, 18619, 17511, 15236, 13344, 12679, 10565, 10105, 9485, 9563, 7735, 6438, 5695, 4655),
         ),
       ),
       FieldSnapshot(
@@ -583,7 +585,7 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
           min: -2374,
           max: 4364,
           unique: 2137,
-          histogram: (12317, 12343, 12874, 12737, 13104, 12503, 12931, 12863, 12608, 12311, 12164, 12433, 11983, 12228, 12239, 12213),
+          histogram: (12317, 12344, 12874, 12737, 13104, 12504, 12931, 12863, 12609, 12312, 12164, 12433, 11983, 12228, 12239, 12213),
         ),
       ),
       FieldSnapshot(
@@ -593,17 +595,17 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
           min: -934,
           max: 481,
           unique: 654,
-          histogram: (11916, 12564, 13655, 12465, 13111, 12375, 12245, 12911, 12206, 13273, 11881, 12599, 11655, 12995, 11752, 12248),
+          histogram: (11916, 12566, 13655, 12465, 13111, 12375, 12246, 12911, 12207, 13273, 11881, 12599, 11655, 12995, 11752, 12248),
         ),
       ),
       FieldSnapshot(
         name: "accSmooth[2]",
         unit: Acceleration,
         history: FieldSnapshot(
-          min: -1805,
+          min: -3010,
           max: 5846,
-          unique: 4210,
-          histogram: (12215, 12388, 12363, 12640, 12789, 12902, 12921, 12590, 12525, 12320, 12374, 12297, 12269, 12405, 12356, 12497),
+          unique: 4211,
+          histogram: (12215, 12389, 12364, 12640, 12790, 12902, 12922, 12590, 12525, 12320, 12374, 12297, 12269, 12405, 12356, 12497),
         ),
       ),
       FieldSnapshot(
@@ -611,9 +613,9 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         unit: Unitless,
         history: FieldSnapshot(
           min: -1799,
-          max: 1800,
-          unique: 2811,
-          histogram: (13449, 13156, 13148, 12261, 12576, 12586, 12631, 12448, 11812, 12271, 12190, 11980, 12022, 11941, 12783, 12597),
+          max: 6290,
+          unique: 2812,
+          histogram: (13450, 13156, 13149, 12261, 12576, 12586, 12632, 12448, 11812, 12271, 12190, 11980, 12022, 11941, 12783, 12598),
         ),
       ),
       FieldSnapshot(
@@ -623,7 +625,7 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
           min: -873,
           max: 476,
           unique: 1226,
-          histogram: (13210, 13568, 13368, 13199, 15358, 12159, 12223, 12258, 12297, 12375, 12065, 11532, 11543, 11320, 11677, 11699),
+          histogram: (13211, 13568, 13369, 13199, 15358, 12159, 12223, 12258, 12297, 12375, 12066, 11532, 11543, 11320, 11677, 11700),
         ),
       ),
       FieldSnapshot(
@@ -632,8 +634,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -250,
           max: 4793,
-          unique: 3603,
-          histogram: (12674, 12933, 13053, 12520, 12185, 12567, 13104, 12232, 12144, 12498, 12521, 12479, 12279, 12109, 12233, 12320),
+          unique: 3604,
+          histogram: (12674, 12933, 13053, 12521, 12185, 12567, 13105, 12232, 12144, 12498, 12523, 12479, 12279, 12109, 12233, 12320),
         ),
       ),
       FieldSnapshot(
@@ -642,8 +644,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 9635,
-          unique: 637,
-          histogram: (7122, 7091, 6820, 9537, 14444, 19189, 14216, 16703, 21126, 17528, 9665, 9986, 12421, 11892, 12913, 9198),
+          unique: 640,
+          histogram: (7122, 7092, 6821, 9537, 14444, 19190, 14217, 16703, 21126, 17528, 9665, 9986, 12421, 11892, 12913, 9198),
         ),
       ),
       FieldSnapshot(
@@ -652,8 +654,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 4294966653,
-          unique: 8,
-          histogram: (0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 199846, 2, 1, 0),
+          unique: 12,
+          histogram: (0, 0, 1, 1, 1, 2, 1, 0, 0, 0, 0, 0, 199846, 2, 1, 0),
         ),
       ),
       FieldSnapshot(
@@ -662,8 +664,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 4294967024,
-          unique: 9,
-          histogram: (2, 0, 1, 1, 0, 0, 0, 2, 0, 0, 0, 0, 199844, 1, 0, 0),
+          unique: 12,
+          histogram: (2, 0, 3, 1, 0, 0, 0, 2, 0, 0, 0, 0, 199845, 1, 0, 1),
         ),
       ),
       FieldSnapshot(
@@ -672,8 +674,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 4294964522,
-          unique: 8,
-          histogram: (0, 0, 0, 2, 0, 0, 0, 0, 0, 1, 1, 1, 199845, 0, 1, 0),
+          unique: 10,
+          histogram: (0, 0, 0, 2, 1, 1, 0, 0, 0, 1, 1, 1, 199847, 0, 1, 0),
         ),
       ),
       FieldSnapshot(
@@ -682,8 +684,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 4294964903,
-          unique: 487,
-          histogram: (11653, 12810, 12510, 12745, 12641, 13592, 13562, 13140, 12924, 12963, 12261, 12022, 12014, 11783, 11426, 11805),
+          unique: 488,
+          histogram: (11653, 12810, 12510, 12745, 12642, 13593, 13562, 13140, 12924, 12963, 12261, 12022, 12015, 11783, 11426, 11806),
         ),
       ),
       FieldSnapshot(
@@ -692,8 +694,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 4294967164,
-          unique: 549,
-          histogram: (12291, 12189, 11837, 12986, 13162, 13112, 13654, 14402, 12230, 11466, 11859, 12531, 12197, 11444, 12361, 12130),
+          unique: 550,
+          histogram: (12291, 12189, 11837, 12987, 13162, 13112, 13654, 14402, 12230, 11466, 11859, 12531, 12198, 11446, 12361, 12130),
         ),
       ),
       FieldSnapshot(
@@ -702,8 +704,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 5032,
-          unique: 9,
-          histogram: (0, 0, 0, 0, 2, 0, 0, 1, 1, 0, 0, 1, 199843, 2, 1, 0),
+          unique: 13,
+          histogram: (0, 1, 1, 0, 2, 0, 1, 1, 1, 0, 0, 1, 199843, 3, 1, 0),
         ),
       ),
       FieldSnapshot(
@@ -712,8 +714,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 1518,
-          unique: 8,
-          histogram: (1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 199845, 0, 2, 0),
+          unique: 12,
+          histogram: (1, 0, 2, 0, 1, 2, 1, 0, 0, 0, 0, 0, 199845, 0, 2, 1),
         ),
       ),
       FieldSnapshot(
@@ -721,9 +723,9 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 1528,
-          unique: 8,
-          histogram: (1, 0, 0, 0, 0, 0, 0, 1, 2, 0, 2, 1, 199843, 0, 0, 1),
+          max: 2443,
+          unique: 12,
+          histogram: (2, 0, 1, 0, 0, 1, 0, 1, 2, 0, 2, 2, 199843, 0, 0, 1),
         ),
       ),
       FieldSnapshot(
@@ -732,8 +734,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 3559,
-          unique: 8,
-          histogram: (0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 199844, 0, 1, 1),
+          unique: 12,
+          histogram: (1, 0, 1, 0, 0, 2, 1, 1, 0, 0, 1, 1, 199844, 0, 1, 2),
         ),
       ),
       FieldSnapshot(
@@ -742,8 +744,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 3539,
-          unique: 9,
-          histogram: (1, 0, 0, 2, 1, 1, 0, 1, 0, 1, 0, 0, 199843, 0, 0, 1),
+          unique: 13,
+          histogram: (1, 0, 2, 3, 1, 2, 0, 1, 0, 1, 0, 0, 199843, 0, 0, 1),
         ),
       ),
       FieldSnapshot(
@@ -752,8 +754,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 2015,
-          unique: 8,
-          histogram: (0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 199844, 1, 1, 1),
+          unique: 12,
+          histogram: (0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 2, 199844, 1, 1, 2),
         ),
       ),
       FieldSnapshot(
@@ -762,8 +764,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 3314,
-          unique: 9,
-          histogram: (1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 199845, 2, 0, 0),
+          unique: 11,
+          histogram: (1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 199847, 2, 0, 1),
         ),
       ),
       FieldSnapshot(
@@ -772,8 +774,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 4294966849,
-          unique: 8,
-          histogram: (0, 1, 0, 0, 0, 0, 2, 0, 0, 1, 0, 0, 199844, 1, 2, 0),
+          unique: 12,
+          histogram: (0, 1, 1, 1, 0, 0, 2, 0, 0, 1, 1, 0, 199844, 1, 2, 1),
         ),
       ),
       FieldSnapshot(
@@ -782,8 +784,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 2020,
-          unique: 9,
-          histogram: (0, 1, 1, 0, 1, 0, 2, 1, 0, 0, 1, 0, 199843, 0, 0, 1),
+          unique: 12,
+          histogram: (0, 1, 1, 1, 3, 1, 2, 1, 0, 0, 1, 0, 199843, 0, 0, 1),
         ),
       ),
       FieldSnapshot(
@@ -792,8 +794,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 4294966163,
-          unique: 8,
-          histogram: (0, 2, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 199844, 0, 0, 1),
+          unique: 12,
+          histogram: (0, 2, 0, 1, 0, 1, 0, 1, 0, 1, 0, 2, 199844, 0, 1, 2),
         ),
       ),
       FieldSnapshot(
@@ -802,8 +804,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 4294967071,
-          unique: 9,
-          histogram: (1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 199843, 0, 1, 2),
+          unique: 12,
+          histogram: (1, 0, 0, 1, 1, 2, 0, 0, 1, 1, 1, 1, 199843, 0, 1, 2),
         ),
       ),
       FieldSnapshot(
@@ -812,8 +814,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -201,
           max: 508,
-          unique: 12,
-          histogram: (1, 184330, 0, 0, 0, 1, 0, 1, 0, 1, 8043, 0, 7471, 0, 2, 1),
+          unique: 15,
+          histogram: (1, 184330, 0, 2, 0, 1, 0, 1, 2, 1, 8043, 0, 7471, 0, 2, 1),
         ),
       ),
       FieldSnapshot(
@@ -822,8 +824,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 4294967281,
-          unique: 10,
-          histogram: (1, 1, 1, 0, 0, 199843, 1, 0, 0, 0, 0, 1, 1, 2, 0, 0),
+          unique: 13,
+          histogram: (1, 1, 3, 0, 0, 199843, 1, 1, 0, 1, 0, 1, 1, 2, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -831,19 +833,19 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         unit: Unitless,
         history: FieldSnapshot(
           min: -206,
-          max: 207,
-          unique: 112,
-          histogram: (14922, 11060, 8659, 12970, 12101, 11941, 10190, 14111, 12171, 13010, 13480, 11430, 10245, 13360, 13811, 16390),
+          max: 854,
+          unique: 115,
+          histogram: (14924, 11060, 8659, 12971, 12101, 11941, 10191, 14111, 12171, 13010, 13480, 11430, 10245, 13360, 13811, 16390),
         ),
       ),
       FieldSnapshot(
         name: "navEPV",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -11,
+          min: -60,
           max: 553,
-          unique: 8,
-          histogram: (0, 0, 0, 0, 199843, 0, 0, 1, 0, 2, 0, 1, 0, 1, 2, 1),
+          unique: 11,
+          histogram: (2, 0, 0, 0, 199843, 0, 0, 2, 0, 2, 0, 1, 1, 1, 2, 1),
         ),
       ),
       FieldSnapshot(
@@ -852,8 +854,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -90469,
           max: 32605,
-          unique: 17845,
-          histogram: (12451, 12530, 12629, 12183, 12710, 12441, 12880, 12401, 12334, 12790, 12481, 11700, 12260, 12760, 12570, 12731),
+          unique: 17847,
+          histogram: (12451, 12530, 12629, 12184, 12710, 12441, 12880, 12402, 12334, 12790, 12481, 11700, 12262, 12760, 12570, 12731),
         ),
       ),
       FieldSnapshot(
@@ -862,8 +864,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -49461,
           max: 104926,
-          unique: 18092,
-          histogram: (12180, 12373, 12980, 12750, 12030, 12870, 12520, 12830, 12430, 13001, 12001, 12201, 12750, 12140, 12275, 12520),
+          unique: 18094,
+          histogram: (12180, 12375, 12981, 12750, 12030, 12871, 12520, 12830, 12430, 13001, 12001, 12201, 12750, 12140, 12275, 12520),
         ),
       ),
       FieldSnapshot(
@@ -873,7 +875,7 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
           min: -1659,
           max: 26627,
           unique: 11878,
-          histogram: (12221, 12700, 12410, 12480, 12390, 13175, 13390, 13061, 12590, 12510, 11560, 12612, 12790, 12091, 12000, 11871),
+          histogram: (12221, 12700, 12410, 12481, 12390, 13175, 13390, 13061, 12591, 12510, 11560, 12614, 12790, 12091, 12000, 11871),
         ),
       ),
       FieldSnapshot(
@@ -882,8 +884,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -3364,
           max: 3854,
-          unique: 6081,
-          histogram: (13040, 12321, 12830, 12521, 12685, 12909, 12611, 12672, 12850, 12610, 11910, 12220, 12091, 12560, 12201, 11820),
+          unique: 6082,
+          histogram: (13043, 12321, 12830, 12521, 12685, 12909, 12611, 12672, 12850, 12610, 11911, 12220, 12091, 12560, 12201, 11820),
         ),
       ),
       FieldSnapshot(
@@ -893,17 +895,17 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
           min: -4258,
           max: 4352,
           unique: 6325,
-          histogram: (12571, 12620, 12859, 13480, 13320, 11771, 12071, 12124, 12450, 12290, 12431, 12561, 12171, 12362, 12700, 12070),
+          histogram: (12571, 12620, 12859, 13480, 13320, 11771, 12071, 12124, 12450, 12291, 12431, 12561, 12173, 12362, 12700, 12071),
         ),
       ),
       FieldSnapshot(
         name: "navVel[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -3132,
-          max: 2795,
-          unique: 2898,
-          histogram: (12710, 14929, 12531, 12541, 12641, 12370, 12121, 11950, 12362, 12250, 12440, 12160, 12526, 12180, 12120, 12020),
+          min: -6291,
+          max: 6287,
+          unique: 2900,
+          histogram: (12710, 14929, 12531, 12543, 12641, 12370, 12121, 11950, 12362, 12250, 12440, 12161, 12526, 12180, 12120, 12021),
         ),
       ),
       FieldSnapshot(
@@ -913,7 +915,7 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
           min: -2075,
           max: 4659,
           unique: 2994,
-          histogram: (13122, 13145, 12980, 13065, 12728, 12435, 12435, 12391, 12510, 12488, 12359, 12344, 12153, 11690, 11853, 12153),
+          histogram: (13122, 13145, 12981, 13065, 12728, 12435, 12435, 12391, 12510, 12488, 12359, 12344, 12153, 11691, 11853, 12155),
         ),
       ),
       FieldSnapshot(
@@ -923,7 +925,7 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
           min: -4359,
           max: 4094,
           unique: 3439,
-          histogram: (13234, 13191, 13199, 12815, 12722, 12550, 12368, 12324, 12484, 12500, 12266, 12063, 12216, 12172, 11984, 11763),
+          histogram: (13234, 13191, 13199, 12816, 12722, 12550, 12368, 12325, 12484, 12500, 12268, 12063, 12216, 12172, 11984, 11763),
         ),
       ),
       FieldSnapshot(
@@ -933,7 +935,7 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
           min: -2929,
           max: 3604,
           unique: 4245,
-          histogram: (13220, 13325, 13100, 12634, 12717, 12224, 12247, 12380, 12305, 12339, 12475, 12271, 12260, 12303, 12146, 11905),
+          histogram: (13220, 13325, 13100, 12634, 12717, 12225, 12247, 12380, 12305, 12339, 12477, 12271, 12260, 12303, 12147, 11905),
         ),
       ),
       FieldSnapshot(
@@ -941,9 +943,9 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         unit: Unitless,
         history: FieldSnapshot(
           min: -2055,
-          max: 249,
-          unique: 8,
-          histogram: (199843, 0, 0, 1, 0, 2, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0),
+          max: 451,
+          unique: 10,
+          histogram: (199843, 0, 0, 2, 0, 2, 0, 2, 1, 1, 3, 1, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -952,8 +954,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -1175,
           max: 1285,
-          unique: 8,
-          histogram: (199846, 0, 0, 0, 0, 1, 0, 1, 1, 0, 2, 0, 0, 0, 0, 0),
+          unique: 10,
+          histogram: (199846, 0, 0, 0, 0, 1, 0, 1, 1, 0, 4, 0, 0, 0, 0, 2),
         ),
       ),
       FieldSnapshot(
@@ -961,9 +963,9 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         unit: Unitless,
         history: FieldSnapshot(
           min: -1234,
-          max: 16,
-          unique: 7,
-          histogram: (199844, 0, 4, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+          max: 923,
+          unique: 8,
+          histogram: (199846, 0, 4, 1, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -972,8 +974,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -53,
           max: 1189,
-          unique: 9,
-          histogram: (64474, 1, 0, 0, 0, 135373, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0),
+          unique: 11,
+          histogram: (64476, 1, 0, 1, 0, 135373, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1),
         ),
       ),
       FieldSnapshot(
@@ -981,9 +983,9 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         unit: Unitless,
         history: FieldSnapshot(
           min: -1152,
-          max: 2,
-          unique: 9,
-          histogram: (64476, 2, 2, 1, 0, 0, 0, 135370, 0, 0, 0, 0, 0, 0, 0, 0),
+          max: 9,
+          unique: 12,
+          histogram: (64476, 2, 2, 1, 1, 0, 0, 135370, 1, 2, 0, 0, 0, 0, 0, 0),
         ),
       ),
       FieldSnapshot(
@@ -992,8 +994,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -2247,
           max: 26596,
-          unique: 10,
-          histogram: (64474, 1, 1, 0, 135369, 0, 0, 1, 1, 2, 1, 0, 0, 1, 0, 0),
+          unique: 13,
+          histogram: (64474, 1, 1, 0, 135369, 0, 0, 1, 1, 3, 1, 0, 0, 1, 0, 3),
         ),
       ),
       FieldSnapshot(
@@ -1002,28 +1004,32 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -251,
           max: 2313,
-          unique: 8,
-          histogram: (199844, 0, 2, 2, 0, 0, 0, 0, 0, 2, 0, 1, 0, 0, 0, 0),
+          unique: 11,
+          histogram: (199844, 0, 2, 2, 1, 0, 0, 1, 0, 2, 2, 1, 0, 0, 0, 0),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
         history: {
-          "Angle": 199848,
-          "AutoTune": 2393,
-          "Flaperon": 1,
-          "HeadFree": 3,
-          "Heading": 4,
-          "Horizon": 30125,
-          "Manual": 272,
-          "NavAltHold": 3,
+          "Angle": 695,
+          "AutoTune": 34,
+          "Failsafe": 21,
+          "Flaperon": 5,
+          "HeadFree": 18,
+          "Heading": 28,
+          "Horizon": 155,
+          "Manual": 24,
+          "NavAltHold": 25,
           "NavCourseHold": 1,
-          "NavPoshold": 3,
-          "NavRth": 3,
-          "NavWp": 274,
+          "NavLaunch": 3,
+          "NavPoshold": 17,
+          "NavRth": 20,
+          "NavWp": 8,
           "Soaring": 1,
-          "TurnAssistant": 30123,
+          "TurnAssistant": 133,
           "Turtle": 1,
         },
       ),
@@ -1031,53 +1037,59 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         name: "stateFlags",
         unit: State,
         history: {
-          "AccelerometerCalibrated": 199847,
-          "AirmodeActive": 199844,
-          "Airplane": 199843,
-          "AltitudeControl": 199843,
-          "AntiWindup": 334,
-          "AntiWindupDeactivated": 181227,
-          "CalibrateMag": 5,
-          "CompassCalibrated": 3,
-          "EscSensorEnabled": 1,
-          "FixedWingLegacy": 199848,
-          "FlaperonAvailable": 4,
-          "GpsFix": 199845,
-          "GpsFixHome": 199846,
-          "MoveForwardOnly": 199843,
-          "NavCruiseBraking": 2,
-          "NavCruiseBrakingBoost": 2,
-          "NavCruiseBrakingLocked": 1,
+          "AccelerometerCalibrated": 673,
+          "AirmodeActive": 669,
+          "Airplane": 669,
+          "AltitudeControl": 669,
+          "AntiWindup": 36,
+          "AntiWindupDeactivated": 585,
+          "CalibrateMag": 45,
+          "CompassCalibrated": 9,
+          "EscSensorEnabled": 2,
+          "FixedWingLegacy": 694,
+          "FlaperonAvailable": 26,
+          "FwHeadingUseYaw": 1,
+          "GpsFix": 687,
+          "GpsFixHome": 688,
+          "LandingDetected": 1,
+          "MoveForwardOnly": 669,
+          "NavCruiseBraking": 7,
+          "NavCruiseBrakingBoost": 4,
+          "NavCruiseBrakingLocked": 5,
           "NavExtraArmingSafetyBypassed": 1,
-          "NavMotorStopOrIdle": 7874,
-          "SetReversibleMotorsForward": 199843,
-          "SmallAngle": 199845,
+          "NavMotorStopOrIdle": 30,
+          "SetReversibleMotorsForward": 668,
+          "SmallAngle": 706,
         },
       ),
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 199845,
+          "Idle": 687,
+          "Landed": 1,
+          "Landing": 2,
           "ReturnToHome": 1,
-          "RxLossDetected": 1,
-          "Unknown": 4,
+          "RxLossDetected": 8,
+          "RxLossMonitoring": 3,
+          "RxLossRecovered": 1,
+          "Unknown": 27,
         },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 199849,
-          no: 2,
+          yes: 704,
+          no: 26,
         ),
       ),
       FieldSnapshot(
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 199848,
-          no: 3,
+          yes: 706,
+          no: 24,
         ),
       ),
       FieldSnapshot(
@@ -1085,9 +1097,9 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 5754,
-          unique: 9,
-          histogram: (1, 0, 0, 1, 1, 199843, 1, 0, 0, 1, 1, 0, 2, 0, 0, 0),
+          max: 24444,
+          unique: 42,
+          histogram: (12, 7, 3, 3, 6, 672, 7, 3, 1, 4, 1, 2, 4, 0, 3, 2),
         ),
       ),
       FieldSnapshot(
@@ -1096,8 +1108,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 199216254,
-          unique: 22,
-          histogram: (26220, 119, 21, 0, 5027, 12693, 1942, 23778, 24742, 45675, 14999, 598, 25525, 8289, 10113, 110),
+          unique: 41,
+          histogram: (138, 7, 6, 1, 25, 25, 15, 81, 73, 101, 44, 7, 105, 49, 50, 3),
         ),
       ),
       FieldSnapshot(
@@ -1105,89 +1117,89 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         unit: Unitless,
         history: FieldSnapshot(
           min: 0,
-          max: 1646,
-          unique: 162,
-          histogram: (10999, 10878, 10952, 10626, 10825, 10295, 9795, 9706, 10176, 16696, 12902, 12172, 14757, 16583, 20790, 11699),
+          max: 4026449895,
+          unique: 193,
+          histogram: (30, 39, 33, 36, 48, 28, 43, 40, 51, 68, 55, 35, 57, 66, 53, 48),
         ),
       ),
       FieldSnapshot(
         name: "wind[0]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -75,
-          max: 4177,
-          unique: 9,
-          histogram: (8704, 1, 69699, 1, 1, 0, 0, 0, 1, 1, 0, 121442, 0, 0, 1, 0),
+          min: -3729,
+          max: 22846,
+          unique: 38,
+          histogram: (41, 6, 323, 3, 3, 2, 1, 4, 6, 6, 9, 318, 0, 4, 2, 2),
         ),
       ),
       FieldSnapshot(
         name: "wind[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -151,
-          max: 4170,
-          unique: 11,
-          histogram: (8702, 0, 69700, 0, 0, 1, 1, 2, 0, 1, 2, 121442, 0, 0, 0, 0),
+          min: -1199,
+          max: 5152,
+          unique: 44,
+          histogram: (31, 3, 323, 1, 3, 7, 3, 15, 4, 6, 6, 319, 3, 0, 3, 3),
         ),
       ),
       FieldSnapshot(
         name: "wind[2]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -50,
-          max: 5029819,
-          unique: 9,
-          histogram: (8704, 0, 121442, 0, 1, 0, 1, 1, 69700, 1, 0, 1, 0, 0, 0, 0),
+          min: -1173,
+          max: 119527292,
+          unique: 37,
+          histogram: (39, 3, 326, 2, 5, 3, 4, 3, 328, 7, 3, 3, 3, 0, 0, 1),
         ),
       ),
       FieldSnapshot(
         name: "IMUTemperature",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -958,
-          max: 421,
-          unique: 144,
-          histogram: (17261, 37455, 13727, 11511, 7939, 8677, 11363, 13068, 12006, 13992, 11417, 8213, 6109, 5924, 5703, 15486),
+          min: -1000,
+          max: 5434,
+          unique: 181,
+          histogram: (65, 103, 54, 43, 36, 36, 32, 38, 53, 50, 37, 34, 25, 28, 35, 61),
         ),
       ),
       FieldSnapshot(
         name: "baroTemperature",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -38,
-          max: 3852,
-          unique: 145,
-          histogram: (4253, 4171, 7933, 41708, 16774, 18707, 12826, 8688, 5537, 15599, 7893, 22673, 9772, 9827, 7369, 6121),
+          min: -1705,
+          max: 5364,
+          unique: 169,
+          histogram: (42, 24, 39, 126, 58, 59, 47, 31, 25, 43, 33, 79, 35, 36, 26, 27),
         ),
       ),
       FieldSnapshot(
         name: "sens0Temp",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -4562,
-          max: 435,
-          unique: 9,
-          histogram: (0, 0, 199844, 3, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0),
+          min: -5356,
+          max: 1759,
+          unique: 36,
+          histogram: (20, 4, 671, 3, 0, 3, 1, 1, 4, 7, 2, 2, 6, 1, 2, 3),
         ),
       ),
       FieldSnapshot(
         name: "sens1Temp",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -4383,
-          max: 40,
-          unique: 8,
-          histogram: (2, 0, 199843, 0, 1, 0, 0, 0, 2, 0, 1, 0, 0, 1, 0, 1),
+          min: -179900,
+          max: 939,
+          unique: 32,
+          histogram: (20, 6, 671, 1, 4, 1, 0, 1, 3, 1, 4, 3, 11, 2, 1, 1),
         ),
       ),
       FieldSnapshot(
         name: "sens2Temp",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -3787,
-          max: 4592,
-          unique: 9,
-          histogram: (1, 0, 199843, 1, 0, 0, 1, 2, 0, 0, 1, 1, 0, 0, 0, 1),
+          min: -21759,
+          max: 5133,
+          unique: 38,
+          histogram: (5, 10, 668, 2, 0, 2, 3, 6, 4, 2, 3, 4, 11, 5, 0, 5),
         ),
       ),
       FieldSnapshot(
@@ -1196,48 +1208,48 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -1250,
           max: 2109,
-          unique: 8,
-          histogram: (2, 0, 199843, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0),
+          unique: 31,
+          histogram: (12, 12, 671, 2, 6, 0, 1, 6, 0, 2, 3, 9, 1, 3, 0, 2),
         ),
       ),
       FieldSnapshot(
         name: "sens4Temp",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -1250,
+          min: -1015752,
           max: 5183,
-          unique: 9,
-          histogram: (0, 0, 199845, 0, 0, 0, 2, 1, 1, 0, 0, 0, 1, 0, 0, 1),
+          unique: 37,
+          histogram: (12, 1, 670, 2, 1, 3, 3, 5, 5, 3, 4, 13, 4, 1, 1, 2),
         ),
       ),
       FieldSnapshot(
         name: "sens5Temp",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -1250,
-          max: 0,
-          unique: 7,
-          histogram: (3, 0, 199843, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 2),
+          min: -6276,
+          max: 6282,
+          unique: 36,
+          histogram: (19, 3, 670, 2, 4, 2, 1, 4, 2, 0, 4, 1, 11, 1, 2, 4),
         ),
       ),
       FieldSnapshot(
         name: "sens6Temp",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -1250,
+          min: -2378,
           max: 515919,
-          unique: 8,
-          histogram: (0, 0, 199843, 0, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1),
+          unique: 45,
+          histogram: (4, 2, 669, 3, 4, 3, 4, 5, 5, 2, 4, 2, 13, 3, 1, 6),
         ),
       ),
       FieldSnapshot(
         name: "sens7Temp",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -1250,
-          max: 1918,
-          unique: 8,
-          histogram: (2, 0, 199844, 0, 0, 0, 1, 0, 0, 1, 0, 2, 0, 0, 1, 0),
+          min: -1878745069,
+          max: 6302,
+          unique: 42,
+          histogram: (11, 13, 670, 2, 1, 0, 3, 2, 3, 5, 7, 5, 2, 3, 3, 0),
         ),
       ),
       FieldSnapshot(
@@ -1246,18 +1258,18 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 134599721,
-          unique: 9,
-          histogram: (0, 0, 0, 0, 2, 0, 1, 0, 2, 199843, 1, 0, 1, 0, 0, 1),
+          unique: 37,
+          histogram: (2, 0, 2, 6, 4, 1, 5, 2, 4, 671, 4, 3, 2, 21, 0, 3),
         ),
       ),
       FieldSnapshot(
         name: "escTemperature",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -26,
-          max: 7,
-          unique: 7,
-          histogram: (199845, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1),
+          min: -2274,
+          max: 1756,
+          unique: 29,
+          histogram: (676, 4, 4, 2, 4, 2, 2, 3, 1, 1, 25, 1, 2, 1, 1, 1),
         ),
       ),
     ]),
@@ -1268,8 +1280,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 513471046,
-          unique: 4168,
-          histogram: (253, 246, 269, 259, 276, 277, 275, 261, 232, 291, 274, 241, 248, 265, 247, 255),
+          unique: 4180,
+          histogram: (253, 246, 271, 260, 278, 278, 272, 259, 235, 292, 272, 243, 246, 265, 251, 259),
         ),
       ),
       FieldSnapshot(
@@ -1278,8 +1290,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 1973410172,
-          unique: 30,
-          histogram: (2, 3, 4137, 0, 2, 0, 1, 2, 5, 7, 3, 0, 5, 1, 0, 1),
+          unique: 41,
+          histogram: (3, 3, 4138, 0, 3, 1, 2, 3, 5, 8, 4, 0, 6, 2, 1, 1),
         ),
       ),
       FieldSnapshot(
@@ -1288,28 +1300,28 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 638555,
-          unique: 43,
-          histogram: (420, 1440, 3, 1, 1, 2, 4, 36, 298, 61, 66, 321, 555, 143, 437, 381),
+          unique: 51,
+          histogram: (422, 1440, 3, 1, 2, 3, 5, 36, 299, 61, 68, 321, 555, 144, 437, 383),
         ),
       ),
       FieldSnapshot(
         name: "GPS_coord[0]",
         unit: GpsCoordinate,
         history: FieldSnapshot(
-          min: -21985368,
+          min: -21990026,
           max: 939252068,
-          unique: 3883,
-          histogram: (267, 257, 284, 254, 241, 272, 261, 251, 265, 248, 262, 242, 246, 270, 270, 279),
+          unique: 3893,
+          histogram: (267, 259, 286, 254, 244, 271, 261, 252, 264, 248, 267, 242, 247, 268, 270, 280),
         ),
       ),
       FieldSnapshot(
         name: "GPS_coord[1]",
         unit: GpsCoordinate,
         history: FieldSnapshot(
-          min: -25635,
+          min: -28785,
           max: 136677548,
-          unique: 3968,
-          histogram: (251, 252, 260, 271, 240, 295, 262, 241, 297, 269, 252, 245, 255, 252, 259, 268),
+          unique: 3980,
+          histogram: (253, 253, 262, 271, 240, 294, 260, 242, 299, 270, 253, 247, 256, 254, 257, 269),
         ),
       ),
       FieldSnapshot(
@@ -1318,8 +1330,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -2000117058,
           max: 5002,
-          unique: 293,
-          histogram: (255, 338, 314, 251, 211, 264, 311, 280, 288, 270, 209, 195, 204, 201, 304, 274),
+          unique: 301,
+          histogram: (255, 338, 314, 252, 212, 266, 311, 280, 288, 271, 211, 195, 206, 202, 304, 275),
         ),
       ),
       FieldSnapshot(
@@ -1328,8 +1340,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 10179,
-          unique: 1702,
-          histogram: (265, 250, 278, 240, 260, 252, 242, 269, 261, 253, 273, 258, 256, 288, 265, 259),
+          unique: 1709,
+          histogram: (265, 252, 278, 240, 260, 254, 242, 269, 261, 255, 273, 258, 258, 289, 266, 260),
         ),
       ),
       FieldSnapshot(
@@ -1338,8 +1350,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 10210,
-          unique: 2038,
-          histogram: (230, 294, 278, 255, 266, 253, 256, 266, 273, 277, 275, 259, 248, 213, 265, 261),
+          unique: 2042,
+          histogram: (230, 296, 278, 256, 267, 253, 257, 267, 272, 280, 276, 260, 249, 213, 265, 261),
         ),
       ),
       FieldSnapshot(
@@ -1348,8 +1360,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 573328,
-          unique: 56,
-          histogram: (6, 96, 829, 896, 74, 353, 208, 654, 40, 546, 61, 43, 2, 2, 149, 210),
+          unique: 64,
+          histogram: (7, 97, 831, 896, 74, 354, 208, 656, 41, 548, 61, 44, 2, 1, 150, 210),
         ),
       ),
       FieldSnapshot(
@@ -1358,8 +1370,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 557036,
-          unique: 88,
-          histogram: (413, 253, 281, 182, 241, 328, 715, 250, 99, 94, 217, 253, 221, 213, 245, 164),
+          unique: 95,
+          histogram: (414, 253, 281, 183, 243, 328, 716, 252, 99, 95, 218, 253, 222, 214, 245, 164),
         ),
       ),
       FieldSnapshot(
@@ -1368,8 +1380,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: 0,
           max: 134079861,
-          unique: 102,
-          histogram: (269, 266, 179, 176, 154, 356, 250, 258, 378, 286, 166, 246, 250, 294, 262, 379),
+          unique: 111,
+          histogram: (270, 266, 179, 176, 154, 356, 255, 258, 380, 286, 165, 246, 251, 294, 264, 380),
         ),
       ),
       FieldSnapshot(
@@ -1378,18 +1390,18 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -5190,
           max: 6526,
-          unique: 2825,
-          histogram: (253, 216, 256, 266, 261, 280, 256, 274, 245, 280, 261, 288, 230, 252, 259, 292),
+          unique: 2833,
+          histogram: (254, 218, 256, 267, 264, 279, 257, 274, 246, 281, 262, 289, 230, 252, 259, 292),
         ),
       ),
       FieldSnapshot(
         name: "GPS_velned[1]",
         unit: Unitless,
         history: FieldSnapshot(
-          min: -4312,
-          max: 4657,
-          unique: 2808,
-          histogram: (293, 255, 272, 258, 235, 255, 282, 250, 273, 255, 254, 258, 278, 240, 277, 234),
+          min: -4763,
+          max: 4597,
+          unique: 2814,
+          histogram: (293, 254, 272, 258, 236, 256, 283, 253, 273, 256, 255, 259, 279, 241, 277, 235),
         ),
       ),
       FieldSnapshot(
@@ -1398,8 +1410,8 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
         history: FieldSnapshot(
           min: -4572,
           max: 4140,
-          unique: 1693,
-          histogram: (251, 275, 284, 283, 259, 242, 265, 245, 251, 291, 240, 261, 245, 294, 245, 238),
+          unique: 1694,
+          histogram: (251, 275, 284, 283, 259, 243, 266, 246, 252, 294, 242, 262, 245, 294, 245, 239),
         ),
       ),
     ]),

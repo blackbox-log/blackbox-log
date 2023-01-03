@@ -3,10 +3,10 @@
 #[macro_use]
 mod trace_field;
 
-mod gps;
+pub mod gps;
 mod gps_home;
-mod main;
-mod slow;
+pub mod main;
+pub mod slow;
 
 use alloc::borrow::ToOwned;
 use alloc::format;
@@ -15,14 +15,77 @@ use core::fmt;
 use core::iter::Peekable;
 
 pub(crate) use self::gps::*;
-pub use self::gps::{GpsUnit, GpsValue};
+pub use self::gps::{GpsFrame, GpsUnit, GpsValue};
 pub(crate) use self::gps_home::*;
 pub(crate) use self::main::*;
+pub use self::main::{MainFrame, MainUnit, MainValue};
 pub(crate) use self::slow::*;
+pub use self::slow::{SlowFrame, SlowUnit, SlowValue};
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
-use crate::{units, HeadersParseError, HeadersParseResult, Reader};
+use crate::{units, FieldFilter, HeadersParseError, HeadersParseResult, Reader};
+
+mod seal {
+    pub trait Sealed {}
+}
+
+/// A parsed data frame definition.
+#[allow(clippy::len_without_is_empty)]
+pub trait FrameDef<'data>: seal::Sealed {
+    type Unit: Into<Unit>;
+
+    /// Returns the number of fields in the frame.
+    fn len(&self) -> usize;
+
+    /// Get the name and unit of a field by its index.
+    fn get<'a>(&'a self, index: usize) -> Option<(&'data str, Self::Unit)>
+    where
+        'data: 'a;
+
+    /// Removes any existing filter so all fields will be included.
+    fn clear_filter(&mut self);
+
+    /// Applies a filter to restrict the exposed fields, overwriting any
+    /// previous filter.
+    fn apply_filter(&mut self, filter: &FieldFilter);
+}
+
+/// A parsed data frame.
+pub trait Frame: seal::Sealed {
+    type Value: Into<Value>;
+
+    /// Get the value of a field by its index.
+    fn get(&self, index: usize) -> Option<Self::Value>;
+
+    /// Iterate over all field values in order.
+    fn iter(&self) -> FrameIter<'_, Self>
+    where
+        Self: Sized,
+    {
+        FrameIter {
+            frame: self,
+            next: 0,
+        }
+    }
+}
+
+/// An iterator over the values of the fields of a parsed frame.
+#[derive(Debug)]
+pub struct FrameIter<'f, F> {
+    frame: &'f F,
+    next: usize,
+}
+
+impl<F: Frame> Iterator for FrameIter<'_, F> {
+    type Item = F::Value;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let value = self.frame.get(self.next)?;
+        self.next += 1;
+        Some(value)
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -207,7 +270,6 @@ pub enum Value {
     GpsHeading(f64),
     Unsigned(u32),
     Signed(i32),
-    Missing,
 }
 
 impl From<MainValue> for Value {
@@ -233,7 +295,6 @@ impl From<SlowValue> for Value {
             SlowValue::Boolean(b) => Self::Boolean(b),
             SlowValue::Unsigned(x) => Self::Unsigned(x),
             SlowValue::Signed(x) => Self::Signed(x),
-            SlowValue::Missing => Self::Missing,
         }
     }
 }
@@ -248,7 +309,6 @@ impl From<GpsValue> for Value {
             GpsValue::Heading(h) => Self::GpsHeading(h),
             GpsValue::Unsigned(x) => Self::Unsigned(x),
             GpsValue::Signed(x) => Self::Signed(x),
-            GpsValue::Missing => Self::Missing,
         }
     }
 }

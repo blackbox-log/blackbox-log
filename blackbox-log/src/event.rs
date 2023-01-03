@@ -1,7 +1,5 @@
 //! Types for blackbox log events.
 
-use alloc::vec::Vec;
-
 use tracing::instrument;
 
 use crate::parser::{decode, InternalError, InternalResult};
@@ -28,7 +26,9 @@ pub enum Event {
     ImuFailure {
         error: u32,
     },
-    End,
+    End {
+        disarm_reason: Option<u32>,
+    },
 }
 
 /// A new value decoded from an
@@ -42,22 +42,19 @@ pub enum AdjustedValue {
 
 impl Event {
     #[instrument(level = "debug", name = "Event::parse", skip_all, fields(kind))]
-    pub(crate) fn parse_into(
-        data: &mut Reader,
-        events: &mut Vec<Self>,
-    ) -> InternalResult<EventKind> {
+    pub(crate) fn parse(data: &mut Reader) -> InternalResult<Self> {
         let byte = data.read_u8().ok_or(InternalError::Eof)?;
         let kind = EventKind::from_byte(byte).ok_or_else(|| {
             tracing::debug!("found invalid event: {byte:0>#2x}");
             InternalError::Retry
         })?;
 
-        match kind {
+        let event = match kind {
             EventKind::SyncBeep => {
                 // TODO: SyncBeep handle time rollover
 
                 let time = decode::variable(data)?;
-                events.push(Self::SyncBeep(time.into()));
+                Self::SyncBeep(time.into())
             }
 
             EventKind::InflightAdjustment => {
@@ -69,64 +66,67 @@ impl Event {
                     AdjustedValue::Int(decode::variable_signed(data)?)
                 };
 
-                events.push(Self::InflightAdjustment {
+                Self::InflightAdjustment {
                     function: function & 0x7F,
                     new_value,
-                });
+                }
             }
 
             EventKind::Resume => {
                 let log_iteration = decode::variable(data)?;
                 let time = decode::variable(data)?;
 
-                events.push(Self::Resume {
+                Self::Resume {
                     log_iteration,
                     time,
-                });
+                }
             }
 
             EventKind::Disarm => {
                 let reason = decode::variable(data)?;
-                events.push(Self::Disarm(reason));
+                Self::Disarm(reason)
             }
 
             EventKind::FlightMode => {
                 let flags = decode::variable(data)?;
                 let last_flags = decode::variable(data)?;
-                events.push(Self::FlightMode { flags, last_flags });
+                Self::FlightMode { flags, last_flags }
             }
 
             EventKind::ImuFailure => {
                 let error = decode::variable(data)?;
-                events.push(Self::ImuFailure { error });
+                Self::ImuFailure { error }
             }
 
             EventKind::End => {
                 check_message(data, b"End of log")?;
 
-                if data.peek() == Some(b' ') {
+                let disarm_reason = if data.peek() == Some(b' ') {
                     // Assume INAV's new format:
                     // `End of log (disarm reason:x)\0`
 
                     check_message(data, b" (disarm reason:")?;
 
-                    let reason = data.read_u8().ok_or(InternalError::Eof)?;
-                    events.push(Self::Disarm(reason.into()));
+                    let reason = data.read_u8().ok_or(InternalError::Eof)?.into();
 
                     if data.read_u8() != Some(b')') {
                         return Err(InternalError::Retry);
                     }
-                }
+
+                    Some(reason)
+                } else {
+                    None
+                };
 
                 if data.read_u8() != Some(0) {
                     return Err(InternalError::Retry);
                 }
 
-                events.push(Self::End);
+                Self::End { disarm_reason }
             }
-        }
+        };
 
-        Ok(kind)
+        Ok(event)
     }
 }
 

@@ -33,11 +33,11 @@ OPTIONS:
   -i, --index <index>             Choose which log(s) should be decoded or omit to decode all
                                   (applies to all files & can be repeated)
       --limits                    Print the limits and range of each field (TODO)
-      --stdout                    Write to stdout instead of a file
       --altitude-offset <offset>  Altitude offset in meters (TODO)
-      --gps <format>              One or more formats for GPS data (merged, separate (csv), gpx)
+      --gps                       Write GPS data into .gps.csv files
   -f, --filter <fields>           Select fields to output by name, excluding any suffixed index
                                   (comma separated)
+  -F, --gps-filter <fields>       Same as --filter, but for GPS fields. Implies --gps
   -v, --verbose                   Increase debug output up to {max_verbose} times
   -q, --quiet                     Reduce debug output up to {max_quiet} times
   -h, --help                      Print this help
@@ -61,32 +61,33 @@ pub(crate) enum Action {
 pub(crate) struct Cli {
     pub index: Vec<usize>,
     pub limits: bool,
-    pub stdout: bool,
     pub altitude_offset: i16,
-    pub gps: GpsFormats,
+    pub gps: bool,
     pub filter: Option<Vec<String>>,
+    pub gps_filter: Option<Vec<String>>,
     pub verbosity: LevelFilter,
-    // TODO: accept - for stdin
     pub logs: Vec<PathBuf>,
-}
-
-#[derive(Debug, Clone, Copy, Default)]
-pub(crate) struct GpsFormats {
-    pub merged: bool,
-    pub separate: bool,
-    pub gpx: bool,
 }
 
 impl Cli {
     pub(crate) fn parse(mut parser: lexopt::Parser) -> Result<Action, lexopt::Error> {
         use lexopt::prelude::*;
 
+        fn parse_filter(parser: &mut lexopt::Parser) -> Result<Vec<String>, lexopt::Error> {
+            parser.value()?.parse_with::<_, _, Infallible>(|s| {
+                Ok(s.split(',')
+                    .map(|s| s.trim().to_owned())
+                    .filter(|s| !s.is_empty())
+                    .collect())
+            })
+        }
+
         let mut index = Vec::new();
         let mut limits = false;
-        let mut stdout = false;
         let mut altitude_offset = 0;
-        let mut gps = GpsFormats::default();
+        let mut gps = false;
         let mut filter = None;
+        let mut gps_filter = None;
         let mut verbosity = DEFAULT_VERBOSITY;
         let mut logs = Vec::new();
 
@@ -94,21 +95,14 @@ impl Cli {
             match arg {
                 Short('i') | Long("index") => index.push(parser.value()?.parse()?),
                 Long("limits") => limits = true,
-                Long("stdout") => stdout = true,
                 Long("altitude-offset") => altitude_offset = parser.value()?.parse()?,
-                Long("gps") => match parser.value()?.into_string().as_deref() {
-                    Ok("merged") => gps.merged = true,
-                    Ok("separate") => gps.separate = true,
-                    Ok("gpx") => gps.gpx = true,
-                    _ => return Err("expected merged, separate, or gpx".into()),
-                },
+                Long("gps") => gps = true,
                 Short('f') | Long("filter") => {
-                    filter = Some(parser.value()?.parse_with::<_, _, Infallible>(|s| {
-                        Ok(s.split(',')
-                            .map(|s| s.trim().to_owned())
-                            .filter(|s| !s.is_empty())
-                            .collect())
-                    })?);
+                    filter = Some(parse_filter(&mut parser)?);
+                }
+                Short('F') | Long("gps-filter") => {
+                    gps = true;
+                    gps_filter = Some(parse_filter(&mut parser)?);
                 }
                 Short('v') | Long("verbose") => verbosity += 1,
                 Short('q') | Long("quiet") => verbosity -= 1,
@@ -123,10 +117,10 @@ impl Cli {
         Ok(Action::Run(Cli {
             index,
             limits,
-            stdout,
             altitude_offset,
             gps,
             filter,
+            gps_filter,
             verbosity: verbosity_from_int(verbosity),
             logs,
         }))
@@ -135,16 +129,6 @@ impl Cli {
     pub(crate) fn validate(&self) -> Result<(), &'static str> {
         if self.logs.is_empty() {
             return Err("at least one log file is required");
-        }
-
-        if self.stdout {
-            if self.logs.len() > 1 {
-                return Err("cannot write multiple logs to stdout");
-            }
-
-            if self.gps.separate || self.gps.gpx {
-                return Err("only merged GPS data can be written to stdout");
-            }
         }
 
         Ok(())

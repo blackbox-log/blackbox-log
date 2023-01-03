@@ -125,9 +125,10 @@ input_file: ".modules/gimbal-ghost/test/btfl_002.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 4,
         main: 1136,
-        slow: 3,
-        gps: 25,
+        slow: 2,
+        gps: 24,
         gps_home: 1,
       ),
     ),
@@ -138,7 +139,9 @@ input_file: ".modules/gimbal-ghost/test/btfl_002.bbl"
         last_flags: 1,
       ),
       Disarm(4),
-      End,
+      End(
+        disarm_reason: None,
+      ),
     ],
     main: Fields([
       FieldSnapshot(
@@ -512,33 +515,35 @@ input_file: ".modules/gimbal-ghost/test/btfl_002.bbl"
           histogram: (73, 69, 71, 80, 71, 60, 69, 77, 57, 66, 80, 79, 79, 64, 76, 65),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
         history: {
-          "Arm": 1115,
+          "Arm": 1,
         },
       ),
       FieldSnapshot(
         name: "stateFlags",
         unit: State,
         history: {
-          "GpsFix": 1135,
-          "GpsFixHome": 1135,
+          "GpsFix": 2,
+          "GpsFixHome": 2,
         },
       ),
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 1135,
+          "Idle": 2,
         },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 1135,
+          yes: 2,
           no: 0,
         ),
       ),
@@ -546,7 +551,7 @@ input_file: ".modules/gimbal-ghost/test/btfl_002.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 1135,
+          yes: 2,
           no: 0,
         ),
       ),
@@ -743,9 +748,10 @@ input_file: ".modules/gimbal-ghost/test/btfl_002.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 4,
         main: 38,
-        slow: 3,
-        gps: 3,
+        slow: 2,
+        gps: 2,
         gps_home: 1,
       ),
     ),
@@ -756,7 +762,9 @@ input_file: ".modules/gimbal-ghost/test/btfl_002.bbl"
         last_flags: 1,
       ),
       Disarm(4),
-      End,
+      End(
+        disarm_reason: None,
+      ),
     ],
     main: Fields([
       FieldSnapshot(
@@ -1124,33 +1132,35 @@ input_file: ".modules/gimbal-ghost/test/btfl_002.bbl"
           histogram: (3, 3, 2, 1, 1, 1, 3, 3, 4, 6, 2, 2, 4, 0, 2, 1),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
         history: {
-          "Arm": 17,
+          "Arm": 1,
         },
       ),
       FieldSnapshot(
         name: "stateFlags",
         unit: State,
         history: {
-          "GpsFix": 37,
-          "GpsFixHome": 37,
+          "GpsFix": 2,
+          "GpsFixHome": 2,
         },
       ),
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 37,
+          "Idle": 2,
         },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 37,
+          yes: 2,
           no: 0,
         ),
       ),
@@ -1158,7 +1168,7 @@ input_file: ".modules/gimbal-ghost/test/btfl_002.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 37,
+          yes: 2,
           no: 0,
         ),
       ),
@@ -1355,9 +1365,10 @@ input_file: ".modules/gimbal-ghost/test/btfl_002.bbl"
     ),
     stats: Stats(
       counts: FrameCounts(
+        event: 3,
         main: 11615,
-        slow: 8,
-        gps: 235,
+        slow: 7,
+        gps: 234,
         gps_home: 1,
       ),
     ),
@@ -1368,7 +1379,6 @@ input_file: ".modules/gimbal-ghost/test/btfl_002.bbl"
         last_flags: 1,
       ),
       Disarm(4),
-      End,
     ],
     main: Fields([
       FieldSnapshot(
@@ -1750,33 +1760,35 @@ input_file: ".modules/gimbal-ghost/test/btfl_002.bbl"
           histogram: (805, 718, 701, 690, 720, 739, 711, 717, 692, 684, 690, 702, 705, 879, 776, 686),
         ),
       ),
+    ]),
+    slow: Fields([
       FieldSnapshot(
         name: "flightModeFlags",
         unit: FlightMode,
         history: {
-          "Arm": 11594,
+          "Arm": 6,
         },
       ),
       FieldSnapshot(
         name: "stateFlags",
         unit: State,
         history: {
-          "GpsFix": 11614,
-          "GpsFixHome": 11614,
+          "GpsFix": 7,
+          "GpsFixHome": 7,
         },
       ),
       FieldSnapshot(
         name: "failsafePhase",
         unit: FailsafePhase,
         history: {
-          "Idle": 11614,
+          "Idle": 7,
         },
       ),
       FieldSnapshot(
         name: "rxSignalReceived",
         unit: Boolean,
         history: History(
-          yes: 11614,
+          yes: 7,
           no: 0,
         ),
       ),
@@ -1784,7 +1796,7 @@ input_file: ".modules/gimbal-ghost/test/btfl_002.bbl"
         name: "rxFlightChannelsValid",
         unit: Boolean,
         history: History(
-          yes: 11614,
+          yes: 7,
           no: 0,
         ),
       ),
