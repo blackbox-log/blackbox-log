@@ -117,7 +117,7 @@ fn main() {
                 _ => None,
             };
 
-            let mut parser = DataParser::new(&mut log, &headers);
+            let mut parser = DataParser::new(log, &headers);
             let mut slow: String = ",".repeat(headers.slow_def().len().saturating_sub(1));
             while let Some(frame) = parser.next() {
                 match frame {

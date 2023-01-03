@@ -21,7 +21,7 @@ macro_rules! run {
                 .iter()
                 .map(|mut reader| {
                     Headers::parse(&mut reader).map(|headers| {
-                        let data = DataParser::new(&mut reader, &headers);
+                        let data = DataParser::new(reader, &headers);
                         LogSnapshot::new(&headers, data)
                     })
                 })
@@ -60,7 +60,7 @@ struct LogSnapshot<'data> {
 }
 
 impl<'data> LogSnapshot<'data> {
-    fn new(headers: &Headers<'data>, mut data: DataParser<'data, '_, '_>) -> Self {
+    fn new(headers: &Headers<'data>, mut data: DataParser<'data, '_>) -> Self {
         let headers = headers.clone();
 
         let mut events = Vec::new();
