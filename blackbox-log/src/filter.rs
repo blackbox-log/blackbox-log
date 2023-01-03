@@ -18,7 +18,25 @@ impl FieldFilter {
     }
 }
 
-impl<S> FromIterator<S> for Filter
+impl<'a, S> From<&'a [S]> for FieldFilter
+where
+    &'a S: Into<String>,
+{
+    fn from(slice: &'a [S]) -> Self {
+        slice.iter().collect()
+    }
+}
+
+impl<S, const N: usize> From<[S; N]> for FieldFilter
+where
+    S: Into<String>,
+{
+    fn from(arr: [S; N]) -> Self {
+        arr.into_iter().collect()
+    }
+}
+
+impl<S> FromIterator<S> for FieldFilter
 where
     S: Into<String>,
 {
