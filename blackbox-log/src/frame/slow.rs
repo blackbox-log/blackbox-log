@@ -3,7 +3,7 @@ use alloc::vec::Vec;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty, FieldDef, Unit};
-use crate::filter::{AppliedFilter, Filter};
+use crate::filter::{AppliedFilter, FieldFilter};
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::utils::as_i32;
@@ -117,7 +117,7 @@ impl<'data> super::FrameDef<'data> for SlowFrameDef<'data> {
         self.filter = AppliedFilter::new_unfiltered(self.fields.len());
     }
 
-    fn apply_filter(&mut self, filter: &Filter) {
+    fn apply_filter(&mut self, filter: &FieldFilter) {
         self.filter = filter.apply(self.fields.iter().map(|f| f.name));
     }
 }

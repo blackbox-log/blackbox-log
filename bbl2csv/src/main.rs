@@ -8,7 +8,7 @@ use std::process;
 use blackbox_log::data::ParseEvent;
 use blackbox_log::frame::{Frame as _, FrameDef as _, GpsFrame, MainFrame, SlowFrame};
 use blackbox_log::units::si;
-use blackbox_log::{DataParser, Filter, Headers, Value};
+use blackbox_log::{DataParser, FieldFilter, Headers, Value};
 use mimalloc::MiMalloc;
 use rayon::prelude::*;
 
@@ -50,8 +50,8 @@ fn main() {
         process::exit(exitcode::USAGE);
     }
 
-    let filter = cli.filter.map(Filter::from_iter);
-    let gps_filter = cli.gps_filter.map(Filter::from_iter);
+    let filter = cli.filter.map(FieldFilter::from_iter);
+    let gps_filter = cli.gps_filter.map(FieldFilter::from_iter);
 
     let result = cli.logs.par_iter().try_for_each(|filename| {
         let span = tracing::info_span!("file", name = ?filename);

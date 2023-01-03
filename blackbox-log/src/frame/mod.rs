@@ -24,7 +24,7 @@ pub use self::slow::{SlowFrame, SlowUnit, SlowValue};
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
-use crate::{units, Filter, HeadersParseError, HeadersParseResult, Reader};
+use crate::{units, FieldFilter, HeadersParseError, HeadersParseResult, Reader};
 
 mod seal {
     pub trait Seal {}
@@ -44,7 +44,7 @@ pub trait FrameDef<'data>: seal::Seal {
         'data: 'a;
 
     fn clear_filter(&mut self);
-    fn apply_filter(&mut self, filter: &Filter);
+    fn apply_filter(&mut self, filter: &FieldFilter);
 }
 
 /// A parsed data frame.

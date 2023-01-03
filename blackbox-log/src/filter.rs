@@ -6,9 +6,9 @@ use hashbrown::HashSet;
 use crate::parser::to_base_field;
 
 #[derive(Debug, Clone)]
-pub struct Filter(HashSet<String>);
+pub struct FieldFilter(HashSet<String>);
 
-impl Filter {
+impl FieldFilter {
     #[allow(single_use_lifetimes)]
     pub(crate) fn apply<'a>(&self, fields: impl Iterator<Item = &'a str>) -> AppliedFilter {
         fields

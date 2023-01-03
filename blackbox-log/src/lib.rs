@@ -102,7 +102,7 @@ mod parser;
 
 pub use self::data::{DataParser, ParseEvent};
 pub use self::file::File;
-pub use self::filter::Filter;
+pub use self::filter::FieldFilter;
 pub use self::frame::{Unit, Value};
 pub use self::headers::{
     Headers, ParseError as HeadersParseError, ParseResult as HeadersParseResult,

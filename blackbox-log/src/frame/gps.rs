@@ -5,7 +5,7 @@ use core::iter;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty, FieldDef, GpsHomeFrame, Unit};
-use crate::filter::{AppliedFilter, Filter};
+use crate::filter::{AppliedFilter, FieldFilter};
 use crate::parser::{decode, to_base_field, Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
@@ -143,7 +143,7 @@ impl<'data> super::FrameDef<'data> for GpsFrameDef<'data> {
         self.filter = AppliedFilter::new_unfiltered(self.fields.len());
     }
 
-    fn apply_filter(&mut self, filter: &Filter) {
+    fn apply_filter(&mut self, filter: &FieldFilter) {
         self.filter = filter.apply(self.fields.iter().map(|f| f.name));
     }
 }
