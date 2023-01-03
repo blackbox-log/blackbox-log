@@ -21,13 +21,14 @@ export type WasmExports = {
 	file_getLog: (ptr: number, log: number) => number;
 
 	headers_free: (ptr: number) => void;
-	headers_firmwareRevision: (ptr: number, isLog: boolean) => WasmStr;
-	headers_boardInfo: (ptr: number, isLog: boolean) => WasmStr;
-	headers_craftName: (ptr: number, isLog: boolean) => WasmStr;
+	headers_getDataParser: (ptr: number) => number;
+	headers_firmwareRevision: (ptr: number) => WasmStr;
+	headers_boardInfo: (ptr: number) => WasmStr;
+	headers_craftName: (ptr: number) => WasmStr;
 
-	log_free: (ptr: number) => void;
-	log_mainFrameCount: (ptr: number) => number;
-	log_gpsFrameCount: (ptr: number) => number;
+	data_free: (ptr: number) => void;
+	data_mainFrameCount: (ptr: number) => number;
+	data_gpsFrameCount: (ptr: number) => number;
 };
 
 const registry = new FinalizationRegistry(dealloc);

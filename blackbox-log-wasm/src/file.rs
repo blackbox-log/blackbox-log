@@ -1,6 +1,6 @@
 use blackbox_log::File;
 
-use crate::log::{WasmHeaders, WasmLog};
+use crate::headers::WasmHeaders;
 use crate::{Borrowing, OwnedSlice, WasmFfi};
 
 pub struct WasmFile(Borrowing<File<'static>>);
@@ -18,11 +18,6 @@ impl WasmFile {
     pub fn parse_headers(&self, log: usize) -> WasmHeaders {
         let reader = self.0.new_borrow(|file| file.get_reader(log));
         WasmHeaders::new(reader)
-    }
-
-    pub fn parse_log(&self, log: usize) -> WasmLog {
-        let reader = self.0.new_borrow(|file| file.get_reader(log));
-        WasmLog::new(reader)
     }
 }
 
@@ -57,13 +52,4 @@ pub unsafe extern "wasm" fn file_getHeaders(ptr: *mut WasmFile, log: usize) -> *
     let headers = Box::new(file.parse_headers(log));
     file.into_wasm();
     headers.into_wasm()
-}
-
-#[no_mangle]
-#[allow(non_snake_case)]
-pub unsafe extern "wasm" fn file_getLog(ptr: *mut WasmFile, log: usize) -> *mut WasmLog {
-    let file = WasmFile::from_wasm(ptr);
-    let log = Box::new(file.parse_log(log));
-    file.into_wasm();
-    log.into_wasm()
 }

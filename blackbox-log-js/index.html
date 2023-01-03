@@ -47,9 +47,11 @@
 
 			const upload = document.querySelector('#upload');
 			const logNum = document.querySelector('#log');
+			const memory = document.querySelector('#memory');
 
 			async function fileHandler() {
 				file?.free();
+				updateMemory();
 
 				const buffer = await upload.files[0].arrayBuffer();
 				const view = new Uint8Array(buffer);
@@ -75,21 +77,32 @@
 				if (value === undefined) {
 					logNum.disabled = true;
 					logInfo.classList.add('hidden');
+					updateMemory();
 					return;
 				}
 
 				logNum.disabled = false;
 				logInfo.classList.remove('hidden');
 
-				const log = file.parseLog(value - 1);
-				document.querySelector('#firmware-revision').innerText = log.firmwareRevision;
-				document.querySelector('#board-info').innerText = log.boardInfo ?? '';
-				document.querySelector('#craft-name').innerText = log.craftName ?? '';
-				document.querySelector('#main-count').innerText = log.mainFrameCount;
-				document.querySelector('#gps-count').innerText = log.gpsFrameCount;
+				const headers = file.parseHeaders(value - 1);
+				document.querySelector('#firmware-revision').innerText = headers.firmwareRevision;
+				document.querySelector('#board-info').innerText = headers.boardInfo ?? '';
+				document.querySelector('#craft-name').innerText = headers.craftName ?? '';
+				updateMemory();
 
-				const memory = Math.round((file.memorySize / 1024 / 1024) * 100) / 100;
+				const data = headers.getDataParser();
+				document.querySelector('#main-count').innerText = data.mainFrameCount;
+				document.querySelector('#gps-count').innerText = data.gpsFrameCount;
+
 				document.querySelector('#memory').innerText = `${memory} MiB`;
+				updateMemory();
+			}
+
+			function updateMemory() {
+				if (file) {
+					const mib = Math.round((file.memorySize / 1024 / 1024) * 100) / 100;
+					memory.innerText = `${mib} MiB`;
+				}
 			}
 
 			logNum.addEventListener('change', logHandler);

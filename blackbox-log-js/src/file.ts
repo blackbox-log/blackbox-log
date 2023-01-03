@@ -1,4 +1,5 @@
-import { Headers, Log } from './log';
+import { Headers } from './headers';
+import { DataParser } from './log';
 import { WasmPointer } from './wasm';
 
 import type { WasmExports, WasmObject } from './wasm';
@@ -8,7 +9,6 @@ export class File implements WasmObject {
 	readonly #ptr: WasmPointer;
 
 	#headers: Array<WeakRef<Headers>> = [];
-	#logs: Array<WeakRef<Log>> = [];
 
 	constructor(wasm: WasmExports, data: Uint8Array) {
 		this.#wasm = wasm;
@@ -28,10 +28,6 @@ export class File implements WasmObject {
 	free() {
 		for (const headers of this.#headers) {
 			headers.deref()?.free();
-		}
-
-		for (const log of this.#logs) {
-			log.deref()?.free();
 		}
 
 		this.#ptr.free();
@@ -57,20 +53,6 @@ export class File implements WasmObject {
 		const headers = new Headers(this.#wasm, this.#ptr.ptr, index);
 		this.#headers[index] = new WeakRef(headers);
 		return headers;
-	}
-
-	parseLog(index: number): Log | undefined {
-		if (index >= this.logCount) {
-			return undefined;
-		}
-
-		if (this.#logs[index]?.deref()?.isAlive) {
-			return this.#logs[index].deref();
-		}
-
-		const log = new Log(this.#wasm, this.#ptr.ptr, index);
-		this.#logs[index] = new WeakRef(log);
-		return log;
 	}
 
 	get memorySize(): number {
