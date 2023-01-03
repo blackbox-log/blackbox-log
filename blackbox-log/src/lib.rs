@@ -27,7 +27,7 @@
 //!     let filter = FieldFilter::from(["flightModeFlags"]);
 //!     headers.slow_def_mut().apply_filter(&filter);
 //!
-//!     let mut parser = DataParser::new(&mut reader, &headers);
+//!     let mut parser = DataParser::new(reader, &headers);
 //!     while let Some(event) = parser.next() {
 //!         match event {
 //!             ParseEvent::Main(main) => {
@@ -58,7 +58,7 @@
 //!     let headers = Headers::parse(&mut reader).unwrap();
 //!
 //!     if let Some(gps_def) = headers.gps_def() {
-//!         let mut parser = DataParser::new(&mut reader, &headers);
+//!         let mut parser = DataParser::new(reader, &headers);
 //!
 //!         while let Some(event) = parser.next() {
 //!             if let ParseEvent::Gps(gps) = event {

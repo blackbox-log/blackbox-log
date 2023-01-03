@@ -10,18 +10,18 @@ use crate::{Headers, Reader};
 
 /// An pseudo-event-based parser for the data section of blackbox logs.
 #[derive(Debug)]
-pub struct DataParser<'data, 'reader, 'headers> {
+pub struct DataParser<'data, 'headers> {
     headers: &'headers Headers<'data>,
-    data: &'reader mut Reader<'data>,
+    data: Reader<'data>,
     stats: Stats,
     main_frames: MainFrameHistory,
     gps_home_frame: Option<GpsHomeFrame>,
     done: bool,
 }
 
-impl<'data, 'reader, 'headers> DataParser<'data, 'reader, 'headers> {
+impl<'data, 'headers> DataParser<'data, 'headers> {
     /// Constructs a new parser without beginning parsing.
-    pub fn new(data: &'reader mut Reader<'data>, headers: &'headers Headers<'data>) -> Self {
+    pub fn new(data: Reader<'data>, headers: &'headers Headers<'data>) -> Self {
         Self {
             headers,
             data,
@@ -54,22 +54,22 @@ impl<'data, 'reader, 'headers> DataParser<'data, 'reader, 'headers> {
             let restore = self.data.get_restore_point();
 
             let Some(kind) = FrameKind::from_byte(byte) else {
-                skip_to_frame(self.data);
+                skip_to_frame(&mut self.data);
                 continue;
             };
 
             tracing::trace!("trying to parse {kind:?} frame");
 
             let result = match kind {
-                FrameKind::Event => Event::parse(self.data).map(InternalFrame::Event),
+                FrameKind::Event => Event::parse(&mut self.data).map(InternalFrame::Event),
                 FrameKind::Data(DataFrameKind::Intra | DataFrameKind::Inter) => {
-                    RawMainFrame::parse(self.data, self.headers, kind, &self.main_frames)
+                    RawMainFrame::parse(&mut self.data, self.headers, kind, &self.main_frames)
                         .map(InternalFrame::Main)
                 }
                 FrameKind::Data(DataFrameKind::Slow) => self
                     .headers
                     .slow_frames
-                    .parse(self.data, self.headers)
+                    .parse(&mut self.data, self.headers)
                     .map(InternalFrame::Slow),
                 FrameKind::Data(DataFrameKind::Gps) => {
                     self.headers.gps_frames.as_ref().map_or_else(
@@ -79,7 +79,7 @@ impl<'data, 'reader, 'headers> DataParser<'data, 'reader, 'headers> {
                         },
                         |gps| {
                             gps.parse(
-                                self.data,
+                                &mut self.data,
                                 self.headers,
                                 self.main_frames.last().map(|frame| frame.time),
                                 self.gps_home_frame.as_ref(),
@@ -98,7 +98,7 @@ impl<'data, 'reader, 'headers> DataParser<'data, 'reader, 'headers> {
                         },
                         |gps_home| {
                             gps_home
-                                .parse(self.data, self.headers)
+                                .parse(&mut self.data, self.headers)
                                 .map(InternalFrame::GpsHome)
                         },
                     )
@@ -146,7 +146,7 @@ impl<'data, 'reader, 'headers> DataParser<'data, 'reader, 'headers> {
                 Ok(_) | Err(InternalError::Retry) => {
                     tracing::debug!("found corrupted {kind:?} frame");
                     self.data.restore(restore);
-                    skip_to_frame(self.data);
+                    skip_to_frame(&mut self.data);
                 }
                 Err(InternalError::Eof) => {
                     tracing::debug!("found unexpected end of file in data section");
