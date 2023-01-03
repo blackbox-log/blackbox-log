@@ -16,7 +16,7 @@ pub struct SlowFrame<'data, 'headers> {
     raw: RawSlowFrame,
 }
 
-impl super::seal::Seal for SlowFrame<'_, '_> {}
+impl super::seal::Sealed for SlowFrame<'_, '_> {}
 
 impl super::Frame for SlowFrame<'_, '_> {
     type Value = SlowValue;
@@ -95,7 +95,7 @@ pub struct SlowFrameDef<'data> {
     filter: AppliedFilter,
 }
 
-impl super::seal::Seal for SlowFrameDef<'_> {}
+impl super::seal::Sealed for SlowFrameDef<'_> {}
 
 impl<'data> super::FrameDef<'data> for SlowFrameDef<'data> {
     type Unit = SlowUnit;

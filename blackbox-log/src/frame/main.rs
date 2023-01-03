@@ -21,7 +21,7 @@ pub struct MainFrame<'data, 'headers, 'parser> {
     raw: &'parser RawMainFrame,
 }
 
-impl super::seal::Seal for MainFrame<'_, '_, '_> {}
+impl super::seal::Sealed for MainFrame<'_, '_, '_> {}
 
 impl super::Frame for MainFrame<'_, '_, '_> {
     type Value = MainValue;
@@ -140,7 +140,7 @@ pub struct MainFrameDef<'data> {
     filter: AppliedFilter,
 }
 
-impl super::seal::Seal for MainFrameDef<'_> {}
+impl super::seal::Sealed for MainFrameDef<'_> {}
 
 impl<'data> super::FrameDef<'data> for MainFrameDef<'data> {
     type Unit = MainUnit;
@@ -166,6 +166,10 @@ impl<'data> super::FrameDef<'data> for MainFrameDef<'data> {
         self.filter = AppliedFilter::new_unfiltered(self.fields.len());
     }
 
+    /// Applies a filter to restrict the exposed fields, overwriting any
+    /// previous filter.
+    ///
+    /// **Note:** `loopIteration` and `time` fields will always be included.
     fn apply_filter(&mut self, filter: &FieldFilter) {
         self.filter = filter.apply(self.fields.iter().map(|f| f.name));
     }

@@ -17,13 +17,17 @@
 //!
 //! let file = b"...";
 //! for mut reader in blackbox_log::File::new(file).iter() {
-//!     let headers = Headers::parse(&mut reader).unwrap();
+//!     let mut headers = Headers::parse(&mut reader).unwrap();
+//!
+//!     // This restricts the included fields to `loopIteration`, `time` and
+//!     // `rcCommand[0]` through `rcCommand[3]` for main frames
+//!     headers.main_def_mut().apply_filter(&["rcCommand"].into());
+//!
+//!     // ... and only `flightModeFlags` for slow frames
+//!     let filter = FieldFilter::from(["flightModeFlags"]);
+//!     headers.slow_def_mut().apply_filter(&filter);
+//!
 //!     let mut parser = DataParser::new(&mut reader, &headers);
-//!     // let mut view = log.data();
-//!
-//!     // This restricts the included fields to `time` and `rcCommand[0]` through `rcCommand[3]`
-//!     // TODO: view.update_filter(&["time", "rcCommand"]);
-//!
 //!     while let Some(event) = parser.next() {
 //!         match event {
 //!             ParseEvent::Main(main) => {

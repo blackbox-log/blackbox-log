@@ -20,7 +20,7 @@ pub struct GpsFrame<'data, 'headers> {
     raw: RawGpsFrame,
 }
 
-impl super::seal::Seal for GpsFrame<'_, '_> {}
+impl super::seal::Sealed for GpsFrame<'_, '_> {}
 
 impl super::Frame for GpsFrame<'_, '_> {
     type Value = GpsValue;
@@ -118,7 +118,7 @@ pub struct GpsFrameDef<'data> {
     filter: AppliedFilter,
 }
 
-impl super::seal::Seal for GpsFrameDef<'_> {}
+impl super::seal::Sealed for GpsFrameDef<'_> {}
 
 impl<'data> super::FrameDef<'data> for GpsFrameDef<'data> {
     type Unit = GpsUnit;
@@ -143,6 +143,10 @@ impl<'data> super::FrameDef<'data> for GpsFrameDef<'data> {
         self.filter = AppliedFilter::new_unfiltered(self.fields.len());
     }
 
+    /// Applies a filter to restrict the exposed fields, overwriting any
+    /// previous filter.
+    ///
+    /// **Note:** The `time` field will always be included.
     fn apply_filter(&mut self, filter: &FieldFilter) {
         self.filter = filter.apply(self.fields.iter().map(|f| f.name));
     }

@@ -27,12 +27,12 @@ use crate::units::prelude::*;
 use crate::{units, FieldFilter, HeadersParseError, HeadersParseResult, Reader};
 
 mod seal {
-    pub trait Seal {}
+    pub trait Sealed {}
 }
 
 /// A parsed data frame definition.
 #[allow(clippy::len_without_is_empty)]
-pub trait FrameDef<'data>: seal::Seal {
+pub trait FrameDef<'data>: seal::Sealed {
     type Unit: Into<Unit>;
 
     /// Returns the number of fields in the frame.
@@ -43,12 +43,16 @@ pub trait FrameDef<'data>: seal::Seal {
     where
         'data: 'a;
 
+    /// Removes any existing filter so all fields will be included.
     fn clear_filter(&mut self);
+
+    /// Applies a filter to restrict the exposed fields, overwriting any
+    /// previous filter.
     fn apply_filter(&mut self, filter: &FieldFilter);
 }
 
 /// A parsed data frame.
-pub trait Frame: seal::Seal {
+pub trait Frame: seal::Sealed {
     type Value: Into<Value>;
 
     /// Get the value of a field by its index.
