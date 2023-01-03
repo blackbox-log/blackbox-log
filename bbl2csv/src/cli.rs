@@ -37,6 +37,7 @@ OPTIONS:
       --gps                       Write GPS data into .gps.csv files
   -f, --filter <fields>           Select fields to output by name, excluding any suffixed index
                                   (comma separated)
+  -F, --gps-filter <fields>       Same as --filter, but for GPS fields. Implies --gps
   -v, --verbose                   Increase debug output up to {max_verbose} times
   -q, --quiet                     Reduce debug output up to {max_quiet} times
   -h, --help                      Print this help
@@ -63,6 +64,7 @@ pub(crate) struct Cli {
     pub altitude_offset: i16,
     pub gps: bool,
     pub filter: Option<Vec<String>>,
+    pub gps_filter: Option<Vec<String>>,
     pub verbosity: LevelFilter,
     pub logs: Vec<PathBuf>,
 }
@@ -71,11 +73,21 @@ impl Cli {
     pub(crate) fn parse(mut parser: lexopt::Parser) -> Result<Action, lexopt::Error> {
         use lexopt::prelude::*;
 
+        fn parse_filter(parser: &mut lexopt::Parser) -> Result<Vec<String>, lexopt::Error> {
+            parser.value()?.parse_with::<_, _, Infallible>(|s| {
+                Ok(s.split(',')
+                    .map(|s| s.trim().to_owned())
+                    .filter(|s| !s.is_empty())
+                    .collect())
+            })
+        }
+
         let mut index = Vec::new();
         let mut limits = false;
         let mut altitude_offset = 0;
         let mut gps = false;
         let mut filter = None;
+        let mut gps_filter = None;
         let mut verbosity = DEFAULT_VERBOSITY;
         let mut logs = Vec::new();
 
@@ -86,12 +98,11 @@ impl Cli {
                 Long("altitude-offset") => altitude_offset = parser.value()?.parse()?,
                 Long("gps") => gps = true,
                 Short('f') | Long("filter") => {
-                    filter = Some(parser.value()?.parse_with::<_, _, Infallible>(|s| {
-                        Ok(s.split(',')
-                            .map(|s| s.trim().to_owned())
-                            .filter(|s| !s.is_empty())
-                            .collect())
-                    })?);
+                    filter = Some(parse_filter(&mut parser)?);
+                }
+                Short('F') | Long("gps-filter") => {
+                    gps = true;
+                    gps_filter = Some(parse_filter(&mut parser)?);
                 }
                 Short('v') | Long("verbose") => verbosity += 1,
                 Short('q') | Long("quiet") => verbosity -= 1,
@@ -109,6 +120,7 @@ impl Cli {
             altitude_offset,
             gps,
             filter,
+            gps_filter,
             verbosity: verbosity_from_int(verbosity),
             logs,
         }))

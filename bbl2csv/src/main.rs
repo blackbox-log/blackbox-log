@@ -51,6 +51,7 @@ fn main() {
     }
 
     let filter = cli.filter.map(Filter::from_iter);
+    let gps_filter = cli.gps_filter.map(Filter::from_iter);
 
     let result = cli.logs.par_iter().try_for_each(|filename| {
         let span = tracing::info_span!("file", name = ?filename);
@@ -80,6 +81,12 @@ fn main() {
                 if let Some(filter) = &filter {
                     headers.main_def_mut().apply_filter(filter);
                     headers.slow_def_mut().apply_filter(filter);
+                }
+
+                if let Some(gps_filter) = &gps_filter {
+                    if let Some(def) = headers.gps_def_mut() {
+                        def.apply_filter(gps_filter);
+                    }
                 }
 
                 headers
