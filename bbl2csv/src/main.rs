@@ -8,7 +8,7 @@ use std::process;
 use blackbox_log::data::ParseEvent;
 use blackbox_log::frame::{Frame as _, FrameDef as _, GpsFrame, MainFrame, SlowFrame};
 use blackbox_log::units::si;
-use blackbox_log::{DataParser, Headers, Value};
+use blackbox_log::{DataParser, Filter, Headers, Value};
 use mimalloc::MiMalloc;
 use rayon::prelude::*;
 
@@ -50,6 +50,8 @@ fn main() {
         process::exit(exitcode::USAGE);
     }
 
+    let filter = cli.filter.map(Filter::from_iter);
+
     let result = cli.logs.par_iter().try_for_each(|filename| {
         let span = tracing::info_span!("file", name = ?filename);
         let _span = span.enter();
@@ -68,14 +70,20 @@ fn main() {
             let _span = span.enter();
 
             let mut log = file.get_reader(i);
-            let headers = Headers::parse(&mut log).map_err(|err| {
-                tracing::debug!("header parse error: {err}");
-                exitcode::DATAERR
-            })?;
 
-            if cli.filter.is_some() {
-                todo!("filters");
-            }
+            let headers: Headers = {
+                let mut headers = Headers::parse(&mut log).map_err(|err| {
+                    tracing::debug!("header parse error: {err}");
+                    exitcode::DATAERR
+                })?;
+
+                if let Some(filter) = &filter {
+                    headers.main_def_mut().apply_filter(filter);
+                    headers.slow_def_mut().apply_filter(filter);
+                }
+
+                headers
+            };
 
             let field_names = headers
                 .main_def()

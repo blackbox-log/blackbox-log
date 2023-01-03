@@ -24,7 +24,7 @@ pub use self::slow::{SlowFrame, SlowUnit, SlowValue};
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
-use crate::{units, HeadersParseError, HeadersParseResult, Reader};
+use crate::{units, Filter, HeadersParseError, HeadersParseResult, Reader};
 
 mod seal {
     pub trait Seal {}
@@ -32,14 +32,19 @@ mod seal {
 
 /// A parsed data frame definition.
 #[allow(clippy::len_without_is_empty)]
-pub trait FrameDef: seal::Seal {
+pub trait FrameDef<'data>: seal::Seal {
     type Unit: Into<Unit>;
 
     /// Returns the number of fields in the frame.
     fn len(&self) -> usize;
 
     /// Get the name and unit of a field by its index.
-    fn get(&self, index: usize) -> Option<(&str, Self::Unit)>;
+    fn get<'a>(&'a self, index: usize) -> Option<(&'data str, Self::Unit)>
+    where
+        'data: 'a;
+
+    fn clear_filter(&mut self);
+    fn apply_filter(&mut self, filter: &Filter);
 }
 
 /// A parsed data frame.

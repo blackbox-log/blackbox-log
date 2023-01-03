@@ -100,18 +100,34 @@ pub struct Headers<'data> {
 
 impl<'data> Headers<'data> {
     /// Returns the parsed definition for main frames.
-    pub fn main_def(&self) -> &MainFrameDef {
+    pub fn main_def(&self) -> &MainFrameDef<'data> {
         &self.main_frames
     }
 
+    /// Returns a mutable reference to the parsed definition for main frames.
+    pub fn main_def_mut<'a>(&'a mut self) -> &'a mut MainFrameDef<'data> {
+        &mut self.main_frames
+    }
+
     /// Returns the parsed definition for slow frames.
-    pub fn slow_def(&self) -> &SlowFrameDef {
+    pub fn slow_def(&self) -> &SlowFrameDef<'data> {
         &self.slow_frames
     }
 
+    /// Returns a mutable reference to the parsed definition for slow frames.
+    pub fn slow_def_mut<'a>(&'a mut self) -> &'a mut SlowFrameDef<'data> {
+        &mut self.slow_frames
+    }
+
     /// Returns the parsed definition for GPS frames, if present.
-    pub fn gps_def(&self) -> Option<&GpsFrameDef> {
+    pub fn gps_def(&self) -> Option<&GpsFrameDef<'data>> {
         self.gps_frames.as_ref()
+    }
+
+    /// Returns a mutable reference to the parsed definition for GPS frames, if
+    /// present.
+    pub fn gps_def_mut<'a>(&'a mut self) -> Option<&'a mut GpsFrameDef<'data>> {
+        self.gps_frames.as_mut()
     }
 
     /// Parses only the headers of a blackbox log.
@@ -157,6 +173,7 @@ impl<'data> Headers<'data> {
     fn validate(&self) -> ParseResult<()> {
         let has_accel = self.acceleration_1g.is_some();
         let has_min_throttle = self.min_throttle.is_some();
+        // TODO: also check it is in a main frame
         let has_motor_0 = self.main_frames.has_motor_0();
         let has_vbat_ref = self.vbat_reference.is_some();
         let has_min_motor = self.motor_output_range.is_some();

@@ -5,6 +5,7 @@ use core::iter;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty, FieldDef, GpsHomeFrame, Unit};
+use crate::filter::{AppliedFilter, Filter};
 use crate::parser::{decode, to_base_field, Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
@@ -28,10 +29,9 @@ impl super::Frame for GpsFrame<'_, '_> {
         let value = if index == 0 {
             GpsValue::FrameTime(Time::from_raw(self.raw.time, self.headers))
         } else {
-            let index = index - 1;
-
             let def = self.headers.gps_frames.as_ref().unwrap();
-            let def = def.0.get(index)?;
+            let index = def.filter.get(index - 1)?;
+            let def = &def.fields[index];
             let raw = self.raw.values[index];
 
             match def.unit {
@@ -112,35 +112,55 @@ pub enum GpsUnit {
 
 /// The parsed frame definition for GPS frames.
 #[derive(Debug, Clone)]
-pub struct GpsFrameDef<'data>(pub(crate) Vec<GpsFieldDef<'data>>);
+pub struct GpsFrameDef<'data> {
+    pub(crate) time: GpsFieldDef<'data>,
+    pub(crate) fields: Vec<GpsFieldDef<'data>>,
+    filter: AppliedFilter,
+}
 
 impl super::seal::Seal for GpsFrameDef<'_> {}
 
-impl<'data> super::FrameDef for GpsFrameDef<'data> {
+impl<'data> super::FrameDef<'data> for GpsFrameDef<'data> {
     type Unit = GpsUnit;
 
     fn len(&self) -> usize {
-        1 + self.0.len()
+        1 + self.filter.len()
     }
 
-    fn get(&self, index: usize) -> Option<(&'data str, GpsUnit)> {
-        if index == 0 {
-            Some(("time", GpsUnit::FrameTime))
-        } else {
-            self.0.get(index - 1).map(|field| (field.name, field.unit))
-        }
+    fn get<'a>(&'a self, index: usize) -> Option<(&'data str, GpsUnit)>
+    where
+        'data: 'a,
+    {
+        let field = match index {
+            0 => Some(&self.time),
+            _ => self.fields.get(self.filter.get(index - 1)?),
+        };
+
+        field.map(|f| (f.name, f.unit))
+    }
+
+    fn clear_filter(&mut self) {
+        self.filter = AppliedFilter::new_unfiltered(self.fields.len());
+    }
+
+    fn apply_filter(&mut self, filter: &Filter) {
+        self.filter = filter.apply(self.fields.iter().map(|f| f.name));
     }
 }
 
 impl<'data> GpsFrameDef<'data> {
     /// Iterates over the name and unit of each field.
     pub fn iter(&self) -> impl Iterator<Item = (&str, GpsUnit)> {
-        iter::once(("time", GpsUnit::FrameTime)).chain(self.0.iter().map(|f| (f.name, f.unit)))
+        iter::once(&self.time)
+            .chain(self.filter.iter().map(|i| &self.fields[i]))
+            .map(|f| (f.name, f.unit))
     }
 
     /// Iterates over the names of each field.
     pub fn iter_names(&self) -> impl Iterator<Item = &str> {
-        iter::once("time").chain(self.0.iter().map(|f| f.name))
+        iter::once(&self.time)
+            .chain(self.filter.iter().map(|i| &self.fields[i]))
+            .map(|f| f.name)
     }
 
     pub(crate) fn builder() -> GpsFrameDefBuilder<'data> {
@@ -157,7 +177,7 @@ impl<'data> GpsFrameDef<'data> {
             predictor,
             unit,
             ..
-        } in &self.0
+        } in &self.fields
         {
             check_predictor(name, *predictor)?;
             check_unit(name, Unit::from(*unit))?;
@@ -183,12 +203,12 @@ impl<'data> GpsFrameDef<'data> {
             time
         };
 
-        let raw = read_field_values(data, &self.0, |f| f.encoding)?;
+        let raw = read_field_values(data, &self.fields, |f| f.encoding)?;
 
         let ctx = PredictorContext::with_home(headers, last_home.map(|home| home.0));
         let mut values = Vec::with_capacity(raw.len());
 
-        for (i, field) in self.0.iter().enumerate() {
+        for (i, field) in self.fields.iter().enumerate() {
             let raw = raw[i];
             let signed = field.encoding.is_signed();
 
@@ -286,21 +306,17 @@ impl<'data> GpsFrameDefBuilder<'data> {
                 })
             });
 
-        match fields.next().transpose()? {
-            Some(GpsFieldDef {
-                name: "time",
-                predictor: Predictor::LastMainFrameTime,
-                encoding: Encoding::Variable,
-                ..
-            }) => {}
-            def => {
-                tracing::debug!(?def, "found invalid gps time field definition");
-                return Err(HeadersParseError::MissingField {
-                    frame: DataFrameKind::Gps,
-                    field: "time".to_owned(),
-                });
-            }
-        }
+        let Some(time @ GpsFieldDef {
+            name: "time",
+            predictor: Predictor::LastMainFrameTime,
+            encoding: Encoding::Variable,
+            ..
+        }) = fields.next().transpose()? else {
+            return Err(HeadersParseError::MissingField {
+                frame: DataFrameKind::Gps,
+                field: "time".to_owned()
+            });
+        };
 
         let mut fields = fields.collect::<Result<Vec<_>, _>>()?;
         for (i, j) in (1..fields.len()).into_iter().map(|i| (i - 1, i)) {
@@ -319,7 +335,13 @@ impl<'data> GpsFrameDefBuilder<'data> {
             tracing::warn!("not all GPS definition headers are of equal length");
         }
 
-        Ok(Some(GpsFrameDef(fields)))
+        let filter = AppliedFilter::new_unfiltered(fields.len());
+
+        Ok(Some(GpsFrameDef {
+            time,
+            fields,
+            filter,
+        }))
     }
 }
 

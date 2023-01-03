@@ -6,6 +6,7 @@ use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty, FieldDef, FrameKind, Unit};
 use crate::data::MainFrameHistory;
+use crate::filter::{AppliedFilter, Filter};
 use crate::parser::{decode, to_base_field, Encoding, InternalResult};
 use crate::predictor::{self, Predictor, PredictorContext};
 use crate::units::prelude::*;
@@ -30,8 +31,8 @@ impl super::Frame for MainFrame<'_, '_, '_> {
             0 => MainValue::Unsigned(self.raw.iteration),
             1 => MainValue::FrameTime(Time::from_raw(self.raw.time, self.headers)),
             _ => {
-                let index = index - 2;
-                let def = self.headers.main_frames.fields.get(index)?;
+                let index = self.headers.main_frames.filter.get(index - 2)?;
+                let def = &self.headers.main_frames.fields[index];
                 let raw = self.raw.values[index];
                 match def.unit {
                     MainUnit::Amperage => {
@@ -136,55 +137,54 @@ pub struct MainFrameDef<'data> {
     pub(crate) fields: Vec<MainFieldDef<'data>>,
 
     index_motor_0: Option<usize>,
+    filter: AppliedFilter,
 }
 
 impl super::seal::Seal for MainFrameDef<'_> {}
 
-impl super::FrameDef for MainFrameDef<'_> {
+impl<'data> super::FrameDef<'data> for MainFrameDef<'data> {
     type Unit = MainUnit;
 
     fn len(&self) -> usize {
-        2 + self.fields.len()
+        2 + self.filter.len()
     }
 
-    fn get(&self, index: usize) -> Option<(&str, MainUnit)> {
+    fn get<'a>(&'a self, index: usize) -> Option<(&'data str, MainUnit)>
+    where
+        'data: 'a,
+    {
         let field = match index {
-            0 => &self.iteration,
-            1 => &self.time,
-            _ => self.fields.get(index - 2)?,
+            0 => Some(&self.iteration),
+            1 => Some(&self.time),
+            _ => self.fields.get(self.filter.get(index - 2)?),
         };
 
-        Some((field.name, field.unit))
+        field.map(|f| (f.name, f.unit))
+    }
+
+    fn clear_filter(&mut self) {
+        self.filter = AppliedFilter::new_unfiltered(self.fields.len());
+    }
+
+    fn apply_filter(&mut self, filter: &Filter) {
+        self.filter = filter.apply(self.fields.iter().map(|f| f.name));
     }
 }
 
 impl<'data> MainFrameDef<'data> {
     /// Iterates over the name and unit of each field.
-    pub fn iter(&self) -> impl Iterator<Item = (&str, MainUnit)> {
-        let Self {
-            iteration,
-            time,
-            fields,
-            ..
-        } = self;
-
-        iter::once((iteration.name, iteration.unit))
-            .chain(iter::once((time.name, time.unit)))
-            .chain(fields.iter().map(|f| (f.name, f.unit)))
+    pub fn iter(&self) -> impl Iterator<Item = (&str, MainUnit)> + '_ {
+        iter::once(&self.iteration)
+            .chain(iter::once(&self.time))
+            .chain(self.filter.iter().map(|i| &self.fields[i]))
+            .map(|field| (field.name, field.unit))
     }
 
     /// Iterates over the names of each field.
     pub fn iter_names(&self) -> impl Iterator<Item = &str> {
-        let Self {
-            iteration,
-            time,
-            fields,
-            ..
-        } = self;
-
-        iter::once(iteration.name)
-            .chain(iter::once(time.name))
-            .chain(fields.iter().map(|f| f.name))
+        iter::once(self.iteration.name)
+            .chain(iter::once(self.time.name))
+            .chain(self.filter.iter().map(|i| self.fields[i].name))
     }
 
     pub(crate) fn builder() -> MainFrameDefBuilder<'data> {
@@ -235,7 +235,7 @@ impl<'data> MainFrameDef<'data> {
         fn get_update_ctx(
             last: Option<&'_ RawMainFrame>,
         ) -> impl Fn(&mut PredictorContext, usize) + '_ {
-            move |ctx: &mut PredictorContext, i| ctx.set_last(last.map(|l| l.values[i]))
+            move |ctx, i| ctx.set_last(last.map(|l| l.values[i]))
         }
 
         let iteration = decode::variable(data)?;
@@ -271,7 +271,7 @@ impl<'data> MainFrameDef<'data> {
             last: Option<&'a RawMainFrame>,
             last_last: Option<&'a RawMainFrame>,
         ) -> impl Fn(&mut PredictorContext<'_, '_>, usize) + 'a {
-            move |ctx: &mut PredictorContext, i| {
+            move |ctx, i| {
                 ctx.set_last_2(last.map(|l| l.values[i]), last_last.map(|l| l.values[i]));
             }
         }
@@ -491,6 +491,7 @@ impl<'data> MainFrameDefBuilder<'data> {
         }
 
         let index_motor_0 = fields.iter().position(|f| f.name == "motor[0]");
+        let filter = AppliedFilter::new_unfiltered(fields.len());
 
         Ok(MainFrameDef {
             iteration,
@@ -498,6 +499,7 @@ impl<'data> MainFrameDefBuilder<'data> {
             fields,
 
             index_motor_0,
+            filter,
         })
     }
 }

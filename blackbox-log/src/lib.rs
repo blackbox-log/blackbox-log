@@ -87,6 +87,7 @@ mod utils;
 pub mod data;
 pub mod event;
 mod file;
+mod filter;
 pub mod frame;
 pub mod headers;
 mod predictor;
@@ -101,6 +102,7 @@ mod parser;
 
 pub use self::data::{DataParser, ParseEvent};
 pub use self::file::File;
+pub use self::filter::Filter;
 pub use self::frame::{Unit, Value};
 pub use self::headers::{
     Headers, ParseError as HeadersParseError, ParseResult as HeadersParseResult,

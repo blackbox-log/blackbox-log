@@ -3,6 +3,7 @@ use alloc::vec::Vec;
 use tracing::instrument;
 
 use super::{read_field_values, DataFrameKind, DataFrameProperty, FieldDef, Unit};
+use crate::filter::{AppliedFilter, Filter};
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::utils::as_i32;
@@ -21,7 +22,8 @@ impl super::Frame for SlowFrame<'_, '_> {
     type Value = SlowValue;
 
     fn get(&self, index: usize) -> Option<Self::Value> {
-        let def = self.headers.slow_frames.0.get(index)?;
+        let index = self.headers.slow_frames.filter.get(index)?;
+        let def = &self.headers.slow_frames.fields[index];
         let raw = self.raw.0[index];
 
         let firmware = self.headers.firmware_kind;
@@ -88,31 +90,50 @@ pub enum SlowUnit {
 /// The parsed frame definition for slow frames.
 #[derive(Debug, Clone)]
 #[cfg_attr(fuzzing, derive(Default))]
-pub struct SlowFrameDef<'data>(pub(crate) Vec<SlowFieldDef<'data>>);
+pub struct SlowFrameDef<'data> {
+    pub(crate) fields: Vec<SlowFieldDef<'data>>,
+    filter: AppliedFilter,
+}
 
 impl super::seal::Seal for SlowFrameDef<'_> {}
 
-impl super::FrameDef for SlowFrameDef<'_> {
+impl<'data> super::FrameDef<'data> for SlowFrameDef<'data> {
     type Unit = SlowUnit;
 
     fn len(&self) -> usize {
-        self.0.len()
+        self.filter.len()
     }
 
-    fn get(&self, index: usize) -> Option<(&str, SlowUnit)> {
-        self.0.get(index).map(|f| (f.name, f.unit))
+    fn get<'a>(&'a self, index: usize) -> Option<(&'data str, SlowUnit)>
+    where
+        'data: 'a,
+    {
+        self.fields
+            .get(self.filter.get(index)?)
+            .map(|f| (f.name, f.unit))
+    }
+
+    fn clear_filter(&mut self) {
+        self.filter = AppliedFilter::new_unfiltered(self.fields.len());
+    }
+
+    fn apply_filter(&mut self, filter: &Filter) {
+        self.filter = filter.apply(self.fields.iter().map(|f| f.name));
     }
 }
 
 impl<'data> SlowFrameDef<'data> {
     /// Iterates over the name and unit of each field.
     pub fn iter(&self) -> impl Iterator<Item = (&str, SlowUnit)> {
-        self.0.iter().map(|f| (f.name, f.unit))
+        self.filter.iter().map(|i| {
+            let field = &self.fields[i];
+            (field.name, field.unit)
+        })
     }
 
     /// Iterates over the names of each field.
     pub fn iter_names(&self) -> impl Iterator<Item = &str> {
-        self.0.iter().map(|f| f.name)
+        self.filter.iter().map(|i| self.fields[i].name)
     }
 
     pub(crate) fn builder() -> SlowFrameDefBuilder<'data> {
@@ -129,7 +150,7 @@ impl<'data> SlowFrameDef<'data> {
             predictor,
             unit,
             ..
-        } in &self.0
+        } in &self.fields
         {
             check_predictor(name, *predictor)?;
             check_unit(name, Unit::from(*unit))?;
@@ -146,8 +167,8 @@ impl<'data> SlowFrameDef<'data> {
     ) -> InternalResult<RawSlowFrame> {
         let values = super::parse_impl(
             PredictorContext::new(headers),
-            &read_field_values(data, &self.0, |f| f.encoding)?,
-            self.0.iter(),
+            &read_field_values(data, &self.fields, |f| f.encoding)?,
+            self.fields.iter(),
             |_, _| {},
         );
 
@@ -231,7 +252,9 @@ impl<'data> SlowFrameDefBuilder<'data> {
             tracing::warn!("not all slow frame definition headers are of equal length");
         }
 
-        Ok(SlowFrameDef(fields))
+        let filter = AppliedFilter::new_unfiltered(fields.len());
+
+        Ok(SlowFrameDef { fields, filter })
     }
 }
 
