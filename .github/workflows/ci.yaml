@@ -29,7 +29,7 @@ jobs:
       - name: blackbox-log, all
         run: cargo cranky -p blackbox-log --all-features
       - name: Workspace
-        run: cargo cranky --workspace --all-targets
+        run: cargo cranky --workspace --all-targets --all-features
 
   test:
     strategy:
