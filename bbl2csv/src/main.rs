@@ -233,7 +233,7 @@ fn format_value(value: Value) -> String {
         Value::State(s) => s.to_string(),
         Value::FailsafePhase(f) => f.to_string(),
         Value::Boolean(b) => b.to_string(),
-        Value::GpsCoordinate(c) => format!("{:.7}", c),
+        Value::GpsCoordinate(c) => format!("{c:.7}"),
         Value::Altitude(a) => format!("{:.0}", a.get::<si::length::meter>()),
         Value::Velocity(v) => format_float(v.get::<si::velocity::meter_per_second>()),
         Value::GpsHeading(h) => format!("{h:.1}"),
