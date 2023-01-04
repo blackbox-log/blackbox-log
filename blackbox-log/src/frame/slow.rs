@@ -22,8 +22,8 @@ impl super::Frame for SlowFrame<'_, '_> {
     type Value = SlowValue;
 
     fn get(&self, index: usize) -> Option<Self::Value> {
-        let index = self.headers.slow_frames.filter.get(index)?;
-        let def = &self.headers.slow_frames.fields[index];
+        let index = self.headers.slow_frame_def.filter.get(index)?;
+        let def = &self.headers.slow_frame_def.fields[index];
         let raw = self.raw.0[index];
 
         let firmware = self.headers.firmware_kind;

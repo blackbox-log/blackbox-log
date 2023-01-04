@@ -31,8 +31,8 @@ impl super::Frame for MainFrame<'_, '_, '_> {
             0 => MainValue::Unsigned(self.raw.iteration),
             1 => MainValue::FrameTime(Time::from_raw(self.raw.time, self.headers)),
             _ => {
-                let index = self.headers.main_frames.filter.get(index - 2)?;
-                let def = &self.headers.main_frames.fields[index];
+                let index = self.headers.main_frame_def.filter.get(index - 2)?;
+                let def = &self.headers.main_frame_def.fields[index];
                 let raw = self.raw.values[index];
                 match def.unit {
                     MainUnit::Amperage => {
@@ -86,7 +86,7 @@ impl RawMainFrame {
         history: &MainFrameHistory,
     ) -> InternalResult<Self> {
         let last = history.last();
-        let def = &headers.main_frames;
+        let def = &headers.main_frame_def;
 
         if kind == FrameKind::Data(DataFrameKind::Intra) {
             def.parse_intra(data, headers, last)

@@ -21,22 +21,22 @@
 //!
 //!     // This restricts the included fields to `loopIteration`, `time` and
 //!     // `rcCommand[0]` through `rcCommand[3]` for main frames
-//!     headers.main_def_mut().apply_filter(&["rcCommand"].into());
+//!     headers.main_frame_def.apply_filter(&["rcCommand"].into());
 //!
 //!     // ... and only `flightModeFlags` for slow frames
 //!     let filter = FieldFilter::from(["flightModeFlags"]);
-//!     headers.slow_def_mut().apply_filter(&filter);
+//!     headers.slow_frame_def.apply_filter(&filter);
 //!
 //!     let mut parser = DataParser::new(reader, &headers);
 //!     while let Some(event) = parser.next() {
 //!         match event {
 //!             ParseEvent::Main(main) => {
-//!                 for (value, (name, _)) in main.iter().zip(headers.main_def().iter()) {
+//!                 for (value, (name, _)) in main.iter().zip(headers.main_frame_def.iter()) {
 //!                     println!("{name}: {value:?}");
 //!                 }
 //!             }
 //!             ParseEvent::Slow(slow) => {
-//!                 for (value, (name, _)) in slow.iter().zip(headers.slow_def().iter()) {
+//!                 for (value, (name, _)) in slow.iter().zip(headers.slow_frame_def.iter()) {
 //!                     println!("{name}: {value:?}");
 //!                 }
 //!             }
@@ -57,7 +57,7 @@
 //! for mut reader in file.iter() {
 //!     let headers = Headers::parse(&mut reader).unwrap();
 //!
-//!     if let Some(gps_def) = headers.gps_def() {
+//!     if let Some(gps_def) = &headers.gps_frame_def {
 //!         let mut parser = DataParser::new(reader, &headers);
 //!
 //!         while let Some(event) = parser.next() {
