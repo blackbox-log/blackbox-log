@@ -11,11 +11,8 @@ rust-version.workspace = true
 cargo-fuzz = true
 
 [dependencies]
-arbitrary = { version = "1.2.0", features = ["derive"] }
-blackbox-sys = { version = "0.1.0", path = "../blackbox-sys" }
 blackbox-log.workspace = true
 libfuzzer-sys = "0.4.5"
-memfile = "0.2.1"
 
 [lib]
 test = false

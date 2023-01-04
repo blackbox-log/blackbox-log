@@ -33,9 +33,6 @@ name = "arbitrary"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "29d47fbf90d5149a107494b15a7dc8d69b351be2db3bb9691740e88ec17fd880"
-dependencies = [
- "derive_arbitrary",
-]
 
 [[package]]
 name = "atty"
@@ -95,11 +92,8 @@ dependencies = [
 name = "blackbox-fuzz"
 version = "0.0.0"
 dependencies = [
- "arbitrary",
  "blackbox-log",
- "blackbox-sys",
  "libfuzzer-sys",
- "memfile",
 ]
 
 [[package]]
@@ -115,13 +109,6 @@ dependencies = [
  "test-case",
  "tracing",
  "uom",
-]
-
-[[package]]
-name = "blackbox-sys"
-version = "0.1.0"
-dependencies = [
- "cc",
 ]
 
 [[package]]
@@ -321,17 +308,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "derive_arbitrary"
-version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4903dff04948f22033ca30232ab8eca2c3fc4c913a8b6a34ee5199699814817f"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "either"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -524,15 +500,6 @@ name = "memchr"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
-
-[[package]]
-name = "memfile"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28989c5dcae5625bb50871c6ab07e347f3dba0675d134eba4abaf57dc6cffdb7"
-dependencies = [
- "libc",
-]
 
 [[package]]
 name = "memoffset"
