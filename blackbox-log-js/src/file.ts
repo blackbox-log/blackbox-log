@@ -1,5 +1,4 @@
 import { Headers } from './headers';
-import { DataParser } from './log';
 import { WasmPointer } from './wasm';
 
 import type { WasmExports, WasmObject } from './wasm';

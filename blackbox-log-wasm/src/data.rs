@@ -1,26 +1,36 @@
 use blackbox_log::prelude::*;
+use blackbox_log::Reader;
 
-use crate::headers::WasmHeadersInner;
-use crate::{Borrowing, WasmFfi};
+use crate::{OwnedSlice, Shared, WasmFfi};
 
 // TODO: use Headers as borrowee
-pub struct WasmDataParser(
-    Borrowing<DataParser<'static, 'static>, Borrowing<WasmHeadersInner<'static>>>,
-);
+pub struct WasmDataParser {
+    parser: DataParser<'static, 'static>,
+    _headers: Shared<Headers<'static>>,
+    _data: Shared<OwnedSlice>,
+}
 
 impl WasmDataParser {
     pub(crate) fn new(
-        inner: Borrowing<DataParser<'static, 'static>, Borrowing<WasmHeadersInner<'static>>>,
+        headers: Shared<Headers<'static>>,
+        reader: Reader<'static>,
+        data: Shared<OwnedSlice>,
     ) -> Self {
-        Self(inner)
+        let headers_ref = unsafe { headers.deref_static() };
+
+        Self {
+            parser: DataParser::new(reader, headers_ref),
+            _headers: headers,
+            _data: data,
+        }
     }
 
     fn main_frame_count(&self) -> usize {
-        self.0.stats().counts.main
+        self.parser.stats().counts.main
     }
 
     fn gps_frame_count(&self) -> usize {
-        self.0.stats().counts.gps
+        self.parser.stats().counts.gps
     }
 }
 

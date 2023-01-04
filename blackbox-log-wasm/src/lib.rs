@@ -1,17 +1,17 @@
 #![feature(wasm_abi)]
 #![allow(unsafe_code)]
 
-mod borrowing;
 mod data;
 mod file;
 mod headers;
 mod owned_slice;
+mod shared;
 mod str;
 
 use std::ptr;
 
-pub(crate) use borrowing::Borrowing;
-pub(crate) use owned_slice::OwnedSlice;
+pub(crate) use self::owned_slice::OwnedSlice;
+pub(crate) use self::shared::Shared;
 
 trait WasmFfi {
     unsafe fn from_wasm(ptr: *mut Self) -> Box<Self> {

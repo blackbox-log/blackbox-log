@@ -1,5 +1,3 @@
-import { Memoize as memoize } from 'typescript-memoize';
-
 import { WasmPointer } from './wasm';
 
 import type { Headers } from './headers';
@@ -26,10 +24,6 @@ export class DataParser implements WasmObject {
 
 	get headers(): Headers {
 		return this.#headers;
-	}
-
-	parseAll() {
-		this.#wasm.data_parseAll(this.#ptr.ptr);
 	}
 
 	get mainFrameCount(): number {

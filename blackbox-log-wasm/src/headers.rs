@@ -1,39 +1,34 @@
-use std::rc::Rc;
-
 use blackbox_log::prelude::*;
 use blackbox_log::Reader;
 
 use crate::data::WasmDataParser;
 use crate::str::WasmStr;
-use crate::{Borrowing, WasmFfi};
+use crate::{OwnedSlice, Shared, WasmFfi};
 
-pub(crate) struct WasmHeadersInner<'data> {
-    headers: Headers<'data>,
-    reader: Reader<'data>,
+pub struct WasmHeaders {
+    headers: Shared<Headers<'static>>,
+    reader: Reader<'static>,
+    data: Shared<OwnedSlice>,
 }
 
-pub struct WasmHeaders(Rc<Borrowing<WasmHeadersInner<'static>>>);
-
 impl WasmHeaders {
-    pub(crate) fn new(reader: Borrowing<Reader<'static>>) -> Self {
+    pub(crate) fn new(mut reader: Reader<'static>, data: Shared<OwnedSlice>) -> Self {
         // TODO: error handling
-        Self(Rc::new(reader.map(|mut reader| WasmHeadersInner {
-            headers: Headers::parse(&mut reader).unwrap(),
-            reader,
-        })))
-    }
+        let headers = Headers::parse(&mut reader).unwrap();
 
-    fn get_header<T>(&self, get: impl FnOnce(&Headers<'static>) -> T) -> Borrowing<T> {
-        self.0.new_borrow(|inner| get(&inner.headers))
+        Self {
+            headers: Shared::new(headers),
+            reader,
+            data,
+        }
     }
 
     fn get_data_parser(&self) -> WasmDataParser {
-        WasmDataParser::new(Borrowing::new_with_rc(
-            Rc::clone(&self.0),
-            |headers: &Borrowing<WasmHeadersInner, _>| {
-                DataParser::new(headers.reader.clone(), &headers.headers)
-            },
-        ))
+        WasmDataParser::new(
+            Shared::clone(&self.headers),
+            self.reader.clone(),
+            Shared::clone(&self.data),
+        )
     }
 }
 
@@ -59,28 +54,25 @@ pub unsafe extern "wasm" fn headers_getDataParser(ptr: *mut WasmHeaders) -> *mut
 #[allow(non_snake_case)]
 pub unsafe extern "wasm" fn headers_firmwareRevision(ptr: *mut WasmHeaders) -> WasmStr {
     let headers = WasmHeaders::from_wasm(ptr);
-    let firmware = headers.get_header(|headers| headers.firmware_revision);
+    let firmware = headers.headers.firmware_revision;
     headers.into_wasm();
-
-    (*firmware).into()
+    firmware.into()
 }
 
 #[no_mangle]
 #[allow(non_snake_case)]
 pub unsafe extern "wasm" fn headers_boardInfo(ptr: *mut WasmHeaders) -> WasmStr {
     let headers = WasmHeaders::from_wasm(ptr);
-    let info = headers.get_header(|headers| headers.board_info);
+    let info = headers.headers.board_info;
     headers.into_wasm();
-
-    (*info).into()
+    info.into()
 }
 
 #[no_mangle]
 #[allow(non_snake_case)]
 pub unsafe extern "wasm" fn headers_craftName(ptr: *mut WasmHeaders) -> WasmStr {
     let headers = WasmHeaders::from_wasm(ptr);
-    let name = headers.get_header(|headers| headers.craft_name);
+    let name = headers.headers.craft_name;
     headers.into_wasm();
-
-    (*name).into()
+    name.into()
 }

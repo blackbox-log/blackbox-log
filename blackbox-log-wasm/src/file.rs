@@ -1,23 +1,32 @@
 use blackbox_log::File;
 
 use crate::headers::WasmHeaders;
-use crate::{Borrowing, OwnedSlice, WasmFfi};
+use crate::{OwnedSlice, Shared, WasmFfi};
 
-pub struct WasmFile(Borrowing<File<'static>>);
+pub struct WasmFile {
+    file: File<'static>,
+    data: Shared<OwnedSlice>,
+}
 
 impl WasmFile {
     pub(crate) fn new(data: OwnedSlice) -> Self {
-        Self(Borrowing::new(data, |data| File::new(data)))
+        let data = Shared::new(data);
+        let data_ref = unsafe { data.deref_static() };
+
+        Self {
+            file: File::new(data_ref),
+            data,
+        }
     }
 
     #[inline(always)]
     pub fn log_count(&self) -> usize {
-        self.0.log_count()
+        self.file.log_count()
     }
 
     pub fn parse_headers(&self, log: usize) -> WasmHeaders {
-        let reader = self.0.new_borrow(|file| file.get_reader(log));
-        WasmHeaders::new(reader)
+        let reader = self.file.get_reader(log);
+        WasmHeaders::new(reader, Shared::clone(&self.data))
     }
 }
 
