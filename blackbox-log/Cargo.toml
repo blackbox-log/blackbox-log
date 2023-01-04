@@ -28,7 +28,7 @@ uom = { version = "^0.33", default-features = false, features = ["si", "f64"] }
 
 [dev-dependencies]
 criterion = { version = "^0.4", features = ["html_reports"] }
-insta = { version = "^1.23", default-features = false, features = ["colors", "glob", "ron"] }
+insta = { version = "^1.24", default-features = false, features = ["colors", "glob", "ron"] }
 test-case = "^2.2.2"
 
 [lib]
