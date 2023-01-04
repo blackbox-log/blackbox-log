@@ -32,9 +32,6 @@ mod from_raw {
     }
 }
 
-#[cfg(fuzzing)]
-pub use from_raw::FromRaw;
-#[cfg(not(fuzzing))]
 pub(crate) use from_raw::FromRaw;
 
 impl FromRaw for Time {

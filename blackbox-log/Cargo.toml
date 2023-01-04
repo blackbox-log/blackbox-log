@@ -35,10 +35,6 @@ test-case = "^2.2.2"
 bench = false
 
 [[bench]]
-name = "decode"
-harness = false
-
-[[bench]]
 name = "parse"
 harness = false
 

@@ -89,7 +89,6 @@ pub enum SlowUnit {
 
 /// The parsed frame definition for slow frames.
 #[derive(Debug, Clone)]
-#[cfg_attr(fuzzing, derive(Default))]
 pub struct SlowFrameDef<'data> {
     pub(crate) fields: Vec<SlowFieldDef<'data>>,
     filter: AppliedFilter,

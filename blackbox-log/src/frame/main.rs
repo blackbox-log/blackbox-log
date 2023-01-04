@@ -313,29 +313,6 @@ impl<'data> MainFrameDef<'data> {
     }
 }
 
-#[cfg(fuzzing)]
-impl Default for MainFrameDef<'static> {
-    fn default() -> Self {
-        let default_def = MainFieldDef {
-            name: "",
-            predictor_intra: Predictor::Zero,
-            predictor_inter: Predictor::Zero,
-            encoding_intra: Encoding::Null,
-            encoding_inter: Encoding::Null,
-            signed: false,
-            unit: MainUnit::Unitless,
-        };
-
-        Self {
-            iteration: default_def.clone(),
-            time: default_def,
-            fields: Vec::new(),
-
-            index_motor_0: None,
-        }
-    }
-}
-
 #[derive(Debug, Clone)]
 pub(crate) struct MainFieldDef<'data> {
     pub(crate) name: &'data str,

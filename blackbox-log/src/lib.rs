@@ -94,15 +94,11 @@ mod file;
 mod filter;
 pub mod frame;
 pub mod headers;
+mod parser;
 mod predictor;
 pub mod prelude;
 mod reader;
 pub mod units;
-
-#[cfg(any(bench, fuzzing))]
-pub mod parser;
-#[cfg(not(any(bench, fuzzing)))]
-mod parser;
 
 pub use self::data::{DataParser, ParseEvent};
 pub use self::file::File;
