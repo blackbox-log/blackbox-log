@@ -16,10 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - name: Fetch no_std target
-        run: rustup target add thumbv7em-none-eabihf
-      - name: Fetch wasm target
-        run: cd blackbox-log-wasm; rustup target add wasm32-unknown-unknown
+        with:
+          target: thumbv7em-none-eabihf
       - name: Install cargo-cranky
         run: cargo install --locked cargo-cranky
       - name: blackbox-log, none
@@ -30,10 +28,20 @@ jobs:
         run: cargo cranky -p blackbox-log --target thumbv7em-none-eabihf --no-default-features -F serde
       - name: blackbox-log, all
         run: cargo cranky -p blackbox-log --all-features
-      - name: blackbox-log-wasm
-        run: cd blackbox-log-wasm; cargo cranky --target wasm32-unknown-unknown --all-targets
       - name: Workspace
         run: cargo cranky --workspace --all-targets --all-features --exclude blackbox-log-wasm
+
+  clippy-wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use blackbox-log-wasm's rust-toolchain file
+        run: mv blackbox-log-wasm/rust-toolchain* .
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Install cargo-cranky
+        run: cargo install --locked cargo-cranky
+      - name: blackbox-log-wasm
+        run: cargo cranky -p blackbox-log-wasm --target wasm32-unknown-unknown --all-targets
 
   test:
     strategy:
