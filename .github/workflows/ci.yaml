@@ -16,8 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          target: thumbv7em-none-eabihf
       - name: Install cargo-cranky
         run: cargo install --locked cargo-cranky
       - name: blackbox-log, none
