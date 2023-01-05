@@ -323,7 +323,7 @@ impl<'data> GpsFrameDefBuilder<'data> {
         };
 
         let mut fields = fields.collect::<Result<Vec<_>, _>>()?;
-        for (i, j) in (1..fields.len()).into_iter().map(|i| (i - 1, i)) {
+        for (i, j) in (1..fields.len()).map(|i| (i - 1, i)) {
             if fields[i].predictor == Predictor::HomeLat
                 && fields[j].predictor == Predictor::HomeLat
             {
