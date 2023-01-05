@@ -17,9 +17,9 @@ fn data(c: &mut Criterion) {
 
     c.bench_function("data", |b| {
         b.iter_batched(
-            || (reader.clone(), headers.clone()),
-            |(mut data, headers)| {
-                let mut parser = DataParser::new(&mut data, &headers);
+            || reader.clone(),
+            |data| {
+                let mut parser = DataParser::new(data, &headers);
                 while let Some(event) = parser.next() {
                     match event {
                         ParseEvent::Event(event) => black_box(event),

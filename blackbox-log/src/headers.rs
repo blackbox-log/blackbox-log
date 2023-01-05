@@ -6,11 +6,11 @@ use core::{fmt, str};
 
 use hashbrown::HashMap;
 
-use crate::frame::{
-    is_frame_def_header, parse_frame_def_header, DataFrameKind, GpsFrameDef, GpsFrameDefBuilder,
-    GpsHomeFrameDef, GpsHomeFrameDefBuilder, MainFrameDef, MainFrameDefBuilder, SlowFrameDef,
-    SlowFrameDefBuilder,
-};
+use crate::frame::gps::{GpsFrameDef, GpsFrameDefBuilder};
+use crate::frame::gps_home::{GpsHomeFrameDef, GpsHomeFrameDefBuilder};
+use crate::frame::main::{MainFrameDef, MainFrameDefBuilder};
+use crate::frame::slow::{SlowFrameDef, SlowFrameDefBuilder};
+use crate::frame::{is_frame_def_header, parse_frame_def_header, DataFrameKind};
 use crate::parser::{InternalError, InternalResult};
 use crate::predictor::Predictor;
 use crate::{Reader, Unit};
@@ -69,13 +69,13 @@ pub struct Headers<'data> {
     pub version: LogVersion,
 
     #[cfg_attr(feature = "serde", serde(skip))]
-    pub(crate) main_frames: MainFrameDef<'data>,
+    pub main_frame_def: MainFrameDef<'data>,
     #[cfg_attr(feature = "serde", serde(skip))]
-    pub(crate) slow_frames: SlowFrameDef<'data>,
+    pub slow_frame_def: SlowFrameDef<'data>,
     #[cfg_attr(feature = "serde", serde(skip))]
-    pub(crate) gps_frames: Option<GpsFrameDef<'data>>,
+    pub gps_frame_def: Option<GpsFrameDef<'data>>,
     #[cfg_attr(feature = "serde", serde(skip))]
-    pub(crate) gps_home_frames: Option<GpsHomeFrameDef<'data>>,
+    pub(crate) gps_home_frame_def: Option<GpsHomeFrameDef<'data>>,
 
     /// The full `Firmware revision` header.
     pub firmware_revision: &'data str,
@@ -99,37 +99,6 @@ pub struct Headers<'data> {
 }
 
 impl<'data> Headers<'data> {
-    /// Returns the parsed definition for main frames.
-    pub fn main_def(&self) -> &MainFrameDef<'data> {
-        &self.main_frames
-    }
-
-    /// Returns a mutable reference to the parsed definition for main frames.
-    pub fn main_def_mut<'a>(&'a mut self) -> &'a mut MainFrameDef<'data> {
-        &mut self.main_frames
-    }
-
-    /// Returns the parsed definition for slow frames.
-    pub fn slow_def(&self) -> &SlowFrameDef<'data> {
-        &self.slow_frames
-    }
-
-    /// Returns a mutable reference to the parsed definition for slow frames.
-    pub fn slow_def_mut<'a>(&'a mut self) -> &'a mut SlowFrameDef<'data> {
-        &mut self.slow_frames
-    }
-
-    /// Returns the parsed definition for GPS frames, if present.
-    pub fn gps_def(&self) -> Option<&GpsFrameDef<'data>> {
-        self.gps_frames.as_ref()
-    }
-
-    /// Returns a mutable reference to the parsed definition for GPS frames, if
-    /// present.
-    pub fn gps_def_mut<'a>(&'a mut self) -> Option<&'a mut GpsFrameDef<'data>> {
-        self.gps_frames.as_mut()
-    }
-
     /// Parses only the headers of a blackbox log.
     ///
     /// `data` will be advanced to the start of the data section of the log,
@@ -174,10 +143,10 @@ impl<'data> Headers<'data> {
         let has_accel = self.acceleration_1g.is_some();
         let has_min_throttle = self.min_throttle.is_some();
         // TODO: also check it is in a main frame
-        let has_motor_0 = self.main_frames.has_motor_0();
+        let has_motor_0 = self.main_frame_def.has_motor_0();
         let has_vbat_ref = self.vbat_reference.is_some();
         let has_min_motor = self.motor_output_range.is_some();
-        let has_gps_home = self.gps_home_frames.is_some();
+        let has_gps_home = self.gps_home_frame_def.is_some();
 
         let predictor = |field, predictor| {
             let ok = match predictor {
@@ -218,46 +187,18 @@ impl<'data> Headers<'data> {
             }
         };
 
-        self.main_frames.validate(predictor, unit)?;
-        self.slow_frames.validate(predictor, unit)?;
+        self.main_frame_def.validate(predictor, unit)?;
+        self.slow_frame_def.validate(predictor, unit)?;
 
-        if let Some(ref def) = self.gps_frames {
+        if let Some(ref def) = self.gps_frame_def {
             def.validate(predictor, unit)?;
         }
 
-        if let Some(ref def) = self.gps_home_frames {
+        if let Some(ref def) = self.gps_home_frame_def {
             def.validate(predictor, unit)?;
         }
 
         Ok(())
-    }
-}
-
-#[cfg(fuzzing)]
-impl Default for Headers<'static> {
-    fn default() -> Self {
-        Self {
-            version: LogVersion::V2,
-
-            main_frames: MainFrameDef::default(),
-            slow_frames: SlowFrameDef::default(),
-            gps_frames: None,
-            gps_home_frames: None,
-
-            firmware_revision: "",
-            firmware_kind: FirmwareKind::Betaflight,
-            board_info: None,
-            craft_name: None,
-
-            vbat_reference: None,
-            acceleration_1g: None,
-            gyro_scale: None,
-
-            min_throttle: None,
-            motor_output_range: None,
-
-            unknown: HashMap::new(),
-        }
     }
 }
 
@@ -442,10 +383,10 @@ impl<'data> State<'data> {
         // TODO: log where each error comes from
         let headers = Headers {
             version: self.version.ok_or(ParseError::MissingHeader)?,
-            main_frames: self.main_frames.parse()?,
-            slow_frames: self.slow_frames.parse()?,
-            gps_frames: self.gps_frames.parse()?,
-            gps_home_frames: self.gps_home_frames.parse()?,
+            main_frame_def: self.main_frames.parse()?,
+            slow_frame_def: self.slow_frames.parse()?,
+            gps_frame_def: self.gps_frames.parse()?,
+            gps_home_frame_def: self.gps_home_frames.parse()?,
 
             firmware_revision,
             firmware_kind,

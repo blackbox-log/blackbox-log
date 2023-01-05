@@ -4,6 +4,7 @@ use std::io::Read;
 
 use blackbox_log::data::{ParseEvent, Stats};
 use blackbox_log::event::Event;
+use blackbox_log::frame::GpsFrameDef;
 use blackbox_log::units::{si, Flag, FlagSet};
 use blackbox_log::{DataParser, Headers, Unit, Value};
 use serde::ser::{SerializeStruct, Serializer};
@@ -64,12 +65,12 @@ impl<'data> LogSnapshot<'data> {
         let headers = headers.clone();
 
         let mut events = Vec::new();
-        let mut main = headers.main_def().iter().collect::<Fields>();
-        let mut slow = headers.slow_def().iter().collect::<Fields>();
+        let mut main = headers.main_frame_def.iter().collect::<Fields>();
+        let mut slow = headers.slow_frame_def.iter().collect::<Fields>();
         let mut gps = headers
-            .gps_def()
+            .gps_frame_def
             .iter()
-            .flat_map(|def| def.iter())
+            .flat_map(GpsFrameDef::iter)
             .collect::<Fields>();
 
         while let Some(frame) = data.next() {

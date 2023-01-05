@@ -3,10 +3,10 @@
 #[macro_use]
 mod trace_field;
 
-pub mod gps;
-mod gps_home;
-pub mod main;
-pub mod slow;
+pub(crate) mod gps;
+pub(crate) mod gps_home;
+pub(crate) mod main;
+pub(crate) mod slow;
 
 use alloc::borrow::ToOwned;
 use alloc::format;
@@ -14,13 +14,10 @@ use alloc::vec::Vec;
 use core::fmt;
 use core::iter::Peekable;
 
-pub(crate) use self::gps::*;
-pub use self::gps::{GpsFrame, GpsUnit, GpsValue};
-pub(crate) use self::gps_home::*;
-pub(crate) use self::main::*;
-pub use self::main::{MainFrame, MainUnit, MainValue};
-pub(crate) use self::slow::*;
-pub use self::slow::{SlowFrame, SlowUnit, SlowValue};
+pub use self::gps::{GpsFrame, GpsFrameDef, GpsUnit, GpsValue};
+pub(crate) use self::gps_home::{GpsHomeFrame, GpsPosition};
+pub use self::main::{MainFrame, MainFrameDef, MainUnit, MainValue};
+pub use self::slow::{SlowFrame, SlowFrameDef, SlowUnit, SlowValue};
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;

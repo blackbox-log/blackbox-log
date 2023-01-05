@@ -77,7 +77,7 @@ impl Predictor {
                     tracing::debug!("found {self:?} without current values");
                     0
                 },
-                |current| ctx.headers.main_frames.get_motor_0_from(current),
+                |current| ctx.headers.main_frame_def.get_motor_0_from(current),
             ),
             Self::Increment => {
                 if signed {

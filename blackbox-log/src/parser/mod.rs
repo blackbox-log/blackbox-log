@@ -1,7 +1,4 @@
-#[cfg(not(any(fuzzing, bench)))]
 pub(crate) mod decode;
-#[cfg(any(fuzzing, bench))]
-pub mod decode;
 
 pub(crate) use self::decode::Encoding;
 

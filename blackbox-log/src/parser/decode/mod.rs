@@ -104,41 +104,6 @@ const fn zig_zag_decode(value: u32) -> i32 {
     as_i32(value >> 1) ^ -(as_i32(value) & 1)
 }
 
-#[cfg(any(fuzzing, bench))]
-pub mod no_error {
-    use crate::Reader;
-
-    #[inline(always)]
-    pub fn negative_14_bit(data: &mut Reader) -> Option<i32> {
-        super::negative_14_bit(data).ok()
-    }
-
-    #[inline(always)]
-    pub fn tagged_16(data: &mut Reader) -> Option<[i16; 4]> {
-        super::tagged_16(data).ok()
-    }
-
-    #[inline(always)]
-    pub fn tagged_32(data: &mut Reader) -> Option<[i32; 3]> {
-        super::tagged_32(data).ok()
-    }
-
-    #[inline(always)]
-    pub fn tagged_variable(data: &mut Reader, extra: usize) -> Option<[i32; 8]> {
-        super::tagged_variable(data, extra).ok()
-    }
-
-    #[inline(always)]
-    pub fn variable(data: &mut Reader) -> Option<u32> {
-        super::variable(data).ok()
-    }
-
-    #[inline(always)]
-    pub fn variable_signed(data: &mut Reader) -> Option<i32> {
-        super::variable_signed(data).ok()
-    }
-}
-
 #[cfg(test)]
 mod test {
     #[test]

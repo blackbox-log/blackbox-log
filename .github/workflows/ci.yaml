@@ -16,22 +16,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - name: Fetch submodule upstream
-        run: git submodule update --init --depth 1 blackbox-sys/upstream
       - name: Fetch no_std target
         run: rustup target add thumbv7em-none-eabihf
-      - name: Build xtasks
-        run: cargo build --package xtask
-      - name: Clippy (workspace)
-        run: cargo ci check --workspace
-      - name: Clippy (none)
-        run: cargo ci check -- --package blackbox-log --target thumbv7em-none-eabihf --no-default-features
-      - name: Clippy (std only)
-        run: cargo ci check -- --package blackbox-log --no-default-features --features std
-      - name: Clippy (serde only)
-        run: cargo ci check -- --package blackbox-log --target thumbv7em-none-eabihf --no-default-features --features serde
-      - name: Clippy (all)
-        run: cargo ci check -- --package blackbox-log --all-features
+      - name: Install cargo-cranky
+        run: cargo install --locked cargo-cranky
+      - name: blackbox-log, none
+        run: cargo cranky -p blackbox-log --target thumbv7em-none-eabihf --no-default-features
+      - name: blackbox-log, std
+        run: cargo cranky -p blackbox-log --no-default-features -F std
+      - name: blackbox-log, serde
+        run: cargo cranky -p blackbox-log --target thumbv7em-none-eabihf --no-default-features -F serde
+      - name: blackbox-log, all
+        run: cargo cranky -p blackbox-log --all-features
+      - name: Workspace
+        run: cargo cranky --workspace --all-targets --all-features
 
   test:
     strategy:
@@ -72,9 +70,6 @@ jobs:
         uses: taiki-e/install-action@cargo-llvm-cov
         if: ${{ matrix.coverage }}
 
-      - name: Build xtasks
-        run: cargo build --package xtask
-
       - name: Replace symlinks with copies
         if: ${{ runner.os == 'windows' }}
         run: |
@@ -87,13 +82,13 @@ jobs:
           rm -r gimbal-ghost~
 
       - name: Run tests
-        run: cargo ci test
-      
+        run: cargo nextest run --workspace --all-features --exclude blackbox-fuzz --profile=ci
+
       - name: Run doctests
-        run: cargo test --doc
+        run: cargo test --doc --workspace --exclude blackbox-fuzz
 
       - name: Generate coverage
-        run: cargo ci test --coverage
+        run: cargo llvm-cov -p blackbox-log --all-features --lcov --output-path=coverage.lcov nextest --profile=ci --run-ignored=all
         if: ${{ matrix.coverage }}
 
       - name: Upload coverage

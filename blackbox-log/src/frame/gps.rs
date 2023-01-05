@@ -29,7 +29,7 @@ impl super::Frame for GpsFrame<'_, '_> {
         let value = if index == 0 {
             GpsValue::FrameTime(Time::from_raw(self.raw.time, self.headers))
         } else {
-            let def = self.headers.gps_frames.as_ref().unwrap();
+            let def = self.headers.gps_frame_def.as_ref().unwrap();
             let index = def.filter.get(index - 1)?;
             let def = &def.fields[index];
             let raw = self.raw.values[index];

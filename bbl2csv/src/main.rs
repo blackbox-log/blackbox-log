@@ -79,12 +79,12 @@ fn main() {
                 })?;
 
                 if let Some(filter) = &filter {
-                    headers.main_def_mut().apply_filter(filter);
-                    headers.slow_def_mut().apply_filter(filter);
+                    headers.main_frame_def.apply_filter(filter);
+                    headers.slow_frame_def.apply_filter(filter);
                 }
 
                 if let Some(gps_filter) = &gps_filter {
-                    if let Some(def) = headers.gps_def_mut() {
+                    if let Some(def) = &mut headers.gps_frame_def {
                         def.apply_filter(gps_filter);
                     }
                 }
@@ -93,9 +93,9 @@ fn main() {
             };
 
             let field_names = headers
-                .main_def()
+                .main_frame_def
                 .iter_names()
-                .chain(headers.slow_def().iter_names());
+                .chain(headers.slow_frame_def.iter_names());
 
             let mut out = get_output(filename, human_i, "csv")?;
             if let Err(error) = write_csv_line(&mut out, field_names) {
@@ -103,7 +103,7 @@ fn main() {
                 return Err(exitcode::IOERR);
             }
 
-            let mut gps_out = match headers.gps_def() {
+            let mut gps_out = match &headers.gps_frame_def {
                 Some(def) if cli.gps => {
                     let mut out = get_output(filename, human_i, "gps.csv")?;
 
@@ -118,7 +118,7 @@ fn main() {
             };
 
             let mut parser = DataParser::new(log, &headers);
-            let mut slow: String = ",".repeat(headers.slow_def().len().saturating_sub(1));
+            let mut slow: String = ",".repeat(headers.slow_frame_def.len().saturating_sub(1));
             while let Some(frame) = parser.next() {
                 match frame {
                     ParseEvent::Event(_) => {}
@@ -233,7 +233,7 @@ fn format_value(value: Value) -> String {
         Value::State(s) => s.to_string(),
         Value::FailsafePhase(f) => f.to_string(),
         Value::Boolean(b) => b.to_string(),
-        Value::GpsCoordinate(c) => format!("{:.7}", c),
+        Value::GpsCoordinate(c) => format!("{c:.7}"),
         Value::Altitude(a) => format!("{:.0}", a.get::<si::length::meter>()),
         Value::Velocity(v) => format_float(v.get::<si::velocity::meter_per_second>()),
         Value::GpsHeading(h) => format!("{h:.1}"),
