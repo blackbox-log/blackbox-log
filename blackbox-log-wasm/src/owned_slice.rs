@@ -5,6 +5,7 @@ use std::slice;
 pub(crate) enum OwnedSliceAllocError {
     Layout(LayoutError),
     Alloc,
+    ZeroSized,
 }
 
 impl From<LayoutError> for OwnedSliceAllocError {
@@ -19,8 +20,14 @@ pub(crate) struct OwnedSlice {
 }
 
 impl OwnedSlice {
-    pub(crate) unsafe fn alloc(len: usize) -> Result<*mut u8, OwnedSliceAllocError> {
+    pub(crate) fn alloc(len: usize) -> Result<*mut u8, OwnedSliceAllocError> {
         let layout = get_layout(len)?;
+
+        if layout.size() == 0 {
+            return Err(OwnedSliceAllocError::ZeroSized);
+        }
+
+        // SAFETY: above check ensures that the allocation is non-zero-sized
         let ptr = unsafe { alloc(layout) };
 
         if ptr.is_null() {
