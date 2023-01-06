@@ -28,6 +28,6 @@ trait WasmFfi {
 }
 
 #[no_mangle]
-pub unsafe extern "wasm" fn data_alloc(len: usize) -> *mut u8 {
+unsafe extern "wasm" fn data_alloc(len: usize) -> *mut u8 {
     OwnedSlice::alloc(len).unwrap_or(ptr::null_mut())
 }

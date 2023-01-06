@@ -10,6 +10,12 @@ impl<T> Shared<T> {
         Self(Rc::pin(borrowee))
     }
 
+    /// Gets a `'static` reference to the inner data.
+    ///
+    /// # Safety
+    ///
+    /// The caller needs to ensure that the resulting reference cannot outlive
+    /// the `Shared` it came from.
     pub(crate) unsafe fn deref_static<'a>(&'a self) -> &'static T {
         std::mem::transmute::<&'a T, &'static T>(self.deref())
     }
