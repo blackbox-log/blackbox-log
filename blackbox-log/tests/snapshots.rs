@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::io::Read;
 
-use blackbox_log::data::{ParseEvent, Stats};
+use blackbox_log::data::{ParserEvent, Stats};
 use blackbox_log::event::Event;
 use blackbox_log::frame::GpsFrameDef;
 use blackbox_log::units::{si, Flag, FlagSet};
@@ -75,10 +75,10 @@ impl<'data> LogSnapshot<'data> {
 
         while let Some(frame) = data.next() {
             match frame {
-                ParseEvent::Event(event) => events.push(event),
-                ParseEvent::Main(frame) => main.update(frame),
-                ParseEvent::Slow(frame) => slow.update(frame),
-                ParseEvent::Gps(frame) => gps.update(frame),
+                ParserEvent::Event(event) => events.push(event),
+                ParserEvent::Main(frame) => main.update(frame),
+                ParserEvent::Slow(frame) => slow.update(frame),
+                ParserEvent::Gps(frame) => gps.update(frame),
             }
         }
 

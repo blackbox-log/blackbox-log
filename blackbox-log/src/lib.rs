@@ -30,17 +30,17 @@
 //!     let mut parser = DataParser::new(reader, &headers);
 //!     while let Some(event) = parser.next() {
 //!         match event {
-//!             ParseEvent::Main(main) => {
+//!             ParserEvent::Main(main) => {
 //!                 for (value, (name, _)) in main.iter().zip(headers.main_frame_def.iter()) {
 //!                     println!("{name}: {value:?}");
 //!                 }
 //!             }
-//!             ParseEvent::Slow(slow) => {
+//!             ParserEvent::Slow(slow) => {
 //!                 for (value, (name, _)) in slow.iter().zip(headers.slow_frame_def.iter()) {
 //!                     println!("{name}: {value:?}");
 //!                 }
 //!             }
-//!             ParseEvent::Event(_) | ParseEvent::Gps(_) => {}
+//!             ParserEvent::Event(_) | ParserEvent::Gps(_) => {}
 //!         }
 //!     }
 //! }
@@ -61,7 +61,7 @@
 //!         let mut parser = DataParser::new(reader, &headers);
 //!
 //!         while let Some(event) = parser.next() {
-//!             if let ParseEvent::Gps(gps) = event {
+//!             if let ParserEvent::Gps(gps) = event {
 //!                 for (value, name) in gps.iter().zip(gps_def.iter_names()) {
 //!                     println!("{name}: {value:?}");
 //!                 }
@@ -100,7 +100,7 @@ pub mod prelude;
 mod reader;
 pub mod units;
 
-pub use self::data::{DataParser, ParseEvent};
+pub use self::data::{DataParser, ParserEvent};
 pub use self::file::File;
 pub use self::filter::FieldFilter;
 pub use self::frame::{Unit, Value};

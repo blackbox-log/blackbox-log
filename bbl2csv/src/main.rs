@@ -5,7 +5,7 @@ use std::io::{self, BufWriter, Write};
 use std::path::Path;
 use std::{iter, process};
 
-use blackbox_log::data::ParseEvent;
+use blackbox_log::data::ParserEvent;
 use blackbox_log::frame::{Frame as _, FrameDef as _, GpsFrame, MainFrame, SlowFrame};
 use blackbox_log::units::{si, Time};
 use blackbox_log::{DataParser, FieldFilter, Headers, Value};
@@ -121,18 +121,18 @@ fn main() {
             let mut slow: String = ",".repeat(headers.slow_frame_def.len().saturating_sub(1));
             while let Some(frame) = parser.next() {
                 match frame {
-                    ParseEvent::Event(_) => {}
-                    ParseEvent::Slow(frame) => {
+                    ParserEvent::Event(_) => {}
+                    ParserEvent::Slow(frame) => {
                         slow.clear();
                         format_slow_frame(&mut slow, frame);
                     }
-                    ParseEvent::Main(main) => {
+                    ParserEvent::Main(main) => {
                         if let Err(error) = write_main_frame(&mut out, main, &slow) {
                             tracing::error!(%error, "failed to write csv");
                             return Err(exitcode::IOERR);
                         }
                     }
-                    ParseEvent::Gps(gps) => {
+                    ParserEvent::Gps(gps) => {
                         if let Some(ref mut out) = gps_out {
                             if let Err(error) = write_gps_frame(out, gps) {
                                 tracing::error!(%error, "failed to write gps csv");

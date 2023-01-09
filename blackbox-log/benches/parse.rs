@@ -1,4 +1,4 @@
-use blackbox_log::data::ParseEvent;
+use blackbox_log::data::ParserEvent;
 use blackbox_log::frame::Frame as _;
 use blackbox_log::{DataParser, Headers, Reader};
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
@@ -22,10 +22,10 @@ fn data(c: &mut Criterion) {
                 let mut parser = DataParser::new(data, &headers);
                 while let Some(event) = parser.next() {
                     match event {
-                        ParseEvent::Event(event) => black_box(event),
-                        ParseEvent::Main(main) => main.iter().for_each(black_box),
-                        ParseEvent::Slow(slow) => slow.iter().for_each(black_box),
-                        ParseEvent::Gps(gps) => gps.iter().for_each(black_box),
+                        ParserEvent::Event(event) => black_box(event),
+                        ParserEvent::Main(main) => main.iter().for_each(black_box),
+                        ParserEvent::Slow(slow) => slow.iter().for_each(black_box),
+                        ParserEvent::Gps(gps) => gps.iter().for_each(black_box),
                     }
                 }
             },
