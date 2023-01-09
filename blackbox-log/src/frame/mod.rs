@@ -12,7 +12,7 @@ use alloc::borrow::ToOwned;
 use alloc::format;
 use alloc::vec::Vec;
 use core::fmt;
-use core::iter::Peekable;
+use core::iter::{FusedIterator, Peekable};
 
 pub use self::gps::{GpsFrame, GpsFrameDef, GpsUnit, GpsValue};
 pub(crate) use self::gps_home::{GpsHomeFrame, GpsPosition};
@@ -28,15 +28,23 @@ mod seal {
 }
 
 /// A parsed data frame definition.
-#[allow(clippy::len_without_is_empty)]
+///
+/// **Note:** All methods exclude any required metadata fields. See each frame's
+/// definition struct documentation for a list.
 pub trait FrameDef<'data>: seal::Sealed {
     type Unit: Into<Unit>;
 
     /// Returns the number of fields in the frame.
     fn len(&self) -> usize;
 
-    /// Get the name and unit of a field by its index.
-    fn get<'a>(&'a self, index: usize) -> Option<(&'data str, Self::Unit)>
+    /// Returns `true` if the frame is empty, or none of its fields satisfy
+    /// the configured filter.
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /// Returns a field definition by its index.
+    fn get<'a>(&'a self, index: usize) -> Option<FieldDef<'data, Self::Unit>>
     where
         'data: 'a;
 
@@ -48,14 +56,55 @@ pub trait FrameDef<'data>: seal::Sealed {
     fn apply_filter(&mut self, filter: &FieldFilter);
 }
 
+/// Metadata describing one field.
+#[derive(Debug, Clone, PartialEq, Hash)]
+pub struct FieldDef<'data, U: Into<Unit>> {
+    pub name: &'data str,
+    pub unit: U,
+    pub signed: bool,
+}
+
 /// A parsed data frame.
+///
+/// **Note:** All methods exclude any required metadata fields. Those can be
+/// accessed by the inherent methods on each frame struct.
 pub trait Frame: seal::Sealed {
     type Value: Into<Value>;
 
-    /// Get the value of a field by its index.
+    /// Returns the number of fields in the frame.
+    fn len(&self) -> usize;
+
+    /// Returns `true` if the frame is empty, or none of its fields satisfy
+    /// the configured filter.
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /// Returns the raw bits of the parsed value of a field by its index.
+    ///
+    /// This ignores the signedness of the field. That can be retrieved from the
+    /// field definition returned by [`FrameDef::get`].
+    ///
+    /// **Note:** Unlike the `--raw` flag for `blackbox_decode`, this does apply
+    /// predictors. This method only skips converting the value into its proper
+    /// units.
+    fn get_raw(&self, index: usize) -> Option<u32>;
+
+    // Iterates over all raw field values in order. See [`Frame::get_raw`].
+    fn iter_raw(&self) -> RawFrameIter<'_, Self>
+    where
+        Self: Sized,
+    {
+        RawFrameIter {
+            frame: self,
+            next: 0,
+        }
+    }
+
+    /// Gets the value of a field by its index.
     fn get(&self, index: usize) -> Option<Self::Value>;
 
-    /// Iterate over all field values in order.
+    /// Iterates over all field values in order.
     fn iter(&self) -> FrameIter<'_, Self>
     where
         Self: Sized,
@@ -67,7 +116,28 @@ pub trait Frame: seal::Sealed {
     }
 }
 
-/// An iterator over the values of the fields of a parsed frame.
+/// An iterator over the raw values of the fields of a parsed frame. See
+/// [`Frame::iter_raw`].
+#[derive(Debug)]
+pub struct RawFrameIter<'f, F> {
+    frame: &'f F,
+    next: usize,
+}
+
+impl<F: Frame> Iterator for RawFrameIter<'_, F> {
+    type Item = u32;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let value = self.frame.get_raw(self.next)?;
+        self.next += 1;
+        Some(value)
+    }
+}
+
+impl<F: Frame> FusedIterator for RawFrameIter<'_, F> {}
+
+/// An iterator over the values of the fields of a parsed frame. See
+/// [`Frame::iter`].
 #[derive(Debug)]
 pub struct FrameIter<'f, F> {
     frame: &'f F,
@@ -83,6 +153,8 @@ impl<F: Frame> Iterator for FrameIter<'_, F> {
         Some(value)
     }
 }
+
+impl<F: Frame> FusedIterator for FrameIter<'_, F> {}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -186,7 +258,7 @@ impl fmt::Display for DataFrameKind {
     }
 }
 
-trait FieldDef<'data> {
+trait FieldDefDetails<'data> {
     fn name(&self) -> &'data str;
     fn predictor(&self) -> Predictor;
     fn encoding(&self) -> Encoding;
@@ -429,7 +501,7 @@ fn read_field_values<T>(
     Ok(values)
 }
 
-fn parse_impl<'data, F: FieldDef<'data>>(
+fn parse_impl<'data, F: FieldDefDetails<'data>>(
     mut ctx: PredictorContext<'_, 'data>,
     raw: &[u32],
     fields: impl IntoIterator<Item = F>,

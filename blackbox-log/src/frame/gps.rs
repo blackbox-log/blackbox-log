@@ -4,7 +4,10 @@ use core::iter;
 
 use tracing::instrument;
 
-use super::{read_field_values, DataFrameKind, DataFrameProperty, FieldDef, GpsHomeFrame, Unit};
+use super::{
+    read_field_values, DataFrameKind, DataFrameProperty, FieldDef, FieldDefDetails, FrameDef,
+    GpsHomeFrame, Unit,
+};
 use crate::filter::{AppliedFilter, FieldFilter};
 use crate::parser::{decode, to_base_field, Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
@@ -25,42 +28,49 @@ impl super::seal::Sealed for GpsFrame<'_, '_> {}
 impl super::Frame for GpsFrame<'_, '_> {
     type Value = GpsValue;
 
+    fn len(&self) -> usize {
+        self.headers.gps_frame_def.as_ref().map_or(0, FrameDef::len)
+    }
+
+    fn get_raw(&self, index: usize) -> Option<u32> {
+        let def = self.headers.gps_frame_def.as_ref().unwrap();
+        let index = def.filter.get(index)?;
+        Some(self.raw.values[index])
+    }
+
     fn get(&self, index: usize) -> Option<Self::Value> {
-        let value = if index == 0 {
-            GpsValue::FrameTime(Time::from_raw(self.raw.time, self.headers))
-        } else {
-            let def = self.headers.gps_frame_def.as_ref().unwrap();
-            let index = def.filter.get(index - 1)?;
-            let def = &def.fields[index];
-            let raw = self.raw.values[index];
+        let frame_def = self.headers.gps_frame_def.as_ref().unwrap();
+        let index = frame_def.filter.get(index)?;
 
-            match def.unit {
-                GpsUnit::FrameTime => unreachable!(),
-                GpsUnit::Coordinate => {
-                    assert!(def.signed);
-                    let value = as_i32(raw);
+        let def = &frame_def.fields[index];
+        let raw = self.raw.values[index];
 
-                    GpsValue::Coordinate(f64::from(value) / 10000000.)
-                }
-                GpsUnit::Altitude => {
-                    let altitude = if def.signed {
-                        as_i32(raw).into()
-                    } else {
-                        raw.into()
-                    };
+        let value = match def.unit {
+            GpsUnit::FrameTime => unreachable!(),
+            GpsUnit::Coordinate => {
+                assert!(def.signed);
+                let value = as_i32(raw);
 
-                    GpsValue::Altitude(Length::new::<meter>(altitude))
-                }
-                GpsUnit::Velocity => {
-                    assert!(!def.signed);
-                    GpsValue::Velocity(Velocity::from_raw(raw, self.headers))
-                }
-                GpsUnit::Heading => {
-                    assert!(!def.signed);
-                    GpsValue::Heading(f64::from(raw) / 10.)
-                }
-                GpsUnit::Unitless => GpsValue::new_unitless(raw, def.signed),
+                GpsValue::Coordinate(f64::from(value) / 10000000.)
             }
+            GpsUnit::Altitude => {
+                let altitude = if def.signed {
+                    as_i32(raw).into()
+                } else {
+                    raw.into()
+                };
+
+                GpsValue::Altitude(Length::new::<meter>(altitude))
+            }
+            GpsUnit::Velocity => {
+                assert!(!def.signed);
+                GpsValue::Velocity(Velocity::from_raw(raw, self.headers))
+            }
+            GpsUnit::Heading => {
+                assert!(!def.signed);
+                GpsValue::Heading(f64::from(raw) / 10.)
+            }
+            GpsUnit::Unitless => GpsValue::new_unitless(raw, def.signed),
         };
 
         Some(value)
@@ -70,6 +80,19 @@ impl super::Frame for GpsFrame<'_, '_> {
 impl<'data, 'headers> GpsFrame<'data, 'headers> {
     pub(crate) fn new(headers: &'headers Headers<'data>, raw: RawGpsFrame) -> Self {
         Self { headers, raw }
+    }
+
+    /// Returns the parsed time since power on.
+    pub fn time(&self) -> Time {
+        Time::from_raw(self.raw.time, self.headers)
+    }
+
+    /// Returns the raw microsecond counter since power on.
+    ///
+    /// **Note:** This does not currently handle overflow of the transmitted
+    /// 32bit counter.
+    pub fn time_raw(&self) -> u64 {
+        self.raw.time
     }
 }
 
@@ -120,23 +143,22 @@ pub struct GpsFrameDef<'data> {
 
 impl super::seal::Sealed for GpsFrameDef<'_> {}
 
-impl<'data> super::FrameDef<'data> for GpsFrameDef<'data> {
+impl<'data> FrameDef<'data> for GpsFrameDef<'data> {
     type Unit = GpsUnit;
 
     fn len(&self) -> usize {
-        1 + self.filter.len()
+        self.filter.len()
     }
 
-    fn get<'a>(&'a self, index: usize) -> Option<(&'data str, GpsUnit)>
+    fn get<'a>(&'a self, index: usize) -> Option<FieldDef<'data, Self::Unit>>
     where
         'data: 'a,
     {
-        let field = match index {
-            0 => Some(&self.time),
-            _ => self.fields.get(self.filter.get(index - 1)?),
-        };
-
-        field.map(|f| (f.name, f.unit))
+        self.fields.get(self.filter.get(index)?).map(
+            |&GpsFieldDef {
+                 name, unit, signed, ..
+             }| FieldDef { name, unit, signed },
+        )
     }
 
     fn clear_filter(&mut self) {
@@ -244,7 +266,7 @@ pub(crate) struct GpsFieldDef<'data> {
     pub(crate) signed: bool,
 }
 
-impl<'data> FieldDef<'data> for &GpsFieldDef<'data> {
+impl<'data> FieldDefDetails<'data> for &GpsFieldDef<'data> {
     fn name(&self) -> &'data str {
         self.name
     }

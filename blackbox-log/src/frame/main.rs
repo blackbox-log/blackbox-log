@@ -4,7 +4,10 @@ use core::iter;
 
 use tracing::instrument;
 
-use super::{read_field_values, DataFrameKind, DataFrameProperty, FieldDef, FrameKind, Unit};
+use super::{
+    read_field_values, DataFrameKind, DataFrameProperty, FieldDef, FieldDefDetails, FrameDef,
+    FrameKind, Unit,
+};
 use crate::data::MainFrameHistory;
 use crate::filter::{AppliedFilter, FieldFilter};
 use crate::parser::{decode, to_base_field, Encoding, InternalResult};
@@ -26,38 +29,44 @@ impl super::seal::Sealed for MainFrame<'_, '_, '_> {}
 impl super::Frame for MainFrame<'_, '_, '_> {
     type Value = MainValue;
 
+    fn len(&self) -> usize {
+        self.headers.main_frame_def.len()
+    }
+
+    fn get_raw(&self, index: usize) -> Option<u32> {
+        let index = self.headers.main_frame_def.filter.get(index)?;
+        Some(self.raw.values[index])
+    }
+
     fn get(&self, index: usize) -> Option<MainValue> {
-        let value = match index {
-            0 => MainValue::Unsigned(self.raw.iteration),
-            1 => MainValue::FrameTime(Time::from_raw(self.raw.time, self.headers)),
-            _ => {
-                let index = self.headers.main_frame_def.filter.get(index - 2)?;
-                let def = &self.headers.main_frame_def.fields[index];
-                let raw = self.raw.values[index];
-                match def.unit {
-                    MainUnit::Amperage => {
-                        debug_assert!(def.signed);
-                        let raw = as_i32(raw);
-                        MainValue::Amperage(ElectricCurrent::from_raw(raw, self.headers))
-                    }
-                    MainUnit::Voltage => {
-                        debug_assert!(!def.signed);
-                        MainValue::Voltage(ElectricPotential::from_raw(raw, self.headers))
-                    }
-                    MainUnit::Acceleration => {
-                        debug_assert!(def.signed);
-                        let raw = as_i32(raw);
-                        MainValue::Acceleration(Acceleration::from_raw(raw, self.headers))
-                    }
-                    MainUnit::Rotation => {
-                        debug_assert!(def.signed);
-                        let raw = as_i32(raw);
-                        MainValue::Rotation(AngularVelocity::from_raw(raw, self.headers))
-                    }
-                    MainUnit::Unitless => MainValue::new_unitless(raw, def.signed),
-                    MainUnit::FrameTime => unreachable!(),
-                }
+        let frame_def = &self.headers.main_frame_def;
+        let index = frame_def.filter.get(index)?;
+
+        let def = &frame_def.fields[index];
+        let raw = self.raw.values[index];
+
+        let value = match def.unit {
+            MainUnit::Amperage => {
+                debug_assert!(def.signed);
+                let raw = as_i32(raw);
+                MainValue::Amperage(ElectricCurrent::from_raw(raw, self.headers))
             }
+            MainUnit::Voltage => {
+                debug_assert!(!def.signed);
+                MainValue::Voltage(ElectricPotential::from_raw(raw, self.headers))
+            }
+            MainUnit::Acceleration => {
+                debug_assert!(def.signed);
+                let raw = as_i32(raw);
+                MainValue::Acceleration(Acceleration::from_raw(raw, self.headers))
+            }
+            MainUnit::Rotation => {
+                debug_assert!(def.signed);
+                let raw = as_i32(raw);
+                MainValue::Rotation(AngularVelocity::from_raw(raw, self.headers))
+            }
+            MainUnit::Unitless => MainValue::new_unitless(raw, def.signed),
+            MainUnit::FrameTime => unreachable!(),
         };
 
         Some(value)
@@ -67,6 +76,25 @@ impl super::Frame for MainFrame<'_, '_, '_> {
 impl<'data, 'headers, 'parser> MainFrame<'data, 'headers, 'parser> {
     pub(crate) fn new(headers: &'headers Headers<'data>, raw: &'parser RawMainFrame) -> Self {
         Self { headers, raw }
+    }
+
+    /// Returns the `loopIteration` field. This is a 32bit counter incremented
+    /// in each flight controller loop.
+    pub fn iteration(&self) -> u32 {
+        self.raw.iteration
+    }
+
+    /// Returns the parsed time since power on.
+    pub fn time(&self) -> Time {
+        Time::from_raw(self.raw.time, self.headers)
+    }
+
+    /// Returns the raw microsecond counter since power on.
+    ///
+    /// **Note:** This does not currently handle overflow of the transmitted
+    /// 32bit counter.
+    pub fn time_raw(&self) -> u64 {
+        self.raw.time
     }
 }
 
@@ -142,24 +170,22 @@ pub struct MainFrameDef<'data> {
 
 impl super::seal::Sealed for MainFrameDef<'_> {}
 
-impl<'data> super::FrameDef<'data> for MainFrameDef<'data> {
+impl<'data> FrameDef<'data> for MainFrameDef<'data> {
     type Unit = MainUnit;
 
     fn len(&self) -> usize {
-        2 + self.filter.len()
+        self.filter.len()
     }
 
-    fn get<'a>(&'a self, index: usize) -> Option<(&'data str, MainUnit)>
+    fn get<'a>(&'a self, index: usize) -> Option<FieldDef<'data, Self::Unit>>
     where
         'data: 'a,
     {
-        let field = match index {
-            0 => Some(&self.iteration),
-            1 => Some(&self.time),
-            _ => self.fields.get(self.filter.get(index - 2)?),
-        };
-
-        field.map(|f| (f.name, f.unit))
+        self.fields.get(self.filter.get(index)?).map(
+            |&MainFieldDef {
+                 name, signed, unit, ..
+             }| FieldDef { name, unit, signed },
+        )
     }
 
     fn clear_filter(&mut self) {
@@ -327,7 +353,7 @@ pub(crate) struct MainFieldDef<'data> {
 #[derive(Debug)]
 struct InterFieldDef<'a, 'data>(&'a MainFieldDef<'data>);
 
-impl<'data> FieldDef<'data> for InterFieldDef<'_, 'data> {
+impl<'data> FieldDefDetails<'data> for InterFieldDef<'_, 'data> {
     fn name(&self) -> &'data str {
         self.0.name
     }
@@ -348,7 +374,7 @@ impl<'data> FieldDef<'data> for InterFieldDef<'_, 'data> {
 #[derive(Debug)]
 struct IntraFieldDef<'a, 'data>(&'a MainFieldDef<'data>);
 
-impl<'data> FieldDef<'data> for IntraFieldDef<'_, 'data> {
+impl<'data> FieldDefDetails<'data> for IntraFieldDef<'_, 'data> {
     fn name(&self) -> &'data str {
         self.0.name
     }

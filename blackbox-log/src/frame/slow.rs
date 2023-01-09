@@ -2,7 +2,9 @@ use alloc::vec::Vec;
 
 use tracing::instrument;
 
-use super::{read_field_values, DataFrameKind, DataFrameProperty, FieldDef, Unit};
+use super::{
+    read_field_values, DataFrameKind, DataFrameProperty, FieldDef, FieldDefDetails, FrameDef, Unit,
+};
 use crate::filter::{AppliedFilter, FieldFilter};
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
@@ -10,6 +12,9 @@ use crate::utils::as_i32;
 use crate::{units, Headers, HeadersParseResult, Reader};
 
 /// Data parsed from a slow frame.
+///
+/// Slow frames do not include any metadata. If that is desired, use the prior
+/// [`MainFrame`][`super::MainFrame`].
 #[derive(Debug, Clone)]
 pub struct SlowFrame<'data, 'headers> {
     headers: &'headers Headers<'data>,
@@ -21,9 +26,20 @@ impl super::seal::Sealed for SlowFrame<'_, '_> {}
 impl super::Frame for SlowFrame<'_, '_> {
     type Value = SlowValue;
 
-    fn get(&self, index: usize) -> Option<Self::Value> {
+    fn len(&self) -> usize {
+        self.headers.slow_frame_def.len()
+    }
+
+    fn get_raw(&self, index: usize) -> Option<u32> {
         let index = self.headers.slow_frame_def.filter.get(index)?;
-        let def = &self.headers.slow_frame_def.fields[index];
+        Some(self.raw.0[index])
+    }
+
+    fn get(&self, index: usize) -> Option<Self::Value> {
+        let frame_def = &self.headers.slow_frame_def;
+        let index = frame_def.filter.get(index)?;
+
+        let def = &frame_def.fields[index];
         let raw = self.raw.0[index];
 
         let firmware = self.headers.firmware_kind;
@@ -96,20 +112,22 @@ pub struct SlowFrameDef<'data> {
 
 impl super::seal::Sealed for SlowFrameDef<'_> {}
 
-impl<'data> super::FrameDef<'data> for SlowFrameDef<'data> {
+impl<'data> FrameDef<'data> for SlowFrameDef<'data> {
     type Unit = SlowUnit;
 
     fn len(&self) -> usize {
         self.filter.len()
     }
 
-    fn get<'a>(&'a self, index: usize) -> Option<(&'data str, SlowUnit)>
+    fn get<'a>(&'a self, index: usize) -> Option<FieldDef<'data, Self::Unit>>
     where
         'data: 'a,
     {
-        self.fields
-            .get(self.filter.get(index)?)
-            .map(|f| (f.name, f.unit))
+        self.fields.get(self.filter.get(index)?).map(
+            |&SlowFieldDef {
+                 name, unit, signed, ..
+             }| FieldDef { name, unit, signed },
+        )
     }
 
     fn clear_filter(&mut self) {
@@ -184,7 +202,7 @@ pub(crate) struct SlowFieldDef<'data> {
     pub(crate) signed: bool,
 }
 
-impl<'data> FieldDef<'data> for &SlowFieldDef<'data> {
+impl<'data> FieldDefDetails<'data> for &SlowFieldDef<'data> {
     fn name(&self) -> &'data str {
         self.name
     }
