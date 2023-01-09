@@ -3,11 +3,11 @@ mod cli;
 use std::fs::{self, File};
 use std::io::{self, BufWriter, Write};
 use std::path::Path;
-use std::process;
+use std::{iter, process};
 
 use blackbox_log::data::ParseEvent;
 use blackbox_log::frame::{Frame as _, FrameDef as _, GpsFrame, MainFrame, SlowFrame};
-use blackbox_log::units::si;
+use blackbox_log::units::{si, Time};
 use blackbox_log::{DataParser, FieldFilter, Headers, Value};
 use mimalloc::MiMalloc;
 use rayon::prelude::*;
@@ -124,7 +124,7 @@ fn main() {
                     ParseEvent::Event(_) => {}
                     ParseEvent::Slow(frame) => {
                         slow.clear();
-                        write_slow_frame(&mut slow, frame);
+                        format_slow_frame(&mut slow, frame);
                     }
                     ParseEvent::Main(main) => {
                         if let Err(error) = write_main_frame(&mut out, main, &slow) {
@@ -181,26 +181,24 @@ fn get_output(
 }
 
 fn write_main_frame(out: &mut impl Write, main: MainFrame, slow: &str) -> io::Result<()> {
-    let mut fields = main.iter().map(|v| format_value(v.into()));
+    out.write_all(main.iteration().to_string().as_bytes())?;
+    out.write_all(b",")?;
+    out.write_all(format_time(main.time()).as_bytes())?;
 
-    if let Some(first) = fields.next() {
-        out.write_all(first.as_bytes())?;
+    for field in main.iter().map(|v| format_value(v.into())) {
+        out.write_all(b",")?;
+        out.write_all(field.as_bytes())?;
+    }
 
-        for field in fields {
-            out.write_all(b",")?;
-            out.write_all(field.as_bytes())?;
-        }
-
-        if !slow.is_empty() {
-            out.write_all(b",")?;
-        }
+    if !slow.is_empty() {
+        out.write_all(b",")?;
     }
 
     out.write_all(slow.as_bytes())?;
     out.write_all(b"\n")
 }
 
-fn write_slow_frame(out: &mut String, slow: SlowFrame) {
+fn format_slow_frame(out: &mut String, slow: SlowFrame) {
     let mut fields = slow.iter().map(|v| format_value(v.into()));
 
     if let Some(first) = fields.next() {
@@ -214,15 +212,22 @@ fn write_slow_frame(out: &mut String, slow: SlowFrame) {
 }
 
 fn write_gps_frame(out: &mut impl Write, gps: GpsFrame) -> io::Result<()> {
-    write_csv_line(out, gps.iter().map(Value::from).map(format_value))
+    let time = format_time(gps.time());
+    let fields = gps.iter().map(Value::from).map(format_value);
+
+    write_csv_line(out, iter::once(time).chain(fields))
 }
+
+fn format_time(time: Time) -> String {
+    format!("{:.0}", time.get::<si::time::microsecond>())
+}
+
 fn format_value(value: Value) -> String {
     fn format_float(f: f64) -> String {
         format!("{f:.2}")
     }
 
     match value {
-        Value::FrameTime(t) => format!("{:.0}", t.get::<si::time::microsecond>()),
         Value::Amperage(a) => format_float(a.get::<si::electric_current::ampere>()),
         Value::Voltage(v) => format_float(v.get::<si::electric_potential::volt>()),
         Value::Acceleration(a) => {

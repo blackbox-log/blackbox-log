@@ -66,7 +66,6 @@ impl super::Frame for MainFrame<'_, '_, '_> {
                 MainValue::Rotation(AngularVelocity::from_raw(raw, self.headers))
             }
             MainUnit::Unitless => MainValue::new_unitless(raw, def.signed),
-            MainUnit::FrameTime => unreachable!(),
         };
 
         Some(value)
@@ -128,7 +127,6 @@ impl RawMainFrame {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum MainValue {
-    FrameTime(Time),
     Amperage(ElectricCurrent),
     Voltage(ElectricPotential),
     Acceleration(Acceleration),
@@ -149,7 +147,6 @@ impl MainValue {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum MainUnit {
-    FrameTime,
     Amperage,
     Voltage,
     Acceleration,
@@ -513,7 +510,6 @@ impl<'data> MainFrameDefBuilder<'data> {
 
 fn unit_from_name(name: &str) -> MainUnit {
     match to_base_field(name) {
-        "time" => MainUnit::FrameTime,
         "vbat" | "vbatLatest" => MainUnit::Voltage,
         "amperageLatest" => MainUnit::Amperage,
         "accSmooth" => MainUnit::Acceleration,

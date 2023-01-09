@@ -46,7 +46,6 @@ impl super::Frame for GpsFrame<'_, '_> {
         let raw = self.raw.values[index];
 
         let value = match def.unit {
-            GpsUnit::FrameTime => unreachable!(),
             GpsUnit::Coordinate => {
                 assert!(def.signed);
                 let value = as_i32(raw);
@@ -104,7 +103,6 @@ pub(crate) struct RawGpsFrame {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum GpsValue {
-    FrameTime(Time),
     Coordinate(f64),
     Altitude(Length),
     Velocity(Velocity),
@@ -125,7 +123,6 @@ impl GpsValue {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum GpsUnit {
-    FrameTime,
     Coordinate,
     Altitude,
     Velocity,
@@ -373,7 +370,6 @@ impl<'data> GpsFrameDefBuilder<'data> {
 
 fn unit_from_name(name: &str) -> GpsUnit {
     match to_base_field(name) {
-        "time" => GpsUnit::FrameTime,
         "GPS_coord" => GpsUnit::Coordinate,
         "GPS_altitude" => GpsUnit::Altitude,
         "GPS_speed" => GpsUnit::Velocity,

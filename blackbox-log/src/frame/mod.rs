@@ -268,7 +268,6 @@ trait FieldDefDetails<'data> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum Unit {
-    FrameTime,
     Amperage,
     Voltage,
     Acceleration,
@@ -287,7 +286,6 @@ pub enum Unit {
 impl From<MainUnit> for Unit {
     fn from(unit: MainUnit) -> Self {
         match unit {
-            MainUnit::FrameTime => Self::FrameTime,
             MainUnit::Amperage => Self::Amperage,
             MainUnit::Voltage => Self::Voltage,
             MainUnit::Acceleration => Self::Acceleration,
@@ -312,7 +310,6 @@ impl From<SlowUnit> for Unit {
 impl From<GpsUnit> for Unit {
     fn from(unit: GpsUnit) -> Self {
         match unit {
-            GpsUnit::FrameTime => Self::FrameTime,
             GpsUnit::Coordinate => Self::GpsCoordinate,
             GpsUnit::Altitude => Self::Altitude,
             GpsUnit::Velocity => Self::Velocity,
@@ -324,7 +321,6 @@ impl From<GpsUnit> for Unit {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Value {
-    FrameTime(Time),
     Amperage(ElectricCurrent),
     Voltage(ElectricPotential),
     Acceleration(Acceleration),
@@ -344,7 +340,6 @@ pub enum Value {
 impl From<MainValue> for Value {
     fn from(value: MainValue) -> Self {
         match value {
-            MainValue::FrameTime(t) => Self::FrameTime(t),
             MainValue::Amperage(a) => Self::Amperage(a),
             MainValue::Voltage(v) => Self::Voltage(v),
             MainValue::Acceleration(a) => Self::Acceleration(a),
@@ -371,7 +366,6 @@ impl From<SlowValue> for Value {
 impl From<GpsValue> for Value {
     fn from(value: GpsValue) -> Self {
         match value {
-            GpsValue::FrameTime(t) => Self::FrameTime(t),
             GpsValue::Coordinate(c) => Self::GpsCoordinate(c),
             GpsValue::Altitude(a) => Self::Altitude(a),
             GpsValue::Velocity(v) => Self::Velocity(v),
