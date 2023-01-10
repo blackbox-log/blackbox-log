@@ -7,16 +7,16 @@
 		"dist",
 		"src"
 	],
-	"main": "./dist/main.cjs",
-	"module": "./dist/slim.js",
 	"exports": {
 		".": {
 			"import": "./dist/main.js",
-			"require": "./dist/main.cjs"
+			"require": "./dist/main.cjs",
+			"types": "./dist/main.d.ts"
 		},
 		"./slim": {
 			"import": "./dist/slim.js",
-			"require": "./dist/slim.cjs"
+			"require": "./dist/slim.cjs",
+			"types": "./dist/slim.d.ts"
 		},
 		"./wasm": "./dist/blackbox-log.wasm"
 	},
@@ -44,6 +44,7 @@
 		"prettier": "^2.8.1",
 		"typescript": "^4.6.4",
 		"vite": "^3.2.3",
+		"vite-plugin-dts": "^1.7.1",
 		"vite-plugin-static-copy": "^0.13.0"
 	}
 }

@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { defineConfig } from 'vite';
 import { viteStaticCopy as staticCopy } from 'vite-plugin-static-copy';
+import dts from 'vite-plugin-dts';
 
 export default defineConfig({
 	build: {
@@ -42,5 +43,6 @@ export default defineConfig({
 				reloadPageOnChange: true,
 			},
 		}),
+		dts(),
 	],
 });
