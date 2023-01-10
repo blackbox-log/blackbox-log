@@ -1,10 +1,10 @@
 {
 	"compilerOptions": {
-		"target": "ESNext",
+		"target": "esnext",
+		"module": "esnext",
 		"useDefineForClassFields": true,
-		"module": "ESNext",
-		"lib": ["ESNext", "DOM"],
-		"moduleResolution": "Node",
+		"lib": ["esnext", "dom"],
+		"moduleResolution": "node",
 		"strict": true,
 		"resolveJsonModule": true,
 		"isolatedModules": true,
@@ -15,7 +15,8 @@
 		"noImplicitReturns": true,
 		"skipLibCheck": true,
 		"experimentalDecorators": true,
-		"exactOptionalPropertyTypes": true
+		"exactOptionalPropertyTypes": true,
+		"types": ["vite/client"]
 	},
 	"include": ["src"]
 }
