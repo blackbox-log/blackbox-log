@@ -140,19 +140,6 @@ impl<'data> FrameDef<'data> for SlowFrameDef<'data> {
 }
 
 impl<'data> SlowFrameDef<'data> {
-    /// Iterates over the name and unit of each field.
-    pub fn iter(&self) -> impl Iterator<Item = (&str, SlowUnit)> {
-        self.filter.iter().map(|i| {
-            let field = &self.fields[i];
-            (field.name, field.unit)
-        })
-    }
-
-    /// Iterates over the names of each field.
-    pub fn iter_names(&self) -> impl Iterator<Item = &str> {
-        self.filter.iter().map(|i| self.fields[i].name)
-    }
-
     pub(crate) fn builder() -> SlowFrameDefBuilder<'data> {
         SlowFrameDefBuilder::default()
     }

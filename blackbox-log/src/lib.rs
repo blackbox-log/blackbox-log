@@ -13,6 +13,7 @@
 //! The simplest way to extract a few fields of interest:
 //!
 //! ```
+//! use blackbox_log::frame::FieldDef;
 //! use blackbox_log::prelude::*;
 //!
 //! let file = b"...";
@@ -31,12 +32,16 @@
 //!     while let Some(event) = parser.next() {
 //!         match event {
 //!             ParserEvent::Main(main) => {
-//!                 for (value, (name, _)) in main.iter().zip(headers.main_frame_def.iter()) {
+//!                 for (value, FieldDef { name, .. }) in
+//!                     main.iter().zip(headers.main_frame_def.iter())
+//!                 {
 //!                     println!("{name}: {value:?}");
 //!                 }
 //!             }
 //!             ParserEvent::Slow(slow) => {
-//!                 for (value, (name, _)) in slow.iter().zip(headers.slow_frame_def.iter()) {
+//!                 for (value, FieldDef { name, .. }) in
+//!                     slow.iter().zip(headers.slow_frame_def.iter())
+//!                 {
 //!                     println!("{name}: {value:?}");
 //!                 }
 //!             }
@@ -49,6 +54,7 @@
 //! Get only the GPS data without parsing logs that cannot contain GPS frames:
 //!
 //! ```
+//! use blackbox_log::frame::FieldDef;
 //! use blackbox_log::prelude::*;
 //!
 //! let file = b"...";
@@ -62,7 +68,7 @@
 //!
 //!         while let Some(event) = parser.next() {
 //!             if let ParserEvent::Gps(gps) = event {
-//!                 for (value, name) in gps.iter().zip(gps_def.iter_names()) {
+//!                 for (value, FieldDef { name, .. }) in gps.iter().zip(gps_def.iter()) {
 //!                     println!("{name}: {value:?}");
 //!                 }
 //!             }

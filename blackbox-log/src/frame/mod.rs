@@ -13,6 +13,7 @@ use alloc::format;
 use alloc::vec::Vec;
 use core::fmt;
 use core::iter::{FusedIterator, Peekable};
+use core::marker::PhantomData;
 
 pub use self::gps::{GpsFrame, GpsFrameDef, GpsUnit, GpsValue};
 pub(crate) use self::gps_home::{GpsHomeFrame, GpsPosition};
@@ -44,9 +45,21 @@ pub trait FrameDef<'data>: seal::Sealed {
     }
 
     /// Returns a field definition by its index.
-    fn get<'a>(&'a self, index: usize) -> Option<FieldDef<'data, Self::Unit>>
+    fn get<'def>(&'def self, index: usize) -> Option<FieldDef<'data, Self::Unit>>
     where
-        'data: 'a;
+        'data: 'def;
+
+    /// Iterates over all field definitions in order.
+    fn iter<'def>(&'def self) -> FieldDefIter<'data, 'def, Self>
+    where
+        Self: Sized,
+    {
+        FieldDefIter {
+            frame: self,
+            next: 0,
+            _data: &PhantomData,
+        }
+    }
 
     /// Removes any existing filter so all fields will be included.
     fn clear_filter(&mut self);
@@ -58,11 +71,30 @@ pub trait FrameDef<'data>: seal::Sealed {
 
 /// Metadata describing one field.
 #[derive(Debug, Clone, PartialEq, Hash)]
-pub struct FieldDef<'data, U: Into<Unit>> {
+pub struct FieldDef<'data, U> {
     pub name: &'data str,
     pub unit: U,
     pub signed: bool,
 }
+
+#[derive(Debug)]
+pub struct FieldDefIter<'data, 'def, F> {
+    frame: &'def F,
+    next: usize,
+    _data: &'data PhantomData<()>,
+}
+
+impl<'data, F: FrameDef<'data>> Iterator for FieldDefIter<'data, '_, F> {
+    type Item = FieldDef<'data, F::Unit>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let value = self.frame.get(self.next)?;
+        self.next += 1;
+        Some(value)
+    }
+}
+
+impl<'data, F: FrameDef<'data>> FusedIterator for FieldDefIter<'data, '_, F> {}
 
 /// A parsed data frame.
 ///
@@ -91,11 +123,11 @@ pub trait Frame: seal::Sealed {
     fn get_raw(&self, index: usize) -> Option<u32>;
 
     // Iterates over all raw field values in order. See [`Frame::get_raw`].
-    fn iter_raw(&self) -> RawFrameIter<'_, Self>
+    fn iter_raw(&self) -> RawFieldIter<'_, Self>
     where
         Self: Sized,
     {
-        RawFrameIter {
+        RawFieldIter {
             frame: self,
             next: 0,
         }
@@ -105,11 +137,11 @@ pub trait Frame: seal::Sealed {
     fn get(&self, index: usize) -> Option<Self::Value>;
 
     /// Iterates over all field values in order.
-    fn iter(&self) -> FrameIter<'_, Self>
+    fn iter(&self) -> FieldIter<'_, Self>
     where
         Self: Sized,
     {
-        FrameIter {
+        FieldIter {
             frame: self,
             next: 0,
         }
@@ -119,12 +151,12 @@ pub trait Frame: seal::Sealed {
 /// An iterator over the raw values of the fields of a parsed frame. See
 /// [`Frame::iter_raw`].
 #[derive(Debug)]
-pub struct RawFrameIter<'f, F> {
+pub struct RawFieldIter<'f, F> {
     frame: &'f F,
     next: usize,
 }
 
-impl<F: Frame> Iterator for RawFrameIter<'_, F> {
+impl<F: Frame> Iterator for RawFieldIter<'_, F> {
     type Item = u32;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -134,17 +166,17 @@ impl<F: Frame> Iterator for RawFrameIter<'_, F> {
     }
 }
 
-impl<F: Frame> FusedIterator for RawFrameIter<'_, F> {}
+impl<F: Frame> FusedIterator for RawFieldIter<'_, F> {}
 
 /// An iterator over the values of the fields of a parsed frame. See
 /// [`Frame::iter`].
 #[derive(Debug)]
-pub struct FrameIter<'f, F> {
+pub struct FieldIter<'f, F> {
     frame: &'f F,
     next: usize,
 }
 
-impl<F: Frame> Iterator for FrameIter<'_, F> {
+impl<F: Frame> Iterator for FieldIter<'_, F> {
     type Item = F::Value;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -154,7 +186,7 @@ impl<F: Frame> Iterator for FrameIter<'_, F> {
     }
 }
 
-impl<F: Frame> FusedIterator for FrameIter<'_, F> {}
+impl<F: Frame> FusedIterator for FieldIter<'_, F> {}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]

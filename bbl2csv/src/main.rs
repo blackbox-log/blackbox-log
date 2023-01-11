@@ -94,8 +94,9 @@ fn main() {
 
             let field_names = headers
                 .main_frame_def
-                .iter_names()
-                .chain(headers.slow_frame_def.iter_names());
+                .iter()
+                .map(|f| f.name)
+                .chain(headers.slow_frame_def.iter().map(|f| f.name));
 
             let mut out = get_output(filename, human_i, "csv")?;
             if let Err(error) = write_csv_line(&mut out, field_names) {
@@ -107,7 +108,7 @@ fn main() {
                 Some(def) if cli.gps => {
                     let mut out = get_output(filename, human_i, "gps.csv")?;
 
-                    if let Err(error) = write_csv_line(&mut out, def.iter_names()) {
+                    if let Err(error) = write_csv_line(&mut out, def.iter().map(|f| f.name)) {
                         tracing::error!(%error, "failed to write gps csv header");
                         return Err(exitcode::IOERR);
                     }

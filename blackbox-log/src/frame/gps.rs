@@ -1,6 +1,5 @@
 use alloc::borrow::ToOwned;
 use alloc::vec::Vec;
-use core::iter;
 
 use tracing::instrument;
 
@@ -133,7 +132,6 @@ pub enum GpsUnit {
 /// The parsed frame definition for GPS frames.
 #[derive(Debug, Clone)]
 pub struct GpsFrameDef<'data> {
-    pub(crate) time: GpsFieldDef<'data>,
     pub(crate) fields: Vec<GpsFieldDef<'data>>,
     filter: AppliedFilter,
 }
@@ -172,20 +170,6 @@ impl<'data> FrameDef<'data> for GpsFrameDef<'data> {
 }
 
 impl<'data> GpsFrameDef<'data> {
-    /// Iterates over the name and unit of each field.
-    pub fn iter(&self) -> impl Iterator<Item = (&str, GpsUnit)> {
-        iter::once(&self.time)
-            .chain(self.filter.iter().map(|i| &self.fields[i]))
-            .map(|f| (f.name, f.unit))
-    }
-
-    /// Iterates over the names of each field.
-    pub fn iter_names(&self) -> impl Iterator<Item = &str> {
-        iter::once(&self.time)
-            .chain(self.filter.iter().map(|i| &self.fields[i]))
-            .map(|f| f.name)
-    }
-
     pub(crate) fn builder() -> GpsFrameDefBuilder<'data> {
         GpsFrameDefBuilder::default()
     }
@@ -329,17 +313,20 @@ impl<'data> GpsFrameDefBuilder<'data> {
                 })
             });
 
-        let Some(time @ GpsFieldDef {
-            name: "time",
-            predictor: Predictor::LastMainFrameTime,
-            encoding: Encoding::Variable,
-            ..
-        }) = fields.next().transpose()? else {
+        if !matches!(
+            fields.next().transpose()?,
+            Some(GpsFieldDef {
+                name: "time",
+                predictor: Predictor::LastMainFrameTime,
+                encoding: Encoding::Variable,
+                ..
+            })
+        ) {
             return Err(HeadersParseError::MissingField {
                 frame: DataFrameKind::Gps,
-                field: "time".to_owned()
+                field: "time".to_owned(),
             });
-        };
+        }
 
         let mut fields = fields.collect::<Result<Vec<_>, _>>()?;
         for (i, j) in (1..fields.len()).map(|i| (i - 1, i)) {
@@ -360,11 +347,7 @@ impl<'data> GpsFrameDefBuilder<'data> {
 
         let filter = AppliedFilter::new_unfiltered(fields.len());
 
-        Ok(Some(GpsFrameDef {
-            time,
-            fields,
-            filter,
-        }))
+        Ok(Some(GpsFrameDef { fields, filter }))
     }
 }
 

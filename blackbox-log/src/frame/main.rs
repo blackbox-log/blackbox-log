@@ -1,6 +1,5 @@
 use alloc::borrow::ToOwned;
 use alloc::vec::Vec;
-use core::iter;
 
 use tracing::instrument;
 
@@ -157,8 +156,6 @@ pub enum MainUnit {
 /// The parsed frame definition for main frames.
 #[derive(Debug, Clone)]
 pub struct MainFrameDef<'data> {
-    pub(crate) iteration: MainFieldDef<'data>,
-    pub(crate) time: MainFieldDef<'data>,
     pub(crate) fields: Vec<MainFieldDef<'data>>,
 
     index_motor_0: Option<usize>,
@@ -199,21 +196,6 @@ impl<'data> FrameDef<'data> for MainFrameDef<'data> {
 }
 
 impl<'data> MainFrameDef<'data> {
-    /// Iterates over the name and unit of each field.
-    pub fn iter(&self) -> impl Iterator<Item = (&str, MainUnit)> + '_ {
-        iter::once(&self.iteration)
-            .chain(iter::once(&self.time))
-            .chain(self.filter.iter().map(|i| &self.fields[i]))
-            .map(|field| (field.name, field.unit))
-    }
-
-    /// Iterates over the names of each field.
-    pub fn iter_names(&self) -> impl Iterator<Item = &str> {
-        iter::once(self.iteration.name)
-            .chain(iter::once(self.time.name))
-            .chain(self.filter.iter().map(|i| self.fields[i].name))
-    }
-
     pub(crate) fn builder() -> MainFrameDefBuilder<'data> {
         MainFrameDefBuilder::default()
     }
@@ -240,9 +222,7 @@ impl<'data> MainFrameDef<'data> {
             predictor_inter,
             unit,
             ..
-        } in iter::once(&self.iteration)
-            .chain(iter::once(&self.time))
-            .chain(self.fields.iter())
+        } in &self.fields
         {
             check_predictor(name, *predictor_intra)?;
             check_predictor(name, *predictor_inter)?;
@@ -452,33 +432,39 @@ impl<'data> MainFrameDefBuilder<'data> {
                 },
             );
 
-        let Some(iteration @ MainFieldDef {
-            name: "loopIteration",
-            predictor_intra: Predictor::Zero,
-            predictor_inter: Predictor::Increment,
-            encoding_intra: Encoding::Variable,
-            encoding_inter: Encoding::Null,
-            ..
-        }) = fields.next().transpose()? else {
+        if !matches!(
+            fields.next().transpose()?,
+            Some(MainFieldDef {
+                name: "loopIteration",
+                predictor_intra: Predictor::Zero,
+                predictor_inter: Predictor::Increment,
+                encoding_intra: Encoding::Variable,
+                encoding_inter: Encoding::Null,
+                ..
+            })
+        ) {
             return Err(HeadersParseError::MissingField {
                 frame: DataFrameKind::Intra,
-                field: "loopIteration".to_owned()
+                field: "loopIteration".to_owned(),
             });
-        };
+        }
 
-        let Some(time @ MainFieldDef {
-            name: "time",
-            predictor_intra: Predictor::Zero,
-            predictor_inter: Predictor::StraightLine,
-            encoding_intra: Encoding::Variable,
-            encoding_inter: Encoding::VariableSigned,
-            ..
-        }) = fields.next().transpose()? else {
+        if !matches!(
+            fields.next().transpose()?,
+            Some(MainFieldDef {
+                name: "time",
+                predictor_intra: Predictor::Zero,
+                predictor_inter: Predictor::StraightLine,
+                encoding_intra: Encoding::Variable,
+                encoding_inter: Encoding::VariableSigned,
+                ..
+            })
+        ) {
             return Err(HeadersParseError::MissingField {
                 frame: DataFrameKind::Intra,
-                field: "time".to_owned()
+                field: "time".to_owned(),
             });
-        };
+        }
 
         let fields = fields.collect::<Result<Vec<_>, _>>()?;
 
@@ -498,8 +484,6 @@ impl<'data> MainFrameDefBuilder<'data> {
         let filter = AppliedFilter::new_unfiltered(fields.len());
 
         Ok(MainFrameDef {
-            iteration,
-            time,
             fields,
 
             index_motor_0,
