@@ -4,4 +4,5 @@
 //! types.
 
 pub use crate::frame::{Frame as _, FrameDef as _};
+pub use crate::units::{Flag as _, FlagSet as _};
 pub use crate::{DataParser, FieldFilter, Headers, ParserEvent};
