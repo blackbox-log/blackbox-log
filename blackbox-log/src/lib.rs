@@ -107,6 +107,7 @@ mod reader;
 pub mod units;
 
 pub use self::data::{DataParser, ParserEvent};
+pub use self::event::Event;
 pub use self::file::File;
 pub use self::filter::FieldFilter;
 pub use self::frame::{Unit, Value};
