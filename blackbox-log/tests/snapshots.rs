@@ -4,7 +4,7 @@ use std::io::Read;
 
 use blackbox_log::data::{ParserEvent, Stats};
 use blackbox_log::event::Event;
-use blackbox_log::frame::GpsFrameDef;
+use blackbox_log::frame::{self, FieldDef, FrameDef, GpsFrameDef};
 use blackbox_log::units::{si, Flag, FlagSet};
 use blackbox_log::{DataParser, Headers, Unit, Value};
 use serde::ser::{SerializeStruct, Serializer};
@@ -54,10 +54,14 @@ fn gimbal_ghost() {
 struct LogSnapshot<'data> {
     headers: Headers<'data>,
     stats: Stats,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     events: Vec<Event>,
-    main: Fields,
-    slow: Fields,
-    gps: Fields,
+    #[serde(skip_serializing_if = "MainSnapshot::is_empty")]
+    main: MainSnapshot,
+    #[serde(skip_serializing_if = "SlowSnapshot::is_empty")]
+    slow: SlowSnapshot,
+    #[serde(skip_serializing_if = "GpsSnapshot::is_empty")]
+    gps: GpsSnapshot,
 }
 
 impl<'data> LogSnapshot<'data> {
@@ -65,13 +69,19 @@ impl<'data> LogSnapshot<'data> {
         let headers = headers.clone();
 
         let mut events = Vec::new();
-        let mut main = headers.main_frame_def.iter().collect::<Fields>();
-        let mut slow = headers.slow_frame_def.iter().collect::<Fields>();
-        let mut gps = headers
+
+        let main = headers.main_frame_def.iter().collect::<Fields>();
+        let mut main = MainSnapshot::new(main);
+
+        let slow = headers.slow_frame_def.iter().collect::<Fields>();
+        let mut slow = SlowSnapshot::new(slow);
+
+        let gps = headers
             .gps_frame_def
             .iter()
             .flat_map(GpsFrameDef::iter)
             .collect::<Fields>();
+        let mut gps = GpsSnapshot::new(gps);
 
         while let Some(frame) = data.next() {
             match frame {
@@ -94,6 +104,83 @@ impl<'data> LogSnapshot<'data> {
 }
 
 #[derive(Debug, Serialize)]
+struct MainSnapshot {
+    count: u32,
+    last_iteration: u32,
+    time: NumberHistory<16, i128>,
+    fields: Fields,
+}
+
+impl MainSnapshot {
+    fn new(fields: Fields) -> Self {
+        Self {
+            count: 0,
+            last_iteration: 0,
+            time: NumberHistory::new(),
+            fields,
+        }
+    }
+
+    fn update(&mut self, frame: frame::MainFrame) {
+        self.count += 1;
+        self.last_iteration = frame.iteration();
+        self.time.update(frame.time_raw().into());
+        self.fields.update(frame);
+    }
+
+    fn is_empty(&self) -> bool {
+        self.count == 0
+    }
+}
+
+#[derive(Debug, Serialize)]
+struct SlowSnapshot {
+    count: u32,
+    fields: Fields,
+}
+
+impl SlowSnapshot {
+    fn new(fields: Fields) -> Self {
+        Self { count: 0, fields }
+    }
+
+    fn update(&mut self, frame: frame::SlowFrame) {
+        self.count += 1;
+        self.fields.update(frame);
+    }
+
+    fn is_empty(&self) -> bool {
+        self.count == 0
+    }
+}
+
+#[derive(Debug, Serialize)]
+struct GpsSnapshot {
+    count: u32,
+    time: (),
+    fields: Fields,
+}
+
+impl GpsSnapshot {
+    fn new(fields: Fields) -> Self {
+        Self {
+            count: 0,
+            time: (),
+            fields,
+        }
+    }
+
+    fn update(&mut self, frame: frame::GpsFrame) {
+        self.count += 1;
+        self.fields.update(frame);
+    }
+
+    fn is_empty(&self) -> bool {
+        self.count == 0
+    }
+}
+
+#[derive(Debug, Serialize)]
 struct Fields(Vec<FieldSnapshot>);
 
 impl Fields {
@@ -104,15 +191,11 @@ impl Fields {
     }
 }
 
-impl<T, U> FromIterator<(T, U)> for Fields
-where
-    T: Into<String>,
-    U: Into<Unit>,
-{
-    fn from_iter<I: IntoIterator<Item = (T, U)>>(iter: I) -> Self {
+impl<'data, U: Into<Unit>> FromIterator<FieldDef<'data, U>> for Fields {
+    fn from_iter<I: IntoIterator<Item = FieldDef<'data, U>>>(iter: I) -> Self {
         Self(
             iter.into_iter()
-                .map(|(name, unit)| FieldSnapshot::new(name.into(), unit.into()))
+                .map(|field| FieldSnapshot::new(field.name.to_owned(), field.unit.into()))
                 .collect(),
         )
     }
@@ -147,8 +230,7 @@ impl FieldSnapshot {
             name,
             unit,
             history: match unit {
-                Unit::FrameTime
-                | Unit::Amperage
+                Unit::Amperage
                 | Unit::Voltage
                 | Unit::Acceleration
                 | Unit::Rotation
@@ -169,7 +251,6 @@ impl FieldSnapshot {
     fn update(&mut self, value: Value) {
         match &mut self.history {
             History::Int(history) => history.update(match value {
-                Value::FrameTime(t) => t.get::<si::time::microsecond>().round() as i128,
                 Value::Amperage(a) => a.get::<si::electric_current::milliampere>().round() as i128,
                 Value::Voltage(v) => v.get::<si::electric_potential::millivolt>().round() as i128,
                 Value::Acceleration(a) => a
