@@ -2,13 +2,16 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::io::Read;
 
-use blackbox_log::data::{ParserEvent, Stats};
-use blackbox_log::event::Event;
-use blackbox_log::frame::{self, FieldDef, FrameDef, GpsFrameDef};
-use blackbox_log::units::{si, Flag, FlagSet};
-use blackbox_log::{DataParser, Headers, Unit, Value};
+use blackbox_log::data::Stats;
+use blackbox_log::frame::{self, FieldDef, GpsFrameDef};
+use blackbox_log::prelude::*;
+use blackbox_log::units::si;
+use blackbox_log::{Event, Unit, Value};
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
+
+const MAX_EVENTS: usize = 200_000;
+const MAX_LOGS: usize = 2;
 
 macro_rules! run {
     () => {
@@ -18,17 +21,9 @@ macro_rules! run {
             file.read_to_end(&mut data).unwrap();
 
             let file = blackbox_log::File::new(&data);
-            let logs = file
-                .iter()
-                .map(|mut reader| {
-                    Headers::parse(&mut reader).map(|headers| {
-                        let data = DataParser::new(reader, &headers);
-                        LogSnapshot::new(&headers, data)
-                    })
-                })
-                .collect::<Vec<_>>();
+            let snapshot = FileSnapshot::from(file);
 
-            insta::assert_ron_snapshot!(logs);
+            insta::assert_ron_snapshot!(snapshot);
         }
     };
 }
@@ -51,9 +46,36 @@ fn gimbal_ghost() {
 }
 
 #[derive(Debug, Serialize)]
+struct FileSnapshot<'data> {
+    count: usize,
+    logs: Vec<blackbox_log::headers::ParseResult<LogSnapshot<'data>>>,
+}
+
+impl<'data> From<blackbox_log::File<'data>> for FileSnapshot<'data> {
+    fn from(file: blackbox_log::File<'data>) -> Self {
+        let logs = file
+            .iter()
+            .map(|mut reader| {
+                Headers::parse(&mut reader).map(|headers| {
+                    let data = DataParser::new(reader, &headers);
+                    LogSnapshot::new(&headers, data)
+                })
+            })
+            .take(MAX_LOGS)
+            .collect::<Vec<_>>();
+
+        Self {
+            count: file.log_count(),
+            logs,
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
 struct LogSnapshot<'data> {
     headers: Headers<'data>,
     stats: Stats,
+    capped: bool,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     events: Vec<Event>,
     #[serde(skip_serializing_if = "MainSnapshot::is_empty")]
@@ -83,7 +105,13 @@ impl<'data> LogSnapshot<'data> {
             .collect::<Fields>();
         let mut gps = GpsSnapshot::new(gps);
 
-        while let Some(frame) = data.next() {
+        let mut capped = true;
+        for _ in 0..MAX_EVENTS {
+            let Some(frame) = data.next() else {
+                capped = false;
+                break;
+            };
+
             match frame {
                 ParserEvent::Event(event) => events.push(event),
                 ParserEvent::Main(frame) => main.update(frame),
@@ -95,6 +123,7 @@ impl<'data> LogSnapshot<'data> {
         Self {
             headers,
             stats: data.stats().clone(),
+            capped,
             events,
             main,
             slow,
@@ -105,7 +134,7 @@ impl<'data> LogSnapshot<'data> {
 
 #[derive(Debug, Serialize)]
 struct MainSnapshot {
-    count: u32,
+    count: u128,
     last_iteration: u32,
     time: NumberHistory<16, i128>,
     fields: Fields,
