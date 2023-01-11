@@ -110,9 +110,7 @@ pub use self::data::{DataParser, ParserEvent};
 pub use self::file::File;
 pub use self::filter::FieldFilter;
 pub use self::frame::{Unit, Value};
-pub use self::headers::{
-    Headers, ParseError as HeadersParseError, ParseResult as HeadersParseResult,
-};
+pub use self::headers::Headers;
 pub use self::reader::Reader;
 
 /// The first line of any blackbox log.

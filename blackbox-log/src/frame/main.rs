@@ -9,12 +9,13 @@ use super::{
 };
 use crate::data::MainFrameHistory;
 use crate::filter::{AppliedFilter, FieldFilter};
+use crate::headers::{ParseError, ParseResult};
 use crate::parser::{decode, to_base_field, Encoding, InternalResult};
 use crate::predictor::{self, Predictor, PredictorContext};
 use crate::units::prelude::*;
 use crate::units::FromRaw;
 use crate::utils::as_i32;
-use crate::{Headers, HeadersParseError, HeadersParseResult, Reader};
+use crate::{Headers, Reader};
 
 /// Data parsed from a main frame.
 #[derive(Debug)]
@@ -213,9 +214,9 @@ impl<'data> MainFrameDef<'data> {
 
     pub(crate) fn validate(
         &self,
-        check_predictor: impl Fn(&'data str, Predictor) -> HeadersParseResult<()>,
-        check_unit: impl Fn(&'data str, Unit) -> HeadersParseResult<()>,
-    ) -> HeadersParseResult<()> {
+        check_predictor: impl Fn(&'data str, Predictor) -> ParseResult<()>,
+        check_unit: impl Fn(&'data str, Unit) -> ParseResult<()>,
+    ) -> ParseResult<()> {
         for MainFieldDef {
             name,
             predictor_intra,
@@ -401,7 +402,7 @@ impl<'data> MainFrameDefBuilder<'data> {
         }
     }
 
-    pub(crate) fn parse(self) -> HeadersParseResult<MainFrameDef<'data>> {
+    pub(crate) fn parse(self) -> ParseResult<MainFrameDef<'data>> {
         let kind_intra = DataFrameKind::Intra;
         let kind_inter = DataFrameKind::Inter;
 
@@ -443,7 +444,7 @@ impl<'data> MainFrameDefBuilder<'data> {
                 ..
             })
         ) {
-            return Err(HeadersParseError::MissingField {
+            return Err(ParseError::MissingField {
                 frame: DataFrameKind::Intra,
                 field: "loopIteration".to_owned(),
             });
@@ -460,7 +461,7 @@ impl<'data> MainFrameDefBuilder<'data> {
                 ..
             })
         ) {
-            return Err(HeadersParseError::MissingField {
+            return Err(ParseError::MissingField {
                 frame: DataFrameKind::Intra,
                 field: "time".to_owned(),
             });

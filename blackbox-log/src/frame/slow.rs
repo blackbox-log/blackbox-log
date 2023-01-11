@@ -6,10 +6,11 @@ use super::{
     read_field_values, DataFrameKind, DataFrameProperty, FieldDef, FieldDefDetails, FrameDef, Unit,
 };
 use crate::filter::{AppliedFilter, FieldFilter};
+use crate::headers::ParseResult;
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::utils::as_i32;
-use crate::{units, Headers, HeadersParseResult, Reader};
+use crate::{units, Headers, Reader};
 
 /// Data parsed from a slow frame.
 ///
@@ -146,9 +147,9 @@ impl<'data> SlowFrameDef<'data> {
 
     pub(crate) fn validate(
         &self,
-        check_predictor: impl Fn(&'data str, Predictor) -> HeadersParseResult<()>,
-        check_unit: impl Fn(&'data str, Unit) -> HeadersParseResult<()>,
-    ) -> HeadersParseResult<()> {
+        check_predictor: impl Fn(&'data str, Predictor) -> ParseResult<()>,
+        check_unit: impl Fn(&'data str, Unit) -> ParseResult<()>,
+    ) -> ParseResult<()> {
         for SlowFieldDef {
             name,
             predictor,
@@ -227,7 +228,7 @@ impl<'data> SlowFrameDefBuilder<'data> {
         }
     }
 
-    pub(crate) fn parse(self) -> HeadersParseResult<SlowFrameDef<'data>> {
+    pub(crate) fn parse(self) -> ParseResult<SlowFrameDef<'data>> {
         let kind = DataFrameKind::Slow;
 
         let mut names = super::parse_names(kind, self.names)?;

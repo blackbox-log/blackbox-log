@@ -8,12 +8,13 @@ use super::{
     GpsHomeFrame, Unit,
 };
 use crate::filter::{AppliedFilter, FieldFilter};
+use crate::headers::{ParseError, ParseResult};
 use crate::parser::{decode, to_base_field, Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
 use crate::units::FromRaw;
 use crate::utils::as_i32;
-use crate::{Headers, HeadersParseError, HeadersParseResult, Reader};
+use crate::{Headers, Reader};
 
 /// Data parsed from a GPS frame.
 #[derive(Debug, Clone)]
@@ -176,9 +177,9 @@ impl<'data> GpsFrameDef<'data> {
 
     pub(crate) fn validate(
         &self,
-        check_predictor: impl Fn(&'data str, Predictor) -> HeadersParseResult<()>,
-        check_unit: impl Fn(&'data str, Unit) -> HeadersParseResult<()>,
-    ) -> HeadersParseResult<()> {
+        check_predictor: impl Fn(&'data str, Predictor) -> ParseResult<()>,
+        check_unit: impl Fn(&'data str, Unit) -> ParseResult<()>,
+    ) -> ParseResult<()> {
         for GpsFieldDef {
             name,
             predictor,
@@ -285,7 +286,7 @@ impl<'data> GpsFrameDefBuilder<'data> {
         }
     }
 
-    pub(crate) fn parse(self) -> HeadersParseResult<Option<GpsFrameDef<'data>>> {
+    pub(crate) fn parse(self) -> ParseResult<Option<GpsFrameDef<'data>>> {
         let kind = DataFrameKind::Gps;
 
         if self.names.is_none()
@@ -322,7 +323,7 @@ impl<'data> GpsFrameDefBuilder<'data> {
                 ..
             })
         ) {
-            return Err(HeadersParseError::MissingField {
+            return Err(ParseError::MissingField {
                 frame: DataFrameKind::Gps,
                 field: "time".to_owned(),
             });

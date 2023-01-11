@@ -19,10 +19,11 @@ pub use self::gps::{GpsFrame, GpsFrameDef, GpsUnit, GpsValue};
 pub(crate) use self::gps_home::{GpsHomeFrame, GpsPosition};
 pub use self::main::{MainFrame, MainFrameDef, MainUnit, MainValue};
 pub use self::slow::{SlowFrame, SlowFrameDef, SlowUnit, SlowValue};
+use crate::headers::{ParseError, ParseResult};
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
-use crate::{units, FieldFilter, HeadersParseError, HeadersParseResult, Reader};
+use crate::{units, FieldFilter, Reader};
 
 mod seal {
     pub trait Sealed {}
@@ -443,15 +444,15 @@ impl DataFrameProperty {
     }
 }
 
-fn missing_header_error(kind: DataFrameKind, property: &'static str) -> HeadersParseError {
+fn missing_header_error(kind: DataFrameKind, property: &'static str) -> ParseError {
     tracing::error!("missing header `Field {} {property}`", char::from(kind));
-    HeadersParseError::MissingHeader
+    ParseError::MissingHeader
 }
 
 fn parse_names(
     kind: DataFrameKind,
     names: Option<&str>,
-) -> HeadersParseResult<impl Iterator<Item = &'_ str>> {
+) -> ParseResult<impl Iterator<Item = &'_ str>> {
     let names = names.ok_or_else(|| missing_header_error(kind, "name"))?;
     Ok(names.split(','))
 }
@@ -461,10 +462,10 @@ fn parse_enum_list<'a, T>(
     property: &'static str,
     s: Option<&'a str>,
     parse: impl Fn(&str) -> Option<T> + 'a,
-) -> HeadersParseResult<impl Iterator<Item = HeadersParseResult<T>> + 'a> {
+) -> ParseResult<impl Iterator<Item = ParseResult<T>> + 'a> {
     let s = s.ok_or_else(|| missing_header_error(kind, property))?;
     Ok(s.split(',').map(move |s| {
-        parse(s).ok_or_else(|| HeadersParseError::InvalidHeader {
+        parse(s).ok_or_else(|| ParseError::InvalidHeader {
             header: format!("Field {} {property}", char::from(kind)),
             value: s.to_owned(),
         })
@@ -475,7 +476,7 @@ fn parse_enum_list<'a, T>(
 fn parse_predictors(
     kind: DataFrameKind,
     predictors: Option<&'_ str>,
-) -> HeadersParseResult<impl Iterator<Item = HeadersParseResult<Predictor>> + '_> {
+) -> ParseResult<impl Iterator<Item = ParseResult<Predictor>> + '_> {
     parse_enum_list(kind, "predictor", predictors, Predictor::from_num_str)
 }
 
@@ -483,14 +484,14 @@ fn parse_predictors(
 fn parse_encodings(
     kind: DataFrameKind,
     encodings: Option<&'_ str>,
-) -> HeadersParseResult<impl Iterator<Item = HeadersParseResult<Encoding>> + '_> {
+) -> ParseResult<impl Iterator<Item = ParseResult<Encoding>> + '_> {
     parse_enum_list(kind, "encoding", encodings, Encoding::from_num_str)
 }
 
 fn parse_signs(
     kind: DataFrameKind,
     names: Option<&str>,
-) -> HeadersParseResult<impl Iterator<Item = bool> + '_> {
+) -> ParseResult<impl Iterator<Item = bool> + '_> {
     let names = names.ok_or_else(|| missing_header_error(kind, "signed"))?;
     Ok(names.split(',').map(|s| s.trim() != "0"))
 }
