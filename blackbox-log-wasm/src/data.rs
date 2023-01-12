@@ -40,14 +40,14 @@ impl WasmDataParser {
 impl WasmFfi for WasmDataParser {}
 
 #[no_mangle]
-unsafe extern "wasm" fn data_free(ptr: *mut WasmDataParser) {
+unsafe extern "C" fn data_free(ptr: *mut WasmDataParser) {
     let parser = WasmDataParser::from_wasm(ptr);
     drop(parser);
 }
 
 #[no_mangle]
 #[allow(non_snake_case)]
-unsafe extern "wasm" fn data_mainFrameCount(ptr: *mut WasmDataParser) -> usize {
+unsafe extern "C" fn data_mainFrameCount(ptr: *mut WasmDataParser) -> usize {
     let parser = WasmDataParser::from_wasm(ptr);
     let count = parser.main_frame_count();
     parser.into_wasm();
@@ -56,7 +56,7 @@ unsafe extern "wasm" fn data_mainFrameCount(ptr: *mut WasmDataParser) -> usize {
 
 #[no_mangle]
 #[allow(non_snake_case)]
-unsafe extern "wasm" fn data_gpsFrameCount(ptr: *mut WasmDataParser) -> usize {
+unsafe extern "C" fn data_gpsFrameCount(ptr: *mut WasmDataParser) -> usize {
     let parser = WasmDataParser::from_wasm(ptr);
     let count = parser.gps_frame_count();
     parser.into_wasm();

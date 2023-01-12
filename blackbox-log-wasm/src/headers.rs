@@ -35,13 +35,13 @@ impl WasmHeaders {
 impl WasmFfi for WasmHeaders {}
 
 #[no_mangle]
-unsafe extern "wasm" fn headers_free(ptr: *mut WasmHeaders) {
+unsafe extern "C" fn headers_free(ptr: *mut WasmHeaders) {
     let headers = WasmHeaders::from_wasm(ptr);
     drop(headers);
 }
 
 #[no_mangle]
-unsafe extern "wasm" fn headers_getDataParser(ptr: *mut WasmHeaders) -> *mut WasmDataParser {
+unsafe extern "C" fn headers_getDataParser(ptr: *mut WasmHeaders) -> *mut WasmDataParser {
     let headers = WasmHeaders::from_wasm(ptr);
     let parser = headers.get_data_parser();
     headers.into_wasm();
@@ -52,7 +52,7 @@ unsafe extern "wasm" fn headers_getDataParser(ptr: *mut WasmHeaders) -> *mut Was
 
 #[no_mangle]
 #[allow(non_snake_case)]
-unsafe extern "wasm" fn headers_firmwareRevision(ptr: *mut WasmHeaders) -> WasmStr {
+unsafe extern "C" fn headers_firmwareRevision(ptr: *mut WasmHeaders) -> WasmStr {
     let headers = WasmHeaders::from_wasm(ptr);
     let firmware = headers.headers.firmware_revision;
     headers.into_wasm();
@@ -61,7 +61,7 @@ unsafe extern "wasm" fn headers_firmwareRevision(ptr: *mut WasmHeaders) -> WasmS
 
 #[no_mangle]
 #[allow(non_snake_case)]
-unsafe extern "wasm" fn headers_boardInfo(ptr: *mut WasmHeaders) -> WasmStr {
+unsafe extern "C" fn headers_boardInfo(ptr: *mut WasmHeaders) -> WasmStr {
     let headers = WasmHeaders::from_wasm(ptr);
     let info = headers.headers.board_info;
     headers.into_wasm();
@@ -70,7 +70,7 @@ unsafe extern "wasm" fn headers_boardInfo(ptr: *mut WasmHeaders) -> WasmStr {
 
 #[no_mangle]
 #[allow(non_snake_case)]
-unsafe extern "wasm" fn headers_craftName(ptr: *mut WasmHeaders) -> WasmStr {
+unsafe extern "C" fn headers_craftName(ptr: *mut WasmHeaders) -> WasmStr {
     let headers = WasmHeaders::from_wasm(ptr);
     let name = headers.headers.craft_name;
     headers.into_wasm();

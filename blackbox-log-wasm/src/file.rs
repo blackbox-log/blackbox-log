@@ -37,13 +37,13 @@ impl WasmFile {
 impl WasmFfi for WasmFile {}
 
 #[no_mangle]
-unsafe extern "wasm" fn file_free(ptr: *mut WasmFile) {
+unsafe extern "C" fn file_free(ptr: *mut WasmFile) {
     let file = WasmFile::from_wasm(ptr);
     drop(file);
 }
 
 #[no_mangle]
-unsafe extern "wasm" fn file_new(data: *mut u8, len: usize) -> *mut WasmFile {
+unsafe extern "C" fn file_new(data: *mut u8, len: usize) -> *mut WasmFile {
     let data = OwnedSlice::new(data, len);
     let file = Box::new(WasmFile::new(data));
     file.into_wasm()
@@ -51,7 +51,7 @@ unsafe extern "wasm" fn file_new(data: *mut u8, len: usize) -> *mut WasmFile {
 
 #[no_mangle]
 #[allow(non_snake_case)]
-unsafe extern "wasm" fn file_logCount(ptr: *mut WasmFile) -> usize {
+unsafe extern "C" fn file_logCount(ptr: *mut WasmFile) -> usize {
     let file = WasmFile::from_wasm(ptr);
     let count = file.log_count();
     file.into_wasm();
@@ -60,7 +60,7 @@ unsafe extern "wasm" fn file_logCount(ptr: *mut WasmFile) -> usize {
 
 #[no_mangle]
 #[allow(non_snake_case)]
-unsafe extern "wasm" fn file_getHeaders(ptr: *mut WasmFile, log: usize) -> *mut WasmHeaders {
+unsafe extern "C" fn file_getHeaders(ptr: *mut WasmFile, log: usize) -> *mut WasmHeaders {
     let file = WasmFile::from_wasm(ptr);
     let headers = Box::new(file.parse_headers(log));
     file.into_wasm();

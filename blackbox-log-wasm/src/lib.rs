@@ -1,4 +1,3 @@
-#![feature(wasm_abi)]
 #![allow(unsafe_code)]
 
 mod data;
@@ -28,6 +27,6 @@ trait WasmFfi {
 }
 
 #[no_mangle]
-unsafe extern "wasm" fn data_alloc(len: usize) -> *mut u8 {
+unsafe extern "C" fn data_alloc(len: usize) -> *mut u8 {
     OwnedSlice::alloc(len).unwrap_or(ptr::null_mut())
 }
