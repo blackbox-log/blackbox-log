@@ -20,14 +20,6 @@
 		},
 		"./wasm": "./dist/blackbox-log.wasm"
 	},
-	"scripts": {
-		"dev": "vite",
-		"build": "tsc && vite build",
-		"preview": "vite preview",
-		"fmt": "prettier --write .",
-		"fmt:check": "prettier --check .",
-		"lint": "eslint --cache src"
-	},
 	"dependencies": {
 		"typescript-memoize": "^1.1.1"
 	},

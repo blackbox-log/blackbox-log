@@ -1,5 +1,5 @@
 [workspace]
-members = ["blackbox-log", "bbl2csv", "blackbox-log-wasm", "fuzz", "xtask"]
+members = ["blackbox-log", "bbl2csv", "blackbox-log-wasm", "fuzz"]
 default-members = ["blackbox-log", "bbl2csv"]
 resolver = "2"
 
