@@ -27,19 +27,7 @@ jobs:
       - name: blackbox-log, all
         run: cargo cranky -p blackbox-log --all-features
       - name: Workspace
-        run: cargo cranky --workspace --all-targets --all-features --exclude blackbox-log-wasm
-
-  clippy-wasm:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use blackbox-log-wasm's rust-toolchain file
-        run: mv blackbox-log-wasm/rust-toolchain* .
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - name: Install cargo-cranky
-        run: cargo install --locked cargo-cranky
-      - name: blackbox-log-wasm
-        run: cargo cranky -p blackbox-log-wasm --target wasm32-unknown-unknown --all-targets
+        run: cargo cranky --workspace --all-targets --all-features
 
   test:
     strategy:
