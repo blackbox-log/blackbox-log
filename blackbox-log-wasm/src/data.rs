@@ -1,7 +1,5 @@
-use std::alloc::{self, Layout};
 use std::mem::ManuallyDrop;
 use std::pin::Pin;
-use std::{ptr, slice};
 
 use blackbox_log::data::FrameCounts;
 use blackbox_log::frame::{Frame, GpsFrame, MainFrame, SlowFrame};
@@ -16,7 +14,7 @@ pub struct WasmDataParser {
     parsed: Pin<Box<WasmParseEvent>>,
     parser: DataParser<'static, 'static>,
     _headers: Shared<Headers<'static>>,
-    _data: Shared<OwnedSlice>,
+    _data: Shared<OwnedSlice<u8>>,
 }
 
 impl_boxed_wasm_ffi!(WasmDataParser);
@@ -25,7 +23,7 @@ impl WasmDataParser {
     pub(crate) fn new(
         headers: Shared<Headers<'static>>,
         reader: Reader<'static>,
-        data: Shared<OwnedSlice>,
+        data: Shared<OwnedSlice<u8>>,
     ) -> Self {
         // SAFETY: this is only used to create the `DataParser`, which is guaranteed to
         // be dropped before `headers` by the declaration order in the struct
@@ -78,15 +76,9 @@ union WasmParseEventData {
     gps: ManuallyDrop<DataGps>,
 }
 
-#[derive(Debug)]
-#[repr(C)]
-struct Fields {
-    // TODO: use generic OwnedSlice
-    len: usize,
-    ptr: *mut u32,
-}
+#[repr(transparent)]
+struct Fields(OwnedSlice<u32>);
 
-#[derive(Debug)]
 #[repr(C)]
 struct DataMain {
     fields: Fields,
@@ -94,13 +86,11 @@ struct DataMain {
     time: WasmDuration,
 }
 
-#[derive(Debug)]
 #[repr(C)]
 struct DataSlow {
     fields: Fields,
 }
 
-#[derive(Debug)]
 #[repr(C)]
 struct DataGps {
     fields: Fields,
@@ -209,58 +199,15 @@ impl From<GpsFrame<'_, '_>> for DataGps {
     }
 }
 
-impl Fields {
-    #[inline]
-    fn layout(len: usize) -> Option<Layout> {
-        if len == 0 {
-            return None;
-        }
-
-        // unwrap is ok since the an error is only returned on overflow, and `len`
-        // should be coming from an existing slice
-        Some(Layout::array::<u32>(len).unwrap())
-    }
-}
-
-impl Default for Fields {
-    fn default() -> Self {
-        Self {
-            len: 0,
-            ptr: ptr::null_mut(),
-        }
-    }
-}
-
-impl Drop for Fields {
-    fn drop(&mut self) {
-        if self.ptr.is_null() {
-            return;
-        }
-
-        if let Some(layout) = Self::layout(self.len) {
-            unsafe { alloc::dealloc(self.ptr as *mut u8, layout) }
-        }
-
-        self.ptr = ptr::null_mut();
-    }
-}
-
 impl<F: Frame> From<F> for Fields {
     fn from(frame: F) -> Self {
-        let len = frame.len();
-        let Some(layout) = Self::layout(len) else {
-            return Self::default();
-        };
-
-        let ptr = unsafe { alloc::alloc_zeroed(layout) as *mut u32 };
-
-        let slice: &mut [u32] = unsafe { slice::from_raw_parts_mut(ptr, len) };
+        let mut slice = OwnedSlice::new_zeroed(frame.len());
 
         for (i, out) in slice.iter_mut().enumerate() {
             *out = frame.get_raw(i).unwrap();
         }
 
-        Self { len, ptr }
+        Self(slice)
     }
 }
 

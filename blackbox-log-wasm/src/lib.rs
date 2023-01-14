@@ -65,7 +65,7 @@ impl<T: WasmSafe> FromWasmFfi for T {
 
 wasm_export! {
     fn data_alloc(len: owned usize) -> *mut u8 {
-        OwnedSlice::alloc(len).unwrap_or(ptr::null_mut())
+        OwnedSlice::<u8>::alloc(len).unwrap_or(ptr::null_mut())
     }
 }
 

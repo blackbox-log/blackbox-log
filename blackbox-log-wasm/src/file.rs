@@ -6,13 +6,13 @@ use crate::{OwnedSlice, Shared};
 // SAFETY: `file` *must* stay before `data` to ensure correct drop order
 pub struct WasmFile {
     file: File<'static>,
-    data: Shared<OwnedSlice>,
+    data: Shared<OwnedSlice<u8>>,
 }
 
 impl_boxed_wasm_ffi!(WasmFile);
 
 impl WasmFile {
-    pub(crate) fn new(data: OwnedSlice) -> Self {
+    pub(crate) fn new(data: OwnedSlice<u8>) -> Self {
         let data = Shared::new(data);
 
         // SAFETY: this is only used to create the `File`, which is guaranteed to be
@@ -39,7 +39,8 @@ impl WasmFile {
 wasm_export!(free file_free: Box<WasmFile>);
 wasm_export! {
     fn file_new(data: owned *mut u8, len: owned usize) -> Box<WasmFile> {
-        let data = OwnedSlice::new(data, len);
+        let data = std::ptr::NonNull::new(data).unwrap();
+        let data = OwnedSlice::from_raw_parts(len, data);
         Box::new(WasmFile::new(data))
     }
 

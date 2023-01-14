@@ -1,77 +1,128 @@
-use std::alloc::{alloc, dealloc, Layout, LayoutError};
-use std::ops::Deref;
+use std::alloc::{alloc, alloc_zeroed, dealloc, Layout, LayoutError};
+use std::ops::{Deref, DerefMut};
+use std::ptr::NonNull;
 use std::slice;
 
-pub(crate) enum OwnedSliceAllocError {
+pub(crate) enum AllocError {
     Layout(LayoutError),
     Alloc,
     ZeroSized,
 }
 
-impl From<LayoutError> for OwnedSliceAllocError {
+impl From<LayoutError> for AllocError {
     fn from(error: LayoutError) -> Self {
         Self::Layout(error)
     }
 }
 
-pub(crate) struct OwnedSlice {
-    ptr: *mut u8,
+#[repr(C)]
+pub(crate) struct OwnedSlice<T> {
     len: usize,
+    ptr: NonNull<T>,
 }
 
-impl OwnedSlice {
-    pub(crate) fn alloc(len: usize) -> Result<*mut u8, OwnedSliceAllocError> {
-        let layout = Layout::array::<u8>(len)?;
+unsafe impl<T> crate::WasmSafe for OwnedSlice<T> {}
 
-        if layout.size() == 0 {
-            return Err(OwnedSliceAllocError::ZeroSized);
+impl<T> OwnedSlice<T> {
+    pub(crate) fn new_zeroed(len: usize) -> Self {
+        let layout = Self::layout(len).unwrap();
+
+        let ptr = if len == 0 || layout.size() == 0 {
+            NonNull::dangling()
+        } else {
+            // SAFETY: above branch ensures that the allocation is non-zero-sized
+            let ptr = unsafe { alloc_zeroed(layout) } as *mut T;
+            NonNull::new(ptr).unwrap()
+        };
+
+        Self { len, ptr }
+    }
+
+    /// Allocate uninitialized backing storage for an `OwnedSlice`.
+    pub(crate) fn alloc(len: usize) -> Result<*mut T, AllocError> {
+        let layout = Self::layout(len)?;
+
+        if len == 0 || layout.size() == 0 {
+            return Err(AllocError::ZeroSized);
         }
 
         // SAFETY: above check ensures that the allocation is non-zero-sized
-        let ptr = unsafe { alloc(layout) };
+        let ptr = unsafe { alloc(layout) } as *mut T;
 
         if ptr.is_null() {
-            return Err(OwnedSliceAllocError::Alloc);
+            return Err(AllocError::Alloc);
         }
 
         Ok(ptr)
     }
 
-    /// Create a new `OwnedSlice` from a pointer and length.
+    /// Create a new `OwnedSlice` from a length and pointer.
     ///
     /// # Safety
     ///
     /// This must be called with a pointer obtained from [`OwnedSlice::alloc`]
-    /// and the same `len`. Any other usage is likely unsound.
-    pub(crate) unsafe fn new(ptr: *mut u8, len: usize) -> Self {
-        Self { ptr, len }
+    /// and the same `len`. Any other usage is likely unsound. All `len`
+    /// elements *must* be initialized before this call.
+    pub(crate) unsafe fn from_raw_parts(len: usize, ptr: NonNull<T>) -> Self {
+        Self { len, ptr }
+    }
+
+    #[inline(always)]
+    fn layout(len: usize) -> Result<Layout, LayoutError> {
+        Layout::array::<T>(len)
     }
 }
 
-impl Deref for OwnedSlice {
-    type Target = [u8];
+impl<T> Default for OwnedSlice<T> {
+    fn default() -> Self {
+        Self::new_zeroed(0)
+    }
+}
 
-    // Reason: makes it clearer what lifetime the output slice will have
-    #[allow(clippy::needless_lifetimes)]
-    fn deref<'a>(&'a self) -> &'a Self::Target {
+impl<T> Deref for OwnedSlice<T> {
+    type Target = [T];
+
+    fn deref(&self) -> &Self::Target {
         // SAFETY: the invariants of `slice::from_raw_parts` are guaranteed to be upheld
         // by callers of `OwnedSlice::new`
-        unsafe { slice::from_raw_parts(self.ptr, self.len) }
+        unsafe { slice::from_raw_parts(self.ptr.as_ptr(), self.len) }
     }
 }
 
-impl Drop for OwnedSlice {
+impl<T> DerefMut for OwnedSlice<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        // SAFETY: the invariants of `slice::from_raw_parts_mut` are guaranteed to be
+        // upheld by callers of `OwnedSlice::new`
+        unsafe { slice::from_raw_parts_mut(self.ptr.as_ptr(), self.len) }
+    }
+}
+
+impl<T> Drop for OwnedSlice<T> {
     fn drop(&mut self) {
-        // SAFETY:
-        // - `unwrap_unchecked` is safe because `Layout::array` only returns an error
-        //   when its size would exceed `isize::MAX`. Since the alignment of a `u8` is
-        //   1, this is only in the case of `self.len > isize::MAX`, which is disallowed
-        //   by `OwnedSlice::new`.
-        // - the invariants of `dealloc` are guaranteed to be upheld by callers of
-        //   `OwnedSlice::new`
-        unsafe {
-            let layout = Layout::array::<u8>(self.len).unwrap_unchecked();
-            dealloc(self.ptr, layout);
-        }
+        let layout = Self::layout(self.len).unwrap();
+        let ptr = self.ptr.as_ptr() as *mut u8;
+
+        // SAFETY: the invariants of `dealloc` are guaranteed to be upheld by callers of
+        // `OwnedSlice::new`
+        unsafe { dealloc(ptr, layout) }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use std::mem;
+
+    use super::*;
+
+    #[test]
+    fn option_niche() {
+        assert_eq!(
+            mem::size_of::<OwnedSlice<()>>(),
+            mem::size_of::<Option<OwnedSlice<()>>>()
+        );
+        assert_eq!(
+            mem::align_of::<OwnedSlice<()>>(),
+            mem::align_of::<Option<OwnedSlice<()>>>()
+        );
     }
 }

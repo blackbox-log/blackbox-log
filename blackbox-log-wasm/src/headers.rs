@@ -1,7 +1,3 @@
-use core::slice;
-use std::alloc::{self, Layout};
-use std::ptr;
-
 use blackbox_log::frame::{FieldDef, FrameDef};
 use blackbox_log::prelude::*;
 use blackbox_log::Reader;
@@ -13,13 +9,13 @@ use crate::{OwnedSlice, Shared};
 pub struct WasmHeaders {
     headers: Shared<Headers<'static>>,
     reader: Reader<'static>,
-    data: Shared<OwnedSlice>,
+    data: Shared<OwnedSlice<u8>>,
 }
 
 impl_boxed_wasm_ffi!(WasmHeaders);
 
 impl WasmHeaders {
-    pub(crate) fn new(mut reader: Reader<'static>, data: Shared<OwnedSlice>) -> Self {
+    pub(crate) fn new(mut reader: Reader<'static>, data: Shared<OwnedSlice<u8>>) -> Self {
         // TODO: error handling
         let headers = Headers::parse(&mut reader).unwrap();
 
@@ -54,12 +50,9 @@ impl WasmHeaders {
     }
 }
 
-#[repr(C)]
-struct WasmFrameDef {
-    // TODO: generic OwnedSlice
-    len: usize,
-    data: *mut WasmFieldDef,
-}
+#[derive(Default)]
+#[repr(transparent)]
+struct WasmFrameDef(OwnedSlice<WasmFieldDef>);
 
 impl_boxed_wasm_ffi!(WasmFrameDef);
 
@@ -70,48 +63,9 @@ struct WasmFieldDef {
     signed: bool,
 }
 
-impl WasmFrameDef {
-    #[inline]
-    fn layout(len: usize) -> Option<Layout> {
-        if len == 0 {
-            return None;
-        }
-
-        Some(Layout::array::<WasmFieldDef>(len).unwrap())
-    }
-}
-
-impl Default for WasmFrameDef {
-    fn default() -> Self {
-        Self {
-            len: 0,
-            data: ptr::null_mut(),
-        }
-    }
-}
-
-impl Drop for WasmFrameDef {
-    fn drop(&mut self) {
-        if self.data.is_null() {
-            return;
-        }
-
-        if let Some(layout) = Self::layout(self.len) {
-            unsafe { alloc::dealloc(self.data as *mut u8, layout) }
-        }
-
-        self.data = ptr::null_mut();
-    }
-}
-
 impl<'data, F: FrameDef<'data>> From<&F> for WasmFrameDef {
     fn from(frame: &F) -> Self {
-        let len = frame.len();
-        let layout = Self::layout(len).unwrap();
-
-        let data = unsafe { alloc::alloc_zeroed(layout) as *mut WasmFieldDef };
-
-        let slice: &mut [WasmFieldDef] = unsafe { slice::from_raw_parts_mut(data, len) };
+        let mut slice = OwnedSlice::new_zeroed(frame.len());
 
         for (i, out) in slice.iter_mut().enumerate() {
             let FieldDef { name, signed, .. } = frame.get(i).unwrap();
@@ -123,7 +77,7 @@ impl<'data, F: FrameDef<'data>> From<&F> for WasmFrameDef {
             };
         }
 
-        Self { len, data }
+        Self(slice)
     }
 }
 
