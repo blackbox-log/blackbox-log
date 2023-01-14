@@ -8,7 +8,7 @@ use blackbox_log::frame::{Frame, GpsFrame, MainFrame, SlowFrame};
 use blackbox_log::prelude::*;
 use blackbox_log::Reader;
 
-use crate::{OwnedSlice, Shared, WasmFfi};
+use crate::{OwnedSlice, Shared};
 
 // SAFETY: field order *must* be `parser` first, then `headers`, then `data` to
 // ensure correct drop order
@@ -18,6 +18,8 @@ pub struct WasmDataParser {
     _headers: Shared<Headers<'static>>,
     _data: Shared<OwnedSlice>,
 }
+
+impl_boxed_wasm_ffi!(WasmDataParser);
 
 impl WasmDataParser {
     pub(crate) fn new(
@@ -51,8 +53,6 @@ impl WasmDataParser {
         *self.parsed = parsed.into();
     }
 }
-
-impl WasmFfi for WasmDataParser {}
 
 #[repr(C)]
 pub struct WasmParseEvent {
@@ -302,39 +302,25 @@ impl WasmDuration {
     }
 }
 
-#[no_mangle]
-unsafe extern "C" fn data_free(ptr: *mut WasmDataParser) {
-    let parser = WasmDataParser::from_wasm(ptr);
-    drop(parser);
-}
+wasm_export!(free data_free: Box<WasmDataParser>);
+wasm_export! {
+    fn data_resultPtr(parser: ref Box<WasmDataParser>) -> *const WasmParseEvent {
+        parser.result_ptr()
+    }
 
-#[no_mangle]
-#[allow(non_snake_case)]
-unsafe extern "C" fn data_resultPtr(ptr: *mut WasmDataParser) -> *const WasmParseEvent {
-    let parser = WasmDataParser::from_wasm(ptr);
-    let ptr = parser.result_ptr();
-    parser.into_wasm();
-    ptr
-}
+    fn data_counts(parser: ref Box<WasmDataParser>) -> [usize; 5] {
+        let counts = parser.frame_counts();
 
-#[no_mangle]
-unsafe extern "C" fn data_counts(ptr: *mut WasmDataParser) -> [usize; 5] {
-    let parser = WasmDataParser::from_wasm(ptr);
-    let counts = parser.frame_counts();
-    parser.into_wasm();
+        [
+            counts.event,
+            counts.main,
+            counts.slow,
+            counts.gps,
+            counts.gps_home,
+        ]
+    }
 
-    [
-        counts.event,
-        counts.main,
-        counts.slow,
-        counts.gps,
-        counts.gps_home,
-    ]
-}
-
-#[no_mangle]
-unsafe extern "C" fn data_next(ptr: *mut WasmDataParser) {
-    let mut parser = WasmDataParser::from_wasm(ptr);
-    parser.next();
-    parser.into_wasm();
+    fn data_next(parser: ref_mut Box<WasmDataParser>) {
+        parser.next();
+    }
 }

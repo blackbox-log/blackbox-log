@@ -18,3 +18,5 @@ impl From<Option<&str>> for WasmStr {
         s.map_or(Self(0, std::ptr::null()), Self::from)
     }
 }
+
+unsafe impl crate::WasmSafe for WasmStr {}

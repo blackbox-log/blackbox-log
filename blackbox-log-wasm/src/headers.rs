@@ -8,13 +8,15 @@ use blackbox_log::Reader;
 
 use crate::data::WasmDataParser;
 use crate::str::WasmStr;
-use crate::{OwnedSlice, Shared, WasmFfi};
+use crate::{OwnedSlice, Shared};
 
 pub struct WasmHeaders {
     headers: Shared<Headers<'static>>,
     reader: Reader<'static>,
     data: Shared<OwnedSlice>,
 }
+
+impl_boxed_wasm_ffi!(WasmHeaders);
 
 impl WasmHeaders {
     pub(crate) fn new(mut reader: Reader<'static>, data: Shared<OwnedSlice>) -> Self {
@@ -52,8 +54,6 @@ impl WasmHeaders {
     }
 }
 
-impl WasmFfi for WasmHeaders {}
-
 #[repr(C)]
 struct WasmFrameDef {
     // TODO: generic OwnedSlice
@@ -61,7 +61,7 @@ struct WasmFrameDef {
     data: *mut WasmFieldDef,
 }
 
-impl WasmFfi for WasmFrameDef {}
+impl_boxed_wasm_ffi!(WasmFrameDef);
 
 #[repr(C)]
 struct WasmFieldDef {
@@ -127,78 +127,34 @@ impl<'data, F: FrameDef<'data>> From<&F> for WasmFrameDef {
     }
 }
 
-#[no_mangle]
-unsafe extern "C" fn headers_free(ptr: *mut WasmHeaders) {
-    let headers = WasmHeaders::from_wasm(ptr);
-    drop(headers);
-}
+wasm_export!(free headers_free: Box<WasmHeaders>);
+wasm_export!(free frameDef_free: Box<WasmFrameDef>);
+wasm_export! {
+    fn headers_getDataParser(headers: ref Box<WasmHeaders>) -> Box<WasmDataParser> {
+        Box::new(headers.get_data_parser())
+    }
 
-#[no_mangle]
-unsafe extern "C" fn headers_getDataParser(ptr: *mut WasmHeaders) -> *mut WasmDataParser {
-    let headers = WasmHeaders::from_wasm(ptr);
-    let parser = headers.get_data_parser();
-    headers.into_wasm();
+    fn headers_mainDef(headers: ref Box<WasmHeaders>) -> Box<WasmFrameDef> {
+        Box::new(headers.main_def())
+    }
 
-    let parser = Box::new(parser);
-    parser.into_wasm()
-}
+    fn headers_slowDef(headers: ref Box<WasmHeaders>) -> Box<WasmFrameDef> {
+        Box::new(headers.slow_def())
+    }
 
-#[no_mangle]
-unsafe extern "C" fn frameDef_free(ptr: *mut WasmFrameDef) {
-    let def = WasmFrameDef::from_wasm(ptr);
-    drop(def);
-}
+    fn headers_gpsDef(headers: ref Box<WasmHeaders>) -> Box<WasmFrameDef> {
+        Box::new(headers.gps_def())
+    }
 
-#[no_mangle]
-unsafe extern "C" fn headers_mainDef(ptr: *mut WasmHeaders) -> *mut WasmFrameDef {
-    let headers = WasmHeaders::from_wasm(ptr);
-    let def = headers.main_def();
-    headers.into_wasm();
+    fn headers_firmwareRevision(headers: ref Box<WasmHeaders>) -> WasmStr {
+        headers.headers.firmware_revision.into()
+    }
 
-    Box::new(def).into_wasm()
-}
+    fn headers_boardInfo(headers: ref Box<WasmHeaders>) -> WasmStr {
+        headers.headers.board_info.into()
+    }
 
-#[no_mangle]
-unsafe extern "C" fn headers_slowDef(ptr: *mut WasmHeaders) -> *mut WasmFrameDef {
-    let headers = WasmHeaders::from_wasm(ptr);
-    let def = headers.slow_def();
-    headers.into_wasm();
-
-    Box::new(def).into_wasm()
-}
-
-#[no_mangle]
-unsafe extern "C" fn headers_gpsDef(ptr: *mut WasmHeaders) -> *mut WasmFrameDef {
-    let headers = WasmHeaders::from_wasm(ptr);
-    let def = headers.gps_def();
-    headers.into_wasm();
-
-    Box::new(def).into_wasm()
-}
-
-#[no_mangle]
-#[allow(non_snake_case)]
-unsafe extern "C" fn headers_firmwareRevision(ptr: *mut WasmHeaders) -> WasmStr {
-    let headers = WasmHeaders::from_wasm(ptr);
-    let firmware = headers.headers.firmware_revision;
-    headers.into_wasm();
-    firmware.into()
-}
-
-#[no_mangle]
-#[allow(non_snake_case)]
-unsafe extern "C" fn headers_boardInfo(ptr: *mut WasmHeaders) -> WasmStr {
-    let headers = WasmHeaders::from_wasm(ptr);
-    let info = headers.headers.board_info;
-    headers.into_wasm();
-    info.into()
-}
-
-#[no_mangle]
-#[allow(non_snake_case)]
-unsafe extern "C" fn headers_craftName(ptr: *mut WasmHeaders) -> WasmStr {
-    let headers = WasmHeaders::from_wasm(ptr);
-    let name = headers.headers.craft_name;
-    headers.into_wasm();
-    name.into()
+    fn headers_craftName(headers: ref Box<WasmHeaders>) -> WasmStr {
+        headers.headers.craft_name.into()
+    }
 }

@@ -1,13 +1,15 @@
 use blackbox_log::File;
 
 use crate::headers::WasmHeaders;
-use crate::{OwnedSlice, Shared, WasmFfi};
+use crate::{OwnedSlice, Shared};
 
 // SAFETY: `file` *must* stay before `data` to ensure correct drop order
 pub struct WasmFile {
     file: File<'static>,
     data: Shared<OwnedSlice>,
 }
+
+impl_boxed_wasm_ffi!(WasmFile);
 
 impl WasmFile {
     pub(crate) fn new(data: OwnedSlice) -> Self {
@@ -34,35 +36,18 @@ impl WasmFile {
     }
 }
 
-impl WasmFfi for WasmFile {}
+wasm_export!(free file_free: Box<WasmFile>);
+wasm_export! {
+    fn file_new(data: owned *mut u8, len: owned usize) -> Box<WasmFile> {
+        let data = OwnedSlice::new(data, len);
+        Box::new(WasmFile::new(data))
+    }
 
-#[no_mangle]
-unsafe extern "C" fn file_free(ptr: *mut WasmFile) {
-    let file = WasmFile::from_wasm(ptr);
-    drop(file);
-}
+    fn file_logCount(file: ref Box<WasmFile>) -> usize {
+        file.log_count()
+    }
 
-#[no_mangle]
-unsafe extern "C" fn file_new(data: *mut u8, len: usize) -> *mut WasmFile {
-    let data = OwnedSlice::new(data, len);
-    let file = Box::new(WasmFile::new(data));
-    file.into_wasm()
-}
-
-#[no_mangle]
-#[allow(non_snake_case)]
-unsafe extern "C" fn file_logCount(ptr: *mut WasmFile) -> usize {
-    let file = WasmFile::from_wasm(ptr);
-    let count = file.log_count();
-    file.into_wasm();
-    count
-}
-
-#[no_mangle]
-#[allow(non_snake_case)]
-unsafe extern "C" fn file_getHeaders(ptr: *mut WasmFile, log: usize) -> *mut WasmHeaders {
-    let file = WasmFile::from_wasm(ptr);
-    let headers = Box::new(file.parse_headers(log));
-    file.into_wasm();
-    headers.into_wasm()
+    fn file_getHeaders(file: ref Box<WasmFile>, log: owned usize) -> Box<WasmHeaders> {
+        Box::new(file.parse_headers(log))
+    }
 }
