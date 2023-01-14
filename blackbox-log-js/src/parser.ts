@@ -1,31 +1,45 @@
 import { File } from './file';
+import { getWasmStr } from './str';
 
 import type { WasmExports } from './wasm';
 
 export type WasmInit = string | URL | Request | Response | WebAssembly.Module;
 
 export default class Parser {
-	static async init(wasm: WasmInit): Promise<Parser> {
-		if (wasm instanceof WebAssembly.Module) {
-			wasm = new WebAssembly.Instance(wasm);
-		} else {
-			if (!(wasm instanceof Response)) {
-				wasm = fetch(wasm);
-			}
+	static async init(init: WasmInit): Promise<Parser> {
+		let instance: WebAssembly.Instance | undefined;
 
-			const streamed = await WebAssembly.instantiateStreaming(
-				wasm as Promise<Response> | Response,
-			);
-			wasm = streamed.instance;
+		const imports = {
+			main: {
+				panic(len: number, ptr: number) {
+					if (instance === undefined) {
+						console.error('received panic before JS handler was initialized');
+						return;
+					}
+
+					console.error(getWasmStr([len, ptr], instance.exports as WasmExports));
+				},
+			},
+		};
+
+		if (init instanceof WebAssembly.Module) {
+			instance = new WebAssembly.Instance(init, imports);
+		} else {
+			const response = init instanceof Response ? init : fetch(init);
+
+			const streamed = await WebAssembly.instantiateStreaming(response, imports);
+			instance = streamed.instance;
 		}
 
-		return new Parser(wasm as WebAssembly.Instance);
+		(instance.exports.set_panic_hook as () => void)();
+
+		return new Parser(instance as { exports: WasmExports });
 	}
 
 	readonly #wasm: WasmExports;
 
-	constructor(wasm: WebAssembly.Instance) {
-		this.#wasm = wasm.exports as WasmExports;
+	constructor(wasm: WebAssembly.Instance & { exports: WasmExports }) {
+		this.#wasm = wasm.exports;
 	}
 
 	loadFile(data: Uint8Array): File {
