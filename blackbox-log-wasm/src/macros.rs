@@ -5,9 +5,10 @@ macro_rules! wasm_export {
         }
     };
 
-    ($( fn $fn:ident($($arg:ident : $pass:ident $arg_type:ty),* $(,)?) $(-> $return:ty)? $body:block )+) => {$(
+    ($( $(#[$attr:meta])* fn $fn:ident($($arg:ident : $pass:ident $arg_type:ty),* $(,)?) $(-> $return:ty)? $body:block )+) => {$(
         #[no_mangle]
         #[allow(non_snake_case, improper_ctypes_definitions)]
+        $(#[$attr])*
         unsafe extern "C" fn $fn($($arg : <$arg_type as crate::WasmFfi>::Ffi),*) $(-> <$return as crate::WasmFfi>::Ffi)? {
             $( #[allow(unused_mut)] let mut $arg = <$arg_type as crate::FromWasmFfi>::from_ffi($arg); )*
 
