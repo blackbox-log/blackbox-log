@@ -166,7 +166,7 @@ pub struct Stats {
     pub counts: FrameCounts,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Copy, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct FrameCounts {
     pub event: usize,

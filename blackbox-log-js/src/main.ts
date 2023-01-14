@@ -1,9 +1,12 @@
 import encodedWasm from './blackbox-log.wasm?inline';
 import Parser from './parser';
 
-import type { File } from './file';
-import type { DataParser, HeaderView, Headers } from './log';
-import type { WasmObject } from './wasm';
+import type { WasmExports } from './wasm';
+
+export type { DataParser } from './data';
+export type { File } from './file';
+export type { Headers } from './headers';
+export type { WasmObject } from './wasm';
 
 export default class SimpleParser extends Parser {
 	static async init(): Promise<SimpleParser> {
@@ -15,10 +18,10 @@ export default class SimpleParser extends Parser {
 		}
 
 		const { instance } = await WebAssembly.instantiate(bytes);
-		return new SimpleParser(instance);
+		return new SimpleParser(instance as { exports: WasmExports });
 	}
 
-	private constructor(wasm: WebAssembly.Instance) {
+	private constructor(wasm: WebAssembly.Instance & { exports: WasmExports }) {
 		if (!(wasm instanceof WebAssembly.Instance)) {
 			throw new Error('create a SimpleParser using its init() method, not new');
 		}
@@ -26,5 +29,3 @@ export default class SimpleParser extends Parser {
 		super(wasm);
 	}
 }
-
-export type { File, HeaderView, Headers, DataParser as Log, WasmObject };

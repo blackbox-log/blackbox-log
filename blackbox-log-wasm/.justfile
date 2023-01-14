@@ -19,7 +19,10 @@ build:
 # Apply multi-value transform
 multivalue:
     multi-value-reverse-polyfill {{ wasmFile }} \
-        'headers_firmwareRevision i32 i32' 'headers_boardInfo i32 i32' 'headers_craftName i32 i32'
+        'data_counts i32 i32 i32 i32 i32' \
+        'headers_boardInfo i32 i32' \
+        'headers_craftName i32 i32' \
+        'headers_firmwareRevision i32 i32'
 
     mv {{ targetDir / 'blackbox-log.multivalue.wasm' }} {{ wasmFile }}
 

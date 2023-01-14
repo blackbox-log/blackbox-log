@@ -30,9 +30,15 @@
 			<br />
 			Craft name: <span id="craft-name"></span>
 			<br />
+			Events: <span id="event-count"></span>
+			<br />
 			Main frames: <span id="main-count"></span>
 			<br />
+			Slow frames: <span id="slow-count"></span>
+			<br />
 			GPS frames: <span id="gps-count"></span>
+			<br />
+			GPS home frames: <span id="gps-home-count"></span>
 		</p>
 
 		<script async type="module">
@@ -70,6 +76,7 @@
 				fileHandler();
 			}
 
+			let animationHandle;
 			function logHandler() {
 				const { value } = logNum;
 				const logInfo = document.querySelector('#log-info');
@@ -90,12 +97,43 @@
 				document.querySelector('#craft-name').innerText = headers.craftName ?? '';
 				updateMemory();
 
-				const data = headers.getDataParser();
-				document.querySelector('#main-count').innerText = data.mainFrameCount;
-				document.querySelector('#gps-count').innerText = data.gpsFrameCount;
+				if (animationHandle !== undefined) {
+					window.cancelAnimationFrame(animationHandle);
+					animationHandle = undefined;
+				}
 
-				document.querySelector('#memory').innerText = `${memory} MiB`;
+				const dataParser = headers.getDataParser();
+				updateCounts(dataParser);
 				updateMemory();
+
+				const animation = () => {
+					if (dataParser.done) {
+						animationHandle = undefined;
+						return;
+					}
+
+					const start = performance.now();
+					let i;
+					for (i = 0; i < 2000; i++) {
+						dataParser.next();
+					}
+					const end = performance.now();
+
+					updateCounts(dataParser);
+					updateMemory();
+
+					animationHandle = window.requestAnimationFrame(animation);
+				};
+				animationHandle = window.requestAnimationFrame(animation);
+			}
+
+			function updateCounts(parser) {
+				const { counts } = parser.stats();
+				document.querySelector('#event-count').innerText = counts.event;
+				document.querySelector('#main-count').innerText = counts.main;
+				document.querySelector('#slow-count').innerText = counts.slow;
+				document.querySelector('#gps-count').innerText = counts.gps;
+				document.querySelector('#gps-home-count').innerText = counts.gpsHome;
 			}
 
 			function updateMemory() {

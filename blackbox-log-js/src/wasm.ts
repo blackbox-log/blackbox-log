@@ -1,8 +1,4 @@
-import { getOptionalWasmStr, getWasmStr } from './str';
-
 import type { WasmStr } from './str';
-
-export { getWasmStr, getOptionalWasmStr };
 
 export type WasmObject = {
 	isAlive: boolean;
@@ -22,19 +18,24 @@ export type WasmExports = {
 
 	headers_free: (ptr: number) => void;
 	headers_getDataParser: (ptr: number) => number;
+	headers_mainDef: (ptr: number) => number;
+	headers_slowDef: (ptr: number) => number;
+	headers_gpsDef: (ptr: number) => number;
 	headers_firmwareRevision: (ptr: number) => WasmStr;
 	headers_boardInfo: (ptr: number) => WasmStr;
 	headers_craftName: (ptr: number) => WasmStr;
 
+	frameDef_free: (ptr: number) => void;
+
 	data_free: (ptr: number) => void;
-	data_mainFrameCount: (ptr: number) => number;
-	data_gpsFrameCount: (ptr: number) => number;
+	data_resultPtr: (ptr: number) => number;
+	data_counts: (ptr: number) => [number, number, number, number, number];
+	data_next: (ptr: number) => void;
 };
 
 const registry = new FinalizationRegistry(dealloc);
 
 function dealloc({ ptr, free }: { ptr: number; free: (ptr: number) => void }) {
-	console.log(`running dealloc for ${ptr}`);
 	free(ptr);
 }
 
