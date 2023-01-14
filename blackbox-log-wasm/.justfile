@@ -1,5 +1,4 @@
 set fallback := true
-set dotenv-load := true
 
 _default:
     @echo blackbox-log-wasm:
@@ -8,12 +7,13 @@ _default:
     @echo Global:
     @cd .. && just --list --unsorted --list-heading ''
 
+wasm := 'wasm32-unknown-unknown'
 targetDir := '../target/wasm32-unknown-unknown/release'
 wasmFile := targetDir / 'blackbox-log.wasm'
 
 # Build
 build:
-    cargo build --release
+    cargo build --release --target {{wasm}}
     cp {{ targetDir / 'blackbox_log_wasm.wasm' }} {{ wasmFile }}
 
 # Apply multi-value transform
