@@ -111,6 +111,7 @@ impl Drop for WasmParseEvent {
     fn drop(&mut self) {
         use {WasmParseEventData as Data, WasmParseEventKind as Kind};
 
+        // SAFETY: data & kind get set together and will always match
         unsafe {
             #[allow(clippy::unneeded_field_pattern)]
             #[allow(clippy::match_same_arms)]

@@ -21,6 +21,7 @@ pub(crate) struct OwnedSlice<T> {
     ptr: NonNull<T>,
 }
 
+// SAFETY: requires multi-value returns
 unsafe impl<T> crate::WasmSafe for OwnedSlice<T> {}
 
 impl<T> OwnedSlice<T> {

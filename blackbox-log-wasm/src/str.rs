@@ -19,4 +19,5 @@ impl From<Option<&str>> for WasmStr {
     }
 }
 
+// SAFETY: requires multi-value returns
 unsafe impl crate::WasmSafe for WasmStr {}
