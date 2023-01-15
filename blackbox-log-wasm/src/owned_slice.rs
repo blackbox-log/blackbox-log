@@ -1,7 +1,7 @@
 use std::alloc::{alloc, alloc_zeroed, dealloc, Layout, LayoutError};
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
-use std::slice;
+use std::{mem, slice};
 
 pub(crate) enum AllocError {
     Layout(LayoutError),
@@ -65,6 +65,8 @@ impl<T> OwnedSlice<T> {
     /// and the same `len`. Any other usage is likely unsound. All `len`
     /// elements *must* be initialized before this call.
     pub(crate) unsafe fn from_raw_parts(len: usize, ptr: NonNull<T>) -> Self {
+        debug_assert_eq!(0, ptr.as_ptr().align_offset(mem::align_of::<T>()));
+
         Self { len, ptr }
     }
 
