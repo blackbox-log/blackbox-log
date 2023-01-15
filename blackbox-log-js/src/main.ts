@@ -3,10 +3,7 @@ import Parser from './parser';
 
 import type { WasmExports } from './wasm';
 
-export type { DataParser } from './data';
-export type { File } from './file';
-export type { Headers } from './headers';
-export type { WasmObject } from './wasm';
+export * from './common';
 
 export default class SimpleParser extends Parser {
 	static async init(): Promise<SimpleParser> {
