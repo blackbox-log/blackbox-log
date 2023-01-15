@@ -7,10 +7,10 @@ import type { FrameDef, Headers } from './headers';
 import type { WasmObject } from './wasm';
 
 export type ParserEvent =
-	| { kind: ParserEventKind.Event; data: undefined }
-	| { kind: ParserEventKind.MainFrame; data: MainFrame }
-	| { kind: ParserEventKind.SlowFrame; data: SlowFrame }
-	| { kind: ParserEventKind.GpsFrame; data: GpsFrame };
+	| { readonly kind: ParserEventKind.Event; readonly data: undefined }
+	| { readonly kind: ParserEventKind.MainFrame; readonly data: MainFrame }
+	| { readonly kind: ParserEventKind.SlowFrame; readonly data: SlowFrame }
+	| { readonly kind: ParserEventKind.GpsFrame; readonly data: GpsFrame };
 
 export enum ParserEventKind {
 	Event = 'event',
@@ -19,30 +19,30 @@ export enum ParserEventKind {
 	GpsFrame = 'gps',
 }
 
-export type FrameFields = Map<string, number>;
+export type FrameFields = ReadonlyMap<string, number>;
 
 export type MainFrame = {
-	iteration: number;
-	time: Temporal.Duration;
-	fields: FrameFields;
+	readonly iteration: number;
+	readonly time: Temporal.Duration;
+	readonly fields: FrameFields;
 };
 
 export type SlowFrame = {
-	fields: FrameFields;
+	readonly fields: FrameFields;
 };
 
 export type GpsFrame = {
-	time: Temporal.Duration;
-	fields: FrameFields;
+	readonly time: Temporal.Duration;
+	readonly fields: FrameFields;
 };
 
 export type Stats = {
-	counts: {
-		event: number;
-		main: number;
-		slow: number;
-		gps: number;
-		gpsHome: number;
+	readonly counts: {
+		readonly event: number;
+		readonly main: number;
+		readonly slow: number;
+		readonly gps: number;
+		readonly gpsHome: number;
 	};
 };
 
