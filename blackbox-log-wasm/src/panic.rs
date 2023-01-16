@@ -1,9 +1,3 @@
-#[cfg(any(target_arch = "wasm32", target_arch = "wasm64"))]
-#[link(wasm_import_module = "main")]
-extern "C" {
-    fn panic(len: usize, data: *const u8);
-}
-
 wasm_export! {
     #[cfg(any(target_arch = "wasm32", target_arch = "wasm64"))]
     fn set_panic_hook() {
@@ -16,12 +10,12 @@ wasm_export! {
 
 #[cfg(any(target_arch = "wasm32", target_arch = "wasm64"))]
 fn panic_hook(info: &std::panic::PanicInfo) {
+    use crate::str::WasmStr;
+
     let message = info.to_string().into_boxed_str();
     let message = Box::leak(message);
-
-    let ptr = message.as_ptr();
-    let len = message.len();
+    let message = WasmStr::from(&*message);
 
     // SAFETY: the message was leaked
-    unsafe { panic(len, ptr) };
+    unsafe { crate::panic(message) };
 }

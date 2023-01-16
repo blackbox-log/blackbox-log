@@ -9,6 +9,7 @@ export type WasmExports = {
 	memory: WebAssembly.Memory;
 
 	data_alloc: (length: number) => number;
+	slice8_free: (length: number, ptr: number) => void;
 
 	file_free: (ptr: number) => void;
 	file_new: (ptr: number, length: number) => number;

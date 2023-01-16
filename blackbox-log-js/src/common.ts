@@ -1,3 +1,4 @@
+export { ParseError } from './parser';
 export type {
 	DataParser,
 	ParserEvent,

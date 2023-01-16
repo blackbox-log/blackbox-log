@@ -111,6 +111,23 @@ impl<T> Drop for OwnedSlice<T> {
     }
 }
 
+impl<T> From<Vec<T>> for OwnedSlice<T> {
+    fn from(vec: Vec<T>) -> Self {
+        Self::from(vec.into_boxed_slice())
+    }
+}
+
+impl<T> From<Box<[T]>> for OwnedSlice<T> {
+    fn from(slice: Box<[T]>) -> Self {
+        let len = slice.len();
+        let ptr = Box::into_raw(slice).cast();
+        let ptr = NonNull::new(ptr).unwrap();
+        unsafe { Self::from_raw_parts(len, ptr) }
+    }
+}
+
+wasm_export!(free slice8_free: OwnedSlice<u8>);
+
 #[cfg(test)]
 mod test {
     use std::mem;

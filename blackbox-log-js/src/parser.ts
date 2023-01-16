@@ -4,9 +4,11 @@ import { type WasmExports } from './wasm';
 
 export type WasmInit = string | URL | Request | Response | WebAssembly.Module;
 
+type Instance = WebAssembly.Instance & { exports: WasmExports };
+
 export default class Parser {
 	static async init(init: WasmInit): Promise<Parser> {
-		let instance: WebAssembly.Instance | undefined;
+		let instance: Instance | undefined;
 
 		const imports = {
 			main: {
@@ -16,18 +18,27 @@ export default class Parser {
 						return;
 					}
 
-					console.error(getWasmStr([len, ptr], instance.exports as WasmExports));
+					console.error(getWasmStr([len, ptr], instance.exports));
+				},
+				throw(len: number, ptr: number) {
+					if (instance === undefined) {
+						throw new ParseError('unknown error');
+					} else {
+						const message = getWasmStr([len, ptr], instance.exports);
+						instance.exports.slice8_free(len, ptr);
+						throw new ParseError(message);
+					}
 				},
 			},
 		};
 
 		if (init instanceof WebAssembly.Module) {
-			instance = new WebAssembly.Instance(init, imports);
+			instance = new WebAssembly.Instance(init, imports) as Instance;
 		} else {
 			const response = init instanceof Response ? init : fetch(init);
 
 			const streamed = await WebAssembly.instantiateStreaming(response, imports);
-			instance = streamed.instance;
+			instance = streamed.instance as Instance;
 		}
 
 		(instance.exports.set_panic_hook as () => void)();
@@ -37,11 +48,23 @@ export default class Parser {
 
 	readonly #wasm: WasmExports;
 
-	constructor(wasm: WebAssembly.Instance & { exports: WasmExports }) {
-		this.#wasm = wasm.exports;
+	constructor(wasm: WebAssembly.Instance) {
+		this.#wasm = wasm.exports as WasmExports;
 	}
 
 	loadFile(data: Uint8Array): File {
 		return new File(this.#wasm, data);
+	}
+}
+
+export class ParseError extends Error {
+	constructor(message: string, options?: ErrorOptions) {
+		super(message, options);
+
+		// Maintain V8 stack trace
+		// @ts-expect-error Only present on V8 and is missing from typedef
+		Error.captureStackTrace?.(this, ParseError); // eslint-disable-line @typescript-eslint/no-unsafe-call
+
+		this.name = 'ParseError';
 	}
 }

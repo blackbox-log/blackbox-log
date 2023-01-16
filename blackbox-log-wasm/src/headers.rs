@@ -16,8 +16,10 @@ impl_boxed_wasm_ffi!(WasmHeaders);
 
 impl WasmHeaders {
     pub(crate) fn new(mut reader: Reader<'static>, data: Shared<OwnedSlice<u8>>) -> Self {
-        // TODO: error handling
-        let headers = Headers::parse(&mut reader).unwrap();
+        let headers = match Headers::parse(&mut reader) {
+            Ok(headers) => headers,
+            Err(err) => crate::throw_headers_parse_error(err),
+        };
 
         Self {
             headers: Shared::new(headers),

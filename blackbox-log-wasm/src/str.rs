@@ -1,7 +1,5 @@
-// The string data will be immediately copied out by JS, so this doesn't use
-// `Borrowing`. That way it can be passed by value and doesn't need a `*_free`
-// function. `wasm-bindgen` does something similar in the impl of `IntoWasmAbi`
-// for `str`.
+use crate::OwnedSlice;
+
 #[repr(C)]
 pub struct WasmStr(usize, *const u8);
 
@@ -21,3 +19,44 @@ impl From<Option<&str>> for WasmStr {
 
 // SAFETY: requires multi-value returns
 unsafe impl crate::WasmSafe for WasmStr {}
+
+#[repr(transparent)]
+pub struct OwnedWasmStr(OwnedSlice<u8>);
+
+impl From<String> for OwnedWasmStr {
+    fn from(str: String) -> Self {
+        let str = str.into_boxed_str();
+        Self::from(str)
+    }
+}
+
+impl From<Box<str>> for OwnedWasmStr {
+    fn from(str: Box<str>) -> Self {
+        Self::from(str.into_boxed_bytes())
+    }
+}
+
+impl From<Box<[u8]>> for OwnedWasmStr {
+    fn from(bytes: Box<[u8]>) -> Self {
+        Self(bytes.into())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use std::mem;
+
+    use super::*;
+
+    #[test]
+    fn owned_str_option_niche() {
+        assert_eq!(
+            mem::size_of::<OwnedWasmStr>(),
+            mem::size_of::<Option<OwnedWasmStr>>()
+        );
+        assert_eq!(
+            mem::align_of::<OwnedWasmStr>(),
+            mem::align_of::<Option<OwnedWasmStr>>()
+        );
+    }
+}
