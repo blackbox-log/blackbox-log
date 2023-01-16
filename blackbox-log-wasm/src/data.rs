@@ -214,8 +214,6 @@ impl<F: Frame> From<F> for Fields {
 
 impl WasmDuration {
     fn from_microseconds(us: u64) -> Self {
-        // TODO: check if it's over the max possible
-
         const US_PER_MS: u64 = 1000;
         const MS_PER_SEC: u64 = 1000;
         const SEC_PER_MIN: u64 = 60;
@@ -235,9 +233,15 @@ impl WasmDuration {
         let min = sec / SEC_PER_MIN;
         let hours = min / MIN_PER_HOUR;
 
+        // Saturate at the full 10hr 16min max...
         if hours > u8::MAX.into() {
-            let hours = u8::MAX.into();
-            return new(hours, MIN_PER_HOUR, SEC_PER_MIN, MS_PER_SEC, US_PER_MS);
+            return new(
+                u8::MAX.into(),
+                MIN_PER_HOUR - 1,
+                SEC_PER_MIN - 1,
+                MS_PER_SEC - 1,
+                US_PER_MS - 1,
+            );
         }
 
         new(
