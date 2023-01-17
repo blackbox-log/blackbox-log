@@ -2,13 +2,16 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::io::Read;
 
-use blackbox_log::data::{ParseEvent, Stats};
-use blackbox_log::event::Event;
-use blackbox_log::frame::GpsFrameDef;
-use blackbox_log::units::{si, Flag, FlagSet};
-use blackbox_log::{DataParser, Headers, Unit, Value};
+use blackbox_log::data::Stats;
+use blackbox_log::frame::{self, FieldDef, GpsFrameDef};
+use blackbox_log::prelude::*;
+use blackbox_log::units::si;
+use blackbox_log::{Event, Unit, Value};
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
+
+const MAX_EVENTS: usize = 200_000;
+const MAX_LOGS: usize = 2;
 
 macro_rules! run {
     () => {
@@ -18,17 +21,9 @@ macro_rules! run {
             file.read_to_end(&mut data).unwrap();
 
             let file = blackbox_log::File::new(&data);
-            let logs = file
-                .iter()
-                .map(|mut reader| {
-                    Headers::parse(&mut reader).map(|headers| {
-                        let data = DataParser::new(reader, &headers);
-                        LogSnapshot::new(&headers, data)
-                    })
-                })
-                .collect::<Vec<_>>();
+            let snapshot = FileSnapshot::from(file);
 
-            insta::assert_ron_snapshot!(logs);
+            insta::assert_ron_snapshot!(snapshot);
         }
     };
 }
@@ -51,13 +46,44 @@ fn gimbal_ghost() {
 }
 
 #[derive(Debug, Serialize)]
+struct FileSnapshot<'data> {
+    count: usize,
+    logs: Vec<blackbox_log::headers::ParseResult<LogSnapshot<'data>>>,
+}
+
+impl<'data> From<blackbox_log::File<'data>> for FileSnapshot<'data> {
+    fn from(file: blackbox_log::File<'data>) -> Self {
+        let logs = file
+            .iter()
+            .map(|mut reader| {
+                Headers::parse(&mut reader).map(|headers| {
+                    let data = DataParser::new(reader, &headers);
+                    LogSnapshot::new(&headers, data)
+                })
+            })
+            .take(MAX_LOGS)
+            .collect::<Vec<_>>();
+
+        Self {
+            count: file.log_count(),
+            logs,
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
 struct LogSnapshot<'data> {
     headers: Headers<'data>,
     stats: Stats,
+    capped: bool,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     events: Vec<Event>,
-    main: Fields,
-    slow: Fields,
-    gps: Fields,
+    #[serde(skip_serializing_if = "MainSnapshot::is_empty")]
+    main: MainSnapshot,
+    #[serde(skip_serializing_if = "SlowSnapshot::is_empty")]
+    slow: SlowSnapshot,
+    #[serde(skip_serializing_if = "GpsSnapshot::is_empty")]
+    gps: GpsSnapshot,
 }
 
 impl<'data> LogSnapshot<'data> {
@@ -65,31 +91,121 @@ impl<'data> LogSnapshot<'data> {
         let headers = headers.clone();
 
         let mut events = Vec::new();
-        let mut main = headers.main_frame_def.iter().collect::<Fields>();
-        let mut slow = headers.slow_frame_def.iter().collect::<Fields>();
-        let mut gps = headers
+
+        let main = headers.main_frame_def.iter().collect::<Fields>();
+        let mut main = MainSnapshot::new(main);
+
+        let slow = headers.slow_frame_def.iter().collect::<Fields>();
+        let mut slow = SlowSnapshot::new(slow);
+
+        let gps = headers
             .gps_frame_def
             .iter()
             .flat_map(GpsFrameDef::iter)
             .collect::<Fields>();
+        let mut gps = GpsSnapshot::new(gps);
 
-        while let Some(frame) = data.next() {
+        let mut capped = true;
+        for _ in 0..MAX_EVENTS {
+            let Some(frame) = data.next() else {
+                capped = false;
+                break;
+            };
+
             match frame {
-                ParseEvent::Event(event) => events.push(event),
-                ParseEvent::Main(frame) => main.update(frame),
-                ParseEvent::Slow(frame) => slow.update(frame),
-                ParseEvent::Gps(frame) => gps.update(frame),
+                ParserEvent::Event(event) => events.push(event),
+                ParserEvent::Main(frame) => main.update(frame),
+                ParserEvent::Slow(frame) => slow.update(frame),
+                ParserEvent::Gps(frame) => gps.update(frame),
             }
         }
 
         Self {
             headers,
             stats: data.stats().clone(),
+            capped,
             events,
             main,
             slow,
             gps,
         }
+    }
+}
+
+#[derive(Debug, Serialize)]
+struct MainSnapshot {
+    count: u128,
+    last_iteration: u32,
+    time: NumberHistory<16, i128>,
+    fields: Fields,
+}
+
+impl MainSnapshot {
+    fn new(fields: Fields) -> Self {
+        Self {
+            count: 0,
+            last_iteration: 0,
+            time: NumberHistory::new(),
+            fields,
+        }
+    }
+
+    fn update(&mut self, frame: frame::MainFrame) {
+        self.count += 1;
+        self.last_iteration = frame.iteration();
+        self.time.update(frame.time_raw().into());
+        self.fields.update(frame);
+    }
+
+    fn is_empty(&self) -> bool {
+        self.count == 0
+    }
+}
+
+#[derive(Debug, Serialize)]
+struct SlowSnapshot {
+    count: u32,
+    fields: Fields,
+}
+
+impl SlowSnapshot {
+    fn new(fields: Fields) -> Self {
+        Self { count: 0, fields }
+    }
+
+    fn update(&mut self, frame: frame::SlowFrame) {
+        self.count += 1;
+        self.fields.update(frame);
+    }
+
+    fn is_empty(&self) -> bool {
+        self.count == 0
+    }
+}
+
+#[derive(Debug, Serialize)]
+struct GpsSnapshot {
+    count: u32,
+    time: (),
+    fields: Fields,
+}
+
+impl GpsSnapshot {
+    fn new(fields: Fields) -> Self {
+        Self {
+            count: 0,
+            time: (),
+            fields,
+        }
+    }
+
+    fn update(&mut self, frame: frame::GpsFrame) {
+        self.count += 1;
+        self.fields.update(frame);
+    }
+
+    fn is_empty(&self) -> bool {
+        self.count == 0
     }
 }
 
@@ -104,15 +220,11 @@ impl Fields {
     }
 }
 
-impl<T, U> FromIterator<(T, U)> for Fields
-where
-    T: Into<String>,
-    U: Into<Unit>,
-{
-    fn from_iter<I: IntoIterator<Item = (T, U)>>(iter: I) -> Self {
+impl<'data, U: Into<Unit>> FromIterator<FieldDef<'data, U>> for Fields {
+    fn from_iter<I: IntoIterator<Item = FieldDef<'data, U>>>(iter: I) -> Self {
         Self(
             iter.into_iter()
-                .map(|(name, unit)| FieldSnapshot::new(name.into(), unit.into()))
+                .map(|field| FieldSnapshot::new(field.name.to_owned(), field.unit.into()))
                 .collect(),
         )
     }
@@ -147,8 +259,7 @@ impl FieldSnapshot {
             name,
             unit,
             history: match unit {
-                Unit::FrameTime
-                | Unit::Amperage
+                Unit::Amperage
                 | Unit::Voltage
                 | Unit::Acceleration
                 | Unit::Rotation
@@ -169,7 +280,6 @@ impl FieldSnapshot {
     fn update(&mut self, value: Value) {
         match &mut self.history {
             History::Int(history) => history.update(match value {
-                Value::FrameTime(t) => t.get::<si::time::microsecond>().round() as i128,
                 Value::Amperage(a) => a.get::<si::electric_current::milliampere>().round() as i128,
                 Value::Voltage(v) => v.get::<si::electric_potential::millivolt>().round() as i128,
                 Value::Acceleration(a) => a

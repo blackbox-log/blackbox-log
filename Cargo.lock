@@ -112,23 +112,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "bpaf"
-version = "0.7.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e95b1464dea6edc21be413bf260662aef39490e150455ae3760019738600b4f"
+name = "blackbox-log-wasm"
+version = "0.1.0"
 dependencies = [
- "bpaf_derive",
-]
-
-[[package]]
-name = "bpaf_derive"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5ed63113bfb3a9bb25dd131acdf0044c7404000ea57dd9eec1f221e3547b4748"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
+ "blackbox-log",
 ]
 
 [[package]]
@@ -841,15 +828,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "toml"
-version = "0.5.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1333c76748e868a4d9d1017b5ab53171dfd095f70c712fdb4653a406547f598f"
-dependencies = [
- "serde",
-]
-
-[[package]]
 name = "tracing"
 version = "0.1.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1093,31 +1071,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "05f360fc0b24296329c78fda852a1e9ae82de9cf7b27dae4b7f62f118f77b9ed"
 dependencies = [
  "tap",
-]
-
-[[package]]
-name = "xshell"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "962c039b3a7b16cf4e9a4248397c6585c07547412e7d6a6e035389a802dcfe90"
-dependencies = [
- "xshell-macros",
-]
-
-[[package]]
-name = "xshell-macros"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1dbabb1cbd15a1d6d12d9ed6b35cc6777d4af87ab3ba155ea37215f20beab80c"
-
-[[package]]
-name = "xtask"
-version = "0.1.0"
-dependencies = [
- "bpaf",
- "serde",
- "toml",
- "xshell",
 ]
 
 [[package]]

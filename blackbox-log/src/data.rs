@@ -42,9 +42,9 @@ impl<'data, 'headers> DataParser<'data, 'headers> {
         self.done
     }
 
-    /// Continues parsing until the next [`ParseEvent`] can be returned. Returns
-    /// `None` if the parser finds the end of the log.
-    pub fn next<'parser>(&'parser mut self) -> Option<ParseEvent<'data, 'headers, 'parser>> {
+    /// Continues parsing until the next [`ParserEvent`] can be returned.
+    /// Returns `None` if the parser finds the end of the log.
+    pub fn next<'parser>(&'parser mut self) -> Option<ParserEvent<'data, 'headers, 'parser>> {
         if self.done {
             return None;
         }
@@ -120,21 +120,21 @@ impl<'data, 'headers> DataParser<'data, 'headers> {
                             }
 
                             self.stats.counts.event += 1;
-                            return Some(ParseEvent::Event(event));
+                            return Some(ParserEvent::Event(event));
                         }
                         InternalFrame::Main(main) => {
                             self.stats.counts.main += 1;
                             let main = self.main_frames.push(main);
 
-                            return Some(ParseEvent::Main(MainFrame::new(self.headers, main)));
+                            return Some(ParserEvent::Main(MainFrame::new(self.headers, main)));
                         }
                         InternalFrame::Slow(slow) => {
                             self.stats.counts.slow += 1;
-                            return Some(ParseEvent::Slow(SlowFrame::new(self.headers, slow)));
+                            return Some(ParserEvent::Slow(SlowFrame::new(self.headers, slow)));
                         }
                         InternalFrame::Gps(gps) => {
                             self.stats.counts.gps += 1;
-                            return Some(ParseEvent::Gps(GpsFrame::new(self.headers, gps)));
+                            return Some(ParserEvent::Gps(GpsFrame::new(self.headers, gps)));
                         }
                         InternalFrame::GpsHome(gps_home) => {
                             self.stats.counts.gps_home += 1;
@@ -166,7 +166,7 @@ pub struct Stats {
     pub counts: FrameCounts,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Copy, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct FrameCounts {
     pub event: usize,
@@ -177,7 +177,7 @@ pub struct FrameCounts {
 }
 
 #[derive(Debug)]
-pub enum ParseEvent<'data, 'headers, 'parser> {
+pub enum ParserEvent<'data, 'headers, 'parser> {
     Event(Event),
     Main(MainFrame<'data, 'headers, 'parser>),
     Slow(SlowFrame<'data, 'headers>),

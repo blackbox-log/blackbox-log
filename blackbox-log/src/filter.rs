@@ -61,10 +61,6 @@ impl AppliedFilter {
     pub(crate) fn get(&self, index: usize) -> Option<usize> {
         self.0.get(index).copied()
     }
-
-    pub(crate) fn iter(&self) -> impl Iterator<Item = usize> + '_ {
-        self.0.iter().copied()
-    }
 }
 
 impl<T> FromIterator<T> for AppliedFilter

@@ -1,4 +1,5 @@
 deny = [
+    "improper_ctypes_definitions",
     "trivial_casts",
     "unsafe_code",
     "clippy::as_underscore",
@@ -19,6 +20,7 @@ warn = [
     "clippy::cast_possible_truncation",
     "clippy::cast_possible_wrap",
     "clippy::cast_sign_loss",
+    "clippy::clone_on_ref_ptr",
     "clippy::cloned_instead_of_copied",
     "clippy::dbg_macro",
     "clippy::decimal_literal_representation",

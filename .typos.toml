@@ -1,5 +1,5 @@
 [files]
-extend-exclude = ["blackbox-log/tests/logs", "blackbox-log/tests/snapshots", "blackbox-sys/upstream"]
+extend-exclude = ["blackbox-log/tests/logs", "blackbox-log/tests/snapshots", "blackbox-sys/upstream", "pnpm-lock.yaml"]
 
 [default]
 locale = "en-us"

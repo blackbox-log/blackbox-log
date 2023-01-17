@@ -1,1419 +1,1266 @@
 ---
 source: blackbox-log/tests/snapshots.rs
-expression: logs
+expression: snapshot
 input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
 ---
-[
-  Ok(LogSnapshot(
-    headers: Headers(
-      version: V2,
-      firmware_revision: "INAV 3.0.1 (753c4479) MATEKF405SE",
-      firmware_kind: Inav,
-      board_info: None,
-      craft_name: Some(":WDTE"),
-      vbat_reference: Some(1646),
-      acceleration_1g: Some(2048),
-      gyro_scale: Some(0.017453292),
-      min_throttle: Some(1042),
-      motor_output_range: Some(MotorOutputRange(
-        min: 1042,
-        max: 1850,
-      )),
-      unknown: {
-        "yaw_lpf_hz": "30",
-        "deadband": "5",
-        "tpa_rate": "0",
-        "acc_hardware": "7",
-        "pidSumLimitYaw": "350",
-        "posPID": "50,5,8",
-        "axisAccelerationLimitYaw": "10000",
-        "rpm_gyro_filter_enabled": "0",
-        "mag_hardware": "0",
-        "altPID": "30,10,10",
-        "yaw_deadband": "5",
-        "gyro_lpf_hz": "25",
-        "dynamicGyroNotchQ": "250",
-        "maxthrottle": "1850",
-        "I interval": "32",
-        "serialrx_provider": "9",
-        "features": "-1337455461",
-        "acc_notch_cutoff": "1",
-        "dterm_lpf_type": "1",
-        "waypoints": "0,0",
-        "Log start datetime": "2021-08-28T12:07:01.109+00:00",
-        "dterm_lpf2_type": "1",
-        "vbatcellvoltage": "28,30,42",
-        "acc_notch_hz": "0",
-        "tpa_breakpoint": "1500",
-        "pidSumLimit": "500",
-        "rates": "36,16,10",
-        "velPID": "0,0,0",
-        "gyro_notch_hz": "0,0",
-        "baro_hardware": "4",
-        "motor_pwm_protocol": "0",
-        "gyro_lpf": "4",
-        "acc_lpf_hz": "15",
-        "rpm_gyro_q": "500",
-        "axisAccelerationLimitRollPitch": "0",
-        "pitchPID": "13,28,0",
-        "magPID": "60",
-        "P interval": "1/2",
-        "posrPID": "0,0,0",
-        "rc_rate": "100",
-        "Firmware date": "Jul  4 2021 14:17:22",
-        "motor_pwm_rate": "400",
-        "dterm_lpf_hz": "40",
-        "rpm_gyro_min_hz": "100",
-        "gyro_lpf_type": "1",
-        "thr_mid": "50",
-        "dynamicGyroNotchRange": "1",
-        "rollPID": "5,8,0",
-        "looptime": "1000",
-        "thr_expo": "0",
-        "yawPID": "20,5,0",
-        "levelPID": "20,5,75",
-        "rc_expo": "70",
-        "debug_mode": "0",
-        "dterm_lpf2_hz": "0",
-        "rc_yaw_expo": "70",
-        "dynamicGyroNotchMinHz": "30",
-        "gyro_notch_cutoff": "1,1",
-        "rpm_gyro_harmonics": "1",
-      },
-    ),
-    stats: Stats(
-      counts: FrameCounts(
-        event: 31,
-        main: 199855,
-        slow: 730,
-        gps: 4180,
-        gps_home: 167,
-      ),
-    ),
-    events: [
-      SyncBeep(110912419),
-      FlightMode(
-        flags: 1,
-        last_flags: 16387,
-      ),
-      FlightMode(
-        flags: 1025,
-        last_flags: 1,
-      ),
-      FlightMode(
-        flags: 1,
-        last_flags: 1025,
-      ),
-      FlightMode(
-        flags: 2305,
-        last_flags: 1,
-      ),
-      FlightMode(
-        flags: 1,
-        last_flags: 2305,
-      ),
-      FlightMode(
-        flags: 16387,
-        last_flags: 1,
-      ),
-      FlightMode(
-        flags: 1,
-        last_flags: 16387,
-      ),
-      FlightMode(
-        flags: 268435457,
-        last_flags: 1,
-      ),
-      InflightAdjustment(
-        function: 17,
-        new_value: Int(36),
-      ),
-      InflightAdjustment(
-        function: 24,
-        new_value: Int(350),
-      ),
-      InflightAdjustment(
-        function: 17,
-        new_value: Int(38),
-      ),
-      InflightAdjustment(
-        function: 24,
-        new_value: Int(340),
-      ),
-      InflightAdjustment(
-        function: 17,
-        new_value: Int(39),
-      ),
-      InflightAdjustment(
-        function: 24,
-        new_value: Int(330),
-      ),
-      InflightAdjustment(
-        function: 17,
-        new_value: Int(41),
-      ),
-      InflightAdjustment(
-        function: 24,
-        new_value: Int(320),
-      ),
-      InflightAdjustment(
-        function: 17,
-        new_value: Int(42),
-      ),
-      InflightAdjustment(
-        function: 24,
-        new_value: Int(310),
-      ),
-      InflightAdjustment(
-        function: 17,
-        new_value: Int(43),
-      ),
-      InflightAdjustment(
-        function: 24,
-        new_value: Int(300),
-      ),
-      InflightAdjustment(
-        function: 17,
-        new_value: Int(45),
-      ),
-      InflightAdjustment(
-        function: 24,
-        new_value: Int(290),
-      ),
-      InflightAdjustment(
-        function: 17,
-        new_value: Int(46),
-      ),
-      InflightAdjustment(
-        function: 24,
-        new_value: Int(280),
-      ),
-      InflightAdjustment(
-        function: 19,
-        new_value: Int(6),
-      ),
-      InflightAdjustment(
-        function: 8,
-        new_value: Int(7),
-      ),
-      SyncBeep(137),
-      FlightMode(
-        flags: 76,
-        last_flags: 80,
-      ),
-      Resume(
-        log_iteration: 1546,
-        time: 1426,
-      ),
-      Disarm(1866),
-    ],
-    main: Fields([
-      FieldSnapshot(
-        name: "loopIteration",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 399682,
-          unique: 199845,
-          histogram: (12492, 12493, 12491, 12490, 12490, 12490, 12490, 12491, 12491, 12490, 12490, 12490, 12492, 12492, 12493, 12490),
-        ),
-      ),
-      FieldSnapshot(
-        name: "time",
-        unit: FrameTime,
-        history: FieldSnapshot(
-          min: 0,
-          max: 513485143,
-          unique: 199855,
-          histogram: (12504, 12513, 12614, 12394, 12500, 12451, 12730, 12352, 12408, 12466, 12355, 12478, 12463, 12573, 12713, 12341),
-        ),
-      ),
-      FieldSnapshot(
-        name: "axisRate[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -5760,
-          max: 2361,
-          unique: 454,
-          histogram: (64409, 10264, 14131, 8745, 10915, 11473, 7169, 12046, 8110, 7035, 10207, 6804, 9566, 6543, 5535, 6903),
-        ),
-      ),
-      FieldSnapshot(
-        name: "axisRate[1]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -93220666,
-          max: 138,
-          unique: 299,
-          histogram: (102270, 17744, 13747, 11054, 9488, 7622, 7113, 6540, 5342, 3267, 2771, 4863, 2323, 1883, 1984, 1844),
-        ),
-      ),
-      FieldSnapshot(
-        name: "axisRate[2]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1163,
-          max: 4794,
-          unique: 20,
-          histogram: (187160, 4155, 6163, 1302, 1064, 3, 2, 1, 0, 0, 1, 1, 1, 1, 0, 1),
-        ),
-      ),
-      FieldSnapshot(
-        name: "axisP[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -133090235,
-          max: 8178,
-          unique: 108,
-          histogram: (57686, 47592, 34420, 23127, 13784, 8568, 5468, 2838, 1745, 1238, 877, 647, 487, 499, 529, 350),
-        ),
-      ),
-      FieldSnapshot(
-        name: "axisP[1]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -841,
-          max: 34556220,
-          unique: 201,
-          histogram: (46066, 41063, 31553, 22771, 15901, 11348, 8336, 5556, 4188, 3160, 2376, 1823, 1502, 2727, 769, 716),
-        ),
-      ),
-      FieldSnapshot(
-        name: "axisP[2]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -48234111,
-          max: 340,
-          unique: 95,
-          histogram: (30153, 26457, 24681, 20786, 18203, 15820, 14065, 12369, 9109, 7856, 6099, 4287, 3365, 2980, 2147, 1478),
-        ),
-      ),
-      FieldSnapshot(
-        name: "axisI[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -842,
-          max: 165,
-          unique: 274,
-          histogram: (24088, 13407, 12782, 13638, 12533, 13779, 11895, 11280, 11535, 11093, 12936, 10961, 10186, 11090, 9551, 9101),
-        ),
-      ),
-      FieldSnapshot(
-        name: "axisI[1]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -397,
-          max: 6285,
-          unique: 217,
-          histogram: (25842, 15905, 13788, 13173, 12293, 12703, 12281, 12235, 11723, 11992, 11285, 10926, 9929, 9201, 8325, 8254),
-        ),
-      ),
-      FieldSnapshot(
-        name: "axisI[2]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1422,
-          max: 2525,
-          unique: 179,
-          histogram: (20271, 10520, 14942, 17050, 24144, 35379, 5906, 6165, 5880, 6160, 7092, 8382, 10937, 8974, 8649, 9404),
-        ),
-      ),
-      FieldSnapshot(
-        name: "axisD[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -6288,
-          max: 40,
-          unique: 13,
-          histogram: (199844, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 2, 0),
-        ),
-      ),
-      FieldSnapshot(
-        name: "axisD[1]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -3700,
-          max: 940,
-          unique: 12,
-          histogram: (199845, 1, 0, 1, 1, 0, 0, 2, 1, 0, 1, 0, 2, 0, 0, 1),
-        ),
-      ),
-      FieldSnapshot(
-        name: "axisD[2]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -2947,
-          max: 46,
-          unique: 11,
-          histogram: (199843, 0, 3, 1, 0, 0, 0, 0, 0, 2, 2, 0, 0, 3, 1, 0),
-        ),
-      ),
-      FieldSnapshot(
-        name: "fwAltP",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -42,
-          max: 1275,
-          unique: 17,
-          histogram: (199577, 11, 10, 10, 27, 30, 31, 41, 42, 70, 2, 3, 0, 0, 1, 0),
-        ),
-      ),
-      FieldSnapshot(
-        name: "fwAltI",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -878,
-          max: 3307,
-          unique: 13,
-          histogram: (199718, 127, 0, 0, 0, 1, 0, 0, 0, 2, 2, 2, 1, 0, 2, 0),
-        ),
-      ),
-      FieldSnapshot(
-        name: "fwAltD",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -3886,
-          max: 3316,
-          unique: 29,
-          histogram: (199598, 1, 20, 0, 21, 21, 0, 21, 31, 21, 32, 20, 40, 27, 2, 0),
-        ),
-      ),
-      FieldSnapshot(
-        name: "fwAltOut",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1072,
-          max: 247,
-          unique: 28,
-          histogram: (199598, 80, 41, 10, 20, 2, 20, 1, 19, 13, 10, 0, 10, 10, 0, 21),
-        ),
-      ),
-      FieldSnapshot(
-        name: "fwPosP",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -63,
-          max: 1128,
-          unique: 17,
-          histogram: (199577, 1, 1, 1, 40, 51, 31, 38, 43, 70, 0, 1, 0, 0, 0, 1),
-        ),
-      ),
-      FieldSnapshot(
-        name: "fwPosI",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1203,
-          max: 3417,
-          unique: 12,
-          histogram: (199706, 137, 1, 2, 0, 0, 0, 0, 1, 5, 2, 0, 1, 0, 0, 0),
-        ),
-      ),
-      FieldSnapshot(
-        name: "fwPosD",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1122,
-          max: 63,
-          unique: 19,
-          histogram: (199646, 20, 22, 41, 117, 0, 0, 0, 0, 0, 3, 1, 0, 1, 0, 4),
-        ),
-      ),
-      FieldSnapshot(
-        name: "fwPosOut",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -942,
-          max: 1217,
-          unique: 21,
-          histogram: (199597, 22, 1, 1, 17, 20, 30, 20, 10, 10, 63, 21, 20, 20, 3, 0),
-        ),
-      ),
-      FieldSnapshot(
-        name: "rcData[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -3593,
-          max: 2011,
-          unique: 466,
-          histogram: (7083, 6129, 9728, 9051, 6116, 9216, 8621, 5172, 10036, 11232, 5303, 22723, 55641, 17306, 5707, 10791),
-        ),
-      ),
-      FieldSnapshot(
-        name: "rcData[1]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -4994,
-          max: 1646,
-          unique: 362,
-          histogram: (6560, 5533, 7772, 7543, 5458, 8061, 7334, 3944, 10884, 33022, 4800, 52313, 24530, 7652, 4256, 10193),
-        ),
-      ),
-      FieldSnapshot(
-        name: "rcData[2]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1712,
-          max: 1591,
-          unique: 102,
-          histogram: (1724, 1150, 3173, 954, 2388, 3348, 1560, 1278, 2959, 4947, 783, 7920, 115573, 48131, 625, 3342),
-        ),
-      ),
-      FieldSnapshot(
-        name: "rcData[3]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1290,
-          max: 2011,
-          unique: 486,
-          histogram: (18434, 11942, 6270, 5551, 9281, 12862, 7482, 7388, 16459, 22229, 15299, 9842, 16222, 18433, 9677, 12484),
-        ),
-      ),
-      FieldSnapshot(
-        name: "rcCommand[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -844,
-          max: 5108,
-          unique: 585,
-          histogram: (84442, 9186, 8565, 9335, 11627, 8164, 6716, 7524, 7256, 6271, 7573, 7668, 7270, 5524, 6697, 6037),
-        ),
-      ),
-      FieldSnapshot(
-        name: "rcCommand[1]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -502,
-          max: 51,
-          unique: 340,
-          histogram: (92001, 9200, 9165, 7506, 8938, 7544, 6193, 6414, 6201, 4792, 18646, 5145, 5333, 4637, 4388, 3752),
-        ),
-      ),
-      FieldSnapshot(
-        name: "rcCommand[2]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -57,
-          max: 34,
-          unique: 54,
-          histogram: (177431, 3116, 3446, 1564, 2713, 1677, 759, 713, 1113, 716, 1373, 2603, 1198, 522, 533, 378),
-        ),
-      ),
-      FieldSnapshot(
-        name: "rcCommand[3]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 12200,
-          unique: 646,
-          histogram: (12332, 15721, 21340, 28334, 6389, 8728, 9995, 16374, 16669, 7330, 8922, 14111, 6854, 8811, 6288, 11657),
-        ),
-      ),
-      FieldSnapshot(
-        name: "vbat",
-        unit: Voltage,
-        history: FieldSnapshot(
-          min: 0,
-          max: 42949655410,
-          unique: 293,
-          histogram: (24464, 0, 22100, 0, 25080, 0, 27180, 0, 24979, 0, 26429, 0, 24526, 0, 25097, 0),
-        ),
-      ),
-      FieldSnapshot(
-        name: "amperage",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -2459,
-          max: 4738,
-          unique: 3168,
-          histogram: (12254, 11803, 11413, 11413, 11943, 17796, 12621, 11700, 11646, 12584, 13221, 12192, 12690, 12145, 12268, 12166),
-        ),
-      ),
-      FieldSnapshot(
-        name: "BaroAlt",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1265,
-          max: 26493,
-          unique: 2436,
-          histogram: (12132, 11766, 11924, 13080, 14950, 11413, 10712, 12530, 12432, 13161, 12185, 11496, 14120, 13311, 12131, 12512),
-        ),
-      ),
-      FieldSnapshot(
-        name: "rssi",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 9687,
-          unique: 183,
-          histogram: (9342, 6403, 4602, 4312, 16403, 4216, 9926, 5241, 6408, 4265, 11312, 8972, 5563, 6426, 3815, 92649),
-        ),
-      ),
-      FieldSnapshot(
-        name: "gyroADC[0]",
-        unit: Rotation,
-        history: FieldSnapshot(
-          min: -4961,
-          max: 1191,
-          unique: 585,
-          histogram: (14077, 17898, 16097, 15429, 14292, 14196, 13683, 13203, 12763, 11829, 10957, 10373, 9390, 9028, 8406, 8234),
-        ),
-      ),
-      FieldSnapshot(
-        name: "gyroADC[1]",
-        unit: Rotation,
-        history: FieldSnapshot(
-          min: -1861,
-          max: 134,
-          unique: 298,
-          histogram: (16475, 22120, 20754, 19654, 17624, 16121, 14677, 12597, 11297, 10021, 8659, 7554, 6513, 5911, 5202, 4676),
-        ),
-      ),
-      FieldSnapshot(
-        name: "gyroADC[2]",
-        unit: Rotation,
-        history: FieldSnapshot(
-          min: -44,
-          max: 99,
-          unique: 142,
-          histogram: (15764, 22285, 20176, 18619, 17511, 15236, 13344, 12679, 10565, 10105, 9485, 9563, 7735, 6438, 5695, 4655),
-        ),
-      ),
-      FieldSnapshot(
-        name: "accSmooth[0]",
-        unit: Acceleration,
-        history: FieldSnapshot(
-          min: -2374,
-          max: 4364,
-          unique: 2137,
-          histogram: (12317, 12344, 12874, 12737, 13104, 12504, 12931, 12863, 12609, 12312, 12164, 12433, 11983, 12228, 12239, 12213),
-        ),
-      ),
-      FieldSnapshot(
-        name: "accSmooth[1]",
-        unit: Acceleration,
-        history: FieldSnapshot(
-          min: -934,
-          max: 481,
-          unique: 654,
-          histogram: (11916, 12566, 13655, 12465, 13111, 12375, 12246, 12911, 12207, 13273, 11881, 12599, 11655, 12995, 11752, 12248),
-        ),
-      ),
-      FieldSnapshot(
-        name: "accSmooth[2]",
-        unit: Acceleration,
-        history: FieldSnapshot(
-          min: -3010,
-          max: 5846,
-          unique: 4211,
-          histogram: (12215, 12389, 12364, 12640, 12790, 12902, 12922, 12590, 12525, 12320, 12374, 12297, 12269, 12405, 12356, 12497),
-        ),
-      ),
-      FieldSnapshot(
-        name: "attitude[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1799,
-          max: 6290,
-          unique: 2812,
-          histogram: (13450, 13156, 13149, 12261, 12576, 12586, 12632, 12448, 11812, 12271, 12190, 11980, 12022, 11941, 12783, 12598),
-        ),
-      ),
-      FieldSnapshot(
-        name: "attitude[1]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -873,
-          max: 476,
-          unique: 1226,
-          histogram: (13211, 13568, 13369, 13199, 15358, 12159, 12223, 12258, 12297, 12375, 12066, 11532, 11543, 11320, 11677, 11700),
-        ),
-      ),
-      FieldSnapshot(
-        name: "attitude[2]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -250,
-          max: 4793,
-          unique: 3604,
-          histogram: (12674, 12933, 13053, 12521, 12185, 12567, 13105, 12232, 12144, 12498, 12523, 12479, 12279, 12109, 12233, 12320),
-        ),
-      ),
-      FieldSnapshot(
-        name: "motor[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 9635,
-          unique: 640,
-          histogram: (7122, 7092, 6821, 9537, 14444, 19190, 14217, 16703, 21126, 17528, 9665, 9986, 12421, 11892, 12913, 9198),
-        ),
-      ),
-      FieldSnapshot(
-        name: "servo[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 4294966653,
-          unique: 12,
-          histogram: (0, 0, 1, 1, 1, 2, 1, 0, 0, 0, 0, 0, 199846, 2, 1, 0),
-        ),
-      ),
-      FieldSnapshot(
-        name: "servo[1]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 4294967024,
-          unique: 12,
-          histogram: (2, 0, 3, 1, 0, 0, 0, 2, 0, 0, 0, 0, 199845, 1, 0, 1),
-        ),
-      ),
-      FieldSnapshot(
-        name: "servo[2]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 4294964522,
-          unique: 10,
-          histogram: (0, 0, 0, 2, 1, 1, 0, 0, 0, 1, 1, 1, 199847, 0, 1, 0),
-        ),
-      ),
-      FieldSnapshot(
-        name: "servo[3]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 4294964903,
-          unique: 488,
-          histogram: (11653, 12810, 12510, 12745, 12642, 13593, 13562, 13140, 12924, 12963, 12261, 12022, 12015, 11783, 11426, 11806),
-        ),
-      ),
-      FieldSnapshot(
-        name: "servo[4]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 4294967164,
-          unique: 550,
-          histogram: (12291, 12189, 11837, 12987, 13162, 13112, 13654, 14402, 12230, 11466, 11859, 12531, 12198, 11446, 12361, 12130),
-        ),
-      ),
-      FieldSnapshot(
-        name: "servo[5]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 5032,
-          unique: 13,
-          histogram: (0, 1, 1, 0, 2, 0, 1, 1, 1, 0, 0, 1, 199843, 3, 1, 0),
-        ),
-      ),
-      FieldSnapshot(
-        name: "servo[6]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 1518,
-          unique: 12,
-          histogram: (1, 0, 2, 0, 1, 2, 1, 0, 0, 0, 0, 0, 199845, 0, 2, 1),
-        ),
-      ),
-      FieldSnapshot(
-        name: "servo[7]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 2443,
-          unique: 12,
-          histogram: (2, 0, 1, 0, 0, 1, 0, 1, 2, 0, 2, 2, 199843, 0, 0, 1),
-        ),
-      ),
-      FieldSnapshot(
-        name: "servo[8]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 3559,
-          unique: 12,
-          histogram: (1, 0, 1, 0, 0, 2, 1, 1, 0, 0, 1, 1, 199844, 0, 1, 2),
-        ),
-      ),
-      FieldSnapshot(
-        name: "servo[9]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 3539,
-          unique: 13,
-          histogram: (1, 0, 2, 3, 1, 2, 0, 1, 0, 1, 0, 0, 199843, 0, 0, 1),
-        ),
-      ),
-      FieldSnapshot(
-        name: "servo[10]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 2015,
-          unique: 12,
-          histogram: (0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 2, 199844, 1, 1, 2),
-        ),
-      ),
-      FieldSnapshot(
-        name: "servo[11]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 3314,
-          unique: 11,
-          histogram: (1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 199847, 2, 0, 1),
-        ),
-      ),
-      FieldSnapshot(
-        name: "servo[12]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 4294966849,
-          unique: 12,
-          histogram: (0, 1, 1, 1, 0, 0, 2, 0, 0, 1, 1, 0, 199844, 1, 2, 1),
-        ),
-      ),
-      FieldSnapshot(
-        name: "servo[13]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 2020,
-          unique: 12,
-          histogram: (0, 1, 1, 1, 3, 1, 2, 1, 0, 0, 1, 0, 199843, 0, 0, 1),
-        ),
-      ),
-      FieldSnapshot(
-        name: "servo[14]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 4294966163,
-          unique: 12,
-          histogram: (0, 2, 0, 1, 0, 1, 0, 1, 0, 1, 0, 2, 199844, 0, 1, 2),
-        ),
-      ),
-      FieldSnapshot(
-        name: "servo[15]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 4294967071,
-          unique: 12,
-          histogram: (1, 0, 0, 1, 1, 2, 0, 0, 1, 1, 1, 1, 199843, 0, 1, 2),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navState",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -201,
-          max: 508,
-          unique: 15,
-          histogram: (1, 184330, 0, 2, 0, 1, 0, 1, 2, 1, 8043, 0, 7471, 0, 2, 1),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navFlags",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 4294967281,
-          unique: 13,
-          histogram: (1, 1, 3, 0, 0, 199843, 1, 1, 0, 1, 0, 1, 1, 2, 0, 0),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navEPH",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -206,
-          max: 854,
-          unique: 115,
-          histogram: (14924, 11060, 8659, 12971, 12101, 11941, 10191, 14111, 12171, 13010, 13480, 11430, 10245, 13360, 13811, 16390),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navEPV",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -60,
-          max: 553,
-          unique: 11,
-          histogram: (2, 0, 0, 0, 199843, 0, 0, 2, 0, 2, 0, 1, 1, 1, 2, 1),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navPos[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -90469,
-          max: 32605,
-          unique: 17847,
-          histogram: (12451, 12530, 12629, 12184, 12710, 12441, 12880, 12402, 12334, 12790, 12481, 11700, 12262, 12760, 12570, 12731),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navPos[1]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -49461,
-          max: 104926,
-          unique: 18094,
-          histogram: (12180, 12375, 12981, 12750, 12030, 12871, 12520, 12830, 12430, 13001, 12001, 12201, 12750, 12140, 12275, 12520),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navPos[2]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1659,
-          max: 26627,
-          unique: 11878,
-          histogram: (12221, 12700, 12410, 12481, 12390, 13175, 13390, 13061, 12591, 12510, 11560, 12614, 12790, 12091, 12000, 11871),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navVel[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -3364,
-          max: 3854,
-          unique: 6082,
-          histogram: (13043, 12321, 12830, 12521, 12685, 12909, 12611, 12672, 12850, 12610, 11911, 12220, 12091, 12560, 12201, 11820),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navVel[1]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -4258,
-          max: 4352,
-          unique: 6325,
-          histogram: (12571, 12620, 12859, 13480, 13320, 11771, 12071, 12124, 12450, 12291, 12431, 12561, 12173, 12362, 12700, 12071),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navVel[2]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -6291,
-          max: 6287,
-          unique: 2900,
-          histogram: (12710, 14929, 12531, 12543, 12641, 12370, 12121, 11950, 12362, 12250, 12440, 12161, 12526, 12180, 12120, 12021),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navAcc[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -2075,
-          max: 4659,
-          unique: 2994,
-          histogram: (13122, 13145, 12981, 13065, 12728, 12435, 12435, 12391, 12510, 12488, 12359, 12344, 12153, 11691, 11853, 12155),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navAcc[1]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -4359,
-          max: 4094,
-          unique: 3439,
-          histogram: (13234, 13191, 13199, 12816, 12722, 12550, 12368, 12325, 12484, 12500, 12268, 12063, 12216, 12172, 11984, 11763),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navAcc[2]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -2929,
-          max: 3604,
-          unique: 4245,
-          histogram: (13220, 13325, 13100, 12634, 12717, 12225, 12247, 12380, 12305, 12339, 12477, 12271, 12260, 12303, 12147, 11905),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navTgtVel[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -2055,
-          max: 451,
-          unique: 10,
-          histogram: (199843, 0, 0, 2, 0, 2, 0, 2, 1, 1, 3, 1, 0, 0, 0, 0),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navTgtVel[1]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1175,
-          max: 1285,
-          unique: 10,
-          histogram: (199846, 0, 0, 0, 0, 1, 0, 1, 1, 0, 4, 0, 0, 0, 0, 2),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navTgtVel[2]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1234,
-          max: 923,
-          unique: 8,
-          histogram: (199846, 0, 4, 1, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navTgtPos[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -53,
-          max: 1189,
-          unique: 11,
-          histogram: (64476, 1, 0, 1, 0, 135373, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navTgtPos[1]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1152,
-          max: 9,
-          unique: 12,
-          histogram: (64476, 2, 2, 1, 1, 0, 0, 135370, 1, 2, 0, 0, 0, 0, 0, 0),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navTgtPos[2]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -2247,
-          max: 26596,
-          unique: 13,
-          histogram: (64474, 1, 1, 0, 135369, 0, 0, 1, 1, 3, 1, 0, 0, 1, 0, 3),
-        ),
-      ),
-      FieldSnapshot(
-        name: "navSurf[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -251,
-          max: 2313,
-          unique: 11,
-          histogram: (199844, 0, 2, 2, 1, 0, 0, 1, 0, 2, 2, 1, 0, 0, 0, 0),
-        ),
-      ),
-    ]),
-    slow: Fields([
-      FieldSnapshot(
-        name: "flightModeFlags",
-        unit: FlightMode,
-        history: {
-          "Angle": 695,
-          "AutoTune": 34,
-          "Failsafe": 21,
-          "Flaperon": 5,
-          "HeadFree": 18,
-          "Heading": 28,
-          "Horizon": 155,
-          "Manual": 24,
-          "NavAltHold": 25,
-          "NavCourseHold": 1,
-          "NavLaunch": 3,
-          "NavPoshold": 17,
-          "NavRth": 20,
-          "NavWp": 8,
-          "Soaring": 1,
-          "TurnAssistant": 133,
-          "Turtle": 1,
+FileSnapshot(
+  count: 1,
+  logs: [
+    Ok(LogSnapshot(
+      headers: Headers(
+        version: V2,
+        firmware_revision: "INAV 3.0.1 (753c4479) MATEKF405SE",
+        firmware_kind: Inav,
+        board_info: None,
+        craft_name: Some(":WDTE"),
+        vbat_reference: Some(1646),
+        acceleration_1g: Some(2048),
+        gyro_scale: Some(0.017453292),
+        min_throttle: Some(1042),
+        motor_output_range: Some(MotorOutputRange(
+          min: 1042,
+          max: 1850,
+        )),
+        unknown: {
+          "yaw_lpf_hz": "30",
+          "deadband": "5",
+          "tpa_rate": "0",
+          "acc_hardware": "7",
+          "pidSumLimitYaw": "350",
+          "posPID": "50,5,8",
+          "axisAccelerationLimitYaw": "10000",
+          "rpm_gyro_filter_enabled": "0",
+          "mag_hardware": "0",
+          "altPID": "30,10,10",
+          "yaw_deadband": "5",
+          "gyro_lpf_hz": "25",
+          "dynamicGyroNotchQ": "250",
+          "maxthrottle": "1850",
+          "I interval": "32",
+          "serialrx_provider": "9",
+          "features": "-1337455461",
+          "acc_notch_cutoff": "1",
+          "dterm_lpf_type": "1",
+          "waypoints": "0,0",
+          "Log start datetime": "2021-08-28T12:07:01.109+00:00",
+          "dterm_lpf2_type": "1",
+          "vbatcellvoltage": "28,30,42",
+          "acc_notch_hz": "0",
+          "tpa_breakpoint": "1500",
+          "pidSumLimit": "500",
+          "rates": "36,16,10",
+          "velPID": "0,0,0",
+          "gyro_notch_hz": "0,0",
+          "baro_hardware": "4",
+          "motor_pwm_protocol": "0",
+          "gyro_lpf": "4",
+          "acc_lpf_hz": "15",
+          "rpm_gyro_q": "500",
+          "axisAccelerationLimitRollPitch": "0",
+          "pitchPID": "13,28,0",
+          "magPID": "60",
+          "P interval": "1/2",
+          "posrPID": "0,0,0",
+          "rc_rate": "100",
+          "Firmware date": "Jul  4 2021 14:17:22",
+          "motor_pwm_rate": "400",
+          "dterm_lpf_hz": "40",
+          "rpm_gyro_min_hz": "100",
+          "gyro_lpf_type": "1",
+          "thr_mid": "50",
+          "dynamicGyroNotchRange": "1",
+          "rollPID": "5,8,0",
+          "looptime": "1000",
+          "thr_expo": "0",
+          "yawPID": "20,5,0",
+          "levelPID": "20,5,75",
+          "rc_expo": "70",
+          "debug_mode": "0",
+          "dterm_lpf2_hz": "0",
+          "rc_yaw_expo": "70",
+          "dynamicGyroNotchMinHz": "30",
+          "gyro_notch_cutoff": "1,1",
+          "rpm_gyro_harmonics": "1",
         },
       ),
-      FieldSnapshot(
-        name: "stateFlags",
-        unit: State,
-        history: {
-          "AccelerometerCalibrated": 673,
-          "AirmodeActive": 669,
-          "Airplane": 669,
-          "AltitudeControl": 669,
-          "AntiWindup": 36,
-          "AntiWindupDeactivated": 585,
-          "CalibrateMag": 45,
-          "CompassCalibrated": 9,
-          "EscSensorEnabled": 2,
-          "FixedWingLegacy": 694,
-          "FlaperonAvailable": 26,
-          "FwHeadingUseYaw": 1,
-          "GpsFix": 687,
-          "GpsFixHome": 688,
-          "LandingDetected": 1,
-          "MoveForwardOnly": 669,
-          "NavCruiseBraking": 7,
-          "NavCruiseBrakingBoost": 4,
-          "NavCruiseBrakingLocked": 5,
-          "NavExtraArmingSafetyBypassed": 1,
-          "NavMotorStopOrIdle": 30,
-          "SetReversibleMotorsForward": 668,
-          "SmallAngle": 706,
-        },
-      ),
-      FieldSnapshot(
-        name: "failsafePhase",
-        unit: FailsafePhase,
-        history: {
-          "Idle": 687,
-          "Landed": 1,
-          "Landing": 2,
-          "ReturnToHome": 1,
-          "RxLossDetected": 8,
-          "RxLossMonitoring": 3,
-          "RxLossRecovered": 1,
-          "Unknown": 27,
-        },
-      ),
-      FieldSnapshot(
-        name: "rxSignalReceived",
-        unit: Boolean,
-        history: History(
-          yes: 704,
-          no: 26,
+      stats: Stats(
+        counts: FrameCounts(
+          event: 9,
+          main: 195300,
+          slow: 650,
+          gps: 4041,
+          gps_home: 97,
         ),
       ),
-      FieldSnapshot(
-        name: "rxFlightChannelsValid",
-        unit: Boolean,
-        history: History(
-          yes: 706,
-          no: 24,
+      capped: true,
+      events: [
+        SyncBeep(110912419),
+        FlightMode(
+          flags: 1,
+          last_flags: 16387,
         ),
-      ),
-      FieldSnapshot(
-        name: "hwHealthStatus",
-        unit: Unitless,
-        history: FieldSnapshot(
+        FlightMode(
+          flags: 1025,
+          last_flags: 1,
+        ),
+        FlightMode(
+          flags: 1,
+          last_flags: 1025,
+        ),
+        FlightMode(
+          flags: 2305,
+          last_flags: 1,
+        ),
+        FlightMode(
+          flags: 1,
+          last_flags: 2305,
+        ),
+        FlightMode(
+          flags: 16387,
+          last_flags: 1,
+        ),
+        FlightMode(
+          flags: 1,
+          last_flags: 16387,
+        ),
+        FlightMode(
+          flags: 268435457,
+          last_flags: 1,
+        ),
+      ],
+      main: MainSnapshot(
+        count: 195300,
+        last_iteration: 390595,
+        time: FieldSnapshot(
           min: 0,
-          max: 24444,
-          unique: 42,
-          histogram: (12, 7, 3, 3, 6, 672, 7, 3, 1, 4, 1, 2, 4, 0, 3, 2),
+          max: 504339886,
+          unique: 195300,
+          histogram: (12223, 12241, 12348, 12128, 12195, 12193, 12441, 12054, 12123, 12141, 12082, 12191, 12155, 12307, 12420, 12058),
         ),
+        fields: Fields([
+          FieldSnapshot(
+            name: "axisRate[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -331,
+              max: 360,
+              unique: 345,
+              histogram: (64085, 10140, 13943, 8668, 10836, 11356, 7123, 11923, 6592, 6968, 9793, 6022, 9370, 6367, 5280, 6834),
+            ),
+          ),
+          FieldSnapshot(
+            name: "axisRate[1]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -153,
+              max: 138,
+              unique: 292,
+              histogram: (100292, 17351, 13220, 10854, 9209, 7457, 6858, 6280, 5193, 3220, 2737, 4795, 2290, 1853, 1948, 1743),
+            ),
+          ),
+          FieldSnapshot(
+            name: "axisRate[2]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -1,
+              max: 4,
+              unique: 6,
+              histogram: (182792, 4055, 6105, 1285, 1063, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "axisP[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -37,
+              max: 44,
+              unique: 82,
+              histogram: (57434, 47242, 34050, 22561, 13460, 8326, 5281, 2585, 1523, 989, 626, 355, 239, 212, 245, 172),
+            ),
+          ),
+          FieldSnapshot(
+            name: "axisP[1]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -97,
+              max: 106,
+              unique: 198,
+              histogram: (45281, 40280, 30907, 22344, 15502, 10986, 8105, 5365, 3990, 3042, 2289, 1728, 1433, 2670, 720, 658),
+            ),
+          ),
+          FieldSnapshot(
+            name: "axisP[2]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -63,
+              max: 21,
+              unique: 85,
+              histogram: (29359, 25923, 24179, 20407, 17956, 15579, 13747, 12140, 8906, 7618, 5884, 4133, 3203, 2842, 2024, 1400),
+            ),
+          ),
+          FieldSnapshot(
+            name: "axisI[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -107,
+              max: 165,
+              unique: 273,
+              histogram: (24008, 13272, 12686, 13574, 12469, 13697, 11772, 11221, 11470, 11006, 10784, 10878, 10130, 9779, 9505, 9049),
+            ),
+          ),
+          FieldSnapshot(
+            name: "axisI[1]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -47,
+              max: 165,
+              unique: 213,
+              histogram: (25493, 15517, 13429, 12958, 12095, 12479, 12127, 11770, 11472, 11650, 10941, 10609, 9671, 8930, 8091, 8068),
+            ),
+          ),
+          FieldSnapshot(
+            name: "axisI[2]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -165,
+              max: 8,
+              unique: 174,
+              histogram: (20219, 10467, 14854, 16893, 23795, 34970, 5573, 5144, 5550, 5760, 6846, 8148, 10582, 8807, 8425, 9267),
+            ),
+          ),
+          FieldSnapshot(
+            name: "axisD[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 0,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "axisD[1]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 0,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "axisD[2]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 0,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "fwAltP",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -9,
+              max: 0,
+              unique: 10,
+              histogram: (195033, 10, 10, 10, 27, 30, 30, 40, 40, 70, 0, 0, 0, 0, 0, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "fwAltI",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -1,
+              max: 0,
+              unique: 2,
+              histogram: (195173, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "fwAltD",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -13,
+              max: 13,
+              unique: 21,
+              histogram: (195053, 0, 20, 0, 20, 20, 0, 20, 30, 20, 30, 20, 40, 27, 0, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "fwAltOut",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -18,
+              max: 8,
+              unique: 19,
+              histogram: (195053, 80, 40, 10, 20, 0, 20, 0, 17, 10, 10, 0, 10, 10, 0, 20),
+            ),
+          ),
+          FieldSnapshot(
+            name: "fwPosP",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -25,
+              max: 0,
+              unique: 7,
+              histogram: (195033, 0, 0, 0, 40, 50, 30, 37, 40, 70, 0, 0, 0, 0, 0, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "fwPosI",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -1,
+              max: 0,
+              unique: 2,
+              histogram: (195163, 137, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "fwPosD",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -4,
+              max: 4,
+              unique: 8,
+              histogram: (195103, 20, 20, 40, 117, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "fwPosOut",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -29,
+              max: 0,
+              unique: 13,
+              histogram: (195053, 20, 0, 0, 17, 20, 30, 20, 10, 10, 60, 20, 20, 20, 0, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "rcData[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 2011,
+              unique: 426,
+              histogram: (6926, 5958, 9570, 8941, 5985, 9026, 8473, 4936, 9757, 9793, 5222, 21736, 55531, 17276, 5597, 10573),
+            ),
+          ),
+          FieldSnapshot(
+            name: "rcData[1]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1646,
+              unique: 342,
+              histogram: (6490, 5294, 7476, 6989, 4972, 7860, 7077, 3725, 10654, 32678, 4710, 52030, 23886, 7442, 4166, 9851),
+            ),
+          ),
+          FieldSnapshot(
+            name: "rcData[2]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1542,
+              unique: 85,
+              histogram: (1712, 1148, 3133, 933, 2358, 3318, 1559, 1262, 2939, 4550, 763, 5528, 114031, 48111, 625, 3330),
+            ),
+          ),
+          FieldSnapshot(
+            name: "rcData[3]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 2001,
+              unique: 464,
+              histogram: (18391, 11802, 6239, 5341, 9055, 12805, 7412, 7347, 16419, 21747, 14385, 9752, 16150, 18244, 8045, 12166),
+            ),
+          ),
+          FieldSnapshot(
+            name: "rcCommand[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -460,
+              max: 501,
+              unique: 464,
+              histogram: (84202, 8985, 8476, 9193, 9889, 8056, 6621, 7419, 7110, 6108, 7517, 7306, 6532, 5409, 6566, 5911),
+            ),
+          ),
+          FieldSnapshot(
+            name: "rcCommand[1]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -282,
+              max: 51,
+              unique: 312,
+              histogram: (91189, 8401, 8960, 7293, 8425, 7304, 5954, 6091, 5964, 4600, 18489, 5056, 5205, 4479, 4271, 3619),
+            ),
+          ),
+          FieldSnapshot(
+            name: "rcCommand[2]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -10,
+              max: 24,
+              unique: 35,
+              histogram: (173135, 3082, 3422, 1548, 2700, 1661, 745, 696, 1092, 685, 1352, 2592, 1180, 513, 526, 371),
+            ),
+          ),
+          FieldSnapshot(
+            name: "rcCommand[3]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1850,
+              unique: 634,
+              histogram: (12300, 15674, 21296, 28284, 6274, 8479, 9897, 16104, 14148, 6876, 8432, 14055, 6784, 8791, 6258, 11648),
+            ),
+          ),
+          FieldSnapshot(
+            name: "vbat",
+            unit: Voltage,
+            history: FieldSnapshot(
+              min: 0,
+              max: 16460,
+              unique: 286,
+              histogram: (24000, 0, 21678, 0, 24441, 0, 26782, 0, 24408, 0, 25919, 0, 23998, 0, 24074, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "amperage",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 4738,
+              unique: 3034,
+              histogram: (11963, 11554, 11017, 10995, 11742, 17464, 12361, 11406, 11396, 12343, 12959, 11853, 12471, 11906, 12003, 11867),
+            ),
+          ),
+          FieldSnapshot(
+            name: "BaroAlt",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -12,
+              max: 26493,
+              unique: 2422,
+              histogram: (11948, 11443, 11717, 12643, 14659, 11116, 10435, 12254, 12180, 12818, 11980, 11311, 13844, 12806, 11933, 12213),
+            ),
+          ),
+          FieldSnapshot(
+            name: "rssi",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1023,
+              unique: 172,
+              histogram: (9338, 6393, 4602, 4302, 16385, 4198, 9874, 5212, 6365, 4227, 11074, 8925, 5500, 6389, 3815, 88701),
+            ),
+          ),
+          FieldSnapshot(
+            name: "gyroADC[0]",
+            unit: Rotation,
+            history: FieldSnapshot(
+              min: -199,
+              max: 291,
+              unique: 375,
+              histogram: (13821, 17613, 15771, 15119, 14018, 13877, 13354, 12848, 12474, 11513, 10675, 10044, 9151, 8796, 8190, 8036),
+            ),
+          ),
+          FieldSnapshot(
+            name: "gyroADC[1]",
+            unit: Rotation,
+            history: FieldSnapshot(
+              min: -188,
+              max: 134,
+              unique: 295,
+              histogram: (16196, 21743, 20308, 19249, 17263, 15784, 14370, 12273, 11044, 9796, 8428, 7315, 6283, 5703, 5027, 4518),
+            ),
+          ),
+          FieldSnapshot(
+            name: "gyroADC[2]",
+            unit: Rotation,
+            history: FieldSnapshot(
+              min: -33,
+              max: 99,
+              unique: 132,
+              histogram: (15378, 21666, 19745, 18221, 17158, 14918, 13120, 12472, 10354, 9895, 9237, 9304, 7547, 6236, 5519, 4530),
+            ),
+          ),
+          FieldSnapshot(
+            name: "accSmooth[0]",
+            unit: Acceleration,
+            history: FieldSnapshot(
+              min: -2374,
+              max: 4364,
+              unique: 2106,
+              histogram: (12021, 12054, 12587, 12476, 12804, 12194, 12594, 12523, 12310, 12054, 11895, 12162, 11708, 11967, 11994, 11957),
+            ),
+          ),
+          FieldSnapshot(
+            name: "accSmooth[1]",
+            unit: Acceleration,
+            history: FieldSnapshot(
+              min: -367,
+              max: 481,
+              unique: 652,
+              histogram: (11686, 12276, 13402, 12225, 12803, 12078, 11950, 12636, 11913, 12941, 11590, 12280, 11391, 12714, 11462, 11953),
+            ),
+          ),
+          FieldSnapshot(
+            name: "accSmooth[2]",
+            unit: Acceleration,
+            history: FieldSnapshot(
+              min: -1382,
+              max: 5846,
+              unique: 3742,
+              histogram: (11919, 12115, 12086, 12365, 12500, 12621, 12604, 12291, 12251, 12022, 12099, 12017, 12018, 12105, 12054, 12233),
+            ),
+          ),
+          FieldSnapshot(
+            name: "attitude[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -1798,
+              max: 1797,
+              unique: 1471,
+              histogram: (13181, 12873, 12865, 12015, 12316, 12318, 12351, 12143, 11488, 11985, 11914, 11678, 11710, 11615, 12512, 12336),
+            ),
+          ),
+          FieldSnapshot(
+            name: "attitude[1]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -757,
+              max: 321,
+              unique: 1078,
+              histogram: (12929, 13349, 13126, 12987, 15133, 11861, 11874, 11878, 11972, 12107, 11741, 11274, 11224, 11072, 11353, 11420),
+            ),
+          ),
+          FieldSnapshot(
+            name: "attitude[2]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 3599,
+              unique: 3599,
+              histogram: (12437, 12651, 12765, 12230, 11890, 12221, 12782, 11943, 11912, 12283, 12237, 12127, 11917, 11847, 11985, 12073),
+            ),
+          ),
+          FieldSnapshot(
+            name: "motor[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1850,
+              unique: 628,
+              histogram: (6559, 6515, 6723, 9488, 14412, 18851, 13406, 16341, 20809, 16445, 9542, 9946, 12394, 11872, 12888, 9109),
+            ),
+          ),
+          FieldSnapshot(
+            name: "servo[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1500,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "servo[1]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1500,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "servo[2]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1500,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "servo[3]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1654,
+              unique: 469,
+              histogram: (11475, 12638, 12287, 12453, 12411, 13318, 13280, 12615, 12611, 12546, 11877, 11714, 11792, 11536, 11188, 11559),
+            ),
+          ),
+          FieldSnapshot(
+            name: "servo[4]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1765,
+              unique: 480,
+              histogram: (12038, 11870, 11532, 12568, 12873, 12712, 13393, 14097, 11963, 11293, 11709, 12346, 12001, 11229, 11841, 11835),
+            ),
+          ),
+          FieldSnapshot(
+            name: "servo[5]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1500,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "servo[6]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1500,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "servo[7]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1500,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "servo[8]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1500,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "servo[9]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1500,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "servo[10]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1500,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "servo[11]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1500,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "servo[12]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1500,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "servo[13]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1500,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "servo[14]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1500,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "servo[15]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1500,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "navState",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 28,
+              unique: 4,
+              histogram: (0, 179787, 0, 0, 0, 0, 0, 0, 0, 0, 8043, 0, 7470, 0, 0, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "navFlags",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 53,
+              unique: 3,
+              histogram: (0, 0, 0, 0, 0, 195300, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "navEPH",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 207,
+              unique: 102,
+              histogram: (14720, 10810, 8309, 12710, 11910, 11740, 9990, 13920, 11950, 12681, 12890, 11070, 9900, 12990, 13550, 16160),
+            ),
+          ),
+          FieldSnapshot(
+            name: "navEPV",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 100,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "navPos[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -90469,
+              max: 32605,
+              unique: 17446,
+              histogram: (12180, 12290, 12289, 11980, 12450, 12180, 12580, 12110, 12121, 12460, 12090, 11380, 11980, 12410, 12330, 12470),
+            ),
+          ),
+          FieldSnapshot(
+            name: "navPos[1]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -49461,
+              max: 104237,
+              unique: 17685,
+              histogram: (11880, 12150, 12740, 12410, 11750, 12570, 12230, 12599, 12130, 12680, 11680, 11920, 12451, 11830, 12010, 12270),
+            ),
+          ),
+          FieldSnapshot(
+            name: "navPos[2]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -21,
+              max: 26627,
+              unique: 11731,
+              histogram: (11910, 12450, 12070, 12181, 12170, 12770, 13129, 12780, 12340, 12260, 11220, 12320, 12440, 11890, 11710, 11660),
+            ),
+          ),
+          FieldSnapshot(
+            name: "navVel[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -3364,
+              max: 3854,
+              unique: 6027,
+              histogram: (12780, 12030, 12590, 12320, 12420, 12519, 12280, 12370, 12591, 12390, 11550, 11910, 11840, 12360, 11870, 11480),
+            ),
+          ),
+          FieldSnapshot(
+            name: "navVel[1]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -4258,
+              max: 3973,
+              unique: 6106,
+              histogram: (12400, 12340, 12609, 13210, 13050, 11540, 11830, 11830, 12150, 11880, 12150, 12260, 11871, 12040, 12350, 11790),
+            ),
+          ),
+          FieldSnapshot(
+            name: "navVel[2]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -2060,
+              max: 2795,
+              unique: 2762,
+              histogram: (12431, 14649, 12180, 12340, 12270, 12100, 11850, 11670, 12050, 11970, 12130, 11800, 12380, 11910, 11860, 11710),
+            ),
+          ),
+          FieldSnapshot(
+            name: "navAcc[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -2075,
+              max: 3190,
+              unique: 2512,
+              histogram: (12845, 12866, 12669, 12787, 12434, 12150, 12133, 12109, 12214, 12235, 12068, 12055, 11848, 11432, 11589, 11866),
+            ),
+          ),
+          FieldSnapshot(
+            name: "navAcc[1]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -1882,
+              max: 4094,
+              unique: 3053,
+              histogram: (12940, 12901, 12894, 12522, 12403, 12251, 12093, 12061, 12213, 12219, 11947, 11797, 11940, 11914, 11696, 11509),
+            ),
+          ),
+          FieldSnapshot(
+            name: "navAcc[2]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -2580,
+              max: 3604,
+              unique: 3825,
+              histogram: (12932, 13055, 12827, 12360, 12425, 11949, 11935, 12097, 11999, 12059, 12177, 11954, 11969, 12039, 11855, 11668),
+            ),
+          ),
+          FieldSnapshot(
+            name: "navTgtVel[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 0,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "navTgtVel[1]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 0,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "navTgtVel[2]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 0,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "navTgtPos[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -53,
+              max: 0,
+              unique: 2,
+              histogram: (64474, 0, 0, 0, 0, 130826, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "navTgtPos[1]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -119,
+              max: 0,
+              unique: 2,
+              histogram: (64474, 0, 0, 0, 0, 0, 0, 130826, 0, 0, 0, 0, 0, 0, 0, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "navTgtPos[2]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 26596,
+              unique: 2,
+              histogram: (64474, 0, 0, 0, 130826, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "navSurf[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 0,
+              unique: 1,
+            ),
+          ),
+        ]),
       ),
-      FieldSnapshot(
-        name: "powerSupplyImpedance",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 199216254,
-          unique: 41,
-          histogram: (138, 7, 6, 1, 25, 25, 15, 81, 73, 101, 44, 7, 105, 49, 50, 3),
-        ),
+      slow: SlowSnapshot(
+        count: 650,
+        fields: Fields([
+          FieldSnapshot(
+            name: "flightModeFlags",
+            unit: FlightMode,
+            history: {
+              "Angle": 650,
+              "AutoTune": 12,
+              "Horizon": 132,
+              "Manual": 1,
+              "NavWp": 1,
+              "TurnAssistant": 132,
+            },
+          ),
+          FieldSnapshot(
+            name: "stateFlags",
+            unit: State,
+            history: {
+              "AccelerometerCalibrated": 650,
+              "AirmodeActive": 650,
+              "Airplane": 650,
+              "AltitudeControl": 650,
+              "AntiWindup": 1,
+              "AntiWindupDeactivated": 566,
+              "FixedWingLegacy": 650,
+              "GpsFix": 650,
+              "GpsFixHome": 650,
+              "MoveForwardOnly": 650,
+              "NavMotorStopOrIdle": 23,
+              "SetReversibleMotorsForward": 650,
+              "SmallAngle": 650,
+            },
+          ),
+          FieldSnapshot(
+            name: "failsafePhase",
+            unit: FailsafePhase,
+            history: {
+              "Idle": 650,
+            },
+          ),
+          FieldSnapshot(
+            name: "rxSignalReceived",
+            unit: Boolean,
+            history: History(
+              yes: 650,
+              no: 0,
+            ),
+          ),
+          FieldSnapshot(
+            name: "rxFlightChannelsValid",
+            unit: Boolean,
+            history: History(
+              yes: 650,
+              no: 0,
+            ),
+          ),
+          FieldSnapshot(
+            name: "hwHealthStatus",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 325,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "powerSupplyImpedance",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 50,
+              unique: 16,
+              histogram: (119, 1, 1, 0, 3, 23, 4, 81, 73, 99, 44, 6, 102, 44, 48, 2),
+            ),
+          ),
+          FieldSnapshot(
+            name: "sagCompensatedVBat",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1646,
+              unique: 146,
+              histogram: (29, 32, 31, 31, 40, 25, 35, 36, 47, 66, 47, 31, 42, 59, 53, 46),
+            ),
+          ),
+          FieldSnapshot(
+            name: "wind[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -75,
+              max: 0,
+              unique: 3,
+              histogram: (30, 0, 321, 0, 0, 0, 0, 0, 0, 0, 0, 299, 0, 0, 0, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "wind[1]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -59,
+              max: 0,
+              unique: 3,
+              histogram: (30, 0, 321, 0, 0, 0, 0, 0, 0, 0, 0, 299, 0, 0, 0, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "wind[2]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -50,
+              max: 0,
+              unique: 3,
+              histogram: (30, 0, 299, 0, 0, 0, 0, 0, 321, 0, 0, 0, 0, 0, 0, 0),
+            ),
+          ),
+          FieldSnapshot(
+            name: "IMUTemperature",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 421,
+              unique: 136,
+              histogram: (61, 88, 46, 39, 31, 32, 30, 33, 46, 41, 33, 31, 22, 26, 32, 59),
+            ),
+          ),
+          FieldSnapshot(
+            name: "baroTemperature",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 412,
+              unique: 139,
+              histogram: (18, 21, 36, 123, 50, 53, 32, 25, 24, 41, 33, 77, 33, 34, 25, 25),
+            ),
+          ),
+          FieldSnapshot(
+            name: "sens0Temp",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -1250,
+              max: 0,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "sens1Temp",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -1250,
+              max: 0,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "sens2Temp",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -1250,
+              max: 0,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "sens3Temp",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -1250,
+              max: 0,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "sens4Temp",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -1250,
+              max: 0,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "sens5Temp",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -1250,
+              max: 0,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "sens6Temp",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -1250,
+              max: 0,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "sens7Temp",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -1250,
+              max: 0,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "escRPM",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 134599721,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "escTemperature",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 0,
+              unique: 1,
+            ),
+          ),
+        ]),
       ),
-      FieldSnapshot(
-        name: "sagCompensatedVBat",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 4026449895,
-          unique: 193,
-          histogram: (30, 39, 33, 36, 48, 28, 43, 40, 51, 68, 55, 35, 57, 66, 53, 48),
-        ),
+      gps: GpsSnapshot(
+        count: 4041,
+        time: (),
+        fields: Fields([
+          FieldSnapshot(
+            name: "GPS_fixType",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 2,
+              unique: 1,
+            ),
+          ),
+          FieldSnapshot(
+            name: "GPS_numSat",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 17,
+              unique: 12,
+              histogram: (418, 1345, 0, 0, 0, 0, 1, 35, 295, 58, 63, 320, 552, 143, 434, 377),
+            ),
+          ),
+          FieldSnapshot(
+            name: "GPS_coord[0]",
+            unit: GpsCoordinate,
+            history: FieldSnapshot(
+              min: 0,
+              max: 524872737,
+              unique: 3759,
+              histogram: (261, 248, 277, 247, 233, 266, 251, 246, 255, 240, 251, 236, 239, 260, 261, 270),
+            ),
+          ),
+          FieldSnapshot(
+            name: "GPS_coord[1]",
+            unit: GpsCoordinate,
+            history: FieldSnapshot(
+              min: 0,
+              max: 136676356,
+              unique: 3844,
+              histogram: (247, 239, 255, 259, 230, 284, 254, 230, 288, 264, 246, 244, 247, 240, 252, 262),
+            ),
+          ),
+          FieldSnapshot(
+            name: "GPS_altitude",
+            unit: Altitude,
+            history: FieldSnapshot(
+              min: 0,
+              max: 305,
+              unique: 262,
+              histogram: (243, 327, 306, 238, 205, 258, 308, 275, 283, 262, 203, 188, 200, 195, 295, 255),
+            ),
+          ),
+          FieldSnapshot(
+            name: "GPS_speed",
+            unit: Velocity,
+            history: FieldSnapshot(
+              min: 0,
+              max: 4327,
+              unique: 1627,
+              histogram: (252, 243, 277, 232, 248, 244, 238, 264, 254, 243, 262, 243, 250, 279, 258, 254),
+            ),
+          ),
+          FieldSnapshot(
+            name: "GPS_ground_course",
+            unit: GpsHeading,
+            history: FieldSnapshot(
+              min: 0,
+              max: 3594,
+              unique: 1989,
+              histogram: (226, 286, 270, 244, 258, 243, 249, 260, 267, 266, 268, 249, 238, 202, 259, 256),
+            ),
+          ),
+          FieldSnapshot(
+            name: "GPS_hdop",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 206,
+              unique: 23,
+              histogram: (0, 95, 826, 799, 72, 352, 207, 651, 40, 544, 59, 41, 0, 0, 148, 207),
+            ),
+          ),
+          FieldSnapshot(
+            name: "GPS_eph",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 147,
+              unique: 55,
+              histogram: (406, 248, 278, 163, 212, 326, 708, 242, 90, 89, 212, 249, 213, 207, 239, 159),
+            ),
+          ),
+          FieldSnapshot(
+            name: "GPS_epv",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 194,
+              unique: 71,
+              histogram: (266, 256, 174, 170, 150, 350, 236, 234, 368, 278, 155, 237, 245, 289, 258, 375),
+            ),
+          ),
+          FieldSnapshot(
+            name: "GPS_velned[0]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -3360,
+              max: 3872,
+              unique: 2759,
+              histogram: (247, 208, 247, 260, 256, 271, 252, 267, 237, 271, 252, 277, 221, 243, 252, 280),
+            ),
+          ),
+          FieldSnapshot(
+            name: "GPS_velned[1]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -4312,
+              max: 4008,
+              unique: 2725,
+              histogram: (284, 247, 263, 251, 227, 249, 271, 243, 261, 247, 249, 249, 275, 237, 266, 222),
+            ),
+          ),
+          FieldSnapshot(
+            name: "GPS_velned[2]",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: -2126,
+              max: 2078,
+              unique: 1653,
+              histogram: (245, 263, 278, 272, 251, 235, 257, 239, 242, 289, 235, 252, 234, 282, 240, 227),
+            ),
+          ),
+        ]),
       ),
-      FieldSnapshot(
-        name: "wind[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -3729,
-          max: 22846,
-          unique: 38,
-          histogram: (41, 6, 323, 3, 3, 2, 1, 4, 6, 6, 9, 318, 0, 4, 2, 2),
-        ),
-      ),
-      FieldSnapshot(
-        name: "wind[1]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1199,
-          max: 5152,
-          unique: 44,
-          histogram: (31, 3, 323, 1, 3, 7, 3, 15, 4, 6, 6, 319, 3, 0, 3, 3),
-        ),
-      ),
-      FieldSnapshot(
-        name: "wind[2]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1173,
-          max: 119527292,
-          unique: 37,
-          histogram: (39, 3, 326, 2, 5, 3, 4, 3, 328, 7, 3, 3, 3, 0, 0, 1),
-        ),
-      ),
-      FieldSnapshot(
-        name: "IMUTemperature",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1000,
-          max: 5434,
-          unique: 181,
-          histogram: (65, 103, 54, 43, 36, 36, 32, 38, 53, 50, 37, 34, 25, 28, 35, 61),
-        ),
-      ),
-      FieldSnapshot(
-        name: "baroTemperature",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1705,
-          max: 5364,
-          unique: 169,
-          histogram: (42, 24, 39, 126, 58, 59, 47, 31, 25, 43, 33, 79, 35, 36, 26, 27),
-        ),
-      ),
-      FieldSnapshot(
-        name: "sens0Temp",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -5356,
-          max: 1759,
-          unique: 36,
-          histogram: (20, 4, 671, 3, 0, 3, 1, 1, 4, 7, 2, 2, 6, 1, 2, 3),
-        ),
-      ),
-      FieldSnapshot(
-        name: "sens1Temp",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -179900,
-          max: 939,
-          unique: 32,
-          histogram: (20, 6, 671, 1, 4, 1, 0, 1, 3, 1, 4, 3, 11, 2, 1, 1),
-        ),
-      ),
-      FieldSnapshot(
-        name: "sens2Temp",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -21759,
-          max: 5133,
-          unique: 38,
-          histogram: (5, 10, 668, 2, 0, 2, 3, 6, 4, 2, 3, 4, 11, 5, 0, 5),
-        ),
-      ),
-      FieldSnapshot(
-        name: "sens3Temp",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1250,
-          max: 2109,
-          unique: 31,
-          histogram: (12, 12, 671, 2, 6, 0, 1, 6, 0, 2, 3, 9, 1, 3, 0, 2),
-        ),
-      ),
-      FieldSnapshot(
-        name: "sens4Temp",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1015752,
-          max: 5183,
-          unique: 37,
-          histogram: (12, 1, 670, 2, 1, 3, 3, 5, 5, 3, 4, 13, 4, 1, 1, 2),
-        ),
-      ),
-      FieldSnapshot(
-        name: "sens5Temp",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -6276,
-          max: 6282,
-          unique: 36,
-          histogram: (19, 3, 670, 2, 4, 2, 1, 4, 2, 0, 4, 1, 11, 1, 2, 4),
-        ),
-      ),
-      FieldSnapshot(
-        name: "sens6Temp",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -2378,
-          max: 515919,
-          unique: 45,
-          histogram: (4, 2, 669, 3, 4, 3, 4, 5, 5, 2, 4, 2, 13, 3, 1, 6),
-        ),
-      ),
-      FieldSnapshot(
-        name: "sens7Temp",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -1878745069,
-          max: 6302,
-          unique: 42,
-          histogram: (11, 13, 670, 2, 1, 0, 3, 2, 3, 5, 7, 5, 2, 3, 3, 0),
-        ),
-      ),
-      FieldSnapshot(
-        name: "escRPM",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 134599721,
-          unique: 37,
-          histogram: (2, 0, 2, 6, 4, 1, 5, 2, 4, 671, 4, 3, 2, 21, 0, 3),
-        ),
-      ),
-      FieldSnapshot(
-        name: "escTemperature",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -2274,
-          max: 1756,
-          unique: 29,
-          histogram: (676, 4, 4, 2, 4, 2, 2, 3, 1, 1, 25, 1, 2, 1, 1, 1),
-        ),
-      ),
-    ]),
-    gps: Fields([
-      FieldSnapshot(
-        name: "time",
-        unit: FrameTime,
-        history: FieldSnapshot(
-          min: 0,
-          max: 513471046,
-          unique: 4180,
-          histogram: (253, 246, 271, 260, 278, 278, 272, 259, 235, 292, 272, 243, 246, 265, 251, 259),
-        ),
-      ),
-      FieldSnapshot(
-        name: "GPS_fixType",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 1973410172,
-          unique: 41,
-          histogram: (3, 3, 4138, 0, 3, 1, 2, 3, 5, 8, 4, 0, 6, 2, 1, 1),
-        ),
-      ),
-      FieldSnapshot(
-        name: "GPS_numSat",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 638555,
-          unique: 51,
-          histogram: (422, 1440, 3, 1, 2, 3, 5, 36, 299, 61, 68, 321, 555, 144, 437, 383),
-        ),
-      ),
-      FieldSnapshot(
-        name: "GPS_coord[0]",
-        unit: GpsCoordinate,
-        history: FieldSnapshot(
-          min: -21990026,
-          max: 939252068,
-          unique: 3893,
-          histogram: (267, 259, 286, 254, 244, 271, 261, 252, 264, 248, 267, 242, 247, 268, 270, 280),
-        ),
-      ),
-      FieldSnapshot(
-        name: "GPS_coord[1]",
-        unit: GpsCoordinate,
-        history: FieldSnapshot(
-          min: -28785,
-          max: 136677548,
-          unique: 3980,
-          histogram: (253, 253, 262, 271, 240, 294, 260, 242, 299, 270, 253, 247, 256, 254, 257, 269),
-        ),
-      ),
-      FieldSnapshot(
-        name: "GPS_altitude",
-        unit: Altitude,
-        history: FieldSnapshot(
-          min: -2000117058,
-          max: 5002,
-          unique: 301,
-          histogram: (255, 338, 314, 252, 212, 266, 311, 280, 288, 271, 211, 195, 206, 202, 304, 275),
-        ),
-      ),
-      FieldSnapshot(
-        name: "GPS_speed",
-        unit: Velocity,
-        history: FieldSnapshot(
-          min: 0,
-          max: 10179,
-          unique: 1709,
-          histogram: (265, 252, 278, 240, 260, 254, 242, 269, 261, 255, 273, 258, 258, 289, 266, 260),
-        ),
-      ),
-      FieldSnapshot(
-        name: "GPS_ground_course",
-        unit: GpsHeading,
-        history: FieldSnapshot(
-          min: 0,
-          max: 10210,
-          unique: 2042,
-          histogram: (230, 296, 278, 256, 267, 253, 257, 267, 272, 280, 276, 260, 249, 213, 265, 261),
-        ),
-      ),
-      FieldSnapshot(
-        name: "GPS_hdop",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 573328,
-          unique: 64,
-          histogram: (7, 97, 831, 896, 74, 354, 208, 656, 41, 548, 61, 44, 2, 1, 150, 210),
-        ),
-      ),
-      FieldSnapshot(
-        name: "GPS_eph",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 557036,
-          unique: 95,
-          histogram: (414, 253, 281, 183, 243, 328, 716, 252, 99, 95, 218, 253, 222, 214, 245, 164),
-        ),
-      ),
-      FieldSnapshot(
-        name: "GPS_epv",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: 0,
-          max: 134079861,
-          unique: 111,
-          histogram: (270, 266, 179, 176, 154, 356, 255, 258, 380, 286, 165, 246, 251, 294, 264, 380),
-        ),
-      ),
-      FieldSnapshot(
-        name: "GPS_velned[0]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -5190,
-          max: 6526,
-          unique: 2833,
-          histogram: (254, 218, 256, 267, 264, 279, 257, 274, 246, 281, 262, 289, 230, 252, 259, 292),
-        ),
-      ),
-      FieldSnapshot(
-        name: "GPS_velned[1]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -4763,
-          max: 4597,
-          unique: 2814,
-          histogram: (293, 254, 272, 258, 236, 256, 283, 253, 273, 256, 255, 259, 279, 241, 277, 235),
-        ),
-      ),
-      FieldSnapshot(
-        name: "GPS_velned[2]",
-        unit: Unitless,
-        history: FieldSnapshot(
-          min: -4572,
-          max: 4140,
-          unique: 1694,
-          histogram: (251, 275, 284, 283, 259, 243, 266, 246, 252, 294, 242, 262, 245, 294, 245, 239),
-        ),
-      ),
-    ]),
-  )),
-]
+    )),
+  ],
+)

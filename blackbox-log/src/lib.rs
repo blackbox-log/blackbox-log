@@ -13,6 +13,7 @@
 //! The simplest way to extract a few fields of interest:
 //!
 //! ```
+//! use blackbox_log::frame::FieldDef;
 //! use blackbox_log::prelude::*;
 //!
 //! let file = b"...";
@@ -30,17 +31,21 @@
 //!     let mut parser = DataParser::new(reader, &headers);
 //!     while let Some(event) = parser.next() {
 //!         match event {
-//!             ParseEvent::Main(main) => {
-//!                 for (value, (name, _)) in main.iter().zip(headers.main_frame_def.iter()) {
+//!             ParserEvent::Main(main) => {
+//!                 for (value, FieldDef { name, .. }) in
+//!                     main.iter().zip(headers.main_frame_def.iter())
+//!                 {
 //!                     println!("{name}: {value:?}");
 //!                 }
 //!             }
-//!             ParseEvent::Slow(slow) => {
-//!                 for (value, (name, _)) in slow.iter().zip(headers.slow_frame_def.iter()) {
+//!             ParserEvent::Slow(slow) => {
+//!                 for (value, FieldDef { name, .. }) in
+//!                     slow.iter().zip(headers.slow_frame_def.iter())
+//!                 {
 //!                     println!("{name}: {value:?}");
 //!                 }
 //!             }
-//!             ParseEvent::Event(_) | ParseEvent::Gps(_) => {}
+//!             ParserEvent::Event(_) | ParserEvent::Gps(_) => {}
 //!         }
 //!     }
 //! }
@@ -49,6 +54,7 @@
 //! Get only the GPS data without parsing logs that cannot contain GPS frames:
 //!
 //! ```
+//! use blackbox_log::frame::FieldDef;
 //! use blackbox_log::prelude::*;
 //!
 //! let file = b"...";
@@ -61,8 +67,8 @@
 //!         let mut parser = DataParser::new(reader, &headers);
 //!
 //!         while let Some(event) = parser.next() {
-//!             if let ParseEvent::Gps(gps) = event {
-//!                 for (value, name) in gps.iter().zip(gps_def.iter_names()) {
+//!             if let ParserEvent::Gps(gps) = event {
+//!                 for (value, FieldDef { name, .. }) in gps.iter().zip(gps_def.iter()) {
 //!                     println!("{name}: {value:?}");
 //!                 }
 //!             }
@@ -74,7 +80,7 @@
 //! # Features
 //!
 //! - `std`: **Enabled** by default. Currently, this only implements
-//!   [`std::error::Error`] for [`HeadersParseError`].
+//!   [`std::error::Error`] for [`headers::ParseError`].
 //! - `serde`: **Disabled** by default. This allows serializing parsed logs
 //!   using `serde`. **Note:** This is only used for snapshot testing and is not
 //!   yet intended for public use.
@@ -100,13 +106,12 @@ pub mod prelude;
 mod reader;
 pub mod units;
 
-pub use self::data::{DataParser, ParseEvent};
+pub use self::data::{DataParser, ParserEvent};
+pub use self::event::Event;
 pub use self::file::File;
 pub use self::filter::FieldFilter;
 pub use self::frame::{Unit, Value};
-pub use self::headers::{
-    Headers, ParseError as HeadersParseError, ParseResult as HeadersParseResult,
-};
+pub use self::headers::Headers;
 pub use self::reader::Reader;
 
 /// The first line of any blackbox log.

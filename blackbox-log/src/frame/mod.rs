@@ -12,33 +12,55 @@ use alloc::borrow::ToOwned;
 use alloc::format;
 use alloc::vec::Vec;
 use core::fmt;
-use core::iter::Peekable;
+use core::iter::{FusedIterator, Peekable};
+use core::marker::PhantomData;
 
 pub use self::gps::{GpsFrame, GpsFrameDef, GpsUnit, GpsValue};
 pub(crate) use self::gps_home::{GpsHomeFrame, GpsPosition};
 pub use self::main::{MainFrame, MainFrameDef, MainUnit, MainValue};
 pub use self::slow::{SlowFrame, SlowFrameDef, SlowUnit, SlowValue};
+use crate::headers::{ParseError, ParseResult};
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
-use crate::{units, FieldFilter, HeadersParseError, HeadersParseResult, Reader};
+use crate::{units, FieldFilter, Reader};
 
 mod seal {
     pub trait Sealed {}
 }
 
 /// A parsed data frame definition.
-#[allow(clippy::len_without_is_empty)]
+///
+/// **Note:** All methods exclude any required metadata fields. See each frame's
+/// definition struct documentation for a list.
 pub trait FrameDef<'data>: seal::Sealed {
     type Unit: Into<Unit>;
 
     /// Returns the number of fields in the frame.
     fn len(&self) -> usize;
 
-    /// Get the name and unit of a field by its index.
-    fn get<'a>(&'a self, index: usize) -> Option<(&'data str, Self::Unit)>
+    /// Returns `true` if the frame is empty, or none of its fields satisfy
+    /// the configured filter.
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /// Returns a field definition by its index.
+    fn get<'def>(&'def self, index: usize) -> Option<FieldDef<'data, Self::Unit>>
     where
-        'data: 'a;
+        'data: 'def;
+
+    /// Iterates over all field definitions in order.
+    fn iter<'def>(&'def self) -> FieldDefIter<'data, 'def, Self>
+    where
+        Self: Sized,
+    {
+        FieldDefIter {
+            frame: self,
+            next: 0,
+            _data: &PhantomData,
+        }
+    }
 
     /// Removes any existing filter so all fields will be included.
     fn clear_filter(&mut self);
@@ -48,33 +70,114 @@ pub trait FrameDef<'data>: seal::Sealed {
     fn apply_filter(&mut self, filter: &FieldFilter);
 }
 
+/// Metadata describing one field.
+#[derive(Debug, Clone, PartialEq, Hash)]
+pub struct FieldDef<'data, U> {
+    pub name: &'data str,
+    pub unit: U,
+    pub signed: bool,
+}
+
+#[derive(Debug)]
+pub struct FieldDefIter<'data, 'def, F> {
+    frame: &'def F,
+    next: usize,
+    _data: &'data PhantomData<()>,
+}
+
+impl<'data, F: FrameDef<'data>> Iterator for FieldDefIter<'data, '_, F> {
+    type Item = FieldDef<'data, F::Unit>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let value = self.frame.get(self.next)?;
+        self.next += 1;
+        Some(value)
+    }
+}
+
+impl<'data, F: FrameDef<'data>> FusedIterator for FieldDefIter<'data, '_, F> {}
+
 /// A parsed data frame.
+///
+/// **Note:** All methods exclude any required metadata fields. Those can be
+/// accessed by the inherent methods on each frame struct.
 pub trait Frame: seal::Sealed {
     type Value: Into<Value>;
 
-    /// Get the value of a field by its index.
-    fn get(&self, index: usize) -> Option<Self::Value>;
+    /// Returns the number of fields in the frame.
+    fn len(&self) -> usize;
 
-    /// Iterate over all field values in order.
-    fn iter(&self) -> FrameIter<'_, Self>
+    /// Returns `true` if the frame is empty, or none of its fields satisfy
+    /// the configured filter.
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /// Returns the raw bits of the parsed value of a field by its index.
+    ///
+    /// This ignores the signedness of the field. That can be retrieved from the
+    /// field definition returned by [`FrameDef::get`].
+    ///
+    /// **Note:** Unlike the `--raw` flag for `blackbox_decode`, this does apply
+    /// predictors. This method only skips converting the value into its proper
+    /// units.
+    fn get_raw(&self, index: usize) -> Option<u32>;
+
+    // Iterates over all raw field values in order. See [`Frame::get_raw`].
+    fn iter_raw(&self) -> RawFieldIter<'_, Self>
     where
         Self: Sized,
     {
-        FrameIter {
+        RawFieldIter {
+            frame: self,
+            next: 0,
+        }
+    }
+
+    /// Gets the value of a field by its index.
+    fn get(&self, index: usize) -> Option<Self::Value>;
+
+    /// Iterates over all field values in order.
+    fn iter(&self) -> FieldIter<'_, Self>
+    where
+        Self: Sized,
+    {
+        FieldIter {
             frame: self,
             next: 0,
         }
     }
 }
 
-/// An iterator over the values of the fields of a parsed frame.
+/// An iterator over the raw values of the fields of a parsed frame. See
+/// [`Frame::iter_raw`].
 #[derive(Debug)]
-pub struct FrameIter<'f, F> {
+pub struct RawFieldIter<'f, F> {
     frame: &'f F,
     next: usize,
 }
 
-impl<F: Frame> Iterator for FrameIter<'_, F> {
+impl<F: Frame> Iterator for RawFieldIter<'_, F> {
+    type Item = u32;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let value = self.frame.get_raw(self.next)?;
+        self.next += 1;
+        Some(value)
+    }
+}
+
+impl<F: Frame> FusedIterator for RawFieldIter<'_, F> {}
+
+/// An iterator over the values of the fields of a parsed frame. See
+/// [`Frame::iter`].
+#[derive(Debug)]
+pub struct FieldIter<'f, F> {
+    frame: &'f F,
+    next: usize,
+}
+
+impl<F: Frame> Iterator for FieldIter<'_, F> {
     type Item = F::Value;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -83,6 +186,8 @@ impl<F: Frame> Iterator for FrameIter<'_, F> {
         Some(value)
     }
 }
+
+impl<F: Frame> FusedIterator for FieldIter<'_, F> {}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -186,7 +291,7 @@ impl fmt::Display for DataFrameKind {
     }
 }
 
-trait FieldDef<'data> {
+trait FieldDefDetails<'data> {
     fn name(&self) -> &'data str;
     fn predictor(&self) -> Predictor;
     fn encoding(&self) -> Encoding;
@@ -196,7 +301,6 @@ trait FieldDef<'data> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum Unit {
-    FrameTime,
     Amperage,
     Voltage,
     Acceleration,
@@ -215,7 +319,6 @@ pub enum Unit {
 impl From<MainUnit> for Unit {
     fn from(unit: MainUnit) -> Self {
         match unit {
-            MainUnit::FrameTime => Self::FrameTime,
             MainUnit::Amperage => Self::Amperage,
             MainUnit::Voltage => Self::Voltage,
             MainUnit::Acceleration => Self::Acceleration,
@@ -240,7 +343,6 @@ impl From<SlowUnit> for Unit {
 impl From<GpsUnit> for Unit {
     fn from(unit: GpsUnit) -> Self {
         match unit {
-            GpsUnit::FrameTime => Self::FrameTime,
             GpsUnit::Coordinate => Self::GpsCoordinate,
             GpsUnit::Altitude => Self::Altitude,
             GpsUnit::Velocity => Self::Velocity,
@@ -252,7 +354,6 @@ impl From<GpsUnit> for Unit {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Value {
-    FrameTime(Time),
     Amperage(ElectricCurrent),
     Voltage(ElectricPotential),
     Acceleration(Acceleration),
@@ -272,7 +373,6 @@ pub enum Value {
 impl From<MainValue> for Value {
     fn from(value: MainValue) -> Self {
         match value {
-            MainValue::FrameTime(t) => Self::FrameTime(t),
             MainValue::Amperage(a) => Self::Amperage(a),
             MainValue::Voltage(v) => Self::Voltage(v),
             MainValue::Acceleration(a) => Self::Acceleration(a),
@@ -299,7 +399,6 @@ impl From<SlowValue> for Value {
 impl From<GpsValue> for Value {
     fn from(value: GpsValue) -> Self {
         match value {
-            GpsValue::FrameTime(t) => Self::FrameTime(t),
             GpsValue::Coordinate(c) => Self::GpsCoordinate(c),
             GpsValue::Altitude(a) => Self::Altitude(a),
             GpsValue::Velocity(v) => Self::Velocity(v),
@@ -345,15 +444,15 @@ impl DataFrameProperty {
     }
 }
 
-fn missing_header_error(kind: DataFrameKind, property: &'static str) -> HeadersParseError {
+fn missing_header_error(kind: DataFrameKind, property: &'static str) -> ParseError {
     tracing::error!("missing header `Field {} {property}`", char::from(kind));
-    HeadersParseError::MissingHeader
+    ParseError::MissingHeader
 }
 
 fn parse_names(
     kind: DataFrameKind,
     names: Option<&str>,
-) -> HeadersParseResult<impl Iterator<Item = &'_ str>> {
+) -> ParseResult<impl Iterator<Item = &'_ str>> {
     let names = names.ok_or_else(|| missing_header_error(kind, "name"))?;
     Ok(names.split(','))
 }
@@ -363,10 +462,10 @@ fn parse_enum_list<'a, T>(
     property: &'static str,
     s: Option<&'a str>,
     parse: impl Fn(&str) -> Option<T> + 'a,
-) -> HeadersParseResult<impl Iterator<Item = HeadersParseResult<T>> + 'a> {
+) -> ParseResult<impl Iterator<Item = ParseResult<T>> + 'a> {
     let s = s.ok_or_else(|| missing_header_error(kind, property))?;
     Ok(s.split(',').map(move |s| {
-        parse(s).ok_or_else(|| HeadersParseError::InvalidHeader {
+        parse(s).ok_or_else(|| ParseError::InvalidHeader {
             header: format!("Field {} {property}", char::from(kind)),
             value: s.to_owned(),
         })
@@ -377,7 +476,7 @@ fn parse_enum_list<'a, T>(
 fn parse_predictors(
     kind: DataFrameKind,
     predictors: Option<&'_ str>,
-) -> HeadersParseResult<impl Iterator<Item = HeadersParseResult<Predictor>> + '_> {
+) -> ParseResult<impl Iterator<Item = ParseResult<Predictor>> + '_> {
     parse_enum_list(kind, "predictor", predictors, Predictor::from_num_str)
 }
 
@@ -385,14 +484,14 @@ fn parse_predictors(
 fn parse_encodings(
     kind: DataFrameKind,
     encodings: Option<&'_ str>,
-) -> HeadersParseResult<impl Iterator<Item = HeadersParseResult<Encoding>> + '_> {
+) -> ParseResult<impl Iterator<Item = ParseResult<Encoding>> + '_> {
     parse_enum_list(kind, "encoding", encodings, Encoding::from_num_str)
 }
 
 fn parse_signs(
     kind: DataFrameKind,
     names: Option<&str>,
-) -> HeadersParseResult<impl Iterator<Item = bool> + '_> {
+) -> ParseResult<impl Iterator<Item = bool> + '_> {
     let names = names.ok_or_else(|| missing_header_error(kind, "signed"))?;
     Ok(names.split(',').map(|s| s.trim() != "0"))
 }
@@ -429,7 +528,7 @@ fn read_field_values<T>(
     Ok(values)
 }
 
-fn parse_impl<'data, F: FieldDef<'data>>(
+fn parse_impl<'data, F: FieldDefDetails<'data>>(
     mut ctx: PredictorContext<'_, 'data>,
     raw: &[u32],
     fields: impl IntoIterator<Item = F>,

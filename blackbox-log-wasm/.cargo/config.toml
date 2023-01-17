@@ -1,0 +1,3 @@
+[build]
+# TODO: add +multivalue
+rustflags = ["-Ctarget-feature=+bulk-memory,+sign-ext"]

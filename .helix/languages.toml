@@ -3,5 +3,5 @@ name = "rust"
 
 [language.config]
 cargo.features = "all"
-checkOnSave.command = "xcheck"
+checkOnSave.command = "cranky"
 rustfmt.extraArgs = ["+nightly"]
