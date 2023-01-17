@@ -52,19 +52,23 @@ impl WasmDataParser {
     }
 }
 
-#[repr(C)]
-pub struct WasmParseEvent {
-    kind: WasmParseEventKind,
-    data: WasmParseEventData,
+impl_structural! {
+    #[repr(C)]
+    pub struct WasmParseEvent {
+        kind: WasmParseEventKind,
+        data: WasmParseEventData,
+    }
 }
 
-#[repr(u8)]
-enum WasmParseEventKind {
-    None = 0,
-    Event,
-    Main,
-    Slow,
-    Gps,
+impl_structural! {
+    #[repr(u8)]
+    enum WasmParseEventKind {
+        None = 0,
+        Event,
+        Main,
+        Slow,
+        Gps,
+    }
 }
 
 #[repr(C)]
@@ -76,35 +80,52 @@ union WasmParseEventData {
     gps: ManuallyDrop<DataGps>,
 }
 
-#[repr(transparent)]
-struct Fields(OwnedSlice<u32>);
-
-#[repr(C)]
-struct DataMain {
-    fields: Fields,
-    iteration: u32,
-    time: WasmDuration,
+// SAFETY: bounds guarantee all fields also impl Structural, repr(C) guarantees
+// known memory layout
+unsafe impl crate::Structural for WasmParseEventData
+where
+    (): crate::Structural,
+    DataMain: crate::Structural,
+    DataSlow: crate::Structural,
+    DataGps: crate::Structural,
+{
 }
 
-#[repr(C)]
-struct DataSlow {
-    fields: Fields,
+impl_structural! {
+    #[repr(transparent)]
+    struct Fields(OwnedSlice<u32>);
 }
 
-#[repr(C)]
-struct DataGps {
-    fields: Fields,
-    time: WasmDuration,
+impl_structural! {
+    #[repr(C)]
+    struct DataMain {
+        fields: Fields,
+        iteration: u32,
+        time: WasmDuration,
+    }
+
+    #[repr(C)]
+    struct DataSlow {
+        fields: Fields,
+    }
+
+    #[repr(C)]
+    struct DataGps {
+        fields: Fields,
+        time: WasmDuration,
+    }
 }
 
-#[derive(Debug, Clone, Copy, Default)]
-#[repr(C)]
-struct WasmDuration {
-    microseconds: u16,
-    milliseconds: u16,
-    seconds: u8,
-    minutes: u8,
-    hours: u8,
+impl_structural! {
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy, Default)]
+    struct WasmDuration {
+        microseconds: u16,
+        milliseconds: u16,
+        seconds: u8,
+        minutes: u8,
+        hours: u8,
+    }
 }
 
 impl Drop for WasmParseEvent {

@@ -52,3 +52,55 @@ macro_rules! impl_boxed_wasm_ffi {
         }
     };
 }
+
+macro_rules! impl_structural {
+    ($(
+        #[repr(C)]
+        $(#[$attr:meta])*
+        $pub:vis struct $name:ident {
+            $( $field:ident : $field_type:path ),+ $(,)?
+        }
+    )+) => {$(
+        $(#[$attr])*
+        #[repr(C)]
+        $pub struct $name {
+            $( $field : $field_type ),+
+        }
+
+        // SAFETY: bounds guarantee all fields also impl Structural, and repr(C)
+        // guarantees a known memory layout
+        unsafe impl crate::Structural for $name
+        where
+            $( $field_type: crate::Structural ),+
+        {}
+    )+};
+    (
+        #[repr(transparent)]
+        $(#[$attr:meta])*
+        $pub:vis struct $name:ident($field:path);
+    ) => {
+        $(#[$attr])*
+        #[repr(transparent)]
+        $pub struct $name($field);
+
+        // SAFETY: bound guanantees the field also impls Structural, but it must
+        // also be repr(C)
+        unsafe impl crate::Structural for $name where $field: crate::Structural {}
+    };
+    (
+        #[repr($repr:ty)]
+        $(#[$attr:meta])*
+        $pub:vis enum $name:ident {
+            $($variant:ident $(= $value:expr)?),+ $(,)?
+        }
+    ) => {
+        $(#[$attr])*
+        #[repr($repr)]
+        $pub enum $name {
+            $($variant $(= $value)?),+
+        }
+
+        // SAFETY: bound guarantees the repr is `Structural`
+        unsafe impl crate::Structural for $name where $repr: crate::Structural {}
+    };
+}

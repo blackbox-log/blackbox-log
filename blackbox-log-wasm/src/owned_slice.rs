@@ -3,6 +3,9 @@ use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 use std::{mem, slice};
 
+use crate::{Structural, WasmByValue};
+
+#[derive(Debug)]
 pub(crate) enum AllocError {
     Layout(LayoutError),
     Alloc,
@@ -21,8 +24,8 @@ pub(crate) struct OwnedSlice<T> {
     ptr: NonNull<T>,
 }
 
-// SAFETY: requires multi-value returns
-unsafe impl<T> crate::WasmSafe for OwnedSlice<T> {}
+// SAFETY: just two usizes when passed by value
+unsafe impl<T: Structural> WasmByValue for OwnedSlice<T> {}
 
 impl<T> OwnedSlice<T> {
     pub(crate) fn new_zeroed(len: usize) -> Self {

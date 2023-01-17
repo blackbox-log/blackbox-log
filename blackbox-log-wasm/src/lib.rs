@@ -14,7 +14,7 @@ mod str;
 
 use std::ptr;
 
-pub(crate) use self::ffi::{FromWasmFfi, IntoWasmFfi, WasmFfi, WasmSafe};
+pub(crate) use self::ffi::{FromWasmFfi, IntoWasmFfi, Structural, WasmByValue, WasmFfi};
 pub(crate) use self::owned_slice::OwnedSlice;
 pub(crate) use self::shared::Shared;
 
