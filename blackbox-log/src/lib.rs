@@ -80,7 +80,7 @@
 //! # Features
 //!
 //! - `std`: **Enabled** by default. Currently, this only implements
-//!   [`std::error::Error`] for [`HeadersParseError`].
+//!   [`std::error::Error`] for [`headers::ParseError`].
 //! - `serde`: **Disabled** by default. This allows serializing parsed logs
 //!   using `serde`. **Note:** This is only used for snapshot testing and is not
 //!   yet intended for public use.
