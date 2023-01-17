@@ -64,9 +64,18 @@ impl<T> OwnedSlice<T> {
     ///
     /// # Safety
     ///
-    /// This must be called with a pointer obtained from [`OwnedSlice::alloc`]
-    /// and the same `len`. Any other usage is likely unsound. All `len`
-    /// elements *must* be initialized before this call.
+    /// - `ptr` must be properly aligned and point to `len` properly initialized
+    ///   values of type `T`
+    /// - if `len` is zero, `ptr` must be an aligned dangling pointer and it
+    ///   will not be deallocated
+    /// - `ptr` must point to the beginning of a single contiguous object
+    ///   allocated by the global allocator
+    /// - there must be no access to the backing memory outside of values
+    ///   returned by `OwnedSlice`
+    /// - `len * mem::size_of::<T>()` must be no larger than `isize::MAX`
+    ///
+    /// See the safety documentation of [`std::slice::from_raw_parts_mut`] &
+    /// [`std::alloc::dealloc`][`dealloc`].
     pub(crate) unsafe fn from_raw_parts(len: usize, ptr: NonNull<T>) -> Self {
         debug_assert_eq!(0, ptr.as_ptr().align_offset(mem::align_of::<T>()));
 
@@ -90,7 +99,7 @@ impl<T> Deref for OwnedSlice<T> {
 
     fn deref(&self) -> &Self::Target {
         // SAFETY: the invariants of `slice::from_raw_parts` are guaranteed to be upheld
-        // by callers of `OwnedSlice::new`
+        // by callers of `OwnedSlice::from_raw_parts`
         unsafe { slice::from_raw_parts(self.ptr.as_ptr(), self.len) }
     }
 }
@@ -98,7 +107,7 @@ impl<T> Deref for OwnedSlice<T> {
 impl<T> DerefMut for OwnedSlice<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         // SAFETY: the invariants of `slice::from_raw_parts_mut` are guaranteed to be
-        // upheld by callers of `OwnedSlice::new`
+        // upheld by callers of `OwnedSlice::from_raw_parts`
         unsafe { slice::from_raw_parts_mut(self.ptr.as_ptr(), self.len) }
     }
 }
@@ -109,7 +118,7 @@ impl<T> Drop for OwnedSlice<T> {
         let ptr = self.ptr.as_ptr() as *mut u8;
 
         // SAFETY: the invariants of `dealloc` are guaranteed to be upheld by callers of
-        // `OwnedSlice::new`
+        // `OwnedSlice::from_raw_parts`
         unsafe { dealloc(ptr, layout) }
     }
 }
@@ -125,6 +134,11 @@ impl<T> From<Box<[T]>> for OwnedSlice<T> {
         let len = slice.len();
         let ptr = Box::into_raw(slice).cast();
         let ptr = NonNull::new(ptr).unwrap();
+
+        // SAFETY:
+        // - proper alignment, allocation, etc is guaranteed because `ptr` comes from an
+        //   existing slice
+        // - taking ownership of the Box prevents invalid usage of pointer
         unsafe { Self::from_raw_parts(len, ptr) }
     }
 }
