@@ -16,6 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: wasm32-unknown-unknown
       - name: Install cargo-cranky
         run: cargo install --locked cargo-cranky
       - name: blackbox-log, none
@@ -28,6 +30,8 @@ jobs:
         run: cargo cranky -p blackbox-log --all-features
       - name: Workspace
         run: cargo cranky --workspace --all-targets --all-features
+      - name: WebAssembly
+        run: cargo cranky -p blackbox-log-wasm --target wasm32-unknown-unknown
 
   test:
     strategy:
@@ -94,6 +98,19 @@ jobs:
         if: ${{ matrix.coverage }}
         with:
           files: coverage.lcov
+
+  miri:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: rm rust-toolchain*
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: nightly
+          target: wasm32-unknown-unknown
+          components: miri
+      - name: Run miri for wasm
+        run: cargo +nightly miri test -p blackbox-log-wasm --target wasm32-unknown-unknown
 
   format:
     runs-on: ubuntu-latest
