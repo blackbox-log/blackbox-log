@@ -23,8 +23,7 @@ Neither is all that great for building other software with:
   JavaScript, which limits the places it can reasonably be embedded.
 
 This project aims to fill that niche. An ergonomic, up-to-date API usable
-anywhere that supports Rust or
-([soon](https://github.com/wetheredge/blackbox/tree/wasm)) WebAssembly.
+anywhere that supports Rust or WebAssembly.
 
 ## Roadmap
 
@@ -34,8 +33,9 @@ anywhere that supports Rust or
     - [ ] 4.4
   - [ ] INAV (versions TBD)
   - [ ] EmuFlight (versions TBD)
-- [ ] WebAssembly
-  - [ ] JavaScript
+- [ ] WebAssembly / JavaScript library: WIP
+  - [TypeScript library](./blackbox-log-js)
+  - [WebAssembly middle layer](./blackbox-log-wasm)
 - [ ] Future: web-native log viewer?
 
 ## Contributing
