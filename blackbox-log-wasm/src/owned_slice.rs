@@ -31,7 +31,7 @@ impl<T> OwnedSlice<T> {
     pub(crate) fn new_zeroed(len: usize) -> Self {
         let layout = Self::layout(len).unwrap();
 
-        let ptr = if len == 0 || layout.size() == 0 {
+        let ptr = if layout.size() == 0 {
             NonNull::dangling()
         } else {
             // SAFETY: above branch ensures that the allocation is non-zero-sized
@@ -43,21 +43,17 @@ impl<T> OwnedSlice<T> {
     }
 
     /// Allocate uninitialized backing storage for an `OwnedSlice`.
-    pub(crate) fn alloc(len: usize) -> Result<*mut T, AllocError> {
+    pub(crate) fn alloc(len: usize) -> Result<NonNull<T>, AllocError> {
         let layout = Self::layout(len)?;
 
-        if len == 0 || layout.size() == 0 {
+        if layout.size() == 0 {
             return Err(AllocError::ZeroSized);
         }
 
         // SAFETY: above check ensures that the allocation is non-zero-sized
         let ptr = unsafe { alloc(layout) } as *mut T;
 
-        if ptr.is_null() {
-            return Err(AllocError::Alloc);
-        }
-
-        Ok(ptr)
+        NonNull::new(ptr).ok_or(AllocError::Alloc)
     }
 
     /// Create a new `OwnedSlice` from a length and pointer.

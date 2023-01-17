@@ -12,7 +12,7 @@ mod panic;
 mod shared;
 mod str;
 
-use std::ptr;
+use std::ptr::{self, NonNull};
 
 pub(crate) use self::ffi::{FromWasmFfi, IntoWasmFfi, Structural, WasmByValue, WasmFfi};
 pub(crate) use self::owned_slice::OwnedSlice;
@@ -39,6 +39,6 @@ fn throw_headers_parse_error(err: blackbox_log::headers::ParseError) -> ! {
 
 wasm_export! {
     fn data_alloc(len: owned usize) -> *mut u8 {
-        OwnedSlice::<u8>::alloc(len).unwrap_or(ptr::null_mut())
+        OwnedSlice::<u8>::alloc(len).map(NonNull::as_ptr).unwrap_or(ptr::null_mut())
     }
 }
