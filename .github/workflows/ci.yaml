@@ -108,7 +108,7 @@ jobs:
         with:
           toolchain: nightly
           target: wasm32-unknown-unknown
-          components: miri
+          components: miri,rust-src
       - name: Run miri for wasm
         run: cargo +nightly miri test -p blackbox-log-wasm --target wasm32-unknown-unknown
 
