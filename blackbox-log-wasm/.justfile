@@ -13,7 +13,7 @@ wasmFile := targetDir / 'blackbox-log.wasm'
 
 # Build
 build:
-    cargo build --release --target {{wasm}}
+    cargo build --release --target {{ wasm }}
     cp {{ targetDir / 'blackbox_log_wasm.wasm' }} {{ wasmFile }}
 
 # Apply multi-value transform
@@ -38,3 +38,13 @@ wasm: build multivalue opt
 # Show disassembly
 dis:
     wasm-dis {{ wasmFile }} | less
+
+export MIRIFLAGS := '-Zmiri-symbolic-alignment-check -Zmiri-strict-provenance'
+
+# Run miri for the host target using nextest
+miri:
+    cargo +nightly miri nextest run
+
+# Run miri for wasm
+miri-wasm:
+    cargo +nightly miri test --target wasm32-unknown-unknown

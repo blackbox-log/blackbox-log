@@ -34,3 +34,27 @@ impl<T> Deref for Shared<T> {
         &self.0
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn invalid_deref_static() {
+        let x = Shared::new("test".to_owned());
+
+        // SAFETY: x is dropped only after x_ref's last use. Switching the last 2 lines
+        // is UB.
+        let x_ref = unsafe { x.deref_static() };
+
+        assert_eq!("test", x_ref);
+        drop(x);
+    }
+
+    #[test]
+    fn clone() {
+        let x = Shared::new(());
+        let _x2 = Shared::clone(&x);
+        assert_eq!(2, Rc::strong_count(&Pin::into_inner(x.0)));
+    }
+}
