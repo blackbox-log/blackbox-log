@@ -158,3 +158,66 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: crate-ci/typos@master
+
+  build-wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use wasm rust-toolchain file
+        run: mv blackbox-log-wasm/rust-toolchain* .
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Install Just
+        uses: taiki-e/install-action@just
+      - name: Install wasm-opt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(gh api -H Accept:application/vnd.github+json /repos/WebAssembly/binaryen/releases/latest | jq -r .tag_name)
+          echo "Downloading release '$version'"
+          curl -LO "https://github.com/WebAssembly/binaryen/releases/download/$version/binaryen-$version-x86_64-linux.tar.gz"
+          curl -Lo sha256 "https://github.com/WebAssembly/binaryen/releases/download/$version/binaryen-$version-x86_64-linux.tar.gz.sha256"
+          ls -A
+          sha256sum --check sha256
+          tar -xzf binaryen-$version-x86_64-linux.tar.gz
+          echo "$(pwd)/binaryen-$version/bin" >> $GITHUB_PATH
+      - name: Install multi-value-reverse-polyfill
+        run: cargo install --locked --git https://github.com/wetheredge/wasm-multi-value-reverse-polyfill
+      - name: Build
+        run: just blackbox-log-wasm/wasm
+      - uses: actions/upload-artifact@v3
+        with:
+          name: blackbox-log.wasm
+          path: target/wasm32-unknown-unknown/release/blackbox-log.wasm
+          if-no-files-found: error
+
+  check-ts:
+    runs-on: ubuntu-latest
+    needs: build-wasm
+    defaults:
+      run:
+        working-directory: blackbox-log-js
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7
+          run_install: |
+            cwd: blackbox-log-js
+            args: [--frozen-lockfile]
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+          cache: pnpm
+          cache-dependency-path: blackbox-log-js/pnpm-lock.yaml
+
+      - name: Download blackbox-log.wasm
+        uses: actions/download-artifact@v3
+        with:
+          name: blackbox-log.wasm
+          path: ${{ runner.temp }}/wasm
+      - name: Install blackbox-log.wasm
+        run: mv ${{ runner.temp }}/wasm/blackbox-log.wasm src/
+      - name: Eslint
+        run: pnpm eslint src --max-warnings 0
+      - name: tsc
+        run: pnpm tsc

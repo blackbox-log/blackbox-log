@@ -47,9 +47,7 @@ install:
         cargo-criterion \
         cargo-llvm-cov \
         cargo-nextest \
-        flamegraph
+        flamegraph \
+        wasm-opt
 
     cargo install --locked --git https://github.com/wetheredge/wasm-multi-value-reverse-polyfill
-
-    @echo
-    @echo Note: wasm-opt and wasm-dis from https://github.com/WebAssembly/binaryen are needed for wasm/js work
