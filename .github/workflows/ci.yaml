@@ -190,7 +190,7 @@ jobs:
           path: target/wasm32-unknown-unknown/release/blackbox-log.wasm
           if-no-files-found: error
 
-  check-ts:
+  eslint:
     runs-on: ubuntu-latest
     needs: build-wasm
     defaults:
@@ -214,10 +214,34 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: blackbox-log.wasm
-          path: ${{ runner.temp }}/wasm
-      - name: Install blackbox-log.wasm
-        run: mv ${{ runner.temp }}/wasm/blackbox-log.wasm src/
+          path: blackbox-log-js/src/
       - name: Eslint
         run: pnpm eslint src --max-warnings 0
+
+  tsc:
+    runs-on: ubuntu-latest
+    needs: build-wasm
+    defaults:
+      run:
+        working-directory: blackbox-log-js
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7
+          run_install: |
+            cwd: blackbox-log-js
+            args: [--frozen-lockfile]
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+          cache: pnpm
+          cache-dependency-path: blackbox-log-js/pnpm-lock.yaml
+
+      - name: Download blackbox-log.wasm
+        uses: actions/download-artifact@v3
+        with:
+          name: blackbox-log.wasm
+          path: blackbox-log-js/src/
       - name: tsc
         run: pnpm tsc
