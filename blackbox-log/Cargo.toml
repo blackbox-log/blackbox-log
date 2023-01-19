@@ -19,12 +19,12 @@ std = ["memchr/std", "serde?/std", "uom/std"]
 serde = ["dep:serde", "hashbrown/serde", "uom/use_serde"]
 
 [dependencies]
-bitvec = { version = "^1", default-features = false }
-hashbrown = "^0.13"
-memchr = { version = "^2.4", default-features = false }
-serde = { version = "^1", default-features = false, features = ["alloc", "derive"], optional = true }
-tracing = { version = "^0.1.36", default-features = false, features = ["attributes"] }
-uom = { version = "^0.33", default-features = false, features = ["si", "f64"] }
+bitvec = { version = "^1.0.0", default-features = false }
+hashbrown = "^0.13.1"
+memchr = { version = "^2.4.0", default-features = false }
+serde = { version = "^1.0.96", default-features = false, features = ["alloc", "derive"], optional = true }
+tracing = { version = "^0.1.16", default-features = false, features = ["attributes"] }
+uom = { version = "^0.33.0", default-features = false, features = ["si", "f64"] }
 
 [dev-dependencies]
 criterion = { version = "^0.4", features = ["html_reports"] }
