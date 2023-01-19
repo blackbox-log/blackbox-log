@@ -16,6 +16,8 @@ export class Headers implements WasmObject {
 	readonly #wasm: WasmExports;
 	readonly #ptr: WasmPointer;
 
+	#parsers: Array<WeakRef<DataParser>> = [];
+
 	constructor(wasm: WasmExports, file: number, log: number) {
 		this.#wasm = wasm;
 		const ptr = this.#wasm.file_getHeaders(file, log);
@@ -23,7 +25,10 @@ export class Headers implements WasmObject {
 	}
 
 	free() {
-		// TODO: free DataParsers too?
+		for (const parser of this.#parsers) {
+			parser.deref()?.free();
+		}
+
 		this.#ptr.free();
 	}
 
@@ -33,7 +38,9 @@ export class Headers implements WasmObject {
 
 	getDataParser(): DataParser {
 		const ptr = this.#wasm.headers_getDataParser(this.#ptr.ptr);
-		return new DataParser(this.#wasm, this, ptr);
+		const parser = new DataParser(this.#wasm, this, ptr);
+		this.#parsers.push(new WeakRef(parser));
+		return parser;
 	}
 
 	@memoize()
