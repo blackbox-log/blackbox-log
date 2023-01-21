@@ -1,7 +1,6 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@js-temporal/polyfill': ^0.4.3
   '@typescript-eslint/eslint-plugin': ^5.47.0
   '@typescript-eslint/parser': ^5.47.0
   eslint: ^8.30.0
@@ -12,6 +11,7 @@ specifiers:
   eslint-plugin-import: ^2.26.0
   eslint-plugin-prettier: ^4.2.1
   prettier: ^2.8.1
+  temporal-polyfill: ^0.0.8
   typescript: ^4.6.4
   typescript-memoize: ^1.1.1
   vite: ^4.0.0
@@ -19,7 +19,7 @@ specifiers:
   vite-plugin-static-copy: ^0.13.0
 
 dependencies:
-  '@js-temporal/polyfill': 0.4.3
+  temporal-polyfill: 0.0.8
   typescript-memoize: 1.1.1
 
 devDependencies:
@@ -274,14 +274,6 @@ packages:
   /@humanwhocodes/object-schema/1.2.1:
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
     dev: true
-
-  /@js-temporal/polyfill/0.4.3:
-    resolution: {integrity: sha512-6Fmjo/HlkyVCmJzAPnvtEWlcbQUSRhi8qlN9EtJA/wP7FqXsevLLrlojR44kzNzrRkpf7eDJ+z7b4xQD/Ycypw==}
-    engines: {node: '>=12'}
-    dependencies:
-      jsbi: 4.3.0
-      tslib: 2.4.1
-    dev: false
 
   /@microsoft/api-extractor-model/7.25.3:
     resolution: {integrity: sha512-WWxBUq77p2iZ+5VF7Nmrm3y/UtqCh5bYV8ii3khwq3w99+fXWpvfsAhgSLsC7k8XDQc6De4ssMxH6He/qe1pzg==}
@@ -1612,10 +1604,6 @@ packages:
       argparse: 2.0.1
     dev: true
 
-  /jsbi/4.3.0:
-    resolution: {integrity: sha512-SnZNcinB4RIcnEyZqFPdGPVgrg2AcnykiBy0sHVJQKHYeaLUvi3Exj+iaPpLnFVkDPZIV4U0yvgC9/R4uEAZ9g==}
-    dev: false
-
   /json-schema-traverse/0.4.1:
     resolution: {integrity: sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==}
     dev: true
@@ -2096,6 +2084,15 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
+  /temporal-polyfill/0.0.8:
+    resolution: {integrity: sha512-IuA8GhS1PRC04H/zVNAIxJvCZQum6V5HjqFj7gz1a3SMUf/Kf1xIXILNYtxrWYnGqIU/RrDRxlCKCm/vmqnBvw==}
+    dependencies:
+      temporal-spec: 0.0.3
+    dev: false
+
+  /temporal-spec/0.0.3:
+    resolution: {integrity: sha512-gJu7QRqn5c2vTSkYWGC4qz1i+FZ9C+Cz16UIBMRcjgXOsHfXeSIgaWUKeq/2rz1iNfFxvmF/ywqbfC6ggTpjkA==}
+
   /text-table/0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==}
     dev: true
@@ -2136,6 +2133,7 @@ packages:
 
   /tslib/2.4.1:
     resolution: {integrity: sha512-tGyy4dAjRIEwI7BzsB0lynWgOpfqjUdq91XXAlIWD2OwKBH7oCl/GZG/HT4BOHrTlPMOASlMQ7veyTqpmRcrNA==}
+    dev: true
 
   /tsutils/3.21.0_typescript@4.9.3:
     resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}
