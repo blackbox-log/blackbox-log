@@ -1,11 +1,11 @@
 import encodedWasm from './blackbox-log.wasm?inline';
-import Parser from './parser';
+import { Parser } from './parser';
 
 import type { WasmExports } from './wasm';
 
 export * from './common';
 
-export default class SimpleParser extends Parser {
+export class SimpleParser extends Parser {
 	static async init(): Promise<SimpleParser> {
 		const decoded = atob(encodedWasm);
 

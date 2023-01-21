@@ -7,7 +7,7 @@ export type WasmInit = string | URL | Request | Response | WebAssembly.Module;
 
 type Instance = WebAssembly.Instance & { exports: WasmExports };
 
-export default class Parser {
+export class Parser {
 	static async init(init: WasmInit): Promise<Parser> {
 		let instance: Instance | undefined;
 

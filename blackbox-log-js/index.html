@@ -42,10 +42,10 @@
 		</p>
 
 		<script async type="module">
-			// import Parser from './src/main.ts';
+			// import { Parser } from './src/main.ts';
 			// const parser = await Parser.init();
 
-			import Parser from './src/slim.ts';
+			import { Parser } from './src/slim.ts';
 			import wasm from './src/blackbox-log.wasm?url';
 			const parser = await Parser.init(wasm);
 
