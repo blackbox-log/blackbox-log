@@ -1,6 +1,7 @@
 import { File } from './file';
 import { getWasmStr } from './str';
-import { type WasmExports } from './wasm';
+
+import type { WasmExports } from './wasm';
 
 export type WasmInit = string | URL | Request | Response | WebAssembly.Module;
 
