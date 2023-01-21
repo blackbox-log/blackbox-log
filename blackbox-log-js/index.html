@@ -112,12 +112,9 @@
 						return;
 					}
 
-					const start = performance.now();
-					let i;
-					for (i = 0; i < 2000; i++) {
+					for (let i = 0; i < 2000; i++) {
 						dataParser.next();
 					}
-					const end = performance.now();
 
 					updateCounts(dataParser);
 					updateMemory();

@@ -22,14 +22,15 @@ export default defineConfig({
 		{
 			name: 'inline-wasm',
 			async transform(_, id) {
-				if (id.endsWith('.wasm?inline')) {
-					const path = id.replace('?inline', '');
-					const wasm = await fs.promises.readFile(path, { encoding: 'base64' });
-					return {
-						code: `export default '${wasm}'`,
-						map: { mappings: '' },
-					};
-				}
+				if (!id.endsWith('.wasm?inline')) return;
+
+				const path = id.replace('?inline', '');
+				const wasm = await fs.promises.readFile(path, { encoding: 'base64' });
+
+				return {
+					code: `export default '${wasm}'`,
+					map: { mappings: '' },
+				};
 			},
 		},
 		staticCopy({
