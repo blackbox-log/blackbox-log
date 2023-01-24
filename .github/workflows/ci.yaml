@@ -19,30 +19,16 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Install cargo-cranky
         run: cargo install --locked cargo-cranky
-      - name: blackbox-log, none
+      - name: no_std
         run: cargo cranky -p blackbox-log --target thumbv7em-none-eabihf --no-default-features
-      - name: blackbox-log, std
+      - name: std
         run: cargo cranky -p blackbox-log --no-default-features -F std
-      - name: blackbox-log, serde
+      - name: no_std + serde
         run: cargo cranky -p blackbox-log --target thumbv7em-none-eabihf --no-default-features -F serde
-      - name: blackbox-log, all
+      - name: All features
         run: cargo cranky -p blackbox-log --all-features
-      - name: Workspace
-        run: cargo cranky --workspace --all-targets --all-features --exclude blackbox-log-wasm
-
-  clippy-wasm:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use wasm rust-toolchain file
-        run: mv blackbox-log-wasm/rust-toolchain* .
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - name: Install cargo-cranky
-        run: cargo install --locked cargo-cranky
-      - name: Native
-        run: cargo cranky -p blackbox-log-wasm
-      - name: WebAssembly
-        run: cargo cranky -p blackbox-log-wasm --target wasm32-unknown-unknown
+      - name: Check fuzz tests
+        run: cargo cranky -p blackbox-fuzz --all-targets
 
   min-dependencies:
     runs-on: ubuntu-latest
@@ -99,9 +85,9 @@ jobs:
           rm -r gimbal-ghost~
 
       - name: Run tests
-        run: cargo nextest run --workspace --all-features --exclude blackbox-fuzz --profile=ci
+        run: cargo nextest run -p blackbox-log --all-features --profile=ci
       - name: Run doctests
-        run: cargo test --doc --workspace --exclude blackbox-fuzz
+        run: cargo test --doc -p blackbox-log
 
   coverage:
     runs-on: ubuntu-latest
@@ -118,22 +104,8 @@ jobs:
         run: cargo llvm-cov -p blackbox-log --all-features --lcov --output-path=coverage.lcov nextest --profile=ci --run-ignored=all
       - name: Upload coverage
         uses: codecov/codecov-action@v3
-        if: ${{ matrix.coverage }}
         with:
           files: coverage.lcov
-
-  miri:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: rm rust-toolchain*
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: nightly
-          target: wasm32-unknown-unknown
-          components: miri,rust-src
-      - name: Run miri for wasm
-        run: cargo +nightly miri test -p blackbox-log-wasm --target wasm32-unknown-unknown
 
   rustfmt:
     runs-on: ubuntu-latest
@@ -147,114 +119,8 @@ jobs:
       - name: Check rustfmt
         run: cargo +nightly fmt --all --check
 
-  prettier:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 7
-          run_install: |
-            cwd: blackbox-log-js
-            args: [--dev, --frozen-lockfile]
-      - uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
-          cache: pnpm
-          cache-dependency-path: blackbox-log-js/pnpm-lock.yaml
-      - name: Check prettier
-        run: pnpm prettier --check .
-        working-directory: blackbox-log-js
-
   typos:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: crate-ci/typos@master
-
-  build-wasm:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use wasm rust-toolchain file
-        run: mv blackbox-log-wasm/rust-toolchain* .
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - name: Install Just
-        uses: taiki-e/install-action@just
-      - name: Install wasm-opt
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          version=$(gh api -H Accept:application/vnd.github+json /repos/WebAssembly/binaryen/releases/latest | jq -r .tag_name)
-          echo "Downloading release '$version'"
-          curl -LO "https://github.com/WebAssembly/binaryen/releases/download/$version/binaryen-$version-x86_64-linux.tar.gz"
-          curl -Lo sha256 "https://github.com/WebAssembly/binaryen/releases/download/$version/binaryen-$version-x86_64-linux.tar.gz.sha256"
-          ls -A
-          sha256sum --check sha256
-          tar -xzf binaryen-$version-x86_64-linux.tar.gz
-          echo "$(pwd)/binaryen-$version/bin" >> $GITHUB_PATH
-      - name: Install multi-value-reverse-polyfill
-        run: cargo install --locked --git https://github.com/wetheredge/wasm-multi-value-reverse-polyfill
-      - name: Build
-        run: just blackbox-log-wasm/wasm
-      - uses: actions/upload-artifact@v3
-        with:
-          name: blackbox-log.wasm
-          path: target/wasm32-unknown-unknown/release/blackbox-log.wasm
-          if-no-files-found: error
-
-  eslint:
-    runs-on: ubuntu-latest
-    needs: build-wasm
-    defaults:
-      run:
-        working-directory: blackbox-log-js
-    steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 7
-          run_install: |
-            cwd: blackbox-log-js
-            args: [--frozen-lockfile]
-      - uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
-          cache: pnpm
-          cache-dependency-path: blackbox-log-js/pnpm-lock.yaml
-
-      - name: Download blackbox-log.wasm
-        uses: actions/download-artifact@v3
-        with:
-          name: blackbox-log.wasm
-          path: blackbox-log-js/src/
-      - name: Eslint
-        run: pnpm eslint src --max-warnings 0
-
-  tsc:
-    runs-on: ubuntu-latest
-    needs: build-wasm
-    defaults:
-      run:
-        working-directory: blackbox-log-js
-    steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 7
-          run_install: |
-            cwd: blackbox-log-js
-            args: [--frozen-lockfile]
-      - uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
-          cache: pnpm
-          cache-dependency-path: blackbox-log-js/pnpm-lock.yaml
-
-      - name: Download blackbox-log.wasm
-        uses: actions/download-artifact@v3
-        with:
-          name: blackbox-log.wasm
-          path: blackbox-log-js/src/
-      - name: tsc
-        run: pnpm tsc
