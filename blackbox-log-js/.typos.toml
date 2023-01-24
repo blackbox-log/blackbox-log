@@ -1,5 +1,0 @@
-[files]
-extend-exclude = ["pnpm-lock.yaml"]
-
-[default]
-locale = "en-us"
