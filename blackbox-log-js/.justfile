@@ -1,11 +1,5 @@
-set fallback := true
-
 _default:
-    @echo blackbox-log-js:
-    @just --list --unsorted --list-heading ''
-    @echo
-    @echo Global:
-    @cd .. && just --list --unsorted --list-heading ''
+    @just --list --unsorted
 
 # Run prettier
 fmt:
@@ -33,4 +27,4 @@ clean:
 
 # Regenerate .wasm
 wasm:
-    @just ../blackbox-log-wasm/wasm
+    @just wasm/wasm

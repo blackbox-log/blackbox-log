@@ -30,7 +30,7 @@ cov *args='':
 bench *args='--benches':
     cargo criterion {{ args }} 
 
-# Test that all benchmarks run
+# Test that all benchmarks run successfully
 [no-cd]
 bench-test:
     cargo criterion --benches -- --test
@@ -40,7 +40,7 @@ bench-test:
 profile-bench file bench time='10' *args='':
     cargo flamegraph --deterministic --palette rust --bench {{ file }} -- --bench --profile-time {{ time }} {{ bench }} {{ args }}
 
-# Install/update all tools from crates.io
+# Install/update all dev tools from crates.io
 install:
     cargo install --locked \
         cargo-cranky \

@@ -11,8 +11,8 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies.blackbox-log]
 version = "0.1.0"
-git = "https://github.com/blackbox-log/blackbox-log"
-# path = "../blackbox-log"
+# git = "https://github.com/blackbox-log/blackbox-log"
+path = "../../blackbox-log"
 
 [profile.bench]
 strip = false

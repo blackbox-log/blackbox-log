@@ -27,8 +27,8 @@ tracing = { version = "0.1.37", default-features = false, features = ["release_m
 
 [dependencies.blackbox-log]
 version = "0.1.0"
-git = "https://github.com/blackbox-log/blackbox-log"
-# path = "../blackbox-log"
+# git = "https://github.com/blackbox-log/blackbox-log"
+path = "../blackbox-log"
 
 [dependencies.tracing-subscriber]
 version = "0.3.16"
