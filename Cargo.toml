@@ -1,6 +1,6 @@
 [workspace]
-members = ["blackbox-log", "bbl2csv", "blackbox-log-wasm", "fuzz"]
-default-members = ["blackbox-log", "bbl2csv"]
+members = ["blackbox-log", "fuzz"]
+default-members = ["blackbox-log"]
 resolver = "2"
 
 [workspace.package]
@@ -10,18 +10,6 @@ rust-version = "1.66"
 
 [workspace.dependencies]
 blackbox-log = { version = "0.1.0", path = "blackbox-log" }
-
-[profile.bench]
-strip = false
-debug = true
-debug-assertions = false
-
-[profile.release]
-lto = "thin"
-opt-level = 3
-codegen-units = 1
-panic = "abort"
-strip = true
 
 [profile.dev.package.insta]
 opt-level = 3

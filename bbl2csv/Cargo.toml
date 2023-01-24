@@ -1,3 +1,5 @@
+[workspace]
+
 [package]
 name = "bbl2csv"
 version = "0.1.0"
@@ -6,24 +8,41 @@ repository = "https://github.com/wetheredge/blackbox"
 readme = "README.md"
 categories = ["aerospace::drones", "aerospace::unmanned-aerial-vehicles", "command-line-utilities", "parser-implementations"]
 keywords = ["blackbox_decode", "betaflight", "blackbox"]
+publish = false
 
-license.workspace = true
-edition.workspace = true
-rust-version.workspace = true
+license = "GPL-3.0-only"
+edition = "2021"
+rust-version = "1.66"
 
 [[bin]]
 path = "src/main.rs"
 name = "bbl2csv"
 
 [dependencies]
-blackbox-log.workspace = true
 exitcode = "1.1.2"
 lexopt = "0.3.0"
 mimalloc = { version = "0.1.34", default-features = false }
 rayon = "1.6.1"
 tracing = { version = "0.1.37", default-features = false, features = ["release_max_level_debug"] }
 
+[dependencies.blackbox-log]
+version = "0.1.0"
+git = "https://github.com/blackbox-log/blackbox-log"
+# path = "../blackbox-log"
+
 [dependencies.tracing-subscriber]
 version = "0.3.16"
 default-features = false
 features = ["smallvec", "fmt", "ansi", "std"]
+
+[profile.bench]
+strip = false
+debug = true
+debug-assertions = false
+
+[profile.release]
+lto = "thin"
+opt-level = 3
+codegen-units = 1
+panic = "abort"
+strip = true
