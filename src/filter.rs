@@ -1,3 +1,4 @@
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -5,6 +6,9 @@ use hashbrown::HashSet;
 
 use crate::parser::to_base_field;
 
+/// A normalized set of field names.
+///
+/// See [`FrameDef::apply_filter`][`crate::frame::FrameDef::apply_filter`].
 #[derive(Debug, Clone)]
 pub struct FieldFilter(HashSet<String>);
 
@@ -20,7 +24,7 @@ impl FieldFilter {
 
 impl<'a, S> From<&'a [S]> for FieldFilter
 where
-    &'a S: Into<String>,
+    &'a S: AsRef<str>,
 {
     fn from(slice: &'a [S]) -> Self {
         slice.iter().collect()
@@ -29,7 +33,7 @@ where
 
 impl<S, const N: usize> From<[S; N]> for FieldFilter
 where
-    S: Into<String>,
+    S: AsRef<str>,
 {
     fn from(arr: [S; N]) -> Self {
         arr.into_iter().collect()
@@ -38,10 +42,13 @@ where
 
 impl<S> FromIterator<S> for FieldFilter
 where
-    S: Into<String>,
+    S: AsRef<str>,
 {
     fn from_iter<T: IntoIterator<Item = S>>(iter: T) -> Self {
-        let set = iter.into_iter().map(Into::into).collect();
+        let set = iter
+            .into_iter()
+            .map(|s| to_base_field(s.as_ref()).to_owned())
+            .collect();
         Self(set)
     }
 }
