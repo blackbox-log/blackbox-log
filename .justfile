@@ -7,8 +7,8 @@ fmt *args='':
 
 # Run clippy using cargo-cranky
 [no-cd]
-check *args='':
-    cargo cranky --all-features --all-targets {{ args }}
+check *args='--all-features':
+    cargo cranky --all-targets {{ args }}
 
 # Run tests
 [no-cd]
