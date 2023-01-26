@@ -24,7 +24,7 @@ fn readme() -> io::Result<()> {
 
 #[test]
 fn toolchain_file() -> io::Result<()> {
-    let path = PathBuf::from("../rust-toolchain.toml");
+    let path = PathBuf::from("rust-toolchain.toml");
 
     if env::var("CI").is_ok() && !path.exists() {
         // Assume it was removed in CI to avoid overriding a >MSRV toolchain

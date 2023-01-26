@@ -76,14 +76,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "blackbox-fuzz"
-version = "0.0.0"
-dependencies = [
- "blackbox-log",
- "libfuzzer-sys",
-]
-
-[[package]]
 name = "blackbox-log"
 version = "0.1.0"
 dependencies = [
@@ -296,6 +288,14 @@ name = "funty"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e6d5a32815ae3f33302d95fdcb2ce17862f8c65363dcfd29360480ba1001fc9c"
+
+[[package]]
+name = "fuzz"
+version = "0.0.0"
+dependencies = [
+ "blackbox-log",
+ "libfuzzer-sys",
+]
 
 [[package]]
 name = "globset"

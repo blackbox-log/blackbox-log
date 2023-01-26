@@ -1,5 +1,5 @@
 [files]
-extend-exclude = ["blackbox-log/tests/logs", "blackbox-log/tests/snapshots"]
+extend-exclude = ["tests/logs", "tests/snapshots"]
 
 [default]
 locale = "en-us"

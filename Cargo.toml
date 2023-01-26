@@ -1,6 +1,5 @@
 [workspace]
-members = ["blackbox-log", "fuzz"]
-default-members = ["blackbox-log"]
+members = [".", "fuzz"]
 resolver = "2"
 
 [workspace.package]
@@ -8,11 +7,52 @@ edition = "2021"
 license = "GPL-3.0-only"
 rust-version = "1.66"
 
-[workspace.dependencies]
-blackbox-log = { version = "0.1.0", path = "blackbox-log" }
+[package]
+name = "blackbox-log"
+version = "0.1.0"
+description = "Ergonomic parser for BetaFlight blackbox logs"
+repository = "https://github.com/blackbox-log/blackbox-log"
+readme = "README.md"
+categories = ["aerospace::drones", "aerospace::unmanned-aerial-vehicles", "parser-implementations", "no-std", "encoding"]
+keywords = ["betaflight", "blackbox"]
+
+exclude = ["/tests/logs/", "/tests/snapshots/"]
+
+license.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[features]
+default = ["std"]
+std = ["memchr/std", "serde?/std", "uom/std"]
+serde = ["dep:serde", "hashbrown/serde", "uom/use_serde"]
+
+[dependencies]
+bitvec = { version = "^1.0.0", default-features = false }
+hashbrown = "^0.13.1"
+memchr = { version = "^2.4.0", default-features = false }
+serde = { version = "^1.0.96", default-features = false, features = ["alloc", "derive"], optional = true }
+tracing = { version = "^0.1.16", default-features = false, features = ["attributes"] }
+uom = { version = "^0.33.0", default-features = false, features = ["si", "f64"] }
+
+[dev-dependencies]
+criterion = { version = "^0.4", features = ["html_reports"] }
+insta = { version = "^1.26", default-features = false, features = ["colors", "glob", "ron"] }
+test-case = "^2.2.2"
 
 [profile.dev.package.insta]
 opt-level = 3
 
 [profile.dev.package.similar]
 opt-level = 3
+
+[lib]
+bench = false
+
+[[bench]]
+name = "parse"
+harness = false
+
+[[test]]
+name = "snapshots"
+required-features = ["serde"]

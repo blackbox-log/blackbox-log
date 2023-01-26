@@ -20,21 +20,18 @@ jobs:
       - name: Install cargo-cranky
         run: cargo install --locked cargo-cranky
       - name: no_std
-        run: cargo cranky -p blackbox-log --target thumbv7em-none-eabihf --no-default-features
+        run: cargo cranky --target thumbv7em-none-eabihf --no-default-features
       - name: std
-        run: cargo cranky -p blackbox-log --no-default-features -F std
+        run: cargo cranky --no-default-features -F std
       - name: no_std + serde
-        run: cargo cranky -p blackbox-log --target thumbv7em-none-eabihf --no-default-features -F serde
+        run: cargo cranky --target thumbv7em-none-eabihf --no-default-features -F serde
       - name: All features
-        run: cargo cranky -p blackbox-log --all-features
+        run: cargo cranky --all-features
       - name: Check fuzz tests
-        run: cargo cranky -p blackbox-fuzz --all-targets
+        run: cargo cranky -p fuzz --all-targets
 
   min-dependencies:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: blackbox-log
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -76,7 +73,7 @@ jobs:
       - name: Replace symlinks with copies
         if: ${{ runner.os == 'windows' }}
         run: |
-          cd blackbox-log/tests/logs
+          cd tests/logs
           mv fc-blackbox fc-blackbox~
           mv gimbal-ghost gimbal-ghost~
           cp -r "$(readlink fc-blackbox~)" fc-blackbox
@@ -85,9 +82,9 @@ jobs:
           rm -r gimbal-ghost~
 
       - name: Run tests
-        run: cargo nextest run -p blackbox-log --all-features --profile=ci
+        run: cargo nextest run --all-features --profile=ci
       - name: Run doctests
-        run: cargo test --doc -p blackbox-log
+        run: cargo test --doc
 
   coverage:
     runs-on: ubuntu-latest
@@ -101,7 +98,7 @@ jobs:
       - name: Install llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: Generate coverage
-        run: cargo llvm-cov -p blackbox-log --all-features --lcov --output-path=coverage.lcov nextest --profile=ci --run-ignored=all
+        run: cargo llvm-cov --all-features --lcov --output-path=coverage.lcov nextest --profile=ci --run-ignored=all
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
