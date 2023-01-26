@@ -176,6 +176,9 @@ pub struct FrameCounts {
     pub gps_home: usize,
 }
 
+/// An item parsed from the data section of a blackbox log.
+///
+/// See [`DataParser::next`].
 #[derive(Debug)]
 pub enum ParserEvent<'data, 'headers, 'parser> {
     Event(Event),

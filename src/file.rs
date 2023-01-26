@@ -27,6 +27,10 @@ impl<'data> File<'data> {
         self.offsets.len()
     }
 
+    /// Returns an iterator over [`Reader`]s for each log.
+    ///
+    /// Equivalent to repeatedly calling [`File::get_reader`], but may be able
+    /// to eliminate bounds checks and cannot panic.
     pub fn iter(&self) -> impl Iterator<Item = Reader<'data>> + '_ {
         self.offsets
             .iter()
