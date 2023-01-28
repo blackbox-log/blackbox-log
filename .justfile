@@ -10,6 +10,10 @@ fmt *args='':
 check *args='--all-features':
     cargo cranky --all-targets {{ args }}
 
+# Run clippy using cargo-cranky for a no_std target
+check-no_std:
+    cargo cranky --no-default-features --target thumbv7em-none-eabihf
+
 # Run tests
 [no-cd]
 test *args='':
