@@ -6,7 +6,7 @@ use hashbrown::HashSet;
 
 use crate::parser::to_base_field;
 
-/// A normalized set of field names.
+/// A filter for the fields to be included in one kind of frame.
 ///
 /// See [`FrameDef::apply_filter`][`crate::frame::FrameDef::apply_filter`].
 #[derive(Debug, Clone)]

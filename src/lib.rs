@@ -82,8 +82,8 @@
 //! - `std`: **Enabled** by default. Currently, this only implements
 //!   [`std::error::Error`] for [`headers::ParseError`].
 //! - `serde`: **Disabled** by default. This allows serializing parsed logs
-//!   using `serde`. **Note:** This is only used for snapshot testing and is not
-//!   yet intended for public use.
+//!   using `serde`. **Note:** This is only used for internal snapshot testing
+//!   and is not yet intended for public use.
 //!
 //! [bf-doc]: https://github.com/betaflight/betaflight/blob/master/docs/development/Blackbox%20Internals.md
 //! [inav-doc]: https://github.com/iNavFlight/inav/blob/master/docs/development/Blackbox%20Internals.md
