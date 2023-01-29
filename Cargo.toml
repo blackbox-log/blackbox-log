@@ -16,7 +16,7 @@ readme = "README.md"
 categories = ["aerospace::drones", "aerospace::unmanned-aerial-vehicles", "parser-implementations", "no-std", "encoding"]
 keywords = ["betaflight", "blackbox"]
 
-exclude = ["/tests/logs/", "/tests/snapshots/"]
+include = ["/src/**/*", "/tests/snapshots.rs", "/benches/parse.rs", "/README.md"]
 
 license.workspace = true
 edition.workspace = true
