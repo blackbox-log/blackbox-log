@@ -105,7 +105,7 @@ const fn zig_zag_decode(value: u32) -> i32 {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     #[test]
     fn sign_extend() {
         use super::sign_extend;

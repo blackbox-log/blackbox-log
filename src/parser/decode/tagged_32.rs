@@ -95,7 +95,7 @@ pub(crate) fn tagged_32(data: &mut Reader) -> InternalResult<[i32; COUNT]> {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use alloc::vec;
     use alloc::vec::Vec;
 

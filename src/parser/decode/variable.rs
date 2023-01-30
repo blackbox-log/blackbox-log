@@ -30,7 +30,7 @@ pub(crate) fn variable_signed(data: &mut Reader) -> InternalResult<i32> {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     fn read_ok(bytes: &[u8]) -> u32 {

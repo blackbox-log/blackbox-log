@@ -30,7 +30,7 @@ pub(crate) fn tagged_variable(data: &mut Reader, extra: usize) -> InternalResult
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     #[test]

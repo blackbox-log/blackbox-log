@@ -15,7 +15,7 @@ pub(crate) fn negative_14_bit(data: &mut Reader) -> InternalResult<i32> {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use test_case::case;
 
     use super::*;
