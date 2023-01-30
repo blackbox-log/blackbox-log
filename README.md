@@ -1,12 +1,12 @@
 # `blackbox-log`
 
-[![CI](https://github.com/wetheredge/blackbox/actions/workflows/ci.yaml/badge.svg)](https://github.com/wetheredge/blackbox/actions/workflows/ci.yaml)
-[![codecov](https://codecov.io/gh/wetheredge/blackbox/branch/main/graph/badge.svg)](https://codecov.io/gh/wetheredge/blackbox)
-[![dependency status](https://deps.rs/repo/github/wetheredge/blackbox/status.svg)](https://deps.rs/repo/github/wetheredge/blackbox)
+[![CI](https://github.com/blackbox-log/blackbox-log/actions/workflows/ci.yaml/badge.svg)](https://github.com/blackbox-log/blackbox-log/actions/workflows/ci.yaml)
+[![codecov](https://codecov.io/gh/blackbox-log/blackbox-log/branch/main/graph/badge.svg)](https://codecov.io/gh/blackbox-log/blackbox-log)
+[![dependency status](https://deps.rs/repo/github/blackbox-log/blackbox-log/status.svg)](https://deps.rs/repo/github/blackbox-log/blackbox-log)
 [![crates.io](https://img.shields.io/crates/v/blackbox-log)](https://crates.io/blackbox-log)
 [![docs.rs](https://img.shields.io/docsrs/blackbox-log)](https://docs.rs/blackbox-log)
 [![MSRV](https://img.shields.io/static/v1?logo=rust&label=MSRV&color=dea584&message=1.66)](https://github.com/rust-lang/rust/blob/master/RELEASES.md)
-[![license](https://img.shields.io/github/license/wetheredge/blackbox)](https://github.com/wetheredge/blackbox/blob/main/COPYING)
+[![license](https://img.shields.io/github/license/blackbox-log/blackbox-log)](https://github.com/blackbox-log/blackbox-log/blob/main/COPYING)
 
 
 This is a Rust port of Betaflight's & INAV's blackbox tools. Check the [GitHub
