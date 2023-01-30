@@ -1,0 +1,72 @@
+set:
+  name: FlightModeSet
+  doc: All currently enabled flight modes. See [`FlagSet`][`crate::units::FlagSet`] and [`FlightMode`].
+flags:
+  name: FlightMode
+  doc: A flight mode. See [`Flag`][`crate::units::Flag`].
+  betaflight:
+    - ARM: 0
+    - ANGLE: 1
+    - HORIZON: 2
+    - MAG: 3
+    - HEAD_FREE: 4
+    - PASSTHRU: 5
+    - FAILSAFE: 6
+    - GPS_RESCUE: 7
+    - ANTIGRAVITY: 8
+    - HEAD_ADJUST: 9
+    - CAM_STAB: 10
+    - BEEPER_ON: 11
+    - LED_LOW: 12
+    - official: CALIB
+      rust: Calibrate
+      index: 13
+    - OSD: 14
+    - TELEMETRY: 15
+    - SERVO1: 16
+    - SERVO2: 17
+    - SERVO3: 18
+    - BLACKBOX: 19
+    - AIRMODE: 20
+    - official: 3D
+      rust: ThreeD
+      index: 21
+    - FPV_ANGLE_MIX: 22
+    - BLACKBOX_ERASE: 23
+    - CAMERA1: 24
+    - CAMERA2: 25
+    - CAMERA3: 26
+    - TURTLE: 27
+    - PREARM: 28
+    - BEEP_GPS_COUNT: 29
+    - VTX_PITMODE: 30
+    - PARALYZE: 31
+    # - USER1: 32
+    # - USER2: 33
+    # - USER3: 34
+    # - USER4: 35
+    # - PID_AUDIO: 36
+    # - ACRO_TRAINER: 37
+    # - VTX_CONTROL_DISABLE: 38
+    # - LAUNCH_CONTROL: 39
+    # - MSP_OVERRIDE: 40
+    # - STICK_COMMAND_DISABLE: 41
+    # - BEEPER_MUTE: 42
+  inav:
+    - ANGLE: 0
+    - HORIZON: 1
+    - HEADING: 2
+    - NAV_ALT_HOLD: 3
+    - NAV_RTH: 4
+    - NAV_POSHOLD: 5
+    - HEAD_FREE: 6
+    - NAV_LAUNCH: 7
+    - MANUAL: 8
+    - FAILSAFE: 9
+    - AUTO_TUNE: 10
+    - NAV_WP: 11
+    - NAV_COURSE_HOLD: 12
+    - FLAPERON: 13
+    - TURN_ASSISTANT: 14
+    - TURTLE: 15
+    - SOARING: 16
