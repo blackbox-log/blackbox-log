@@ -29,6 +29,8 @@ jobs:
         run: cargo cranky --all-features
       - name: Check fuzz tests
         run: cargo cranky -p fuzz --all-targets
+      - name: Check code generator
+        run: cargo cranky -p codegen
 
   min-dependencies:
     runs-on: ubuntu-latest
@@ -40,6 +42,18 @@ jobs:
           mv Cargo.min.toml Cargo.toml
           mv Cargo.min.lock Cargo.lock
       - run: cargo check --locked --lib
+
+  codegen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: rm rust-toolchain*
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: nightly
+          components: rustfmt
+      - run: cargo run -p codegen
+      - run: git diff --exit-code src/generated/
 
   test:
     strategy:
