@@ -1,12 +1,10 @@
 use alloc::vec::Vec;
-use core::fmt;
 
 pub use uom::si;
 pub use uom::si::f64::{
     Acceleration, AngularVelocity, ElectricCurrent, ElectricPotential, Length, Time, Velocity,
 };
 
-use crate::headers::FirmwareKind;
 use crate::Headers;
 
 #[allow(unreachable_pub)]
@@ -31,6 +29,7 @@ mod from_raw {
     }
 }
 
+include!(concat!(env!("OUT_DIR"), "/failsafe_phase.rs"));
 include!(concat!(env!("OUT_DIR"), "/flight_mode.rs"));
 include!(concat!(env!("OUT_DIR"), "/state.rs"));
 
@@ -116,80 +115,6 @@ pub trait FlagSet {
 pub trait Flag {
     /// Returns the name of this flag.
     fn as_name(&self) -> &'static str;
-}
-
-/// The current failsafe phase. See [`Flag`].
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum FailsafePhase {
-    Idle,
-    RxLossDetected,
-    RxLossIdle,
-    ReturnToHome,
-    Landing,
-    Landed,
-    RxLossMonitoring,
-    RxLossRecovered,
-    GpsRescue,
-    Unknown,
-}
-
-impl FailsafePhase {
-    pub(crate) fn new(raw: u32, firmware: FirmwareKind) -> Self {
-        let mapping: &[Self] = if firmware == FirmwareKind::Inav {
-            &[
-                Self::Idle,
-                Self::RxLossDetected,
-                Self::RxLossIdle,
-                Self::ReturnToHome,
-                Self::Landing,
-                Self::Landed,
-                Self::RxLossMonitoring,
-                Self::RxLossRecovered,
-            ]
-        } else {
-            &[
-                Self::Idle,
-                Self::RxLossDetected,
-                Self::Landing,
-                Self::Landed,
-                Self::RxLossMonitoring,
-                Self::RxLossRecovered,
-                Self::GpsRescue,
-            ]
-        };
-
-        usize::try_from(raw)
-            .ok()
-            .and_then(|index| mapping.get(index))
-            .copied()
-            .unwrap_or_else(|| {
-                tracing::debug!("invalid failsafe phase ({raw})");
-                Self::Unknown
-            })
-    }
-}
-
-impl Flag for FailsafePhase {
-    fn as_name(&self) -> &'static str {
-        match self {
-            Self::Idle => "Idle",
-            Self::RxLossDetected => "RxLossDetected",
-            Self::RxLossIdle => "RxLossIdle",
-            Self::ReturnToHome => "ReturnToHome",
-            Self::Landing => "Landing",
-            Self::Landed => "Landed",
-            Self::RxLossMonitoring => "RxLossMonitoring",
-            Self::RxLossRecovered => "RxLossRecovered",
-            Self::GpsRescue => "GpsRescue",
-            Self::Unknown => "Unknown",
-        }
-    }
-}
-
-impl fmt::Display for FailsafePhase {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(self.as_name())
-    }
 }
 
 #[cfg(test)]

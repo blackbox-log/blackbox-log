@@ -86,6 +86,7 @@ dependencies = [
  "heck",
  "insta",
  "memchr",
+ "proc-macro2",
  "quote",
  "serde",
  "serde_yaml",

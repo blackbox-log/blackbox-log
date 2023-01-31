@@ -1,11 +1,12 @@
 use std::collections::HashMap;
+use std::env;
 use std::fs::File;
 use std::io::Write;
 use std::process::Command;
-use std::{env, io};
 
 use glob::glob;
 use heck::ToUpperCamelCase;
+use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 use serde::de::Visitor;
 use serde::Deserialize;
@@ -14,15 +15,18 @@ use serde::Deserialize;
 #[serde(untagged)]
 enum TypeDef {
     Flags { set: FlagSet, flags: Flags },
+    Enum { r#enum: Enum },
 }
 
 impl TypeDef {
-    fn write(&self, out: &mut impl Write) -> io::Result<()> {
+    fn expand(&self) -> TokenStream {
         match self {
             Self::Flags { set, flags } => {
-                set.write(out, &flags.name)?;
-                flags.write(out)
+                let mut tokens = set.expand(&flags.name);
+                tokens.extend(flags.expand());
+                tokens
             }
+            Self::Enum { r#enum } => r#enum.expand(),
         }
     }
 }
@@ -36,19 +40,13 @@ struct FlagSet {
 }
 
 impl FlagSet {
-    fn write(&self, out: &mut impl Write, flag_name: &str) -> io::Result<()> {
-        let Self { name, doc, attrs } = self;
-        let name = format_ident!("{}", name);
-        let doc = doc.lines();
-        let attrs = attrs
-            .iter()
-            .map(|attr| syn::parse_str::<syn::Meta>(attr).unwrap());
+    fn expand(&self, flag_name: &str) -> TokenStream {
+        let name = format_ident!("{}", self.name);
+        let attrs = quote_attrs(&self.doc, &self.attrs);
         let flag_name = format_ident!("{}", flag_name);
 
-        let tokens = quote! {
-            #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-            #( #[doc = #doc] )*
-            #( #[#attrs] )*
+        quote! {
+            #attrs
             #[allow(unused_qualifications)]
             pub struct #name {
                 firmware: crate::headers::FirmwareKind,
@@ -86,9 +84,7 @@ impl FlagSet {
                     f.write_str(&self.as_names().join("|"))
                 }
             }
-        };
-
-        writeln!(out, "{tokens}")
+        }
     }
 }
 
@@ -98,47 +94,22 @@ struct Flags {
     doc: String,
     #[serde(default)]
     attrs: Vec<String>,
-    betaflight: Vec<Flag>,
-    inav: Vec<Flag>,
+    betaflight: Vec<Variant>,
+    inav: Vec<Variant>,
 }
 
 impl Flags {
-    fn write(&self, out: &mut impl Write) -> io::Result<()> {
-        let Self {
-            name, doc, attrs, ..
-        } = self;
-        let name = format_ident!("{}", name);
-        let doc = doc.lines();
-        let attrs = attrs
-            .iter()
-            .map(|attr| syn::parse_str::<syn::Meta>(attr).unwrap());
+    fn expand(&self) -> TokenStream {
+        let name = format_ident!("{}", self.name);
+        let attrs = quote_attrs(&self.doc, &self.attrs);
 
-        let flags = self.combined_flags();
-        let ident_flags = flags
-            .iter()
-            .map(|flag| (format_ident!("{}", flag.rust), flag))
-            .collect::<Vec<_>>();
-
-        let flag_names = ident_flags
-            .iter()
-            .map(|(ident, _)| ident)
-            .collect::<Vec<_>>();
-        let official_names = flags.iter().map(|flag| &flag.official).collect::<Vec<_>>();
-
-        let enum_body = ident_flags.iter().map(|(ident, flag)| {
-            let note = match (flag.betaflight.is_some(), flag.inav.is_some()) {
-                (true, true) => "",
-                (true, false) => " (Betaflight only)",
-                (false, true) => " (INAV only)",
-                _ => unreachable!(),
-            };
-
-            let doc = format!("`{}`{note}", flag.official);
-            quote! { #[doc = #doc] #ident }
-        });
+        let (flags, idents, official) = combine_flags(&self.betaflight, &self.inav);
+        let enum_def = expand_combined_flags(&name, &flags, &idents, false);
+        let impl_flag = impl_flag(&name, &idents, &official, false);
+        let impl_flag_display = impl_flag_display(&name);
 
         let mut from_bit = Vec::new();
-        for (ident, flag) in &ident_flags {
+        for (flag, ident) in flags.iter().zip(idents.iter()) {
             if flag.betaflight == flag.inav && flag.betaflight.is_some() {
                 let bit = flag.betaflight.unwrap();
                 let arm = quote!((#bit, _) => Some(Self::#ident));
@@ -160,7 +131,7 @@ impl Flags {
         let from_bit = from_bit.iter().map(|(_, _, arm)| arm);
 
         let mut to_bit = Vec::new();
-        for (ident, flag) in &ident_flags {
+        for (flag, ident) in flags.iter().zip(idents.iter()) {
             if flag.betaflight == flag.inav && flag.betaflight.is_some() {
                 let bit = flag.betaflight.unwrap();
                 to_bit.push(quote!((Self::#ident, _) => Some(#bit)));
@@ -176,22 +147,11 @@ impl Flags {
             }
         }
 
-        let tokens = quote! {
-            #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-            #( #[doc = #doc] )*
-            #( #[#attrs] )*
-            pub enum #name {
-                #(#enum_body),*
-            }
-
-            #[allow(unused_qualifications)]
-            impl crate::units::Flag for #name {
-                fn as_name(&self) -> &'static str {
-                    match self {
-                        #( Self::#flag_names => #official_names ),*
-                    }
-                }
-            }
+        quote! {
+            #attrs
+            #enum_def
+            #impl_flag
+            #impl_flag_display
 
             #[allow(clippy::match_same_arms, unused_qualifications)]
             impl #name {
@@ -212,65 +172,19 @@ impl Flags {
                 }
             }
 
-            impl ::core::fmt::Display for #name {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.write_str(self.as_name())
-                }
-            }
-        };
-
-        writeln!(out, "{tokens}")
-    }
-
-    fn combined_flags(&self) -> Vec<CombinedFlag> {
-        let mut combined = HashMap::new();
-
-        for flag in &self.betaflight {
-            assert!(combined.get(&flag.rust).is_none());
-            combined.insert(
-                &flag.rust,
-                CombinedFlag {
-                    official: flag.official.clone(),
-                    rust: flag.rust.clone(),
-                    betaflight: Some(flag.index),
-                    inav: None,
-                },
-            );
         }
-
-        for flag in &self.inav {
-            if let Some(combined) = combined.get_mut(&flag.rust) {
-                assert_eq!(combined.official, flag.official);
-                assert!(combined.inav.is_none());
-                combined.inav = Some(flag.index);
-            } else {
-                combined.insert(
-                    &flag.rust,
-                    CombinedFlag {
-                        official: flag.official.clone(),
-                        rust: flag.rust.clone(),
-                        betaflight: None,
-                        inav: Some(flag.index),
-                    },
-                );
-            }
-        }
-
-        let mut combined = combined.into_values().collect::<Vec<_>>();
-        combined.sort_unstable_by_key(|flag| flag.rust.clone());
-        combined
     }
 }
 
 #[derive(Debug)]
-struct Flag {
+struct Variant {
     official: String,
     rust: String,
     index: u32,
 }
 
 #[derive(Debug)]
-struct CombinedFlag {
+struct CombinedVariant {
     official: String,
     rust: String,
     betaflight: Option<u32>,
@@ -282,6 +196,216 @@ enum FirmwareKind {
     Both,
     Betaflight,
     Inav,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct Enum {
+    name: String,
+    doc: String,
+    #[serde(default)]
+    attrs: Vec<String>,
+    unknown: bool,
+    unknown_callback: Option<String>,
+    betaflight: Vec<Variant>,
+    inav: Vec<Variant>,
+}
+
+impl Enum {
+    fn expand(&self) -> TokenStream {
+        let name = format_ident!("{}", self.name);
+        let attrs = quote_attrs(&self.doc, &self.attrs);
+
+        let (variants, idents, official) = combine_flags(&self.betaflight, &self.inav);
+
+        let enum_def = expand_combined_flags(&name, &variants, &idents, self.unknown);
+        let impl_flag = impl_flag(&name, &idents, &official, self.unknown);
+        let impl_flag_display = impl_flag_display(&name);
+
+        let (return_type, default) = if self.unknown {
+            (quote!(Self), quote!(Self::Unknown))
+        } else {
+            (quote!(Option<Self>), quote!(None))
+        };
+
+        let unknown_cb = self.unknown_callback.as_deref().unwrap_or("|_| ()");
+        let unknown_cb = syn::parse_str::<syn::ExprClosure>(unknown_cb).unwrap();
+
+        let mut new = Vec::new();
+        for (variant, ident) in variants.iter().zip(idents.iter()) {
+            let value = quote!(Self::#ident);
+            let value = if self.unknown {
+                value
+            } else {
+                quote!(Some(#value))
+            };
+
+            if variant.betaflight == variant.inav && variant.betaflight.is_some() {
+                let index = variant.betaflight.unwrap();
+                let arm = quote!((#index, _) => #value);
+                new.push((index, FirmwareKind::Both, arm));
+                continue;
+            }
+
+            if let Some(index) = variant.betaflight {
+                let arm = quote!((#index, Betaflight | EmuFlight) => #value);
+                new.push((index, FirmwareKind::Betaflight, arm));
+            }
+
+            if let Some(index) = variant.inav {
+                let arm = quote!((#index, Inav) => #value);
+                new.push((index, FirmwareKind::Inav, arm));
+            }
+        }
+        new.sort_unstable_by_key(|(index, firmware, _)| (*index, *firmware));
+        let new = new.iter().map(|(_, _, arm)| arm);
+
+        quote! {
+            #attrs
+            #enum_def
+            #impl_flag
+            #impl_flag_display
+
+            #[allow(clippy::match_same_arms, unused_qualifications)]
+            impl #name {
+                pub(crate) fn new(raw: u32, firmware: crate::headers::FirmwareKind) -> #return_type {
+                    use crate::headers::FirmwareKind::{Betaflight, EmuFlight, Inav};
+                    match (raw, firmware) {
+                        #(#new,)*
+                        _ => {
+                            (#unknown_cb)(raw);
+                            #default
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn combine_flags(
+    betaflight: &[Variant],
+    inav: &[Variant],
+) -> (Vec<CombinedVariant>, Vec<Ident>, Vec<String>) {
+    let mut combined = HashMap::new();
+
+    for flag in betaflight {
+        assert!(combined.get(&flag.rust).is_none());
+        combined.insert(
+            &flag.rust,
+            CombinedVariant {
+                official: flag.official.clone(),
+                rust: flag.rust.clone(),
+                betaflight: Some(flag.index),
+                inav: None,
+            },
+        );
+    }
+
+    for flag in inav {
+        if let Some(combined) = combined.get_mut(&flag.rust) {
+            assert_eq!(combined.official, flag.official);
+            assert!(combined.inav.is_none());
+            combined.inav = Some(flag.index);
+        } else {
+            combined.insert(
+                &flag.rust,
+                CombinedVariant {
+                    official: flag.official.clone(),
+                    rust: flag.rust.clone(),
+                    betaflight: None,
+                    inav: Some(flag.index),
+                },
+            );
+        }
+    }
+
+    let mut combined = combined.into_values().collect::<Vec<_>>();
+    combined.sort_unstable_by_key(|flag| flag.rust.clone());
+
+    let (idents, official) = combined
+        .iter()
+        .map(|variant| (format_ident!("{}", variant.rust), variant.official.clone()))
+        .unzip();
+
+    (combined, idents, official)
+}
+
+#[allow(single_use_lifetimes)]
+fn expand_combined_flags<'f, 'i>(
+    name: &Ident,
+    flags: impl IntoIterator<Item = &'f CombinedVariant>,
+    idents: impl IntoIterator<Item = &'i Ident>,
+    unknown: bool,
+) -> TokenStream {
+    let body = flags
+        .into_iter()
+        .zip(idents.into_iter())
+        .map(|(flag, ident)| {
+            let note = match (flag.betaflight.is_some(), flag.inav.is_some()) {
+                (true, true) => "",
+                (true, false) => " (Betaflight only)",
+                (false, true) => " (INAV only)",
+                _ => unreachable!(),
+            };
+
+            let doc = format!("`{}`{note}", flag.official);
+            quote! { #[doc = #doc] #ident }
+        });
+
+    let unknown = unknown.then_some(quote!(Unknown));
+
+    quote! {
+        pub enum #name {
+            #(#body, )*
+            #unknown
+        }
+    }
+}
+
+fn quote_attrs(doc: &str, attrs: &[String]) -> TokenStream {
+    let doc = doc.lines();
+    let attrs = attrs
+        .iter()
+        .map(|attr| syn::parse_str::<syn::Meta>(attr).unwrap());
+
+    quote! {
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+        #( #[doc = #doc] )*
+        #( #[#attrs] )*
+    }
+}
+
+#[allow(single_use_lifetimes)]
+fn impl_flag<'v>(
+    name: &Ident,
+    variants: impl IntoIterator<Item = &'v Ident>,
+    names: &[String],
+    unknown: bool,
+) -> TokenStream {
+    let variants = variants.into_iter();
+    let unknown = unknown.then_some(quote!(Self::Unknown => "UNKNOWN"));
+    quote! {
+        #[allow(unused_qualifications)]
+        impl crate::units::Flag for #name {
+            fn as_name(&self) -> &'static str {
+                match self {
+                    #( Self::#variants => #names, )*
+                    #unknown
+                }
+            }
+        }
+    }
+}
+
+fn impl_flag_display(name: &Ident) -> TokenStream {
+    quote! {
+        impl ::core::fmt::Display for #name {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                f.write_str(self.as_name())
+            }
+        }
+    }
 }
 
 fn main() {
@@ -306,7 +430,8 @@ fn main() {
         let s = std::io::read_to_string(f).unwrap();
         let type_def: TypeDef = serde_yaml::from_str(&s).unwrap();
 
-        type_def.write(&mut out).unwrap();
+        let tokens = type_def.expand();
+        writeln!(out, "{tokens}").unwrap();
     }
 
     if Command::new("rustfmt")
@@ -321,7 +446,7 @@ fn main() {
     }
 }
 
-impl<'de> Deserialize<'de> for Flag {
+impl<'de> Deserialize<'de> for Variant {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -339,7 +464,7 @@ impl<'de> Deserialize<'de> for Flag {
         struct FlagVisitor;
 
         impl<'de> Visitor<'de> for FlagVisitor {
-            type Value = Flag;
+            type Value = Variant;
 
             fn expecting(&self, _formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
                 todo!()
@@ -353,7 +478,7 @@ impl<'de> Deserialize<'de> for Flag {
                     let (official, index): (String, u32) = map.next_entry()?.unwrap();
                     let rust = official.to_upper_camel_case();
 
-                    Ok(Flag {
+                    Ok(Variant {
                         official,
                         rust,
                         index,
@@ -390,7 +515,7 @@ impl<'de> Deserialize<'de> for Flag {
                     let rust = rust.ok_or_else(|| Error::missing_field("rust"))?;
                     let index = index.ok_or_else(|| Error::missing_field("index"))?;
 
-                    Ok(Flag {
+                    Ok(Variant {
                         official,
                         rust,
                         index,
