@@ -1,15 +1,54 @@
 use std::collections::HashMap;
 use std::env;
-use std::fs::File;
-use std::io::Write;
-use std::process::Command;
+use std::io::{BufWriter, Write};
+use std::path::PathBuf;
+use std::process::{Command, Stdio};
 
-use glob::glob;
 use heck::ToUpperCamelCase;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 use serde::de::Visitor;
 use serde::Deserialize;
+
+pub fn get_types_glob() -> String {
+    format!("{}/../types/*.yaml", env!("CARGO_MANIFEST_DIR"))
+}
+
+pub fn get_out_dir() -> PathBuf {
+    let mut dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    dir.pop();
+    dir.push("src/generated");
+    dir
+}
+
+pub fn run(yaml: &str) -> String {
+    let type_def: TypeDef = serde_yaml::from_str(yaml).unwrap();
+    let tokens = type_def.expand();
+
+    rustfmt(&tokens.to_string())
+}
+
+fn rustfmt(src: &str) -> String {
+    let mut cmd = Command::new("rustfmt")
+        .arg("+nightly")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .expect("failed to start `rustfmt +nightly`");
+
+    let mut stdin = BufWriter::new(cmd.stdin.as_mut().unwrap());
+    stdin.write_all(src.as_bytes()).unwrap();
+    drop(stdin);
+
+    let output = cmd.wait_with_output().unwrap();
+
+    assert!(
+        output.status.success(),
+        "`rustfmt +nightly` exited unsuccessfully"
+    );
+
+    String::from_utf8(output.stdout).unwrap()
+}
 
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
@@ -63,7 +102,7 @@ impl FlagSet {
                 }
             }
 
-            #[allow(unused_qualifications)]
+            #[allow(unused_qualifications, clippy::cast_possible_truncation)]
             impl crate::units::FlagSet for #name {
                 type Flag = #flag_name;
 
@@ -153,7 +192,7 @@ impl Flags {
             #impl_flag
             #impl_flag_display
 
-            #[allow(clippy::match_same_arms, unused_qualifications)]
+            #[allow(unused_qualifications, clippy::match_same_arms, clippy::unseparated_literal_suffix)]
             impl #name {
                 const fn from_bit(bit: u32, firmware: crate::headers::FirmwareKind) -> Option<Self> {
                     use crate::headers::FirmwareKind::{Betaflight, EmuFlight, Inav};
@@ -266,13 +305,14 @@ impl Enum {
             #impl_flag
             #impl_flag_display
 
-            #[allow(clippy::match_same_arms, unused_qualifications)]
+            #[allow(unused_qualifications, clippy::match_same_arms, clippy::unseparated_literal_suffix)]
             impl #name {
                 pub(crate) fn new(raw: u32, firmware: crate::headers::FirmwareKind) -> #return_type {
                     use crate::headers::FirmwareKind::{Betaflight, EmuFlight, Inav};
                     match (raw, firmware) {
                         #(#new,)*
                         _ => {
+                            #[allow(clippy::redundant_closure_call)]
                             (#unknown_cb)(raw);
                             #default
                         }
@@ -408,44 +448,6 @@ fn impl_flag_display(name: &Ident) -> TokenStream {
     }
 }
 
-fn main() {
-    println!("cargo:rerun-if-changed=types/");
-
-    let out_dir = env::var("OUT_DIR").unwrap();
-    let out_dir = std::path::PathBuf::from(out_dir);
-
-    let mut files = Vec::new();
-
-    for f in glob("types/*.yaml").unwrap() {
-        let f = f.unwrap();
-        let filename = f.file_stem().unwrap();
-
-        let mut out_path = out_dir.clone();
-        out_path.push(filename);
-        out_path.set_extension("rs");
-        let mut out = File::create(&out_path).unwrap();
-        files.push(out_path);
-
-        let f = File::open(f).unwrap();
-        let s = std::io::read_to_string(f).unwrap();
-        let type_def: TypeDef = serde_yaml::from_str(&s).unwrap();
-
-        let tokens = type_def.expand();
-        writeln!(out, "{tokens}").unwrap();
-    }
-
-    if Command::new("rustfmt")
-        .arg("+nightly")
-        .args(files)
-        .status()
-        .map(|status| status.success())
-        .ok()
-        != Some(true)
-    {
-        println!("cargo:warning=failed to run `rustfmt +nightly` on generated files");
-    }
-}
-
 impl<'de> Deserialize<'de> for Variant {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -466,8 +468,12 @@ impl<'de> Deserialize<'de> for Variant {
         impl<'de> Visitor<'de> for FlagVisitor {
             type Value = Variant;
 
-            fn expecting(&self, _formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                todo!()
+            fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                write!(
+                    f,
+                    "a map with keys `official`, `rust`, and `index`, or a map with one entry \
+                     `official` -> `index`"
+                )
             }
 
             fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>

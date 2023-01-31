@@ -1,3 +1,14 @@
+macro_rules! include_generated {
+    ($file:literal) => {
+        include!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/src/generated/",
+            $file,
+            ".rs"
+        ));
+    };
+}
+
 macro_rules! impl_sign_conversions {
     ($as_i:ident, $i:ty, $as_u:ident, $u:ty) => {
         #[doc = concat!("Wrapper for `x as ", stringify!($i), "` that typechecks `x`")]

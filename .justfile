@@ -44,6 +44,10 @@ bench-test:
 profile-bench file bench time='10' *args='':
     cargo flamegraph --deterministic --palette rust --bench {{ file }} -- --bench --profile-time {{ time }} {{ bench }} {{ args }}
 
+# Run codegen
+codegen:
+    cargo run -p codegen
+
 # Install/update all dev tools from crates.io
 install:
     cargo install --locked \

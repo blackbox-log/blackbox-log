@@ -29,9 +29,9 @@ mod from_raw {
     }
 }
 
-include!(concat!(env!("OUT_DIR"), "/failsafe_phase.rs"));
-include!(concat!(env!("OUT_DIR"), "/flight_mode.rs"));
-include!(concat!(env!("OUT_DIR"), "/state.rs"));
+include_generated!("failsafe_phase");
+include_generated!("flight_mode");
+include_generated!("state");
 
 pub(crate) use from_raw::FromRaw;
 

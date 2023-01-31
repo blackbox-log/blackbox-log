@@ -1,0 +1,16 @@
+[package]
+name = "codegen"
+version = "0.0.0"
+publish = false
+
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+glob = "0.3.1"
+heck = "0.4.0"
+proc-macro2 = { version = "1.0.50", default-features = false }
+quote = "1.0.23"
+serde = { version = "^1.0.96", features = ["derive"] }
+serde_yaml = "0.9.17"
+syn = { version = "1.0.107", features = ["full"] }
