@@ -139,17 +139,34 @@ impl Flags {
 
         let mut from_bit = Vec::new();
         for (ident, flag) in &ident_flags {
+            if flag.betaflight == flag.inav && flag.betaflight.is_some() {
+                let bit = flag.betaflight.unwrap();
+                let arm = quote!((#bit, _) => Some(Self::#ident));
+                from_bit.push((bit, FirmwareKind::Both, arm));
+                continue;
+            }
+
             if let Some(bit) = flag.betaflight {
-                from_bit.push(quote!((#bit, Betaflight | EmuFlight) => Some(Self::#ident)));
+                let arm = quote!((#bit, Betaflight | EmuFlight) => Some(Self::#ident));
+                from_bit.push((bit, FirmwareKind::Betaflight, arm));
             }
 
             if let Some(bit) = flag.inav {
-                from_bit.push(quote!((#bit, Inav) => Some(Self::#ident)));
+                let arm = quote!((#bit, Inav) => Some(Self::#ident));
+                from_bit.push((bit, FirmwareKind::Inav, arm));
             }
         }
+        from_bit.sort_unstable_by_key(|(index, firmware, _)| (*index, *firmware));
+        let from_bit = from_bit.iter().map(|(_, _, arm)| arm);
 
         let mut to_bit = Vec::new();
         for (ident, flag) in &ident_flags {
+            if flag.betaflight == flag.inav && flag.betaflight.is_some() {
+                let bit = flag.betaflight.unwrap();
+                to_bit.push(quote!((Self::#ident, _) => Some(#bit)));
+                continue;
+            }
+
             if let Some(bit) = flag.betaflight {
                 to_bit.push(quote!((Self::#ident, Betaflight | EmuFlight) => Some(#bit)));
             }
@@ -258,6 +275,13 @@ struct CombinedFlag {
     rust: String,
     betaflight: Option<u32>,
     inav: Option<u32>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum FirmwareKind {
+    Both,
+    Betaflight,
+    Inav,
 }
 
 fn main() {
