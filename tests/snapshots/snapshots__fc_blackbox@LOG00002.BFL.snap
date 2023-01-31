@@ -1,5 +1,5 @@
 ---
-source: blackbox-log/tests/snapshots.rs
+source: tests/snapshots.rs
 expression: snapshot
 input_file: ".modules/fc-blackbox/src/test-data/LOG00002.BFL"
 ---
@@ -485,7 +485,7 @@ FileSnapshot(
             name: "failsafePhase",
             unit: FailsafePhase,
             history: {
-              "Idle": 25,
+              "IDLE": 25,
             },
           ),
           FieldSnapshot(

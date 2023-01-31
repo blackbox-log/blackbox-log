@@ -1,5 +1,5 @@
 ---
-source: blackbox-log/tests/snapshots.rs
+source: tests/snapshots.rs
 expression: snapshot
 input_file: ".modules/gimbal-ghost/test/LOG00001.BFL"
 ---
@@ -550,22 +550,22 @@ FileSnapshot(
             name: "flightModeFlags",
             unit: FlightMode,
             history: {
-              "Arm": 29,
+              "ARM": 29,
             },
           ),
           FieldSnapshot(
             name: "stateFlags",
             unit: State,
             history: {
-              "GpsFix": 26,
-              "GpsFixEver": 29,
+              "GPS_FIX": 26,
+              "GPS_FIX_EVER": 29,
             },
           ),
           FieldSnapshot(
             name: "failsafePhase",
             unit: FailsafePhase,
             history: {
-              "Idle": 29,
+              "IDLE": 29,
             },
           ),
           FieldSnapshot(

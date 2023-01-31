@@ -1,7 +1,7 @@
 ---
-source: blackbox-log/tests/snapshots.rs
+source: tests/snapshots.rs
 expression: snapshot
-input_file: blackbox-log/tests/logs/error-recovery.bbl
+input_file: tests/logs/error-recovery.bbl
 ---
 FileSnapshot(
   count: 1,
@@ -473,7 +473,7 @@ FileSnapshot(
             name: "flightModeFlags",
             unit: FlightMode,
             history: {
-              "Arm": 1,
+              "ARM": 1,
             },
           ),
           FieldSnapshot(
@@ -485,7 +485,7 @@ FileSnapshot(
             name: "failsafePhase",
             unit: FailsafePhase,
             history: {
-              "Idle": 1,
+              "IDLE": 1,
             },
           ),
           FieldSnapshot(

@@ -1,5 +1,5 @@
 ---
-source: blackbox-log/tests/snapshots.rs
+source: tests/snapshots.rs
 expression: snapshot
 input_file: ".modules/fc-blackbox/src/test-data/crashing-LOG00002.BFL"
 ---
@@ -443,8 +443,8 @@ FileSnapshot(
             name: "flightModeFlags",
             unit: FlightMode,
             history: {
-              "Arm": 11,
-              "ThreeD": 11,
+              "3D": 11,
+              "ARM": 11,
             },
           ),
           FieldSnapshot(
@@ -456,7 +456,7 @@ FileSnapshot(
             name: "failsafePhase",
             unit: FailsafePhase,
             history: {
-              "Idle": 11,
+              "IDLE": 11,
             },
           ),
           FieldSnapshot(

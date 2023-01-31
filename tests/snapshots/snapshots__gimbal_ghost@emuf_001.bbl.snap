@@ -1,5 +1,5 @@
 ---
-source: blackbox-log/tests/snapshots.rs
+source: tests/snapshots.rs
 expression: snapshot
 input_file: ".modules/gimbal-ghost/test/emuf_001.bbl"
 ---
@@ -562,9 +562,9 @@ FileSnapshot(
             name: "flightModeFlags",
             unit: FlightMode,
             history: {
-              "Arm": 15,
-              "FpvAngleMix": 15,
-              "Paralyze": 1,
+              "ARM": 15,
+              "FPV_ANGLE_MIX": 15,
+              "PARALYZE": 1,
             },
           ),
           FieldSnapshot(
@@ -576,7 +576,7 @@ FileSnapshot(
             name: "failsafePhase",
             unit: FailsafePhase,
             history: {
-              "Idle": 15,
+              "IDLE": 15,
             },
           ),
           FieldSnapshot(
@@ -1154,9 +1154,9 @@ FileSnapshot(
             name: "flightModeFlags",
             unit: FlightMode,
             history: {
-              "Arm": 17,
-              "FpvAngleMix": 17,
-              "Paralyze": 1,
+              "ARM": 17,
+              "FPV_ANGLE_MIX": 17,
+              "PARALYZE": 1,
             },
           ),
           FieldSnapshot(
@@ -1168,7 +1168,7 @@ FileSnapshot(
             name: "failsafePhase",
             unit: FailsafePhase,
             history: {
-              "Idle": 17,
+              "IDLE": 17,
             },
           ),
           FieldSnapshot(

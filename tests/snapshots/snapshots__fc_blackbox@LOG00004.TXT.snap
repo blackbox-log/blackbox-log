@@ -1,5 +1,5 @@
 ---
-source: blackbox-log/tests/snapshots.rs
+source: tests/snapshots.rs
 expression: snapshot
 input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
 ---
@@ -905,38 +905,37 @@ FileSnapshot(
             name: "flightModeFlags",
             unit: FlightMode,
             history: {
-              "Angle": 650,
-              "AutoTune": 12,
-              "Horizon": 132,
-              "Manual": 1,
-              "NavWp": 1,
-              "TurnAssistant": 132,
+              "ANGLE": 650,
+              "AUTO_TUNE": 12,
+              "HORIZON": 132,
+              "MANUAL": 1,
+              "NAV_WP": 1,
+              "TURN_ASSISTANT": 132,
             },
           ),
           FieldSnapshot(
             name: "stateFlags",
             unit: State,
             history: {
-              "AccelerometerCalibrated": 650,
-              "AirmodeActive": 650,
-              "Airplane": 650,
-              "AltitudeControl": 650,
-              "AntiWindup": 1,
-              "AntiWindupDeactivated": 566,
-              "FixedWingLegacy": 650,
-              "GpsFix": 650,
-              "GpsFixHome": 650,
-              "MoveForwardOnly": 650,
-              "NavMotorStopOrIdle": 23,
-              "SetReversibleMotorsForward": 650,
-              "SmallAngle": 650,
+              "ACCELEROMETER_CALIBRATED": 650,
+              "AIRMODE_ACTIVE": 650,
+              "AIRPLANE": 650,
+              "ALTITUDE_CONTROL": 650,
+              "ANTI_WINDUP": 1,
+              "ANTI_WINDUP_DEACTIVATED": 566,
+              "GPS_FIX": 650,
+              "GPS_FIX_HOME": 650,
+              "MOVE_FORWARD_ONLY": 650,
+              "NAV_MOTOR_STOP_OR_IDLE": 23,
+              "SET_REVERSIBLE_MOTORS_FORWARD": 650,
+              "SMALL_ANGLE": 650,
             },
           ),
           FieldSnapshot(
             name: "failsafePhase",
             unit: FailsafePhase,
             history: {
-              "Idle": 650,
+              "IDLE": 650,
             },
           ),
           FieldSnapshot(
