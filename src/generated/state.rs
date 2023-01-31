@@ -137,11 +137,11 @@ impl ::core::fmt::Display for State {
 )]
 impl State {
     const fn from_bit(bit: u32, firmware: crate::headers::FirmwareKind) -> Option<Self> {
-        use crate::headers::FirmwareKind::{Betaflight, EmuFlight, Inav};
+        use crate::headers::FirmwareKind::{Betaflight, Inav};
         match (bit, firmware) {
             (0u32, _) => Some(Self::GpsFixHome),
             (1u32, _) => Some(Self::GpsFix),
-            (2u32, Betaflight | EmuFlight) => Some(Self::GpsFixEver),
+            (2u32, Betaflight) => Some(Self::GpsFixEver),
             (2u32, Inav) => Some(Self::CalibrateMag),
             (3u32, Inav) => Some(Self::SmallAngle),
             (5u32, Inav) => Some(Self::AntiWindup),
@@ -170,7 +170,7 @@ impl State {
     }
 
     const fn to_bit(self, firmware: crate::headers::FirmwareKind) -> Option<u32> {
-        use crate::headers::FirmwareKind::{Betaflight, EmuFlight, Inav};
+        use crate::headers::FirmwareKind::{Betaflight, Inav};
         match (self, firmware) {
             (Self::AccelerometerCalibrated, Inav) => Some(9u32),
             (Self::Airmode, Inav) => Some(15u32),
@@ -185,7 +185,7 @@ impl State {
             (Self::FlaperonAvailable, Inav) => Some(6u32),
             (Self::FwHeadingUseYaw, Inav) => Some(24u32),
             (Self::GpsFix, _) => Some(1u32),
-            (Self::GpsFixEver, Betaflight | EmuFlight) => Some(2u32),
+            (Self::GpsFixEver, Betaflight) => Some(2u32),
             (Self::GpsFixHome, _) => Some(0u32),
             (Self::LandingDetected, Inav) => Some(26u32),
             (Self::MoveForwardOnly, Inav) => Some(22u32),

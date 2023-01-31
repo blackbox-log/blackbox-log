@@ -50,19 +50,19 @@ impl ::core::fmt::Display for FailsafePhase {
 )]
 impl FailsafePhase {
     pub(crate) fn new(raw: u32, firmware: crate::headers::FirmwareKind) -> Self {
-        use crate::headers::FirmwareKind::{Betaflight, EmuFlight, Inav};
+        use crate::headers::FirmwareKind::{Betaflight, Inav};
         match (raw, firmware) {
             (0u32, _) => Self::Idle,
             (1u32, _) => Self::RxLossDetected,
-            (2u32, Betaflight | EmuFlight) => Self::Landing,
+            (2u32, Betaflight) => Self::Landing,
             (2u32, Inav) => Self::RxLossIdle,
-            (3u32, Betaflight | EmuFlight) => Self::Landed,
+            (3u32, Betaflight) => Self::Landed,
             (3u32, Inav) => Self::ReturnToHome,
-            (4u32, Betaflight | EmuFlight) => Self::RxLossMonitoring,
+            (4u32, Betaflight) => Self::RxLossMonitoring,
             (4u32, Inav) => Self::Landing,
-            (5u32, Betaflight | EmuFlight) => Self::RxLossRecovered,
+            (5u32, Betaflight) => Self::RxLossRecovered,
             (5u32, Inav) => Self::Landed,
-            (6u32, Betaflight | EmuFlight) => Self::GpsRescue,
+            (6u32, Betaflight) => Self::GpsRescue,
             (6u32, Inav) => Self::RxLossMonitoring,
             (7u32, Inav) => Self::RxLossRecovered,
             _ => {

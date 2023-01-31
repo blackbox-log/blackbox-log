@@ -222,8 +222,6 @@ pub enum FirmwareKind {
     Betaflight,
     /// [INAV](https://github.com/iNavFlight/inav/)
     Inav,
-    /// [EmuFlight](https://github.com/emuflight/EmuFlight)
-    EmuFlight,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -370,13 +368,18 @@ impl<'data> State<'data> {
         let firmware_kind = firmware_revision
             .split_once(' ')
             .map(|(fw, _)| fw.to_ascii_lowercase());
+
+        let firmware_kind_err = || Err(ParseError::UnknownFirmware(firmware_revision.to_owned()));
         let firmware_kind = match firmware_kind.as_deref() {
             Some("betaflight") => FirmwareKind::Betaflight,
             Some("inav") => FirmwareKind::Inav,
-            Some("emuflight") => FirmwareKind::EmuFlight,
+            Some("emuflight") => {
+                tracing::error!("EmuFlight is not supported");
+                return firmware_kind_err();
+            }
             _ => {
                 tracing::error!("Could not parse firmware revision");
-                return Err(ParseError::UnknownFirmware(firmware_revision.to_owned()));
+                return firmware_kind_err();
             }
         };
 

@@ -157,7 +157,7 @@ impl Flags {
             }
 
             if let Some(bit) = flag.betaflight {
-                let arm = quote!((#bit, Betaflight | EmuFlight) => Some(Self::#ident));
+                let arm = quote!((#bit, Betaflight) => Some(Self::#ident));
                 from_bit.push((bit, FirmwareKind::Betaflight, arm));
             }
 
@@ -178,7 +178,7 @@ impl Flags {
             }
 
             if let Some(bit) = flag.betaflight {
-                to_bit.push(quote!((Self::#ident, Betaflight | EmuFlight) => Some(#bit)));
+                to_bit.push(quote!((Self::#ident, Betaflight) => Some(#bit)));
             }
 
             if let Some(bit) = flag.inav {
@@ -195,7 +195,7 @@ impl Flags {
             #[allow(unused_qualifications, clippy::match_same_arms, clippy::unseparated_literal_suffix)]
             impl #name {
                 const fn from_bit(bit: u32, firmware: crate::headers::FirmwareKind) -> Option<Self> {
-                    use crate::headers::FirmwareKind::{Betaflight, EmuFlight, Inav};
+                    use crate::headers::FirmwareKind::{Betaflight, Inav};
                     match (bit, firmware) {
                         #(#from_bit,)*
                         _ => None
@@ -203,7 +203,7 @@ impl Flags {
                 }
 
                 const fn to_bit(self, firmware: crate::headers::FirmwareKind) -> Option<u32> {
-                    use crate::headers::FirmwareKind::{Betaflight, EmuFlight, Inav};
+                    use crate::headers::FirmwareKind::{Betaflight, Inav};
                     match (self, firmware) {
                         #(#to_bit,)*
                         _ => None
@@ -287,7 +287,7 @@ impl Enum {
             }
 
             if let Some(index) = variant.betaflight {
-                let arm = quote!((#index, Betaflight | EmuFlight) => #value);
+                let arm = quote!((#index, Betaflight) => #value);
                 new.push((index, FirmwareKind::Betaflight, arm));
             }
 
@@ -308,7 +308,7 @@ impl Enum {
             #[allow(unused_qualifications, clippy::match_same_arms, clippy::unseparated_literal_suffix)]
             impl #name {
                 pub(crate) fn new(raw: u32, firmware: crate::headers::FirmwareKind) -> #return_type {
-                    use crate::headers::FirmwareKind::{Betaflight, EmuFlight, Inav};
+                    use crate::headers::FirmwareKind::{Betaflight, Inav};
                     match (raw, firmware) {
                         #(#new,)*
                         _ => {
