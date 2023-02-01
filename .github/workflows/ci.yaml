@@ -6,6 +6,7 @@ on:
       - 'ci'
     paths-ignore:
       - '.github/workflows/pages.yaml'
+      - '.github/renovate.json'
   pull_request:
 
 permissions:

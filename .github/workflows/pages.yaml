@@ -4,9 +4,10 @@ on:
     branches:
       - main
     paths:
-      - blackbox-log/Cargo.toml
-      - 'blackbox-log/src/**'
+      - Cargo.toml
+      - 'src/**'
       - .github/workflows/pages.yaml
+      - .github/workflows/pages.index.html
   workflow_dispatch:
 
 permissions:
