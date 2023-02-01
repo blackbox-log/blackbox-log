@@ -259,6 +259,8 @@ impl serde::Serialize for FirmwareVersion {
     where
         S: serde::Serializer,
     {
+        #[cfg(not(feature = "std"))]
+        use alloc::string::ToString;
         serializer.serialize_str(&self.to_string())
     }
 }
