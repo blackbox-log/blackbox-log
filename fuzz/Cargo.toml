@@ -12,7 +12,7 @@ cargo-fuzz = true
 
 [dependencies]
 blackbox-log.path = ".."
-libfuzzer-sys = "0.4.5"
+libfuzzer-sys = "0.4.6"
 
 [lib]
 test = false
