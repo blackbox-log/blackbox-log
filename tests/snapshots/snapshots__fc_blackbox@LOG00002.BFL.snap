@@ -10,7 +10,7 @@ FileSnapshot(
       headers: Headers(
         version: V2,
         firmware_revision: "Betaflight 4.2.6 (a4b6db1e7) STM32F405",
-        firmware_kind: Betaflight,
+        firmware: Betaflight("4.2.6"),
         board_info: Some("AIRB OMNIBUSF4"),
         craft_name: None,
         vbat_reference: Some(0),

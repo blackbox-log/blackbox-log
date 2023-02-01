@@ -10,7 +10,7 @@ FileSnapshot(
       headers: Headers(
         version: V2,
         firmware_revision: "INAV 3.0.1 (753c4479) MATEKF405SE",
-        firmware_kind: Inav,
+        firmware: Inav("3.0.1"),
         board_info: None,
         craft_name: Some(":WDTE"),
         vbat_reference: Some(1646),

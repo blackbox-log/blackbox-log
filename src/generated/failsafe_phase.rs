@@ -49,22 +49,22 @@ impl ::core::fmt::Display for FailsafePhase {
     clippy::unseparated_literal_suffix
 )]
 impl FailsafePhase {
-    pub(crate) fn new(raw: u32, firmware: crate::headers::FirmwareKind) -> Self {
-        use crate::headers::FirmwareKind::{Betaflight, Inav};
+    pub(crate) fn new(raw: u32, firmware: crate::headers::Firmware) -> Self {
+        use crate::headers::Firmware::{Betaflight, Inav};
         match (raw, firmware) {
             (0u32, _) => Self::Idle,
             (1u32, _) => Self::RxLossDetected,
-            (2u32, Betaflight) => Self::Landing,
-            (2u32, Inav) => Self::RxLossIdle,
-            (3u32, Betaflight) => Self::Landed,
-            (3u32, Inav) => Self::ReturnToHome,
-            (4u32, Betaflight) => Self::RxLossMonitoring,
-            (4u32, Inav) => Self::Landing,
-            (5u32, Betaflight) => Self::RxLossRecovered,
-            (5u32, Inav) => Self::Landed,
-            (6u32, Betaflight) => Self::GpsRescue,
-            (6u32, Inav) => Self::RxLossMonitoring,
-            (7u32, Inav) => Self::RxLossRecovered,
+            (2u32, Betaflight(_)) => Self::Landing,
+            (2u32, Inav(_)) => Self::RxLossIdle,
+            (3u32, Betaflight(_)) => Self::Landed,
+            (3u32, Inav(_)) => Self::ReturnToHome,
+            (4u32, Betaflight(_)) => Self::RxLossMonitoring,
+            (4u32, Inav(_)) => Self::Landing,
+            (5u32, Betaflight(_)) => Self::RxLossRecovered,
+            (5u32, Inav(_)) => Self::Landed,
+            (6u32, Betaflight(_)) => Self::GpsRescue,
+            (6u32, Inav(_)) => Self::RxLossMonitoring,
+            (7u32, Inav(_)) => Self::RxLossRecovered,
             _ => {
                 #[allow(clippy::redundant_closure_call)]
                 (|raw| tracing::debug!("invalid failsafe phase ({raw})"))(raw);

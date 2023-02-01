@@ -3,12 +3,12 @@
 /// [`State`].
 #[allow(unused_qualifications)]
 pub struct StateSet {
-    firmware: crate::headers::FirmwareKind,
+    firmware: crate::headers::Firmware,
     raw: ::bitvec::array::BitArray<[u32; 1], ::bitvec::order::Lsb0>,
 }
 #[allow(unused_qualifications)]
 impl StateSet {
-    pub(crate) fn new(raw: u32, firmware: crate::headers::FirmwareKind) -> Self {
+    pub(crate) fn new(raw: u32, firmware: crate::headers::Firmware) -> Self {
         Self {
             firmware,
             raw: ::bitvec::array::BitArray::new([raw]),
@@ -136,68 +136,68 @@ impl ::core::fmt::Display for State {
     clippy::unseparated_literal_suffix
 )]
 impl State {
-    const fn from_bit(bit: u32, firmware: crate::headers::FirmwareKind) -> Option<Self> {
-        use crate::headers::FirmwareKind::{Betaflight, Inav};
+    const fn from_bit(bit: u32, firmware: crate::headers::Firmware) -> Option<Self> {
+        use crate::headers::Firmware::{Betaflight, Inav};
         match (bit, firmware) {
             (0u32, _) => Some(Self::GpsFixHome),
             (1u32, _) => Some(Self::GpsFix),
-            (2u32, Betaflight) => Some(Self::GpsFixEver),
-            (2u32, Inav) => Some(Self::CalibrateMag),
-            (3u32, Inav) => Some(Self::SmallAngle),
-            (5u32, Inav) => Some(Self::AntiWindup),
-            (6u32, Inav) => Some(Self::FlaperonAvailable),
-            (7u32, Inav) => Some(Self::NavMotorStopOrIdle),
-            (8u32, Inav) => Some(Self::CompassCalibrated),
-            (9u32, Inav) => Some(Self::AccelerometerCalibrated),
-            (11u32, Inav) => Some(Self::NavCruiseBraking),
-            (12u32, Inav) => Some(Self::NavCruiseBrakingBoost),
-            (13u32, Inav) => Some(Self::NavCruiseBrakingLocked),
-            (14u32, Inav) => Some(Self::NavExtraArmingSafetyBypassed),
-            (15u32, Inav) => Some(Self::Airmode),
-            (16u32, Inav) => Some(Self::EscSensorEnabled),
-            (17u32, Inav) => Some(Self::Airplane),
-            (18u32, Inav) => Some(Self::Multirotor),
-            (19u32, Inav) => Some(Self::Rover),
-            (20u32, Inav) => Some(Self::Boat),
-            (21u32, Inav) => Some(Self::AltitudeControl),
-            (22u32, Inav) => Some(Self::MoveForwardOnly),
-            (23u32, Inav) => Some(Self::SetReversibleMotorsForward),
-            (24u32, Inav) => Some(Self::FwHeadingUseYaw),
-            (25u32, Inav) => Some(Self::AntiWindupDeactivated),
-            (26u32, Inav) => Some(Self::LandingDetected),
+            (2u32, Betaflight(_)) => Some(Self::GpsFixEver),
+            (2u32, Inav(_)) => Some(Self::CalibrateMag),
+            (3u32, Inav(_)) => Some(Self::SmallAngle),
+            (5u32, Inav(_)) => Some(Self::AntiWindup),
+            (6u32, Inav(_)) => Some(Self::FlaperonAvailable),
+            (7u32, Inav(_)) => Some(Self::NavMotorStopOrIdle),
+            (8u32, Inav(_)) => Some(Self::CompassCalibrated),
+            (9u32, Inav(_)) => Some(Self::AccelerometerCalibrated),
+            (11u32, Inav(_)) => Some(Self::NavCruiseBraking),
+            (12u32, Inav(_)) => Some(Self::NavCruiseBrakingBoost),
+            (13u32, Inav(_)) => Some(Self::NavCruiseBrakingLocked),
+            (14u32, Inav(_)) => Some(Self::NavExtraArmingSafetyBypassed),
+            (15u32, Inav(_)) => Some(Self::Airmode),
+            (16u32, Inav(_)) => Some(Self::EscSensorEnabled),
+            (17u32, Inav(_)) => Some(Self::Airplane),
+            (18u32, Inav(_)) => Some(Self::Multirotor),
+            (19u32, Inav(_)) => Some(Self::Rover),
+            (20u32, Inav(_)) => Some(Self::Boat),
+            (21u32, Inav(_)) => Some(Self::AltitudeControl),
+            (22u32, Inav(_)) => Some(Self::MoveForwardOnly),
+            (23u32, Inav(_)) => Some(Self::SetReversibleMotorsForward),
+            (24u32, Inav(_)) => Some(Self::FwHeadingUseYaw),
+            (25u32, Inav(_)) => Some(Self::AntiWindupDeactivated),
+            (26u32, Inav(_)) => Some(Self::LandingDetected),
             _ => None,
         }
     }
 
-    const fn to_bit(self, firmware: crate::headers::FirmwareKind) -> Option<u32> {
-        use crate::headers::FirmwareKind::{Betaflight, Inav};
+    const fn to_bit(self, firmware: crate::headers::Firmware) -> Option<u32> {
+        use crate::headers::Firmware::{Betaflight, Inav};
         match (self, firmware) {
-            (Self::AccelerometerCalibrated, Inav) => Some(9u32),
-            (Self::Airmode, Inav) => Some(15u32),
-            (Self::Airplane, Inav) => Some(17u32),
-            (Self::AltitudeControl, Inav) => Some(21u32),
-            (Self::AntiWindup, Inav) => Some(5u32),
-            (Self::AntiWindupDeactivated, Inav) => Some(25u32),
-            (Self::Boat, Inav) => Some(20u32),
-            (Self::CalibrateMag, Inav) => Some(2u32),
-            (Self::CompassCalibrated, Inav) => Some(8u32),
-            (Self::EscSensorEnabled, Inav) => Some(16u32),
-            (Self::FlaperonAvailable, Inav) => Some(6u32),
-            (Self::FwHeadingUseYaw, Inav) => Some(24u32),
+            (Self::AccelerometerCalibrated, Inav(_)) => Some(9u32),
+            (Self::Airmode, Inav(_)) => Some(15u32),
+            (Self::Airplane, Inav(_)) => Some(17u32),
+            (Self::AltitudeControl, Inav(_)) => Some(21u32),
+            (Self::AntiWindup, Inav(_)) => Some(5u32),
+            (Self::AntiWindupDeactivated, Inav(_)) => Some(25u32),
+            (Self::Boat, Inav(_)) => Some(20u32),
+            (Self::CalibrateMag, Inav(_)) => Some(2u32),
+            (Self::CompassCalibrated, Inav(_)) => Some(8u32),
+            (Self::EscSensorEnabled, Inav(_)) => Some(16u32),
+            (Self::FlaperonAvailable, Inav(_)) => Some(6u32),
+            (Self::FwHeadingUseYaw, Inav(_)) => Some(24u32),
             (Self::GpsFix, _) => Some(1u32),
-            (Self::GpsFixEver, Betaflight) => Some(2u32),
+            (Self::GpsFixEver, Betaflight(_)) => Some(2u32),
             (Self::GpsFixHome, _) => Some(0u32),
-            (Self::LandingDetected, Inav) => Some(26u32),
-            (Self::MoveForwardOnly, Inav) => Some(22u32),
-            (Self::Multirotor, Inav) => Some(18u32),
-            (Self::NavCruiseBraking, Inav) => Some(11u32),
-            (Self::NavCruiseBrakingBoost, Inav) => Some(12u32),
-            (Self::NavCruiseBrakingLocked, Inav) => Some(13u32),
-            (Self::NavExtraArmingSafetyBypassed, Inav) => Some(14u32),
-            (Self::NavMotorStopOrIdle, Inav) => Some(7u32),
-            (Self::Rover, Inav) => Some(19u32),
-            (Self::SetReversibleMotorsForward, Inav) => Some(23u32),
-            (Self::SmallAngle, Inav) => Some(3u32),
+            (Self::LandingDetected, Inav(_)) => Some(26u32),
+            (Self::MoveForwardOnly, Inav(_)) => Some(22u32),
+            (Self::Multirotor, Inav(_)) => Some(18u32),
+            (Self::NavCruiseBraking, Inav(_)) => Some(11u32),
+            (Self::NavCruiseBrakingBoost, Inav(_)) => Some(12u32),
+            (Self::NavCruiseBrakingLocked, Inav(_)) => Some(13u32),
+            (Self::NavExtraArmingSafetyBypassed, Inav(_)) => Some(14u32),
+            (Self::NavMotorStopOrIdle, Inav(_)) => Some(7u32),
+            (Self::Rover, Inav(_)) => Some(19u32),
+            (Self::SetReversibleMotorsForward, Inav(_)) => Some(23u32),
+            (Self::SmallAngle, Inav(_)) => Some(3u32),
             _ => None,
         }
     }

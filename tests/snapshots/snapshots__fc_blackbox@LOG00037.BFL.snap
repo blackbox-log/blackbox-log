@@ -10,7 +10,7 @@ FileSnapshot(
       headers: Headers(
         version: V2,
         firmware_revision: "Betaflight 4.2.0 (8f2d21460) STM32F745",
-        firmware_kind: Betaflight,
+        firmware: Betaflight("4.2.0"),
         board_info: Some("HBRO KAKUTEF7"),
         craft_name: Some("AR8"),
         vbat_reference: Some(2277),

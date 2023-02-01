@@ -10,7 +10,7 @@ FileSnapshot(
       headers: Headers(
         version: V2,
         firmware_revision: "Betaflight 4.2.8 (101738d8e) STM32F7X2",
-        firmware_kind: Betaflight,
+        firmware: Betaflight("4.2.8"),
         board_info: Some("AIKO AIKONF7"),
         craft_name: Some("Gecko"),
         vbat_reference: Some(1653),

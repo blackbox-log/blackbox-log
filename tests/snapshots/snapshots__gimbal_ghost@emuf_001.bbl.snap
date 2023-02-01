@@ -6,7 +6,7 @@ input_file: ".modules/gimbal-ghost/test/emuf_001.bbl"
 FileSnapshot(
   count: 2,
   logs: [
-    Err(UnknownFirmware("EmuFlight 0.4.1 (7bac6ddd0) HELIOSPRING")),
-    Err(UnknownFirmware("EmuFlight 0.4.1 (7bac6ddd0) HELIOSPRING")),
+    Err(InvalidFirmware("EmuFlight 0.4.1 (7bac6ddd0) HELIOSPRING")),
+    Err(InvalidFirmware("EmuFlight 0.4.1 (7bac6ddd0) HELIOSPRING")),
   ],
 )

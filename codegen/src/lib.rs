@@ -88,13 +88,13 @@ impl FlagSet {
             #attrs
             #[allow(unused_qualifications)]
             pub struct #name {
-                firmware: crate::headers::FirmwareKind,
+                firmware: crate::headers::Firmware,
                 raw: ::bitvec::array::BitArray<[u32; 1], ::bitvec::order::Lsb0>
             }
 
             #[allow(unused_qualifications)]
             impl #name {
-                pub(crate) fn new(raw: u32, firmware: crate::headers::FirmwareKind) -> Self {
+                pub(crate) fn new(raw: u32, firmware: crate::headers::Firmware) -> Self {
                     Self {
                         firmware,
                         raw: ::bitvec::array::BitArray::new([raw])
@@ -152,18 +152,18 @@ impl Flags {
             if flag.betaflight == flag.inav && flag.betaflight.is_some() {
                 let bit = flag.betaflight.unwrap();
                 let arm = quote!((#bit, _) => Some(Self::#ident));
-                from_bit.push((bit, FirmwareKind::Both, arm));
+                from_bit.push((bit, Firmware::Both, arm));
                 continue;
             }
 
             if let Some(bit) = flag.betaflight {
-                let arm = quote!((#bit, Betaflight) => Some(Self::#ident));
-                from_bit.push((bit, FirmwareKind::Betaflight, arm));
+                let arm = quote!((#bit, Betaflight(_)) => Some(Self::#ident));
+                from_bit.push((bit, Firmware::Betaflight, arm));
             }
 
             if let Some(bit) = flag.inav {
-                let arm = quote!((#bit, Inav) => Some(Self::#ident));
-                from_bit.push((bit, FirmwareKind::Inav, arm));
+                let arm = quote!((#bit, Inav(_)) => Some(Self::#ident));
+                from_bit.push((bit, Firmware::Inav, arm));
             }
         }
         from_bit.sort_unstable_by_key(|(index, firmware, _)| (*index, *firmware));
@@ -178,11 +178,11 @@ impl Flags {
             }
 
             if let Some(bit) = flag.betaflight {
-                to_bit.push(quote!((Self::#ident, Betaflight) => Some(#bit)));
+                to_bit.push(quote!((Self::#ident, Betaflight(_)) => Some(#bit)));
             }
 
             if let Some(bit) = flag.inav {
-                to_bit.push(quote!((Self::#ident, Inav) => Some(#bit)));
+                to_bit.push(quote!((Self::#ident, Inav(_)) => Some(#bit)));
             }
         }
 
@@ -194,16 +194,16 @@ impl Flags {
 
             #[allow(unused_qualifications, clippy::match_same_arms, clippy::unseparated_literal_suffix)]
             impl #name {
-                const fn from_bit(bit: u32, firmware: crate::headers::FirmwareKind) -> Option<Self> {
-                    use crate::headers::FirmwareKind::{Betaflight, Inav};
+                const fn from_bit(bit: u32, firmware: crate::headers::Firmware) -> Option<Self> {
+                    use crate::headers::Firmware::{Betaflight, Inav};
                     match (bit, firmware) {
                         #(#from_bit,)*
                         _ => None
                     }
                 }
 
-                const fn to_bit(self, firmware: crate::headers::FirmwareKind) -> Option<u32> {
-                    use crate::headers::FirmwareKind::{Betaflight, Inav};
+                const fn to_bit(self, firmware: crate::headers::Firmware) -> Option<u32> {
+                    use crate::headers::Firmware::{Betaflight, Inav};
                     match (self, firmware) {
                         #(#to_bit,)*
                         _ => None
@@ -231,7 +231,7 @@ struct CombinedVariant {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-enum FirmwareKind {
+enum Firmware {
     Both,
     Betaflight,
     Inav,
@@ -282,18 +282,18 @@ impl Enum {
             if variant.betaflight == variant.inav && variant.betaflight.is_some() {
                 let index = variant.betaflight.unwrap();
                 let arm = quote!((#index, _) => #value);
-                new.push((index, FirmwareKind::Both, arm));
+                new.push((index, Firmware::Both, arm));
                 continue;
             }
 
             if let Some(index) = variant.betaflight {
-                let arm = quote!((#index, Betaflight) => #value);
-                new.push((index, FirmwareKind::Betaflight, arm));
+                let arm = quote!((#index, Betaflight(_)) => #value);
+                new.push((index, Firmware::Betaflight, arm));
             }
 
             if let Some(index) = variant.inav {
-                let arm = quote!((#index, Inav) => #value);
-                new.push((index, FirmwareKind::Inav, arm));
+                let arm = quote!((#index, Inav(_)) => #value);
+                new.push((index, Firmware::Inav, arm));
             }
         }
         new.sort_unstable_by_key(|(index, firmware, _)| (*index, *firmware));
@@ -307,8 +307,8 @@ impl Enum {
 
             #[allow(unused_qualifications, clippy::match_same_arms, clippy::unseparated_literal_suffix)]
             impl #name {
-                pub(crate) fn new(raw: u32, firmware: crate::headers::FirmwareKind) -> #return_type {
-                    use crate::headers::FirmwareKind::{Betaflight, Inav};
+                pub(crate) fn new(raw: u32, firmware: crate::headers::Firmware) -> #return_type {
+                    use crate::headers::Firmware::{Betaflight, Inav};
                     match (raw, firmware) {
                         #(#new,)*
                         _ => {

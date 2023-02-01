@@ -23,8 +23,8 @@ pub type ParseResult<T> = Result<T, ParseError>;
 pub enum ParseError {
     /// The log uses a format version that is unsupported.
     UnsupportedVersion(String),
-    /// The `Firmware revision` header did not contain a known firmware.
-    UnknownFirmware(String),
+    /// The `Firmware revision` header could not be parsed.
+    InvalidFirmware(String),
     /// Could not parse the value in header `header`.
     InvalidHeader { header: String, value: String },
     // TODO: include header
@@ -40,7 +40,7 @@ impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::UnsupportedVersion(v) => write!(f, "unsupported or invalid version: `{v}`"),
-            Self::UnknownFirmware(firmware) => write!(f, "unknown firmware: `{firmware}`"),
+            Self::InvalidFirmware(firmware) => write!(f, "could not parse firmware: `{firmware}`"),
             Self::InvalidHeader { header, value } => {
                 write!(f, "invalid value for header `{header}`: `{value}`")
             }
@@ -80,7 +80,7 @@ pub struct Headers<'data> {
     /// The full `Firmware revision` header.
     pub firmware_revision: &'data str,
     /// The firmware that wrote the log.
-    pub firmware_kind: FirmwareKind,
+    pub firmware: Firmware,
     pub board_info: Option<&'data str>,
     pub craft_name: Option<&'data str>,
 
@@ -217,11 +217,50 @@ pub enum LogVersion {
 /// revision`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub enum FirmwareKind {
+pub enum Firmware {
     /// [Betaflight](https://github.com/betaflight/betaflight/)
-    Betaflight,
+    Betaflight(FirmwareVersion),
     /// [INAV](https://github.com/iNavFlight/inav/)
-    Inav,
+    Inav(FirmwareVersion),
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct FirmwareVersion {
+    pub major: u8,
+    pub minor: u8,
+    pub patch: u8,
+}
+
+impl FirmwareVersion {
+    fn from_str(s: &str) -> Option<Self> {
+        let mut components = s.splitn(3, '.').map(|s| s.parse().ok());
+
+        let major = components.next()??;
+        let minor = components.next()??;
+        let patch = components.next()??;
+
+        Some(Self {
+            major,
+            minor,
+            patch,
+        })
+    }
+}
+
+impl fmt::Display for FirmwareVersion {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}.{}.{}", self.major, self.minor, self.patch)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl serde::Serialize for FirmwareVersion {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -365,23 +404,7 @@ impl<'data> State<'data> {
         let not_empty = |s: &&str| !s.is_empty();
 
         let firmware_revision = self.firmware_revision.ok_or(ParseError::MissingHeader)?;
-        let firmware_kind = firmware_revision
-            .split_once(' ')
-            .map(|(fw, _)| fw.to_ascii_lowercase());
-
-        let firmware_kind_err = || Err(ParseError::UnknownFirmware(firmware_revision.to_owned()));
-        let firmware_kind = match firmware_kind.as_deref() {
-            Some("betaflight") => FirmwareKind::Betaflight,
-            Some("inav") => FirmwareKind::Inav,
-            Some("emuflight") => {
-                tracing::error!("EmuFlight is not supported");
-                return firmware_kind_err();
-            }
-            _ => {
-                tracing::error!("Could not parse firmware revision");
-                return firmware_kind_err();
-            }
-        };
+        let firmware = parse_firmware(firmware_revision)?;
 
         // TODO: log where each error comes from
         let headers = Headers {
@@ -392,7 +415,7 @@ impl<'data> State<'data> {
             gps_home_frame_def: self.gps_home_frames.parse()?,
 
             firmware_revision,
-            firmware_kind,
+            firmware,
             board_info: self.board_info.map(str::trim).filter(not_empty),
             craft_name: self.craft_name.map(str::trim).filter(not_empty),
 
@@ -409,6 +432,30 @@ impl<'data> State<'data> {
         headers.validate()?;
 
         Ok(headers)
+    }
+}
+
+fn parse_firmware(firmware_revision: &str) -> Result<Firmware, ParseError> {
+    let mut iter = firmware_revision.split(' ');
+
+    let invalid_fw = || Err(ParseError::InvalidFirmware(firmware_revision.to_owned()));
+
+    let kind = iter.next().map(str::to_ascii_lowercase);
+    let Some(version) = iter.next().and_then(FirmwareVersion::from_str) else {
+        return invalid_fw();
+    };
+
+    match kind.as_deref() {
+        Some("betaflight") => Ok(Firmware::Betaflight(version)),
+        Some("inav") => Ok(Firmware::Inav(version)),
+        Some("emuflight") => {
+            tracing::error!("EmuFlight is not supported");
+            invalid_fw()
+        }
+        _ => {
+            tracing::error!("Could not parse firmware revision");
+            invalid_fw()
+        }
     }
 }
 

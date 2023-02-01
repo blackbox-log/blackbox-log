@@ -10,7 +10,7 @@ FileSnapshot(
       headers: Headers(
         version: V2,
         firmware_revision: "Betaflight 4.3.0 (fc8318f54) STM32F405",
-        firmware_kind: Betaflight,
+        firmware: Betaflight("4.3.0"),
         board_info: Some("MTKS MATEKF405CTR"),
         craft_name: None,
         vbat_reference: Some(1629),

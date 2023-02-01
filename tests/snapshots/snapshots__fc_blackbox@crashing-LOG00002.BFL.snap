@@ -6,6 +6,6 @@ input_file: ".modules/fc-blackbox/src/test-data/crashing-LOG00002.BFL"
 FileSnapshot(
   count: 1,
   logs: [
-    Err(UnknownFirmware("EmuFlight 3.7.0 (9366544) OMNIBUSF4SD")),
+    Err(InvalidFirmware("EmuFlight 3.7.0 (9366544) OMNIBUSF4SD")),
   ],
 )
