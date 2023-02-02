@@ -9,17 +9,27 @@ flags:
     - ANGLE: 1
     - HORIZON: 2
     - MAG: 3
-    - HEAD_FREE: 4
+    - official: HEADFREE
+      rust: HeadFree
+      index: 4
     - PASSTHRU: 5
     - FAILSAFE: 6
-    - GPS_RESCUE: 7
-    - ANTIGRAVITY: 8
-    - HEAD_ADJUST: 9
-    - CAM_STAB: 10
-    - BEEPER_ON: 11
-    - LED_LOW: 12
+    - GPS RESCUE: 7
+    - ANTI GRAVITY: 8
+    - official: HEADADJ
+      rust: HeadAdjust
+      index: 9
+    - official: CAMSTAB
+      rust: CamStab
+      index: 10
+    - official: BEEPERON
+      rust: BeeperOn
+      index: 11
+    - official: LEDLOW
+      rust: LedLow
+      index: 12
     - official: CALIB
-      rust: Calibrate
+      rust: Calibration
       index: 13
     - OSD: 14
     - TELEMETRY: 15
@@ -31,42 +41,129 @@ flags:
     - official: 3D
       rust: ThreeD
       index: 21
-    - FPV_ANGLE_MIX: 22
-    - BLACKBOX_ERASE: 23
+    - FPV ANGLE MIX: 22
+    - BLACKBOX ERASE: 23
     - CAMERA1: 24
     - CAMERA2: 25
     - CAMERA3: 26
     - TURTLE: 27
     - PREARM: 28
-    - BEEP_GPS_COUNT: 29
-    - VTX_PITMODE: 30
+    - BEEP GPS COUNT: 29
+    - VTX PIT MODE: 30
     - PARALYZE: 31
-    # - USER1: 32
-    # - USER2: 33
-    # - USER3: 34
-    # - USER4: 35
-    # - PID_AUDIO: 36
-    # - ACRO_TRAINER: 37
-    # - VTX_CONTROL_DISABLE: 38
-    # - LAUNCH_CONTROL: 39
-    # - MSP_OVERRIDE: 40
-    # - STICK_COMMAND_DISABLE: 41
-    # - BEEPER_MUTE: 42
+    - USER1: 32
+    - USER2: 33
+    - USER3: 34
+    - USER4: 35
+    - PID AUDIO: 36
+    - ACRO TRAINER: 37
+    - VTX CONTROL DISABLE: 38
+    - LAUNCH CONTROL: 39
+    - official: MSPOVERRIDE
+      rust: MspOverride
+      index: 40
+    - STICK COMMAND DISABLE: 41
+    - BEEPER MUTE: 42
   inav:
-    - ANGLE: 0
-    - HORIZON: 1
-    - HEADING: 2
-    - NAV_ALT_HOLD: 3
-    - NAV_RTH: 4
-    - NAV_POSHOLD: 5
-    - HEAD_FREE: 6
-    - NAV_LAUNCH: 7
-    - MANUAL: 8
-    - FAILSAFE: 9
-    - AUTO_TUNE: 10
-    - NAV_WP: 11
-    - NAV_COURSE_HOLD: 12
-    - FLAPERON: 13
-    - TURN_ASSISTANT: 14
-    - TURTLE: 15
-    - SOARING: 16
+    - ARM: 0
+    - ANGLE: 1
+    - HORIZON: 2
+    - official: NAV ALTHOLD
+      rust: NavAltitudeHold
+      index: 3
+    - official: HEADINGHOLD
+      rust: HeadingHold
+      index: 4
+    - official: HEADFREE
+      rust: HeadFree
+      index: 5
+    - official: HEADADJ
+      rust: HeadAdjust
+      index: 6
+    - official: CAMSTAB
+      rust: CamStab
+      index: 7
+    - NAV RTH: 8
+    - official: NAV POSHOLD
+      rust: NavPositionHold
+      index: 9
+    - MANUAL: 10
+    - official: BEEPERON
+      rust: BeeperOn
+      index: 11
+    - official: LEDLOW
+      rust: LedLow
+      index: 12
+    - LIGHTS: 13
+    - NAV LAUNCH: 14
+    - OSD: 15
+    - TELEMETRY: 16
+    - BLACKBOX: 17
+    - FAILSAFE: 18
+    - official: NAV WP
+      rust: NavWaypoint
+      index: 19
+    - AIRMODE: 20
+    - official: HOMERESET
+      rust: HomeReset
+      index: 21
+    - official: GCSNAV
+      rust: GcsNav
+      index: 22
+    - KILLSWITCH: 23
+    - SURFACE: 24
+    - FLAPERON: 25
+    - official: TURNASSIST
+      rust: TurnAssist
+      index: 26
+    - official: AUTOTRIM
+      rust: AutoTrim
+      index: 27
+    - official: AUTOTUNE
+      rust: AutoTune
+      index: 28
+    - official: CAMERA1
+      rust: Camera1
+      index: 29
+    - official: CAMERA2
+      rust: Camera2
+      index: 30
+    - official: CAMERA3
+      rust: Camera3
+      index: 31
+    - official: OSDALT1
+      rust: OsdAlt1
+      index: 32
+    - official: OSDALT2
+      rust: OsdAlt2
+      index: 33
+    - official: OSDALT3
+      rust: OsdAlt3
+      index: 34
+    - official: NAVCOURSEHOLD
+      rust: NavCourseHold
+      index: 35
+    - BRAKING: 36
+    - USER1: 37
+    - USER2: 38
+    - FPV ANGLE MIX: 39
+    - official: LOITERDIRCHN
+      rust: LoiterChange
+      index: 40
+    - official: MSPRCOVERRIDE
+      rust: MspRcOverride
+      index: 41
+    - PREARM: 42
+    - TURTLE: 43
+    - NAV CRUISE: 44
+    - official: AUTOLEVEL
+      rust: AutoLevel
+      index: 45
+    - official: PLANWPMISSION
+      rust: PlanWpMission
+      index: 46
+    - SOARING: 47
+    - USER3: 48
+    - official: CHANGEMISSION
+      rust: MissionChange
+      index: 49

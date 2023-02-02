@@ -42,7 +42,7 @@ pub enum State {
     /// `ACCELEROMETER_CALIBRATED` (INAV only)
     AccelerometerCalibrated,
     /// `AIRMODE_ACTIVE` (INAV only)
-    Airmode,
+    AirMode,
     /// `AIRPLANE` (INAV only)
     Airplane,
     /// `ALTITUDE_CONTROL` (INAV only)
@@ -97,7 +97,7 @@ impl crate::units::Flag for State {
     fn as_name(&self) -> &'static str {
         match self {
             Self::AccelerometerCalibrated => "ACCELEROMETER_CALIBRATED",
-            Self::Airmode => "AIRMODE_ACTIVE",
+            Self::AirMode => "AIRMODE_ACTIVE",
             Self::Airplane => "AIRPLANE",
             Self::AltitudeControl => "ALTITUDE_CONTROL",
             Self::AntiWindup => "ANTI_WINDUP",
@@ -153,7 +153,7 @@ impl State {
             (12u32, Inav(_)) => Some(Self::NavCruiseBrakingBoost),
             (13u32, Inav(_)) => Some(Self::NavCruiseBrakingLocked),
             (14u32, Inav(_)) => Some(Self::NavExtraArmingSafetyBypassed),
-            (15u32, Inav(_)) => Some(Self::Airmode),
+            (15u32, Inav(_)) => Some(Self::AirMode),
             (16u32, Inav(_)) => Some(Self::EscSensorEnabled),
             (17u32, Inav(_)) => Some(Self::Airplane),
             (18u32, Inav(_)) => Some(Self::Multirotor),
@@ -173,7 +173,7 @@ impl State {
         use crate::headers::Firmware::{Betaflight, Inav};
         match (self, firmware) {
             (Self::AccelerometerCalibrated, Inav(_)) => Some(9u32),
-            (Self::Airmode, Inav(_)) => Some(15u32),
+            (Self::AirMode, Inav(_)) => Some(15u32),
             (Self::Airplane, Inav(_)) => Some(17u32),
             (Self::AltitudeControl, Inav(_)) => Some(21u32),
             (Self::AntiWindup, Inav(_)) => Some(5u32),

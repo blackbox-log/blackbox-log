@@ -25,7 +25,7 @@ flags:
     - NAV_CRUISE_BRAKING_LOCKED: 13
     - NAV_EXTRA_ARMING_SAFETY_BYPASSED: 14
     - official: AIRMODE_ACTIVE
-      rust: Airmode
+      rust: AirMode
       index: 15
     - ESC_SENSOR_ENABLED: 16
     - AIRPLANE: 17

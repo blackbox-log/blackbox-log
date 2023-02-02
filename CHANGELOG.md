@@ -9,6 +9,8 @@
   header.
 - Renamed the `firmware_kind` field of `Headers` to `firmware` and the
   `FirmwareKind` -> `Firmware`, now including the parsed version.
+- Fixed missing & misnamed flight modes
+  - Renamed some variants of `FlightMode`
 
 ## [0.2.0] - 2023-01-28
 
