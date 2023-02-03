@@ -300,6 +300,7 @@ impl ::core::fmt::Display for DebugMode {
     }
 }
 #[allow(
+    unused_imports,
     unused_qualifications,
     clippy::match_same_arms,
     clippy::unseparated_literal_suffix

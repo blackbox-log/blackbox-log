@@ -79,7 +79,7 @@ impl Enum {
             #impl_flag
             #impl_flag_display
 
-            #[allow(unused_qualifications, clippy::match_same_arms, clippy::unseparated_literal_suffix)]
+            #[allow(unused_imports, unused_qualifications, clippy::match_same_arms, clippy::unseparated_literal_suffix)]
             impl #name {
                 pub(crate) fn new(raw: u32, firmware: crate::headers::Firmware) -> #return_type {
                     use crate::headers::Firmware::{Betaflight, Inav};

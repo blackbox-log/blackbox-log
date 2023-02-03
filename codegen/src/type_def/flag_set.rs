@@ -137,7 +137,7 @@ impl Flags {
             #impl_flag
             #impl_flag_display
 
-            #[allow(unused_qualifications, clippy::match_same_arms, clippy::unseparated_literal_suffix)]
+            #[allow(unused_imports, unused_qualifications, clippy::match_same_arms, clippy::unseparated_literal_suffix)]
             impl #name {
                 const fn from_bit(bit: u32, firmware: crate::headers::Firmware) -> Option<Self> {
                     use crate::headers::Firmware::{Betaflight, Inav};

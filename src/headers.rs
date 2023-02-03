@@ -16,8 +16,9 @@ use crate::predictor::Predictor;
 use crate::utils::as_u32;
 use crate::{Reader, Unit};
 
-include_generated!("features");
 include_generated!("debug_mode");
+include_generated!("disabled_fields");
+include_generated!("features");
 
 pub type ParseResult<T> = Result<T, ParseError>;
 
@@ -89,6 +90,7 @@ pub struct Headers<'data> {
     pub craft_name: Option<&'data str>,
 
     pub debug_mode: DebugMode,
+    pub disabled_fields: DisabledFields,
     pub features: FeatureSet,
 
     /// The battery voltage measured at arm.
@@ -304,6 +306,7 @@ struct State<'data> {
     craft_name: Option<&'data str>,
 
     debug_mode: u32,
+    disabled_fields: u32,
     features: u32,
 
     vbat_reference: Option<u16>,
@@ -331,6 +334,7 @@ impl<'data> State<'data> {
             craft_name: None,
 
             debug_mode: 0,
+            disabled_fields: 0,
             features: 0,
 
             vbat_reference: None,
@@ -362,6 +366,7 @@ impl<'data> State<'data> {
                 "Craft name" => self.craft_name = Some(value),
 
                 "debug_mode" => self.debug_mode = value.parse().map_err(|_| ())?,
+                "fields_disabled_mask" => self.disabled_fields = value.parse().map_err(|_| ())?,
                 "features" => self.features = as_u32(value.parse().map_err(|_| ())?),
 
                 "vbatref" => {
@@ -438,6 +443,7 @@ impl<'data> State<'data> {
             craft_name: self.craft_name.map(str::trim).filter(not_empty),
 
             debug_mode: DebugMode::new(self.debug_mode, firmware),
+            disabled_fields: DisabledFields::new(self.disabled_fields, firmware),
             features: FeatureSet::new(self.features, firmware),
 
             vbat_reference: self.vbat_reference,
