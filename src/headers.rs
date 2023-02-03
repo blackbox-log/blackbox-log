@@ -233,6 +233,20 @@ pub enum Firmware {
     Inav(FirmwareVersion),
 }
 
+impl Firmware {
+    pub const fn name(&self) -> &'static str {
+        match self {
+            Firmware::Betaflight(_) => "Betaflight",
+            Firmware::Inav(_) => "INAV",
+        }
+    }
+
+    pub const fn version(&self) -> FirmwareVersion {
+        let (Self::Betaflight(version) | Self::Inav(version)) = self;
+        *version
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FirmwareVersion {
     pub major: u8,
