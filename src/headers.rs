@@ -219,6 +219,18 @@ pub enum LogVersion {
     V2,
 }
 
+impl fmt::Display for LogVersion {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if !f.alternate() {
+            write!(f, "v")?;
+        }
+
+        match self {
+            LogVersion::V2 => write!(f, "2"),
+        }
+    }
+}
+
 /// A supported firmware.
 ///
 /// This is not the same as the `Firmware type` header since all modern
