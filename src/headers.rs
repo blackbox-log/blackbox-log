@@ -13,7 +13,10 @@ use crate::frame::slow::{SlowFrameDef, SlowFrameDefBuilder};
 use crate::frame::{is_frame_def_header, parse_frame_def_header, DataFrameKind};
 use crate::parser::{InternalError, InternalResult};
 use crate::predictor::Predictor;
+use crate::utils::as_u32;
 use crate::{Reader, Unit};
+
+include_generated!("features");
 
 pub type ParseResult<T> = Result<T, ParseError>;
 
@@ -83,6 +86,8 @@ pub struct Headers<'data> {
     pub firmware: Firmware,
     pub board_info: Option<&'data str>,
     pub craft_name: Option<&'data str>,
+
+    pub features: FeatureSet,
 
     /// The battery voltage measured at arm.
     pub(crate) vbat_reference: Option<u16>,
@@ -296,6 +301,8 @@ struct State<'data> {
     board_info: Option<&'data str>,
     craft_name: Option<&'data str>,
 
+    features: u32,
+
     vbat_reference: Option<u16>,
     acceleration_1g: Option<u16>,
     gyro_scale: Option<f32>,
@@ -319,6 +326,8 @@ impl<'data> State<'data> {
             firmware_kind: None,
             board_info: None,
             craft_name: None,
+
+            features: 0,
 
             vbat_reference: None,
             acceleration_1g: None,
@@ -347,6 +356,8 @@ impl<'data> State<'data> {
                 "Firmware type" => self.firmware_kind = Some(value),
                 "Board information" => self.board_info = Some(value),
                 "Craft name" => self.craft_name = Some(value),
+
+                "features" => self.features = as_u32(value.parse().map_err(|_| ())?),
 
                 "vbatref" => {
                     let vbat_reference = value.parse().map_err(|_| ())?;
@@ -420,6 +431,8 @@ impl<'data> State<'data> {
             firmware,
             board_info: self.board_info.map(str::trim).filter(not_empty),
             craft_name: self.craft_name.map(str::trim).filter(not_empty),
+
+            features: FeatureSet::new(self.features, firmware),
 
             vbat_reference: self.vbat_reference,
             acceleration_1g: self.acceleration_1g,
