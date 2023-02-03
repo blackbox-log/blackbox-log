@@ -27,13 +27,18 @@ impl crate::units::FlagSet for StateSet {
     fn as_names(&self) -> ::alloc::vec::Vec<&'static str> {
         self.raw
             .iter_ones()
-            .filter_map(|bit| Some(<State>::from_bit(bit as u32, self.firmware)?.as_name()))
+            .filter_map(|bit| {
+                let flag = <State>::from_bit(bit as u32, self.firmware)?;
+                let name = <State as crate::units::Flag>::as_name(&flag);
+                Some(name)
+            })
             .collect()
     }
 }
 impl ::core::fmt::Display for StateSet {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.write_str(&self.as_names().join("|"))
+        let names = <Self as crate::units::FlagSet>::as_names(self);
+        f.write_str(&names.join("|"))
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -127,7 +132,8 @@ impl crate::units::Flag for State {
 }
 impl ::core::fmt::Display for State {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.write_str(self.as_name())
+        let s = <Self as crate::units::Flag>::as_name(self);
+        f.write_str(s)
     }
 }
 #[allow(

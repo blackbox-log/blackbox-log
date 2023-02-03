@@ -51,14 +51,19 @@ impl FlagSet {
                 fn as_names(&self) -> ::alloc::vec::Vec<&'static str> {
                     self.raw
                         .iter_ones()
-                        .filter_map(|bit| Some(<#flag_name>::from_bit(bit as u32, self.firmware)?.as_name()))
+                        .filter_map(|bit| {
+                            let flag = <#flag_name>::from_bit(bit as u32, self.firmware)?;
+                            let name = <#flag_name as crate::units::Flag>::as_name(&flag);
+                            Some(name)
+                        })
                         .collect()
                 }
             }
 
             impl ::core::fmt::Display for #name {
                 fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.write_str(&self.as_names().join("|"))
+                    let names = <Self as crate::units::FlagSet>::as_names(self);
+                    f.write_str(&names.join("|"))
                 }
             }
         }

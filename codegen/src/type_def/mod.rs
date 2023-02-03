@@ -175,7 +175,8 @@ fn impl_flag_display(name: &Ident) -> TokenStream {
     quote! {
         impl ::core::fmt::Display for #name {
             fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                f.write_str(self.as_name())
+                let s = <Self as crate::units::Flag>::as_name(self);
+                f.write_str(s)
             }
         }
     }
