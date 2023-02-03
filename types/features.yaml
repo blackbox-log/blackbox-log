@@ -7,82 +7,73 @@ flags:
   attrs:
     - 'cfg_attr(feature = "serde", derive(serde::Serialize))'
   betaflight:
-    - RX_PPM: 0
+    RX_PPM: 0
     # 1
-    - INFLIGHT_ACC_CAL: 2
-    - RX_SERIAL: 3
-    - MOTOR_STOP: 4
-    - SERVO_TILT: 5
-    - official: SOFTSERIAL
-      rust: SoftSerial
-      index: 6
-    - GPS: 7
+    INFLIGHT_ACC_CAL: 2
+    RX_SERIAL: 3
+    MOTOR_STOP: 4
+    SERVO_TILT: 5
+    SOFTSERIAL: 6
+    GPS: 7
     # 8
-    - official: RANGEFINDER
-      rust: RangeFinder
-      index: 9
-    - TELEMETRY: 10
+    RANGEFINDER: 9
+    TELEMETRY: 10
     # 11
-    - official: 3D
-      rust: ThreeD
-      index: 12
-    - RX_PARALLEL_PWM: 13
-    - RX_MSP: 14
-    - RSSI_ADC: 15
-    - LED_STRIP: 16
-    - DASHBOARD: 17
-    - OSD: 18
+    3D: 12
+    RX_PARALLEL_PWM: 13
+    RX_MSP: 14
+    RSSI_ADC: 15
+    LED_STRIP: 16
+    DASHBOARD: 17
+    OSD: 18
     # 19
-    - CHANNEL_FORWARDING: 20
-    - TRANSPONDER: 21
-    - official: AIRMODE
-      rust: AirMode
-      index: 22
+    CHANNEL_FORWARDING: 20
+    TRANSPONDER: 21
+    AIRMODE: 22
     # 23
     # 24
-    - RX_SPI: 25
+    RX_SPI: 25
     # SOFTSPI: 26
-    - ESC_SENSOR: 27
-    - ANTI_GRAVITY: 28
+    ESC_SENSOR: 27
+    ANTI_GRAVITY: 28
     # DYNAMIC_FILTER: 29
   inav:
-    - official: THR_VBAT_COMP
-      rust: ThrottleVbatCompensation
-      index: 0
-    - VBAT: 1
-    - official: TX_PROF_SEL # Profile selection by TX stick command
-      rust: TxProfileSelection
-      index: 2
-    - BAT_PROFILE_AUTOSWITCH: 3
-    - MOTOR_STOP: 4
+    THR_VBAT_COMP: 0
+    VBAT: 1
+    TX_PROF_SEL: 2
+    BAT_PROFILE_AUTOSWITCH: 3
+    MOTOR_STOP: 4
     # 5
-    - official: SOFTSERIAL
-      rust: SoftSerial
-      index: 6
-    - GPS: 7
+    SOFTSERIAL: 6
+    GPS: 7
     # 8
     # 9
-    - TELEMETRY: 10
-    - CURRENT_METER: 11
-    - REVERSIBLE_MOTORS: 12
+    TELEMETRY: 10
+    CURRENT_METER: 11
+    REVERSIBLE_MOTORS: 12
     # 13
     # 14
-    - RSSI_ADC: 15
-    - LED_STRIP: 16
-    - DASHBOARD: 17
+    RSSI_ADC: 15
+    LED_STRIP: 16
+    DASHBOARD: 17
     # 18
-    - BLACKBOX: 19
+    BLACKBOX: 19
     # 20
-    - TRANSPONDER: 21
-    - official: AIRMODE
-      rust: AirMode
-      index: 22
-    - SUPEREXPO_RATES: 23
-    - VTX: 24
+    TRANSPONDER: 21
+    AIRMODE: 22
+    SUPEREXPO_RATES: 23
+    VTX: 24
     # 25
     # 26
     # 27
-    - PWM_OUTPUT_ENABLE: 28
-    - OSD: 29
-    - FW_LAUNCH: 30
-    - FW_AUTOTRIM: 31
+    PWM_OUTPUT_ENABLE: 28
+    OSD: 29
+    FW_LAUNCH: 30
+    FW_AUTOTRIM: 31
+  rename:
+    3D: ThreeD
+    AIRMODE: AirMode
+    RANGEFINDER: RangeFinder
+    SOFTSERIAL: SoftSerial
+    THR_VBAT_COMP: ThrottleVbatCompensation
+    TX_PROF_SEL: TxProfileSelection

@@ -28,6 +28,7 @@ fn main() {
     for yaml in glob(TYPES_GLOB).unwrap() {
         let yaml = yaml.unwrap();
         let filename = yaml.file_stem().unwrap();
+        println!("Generating {}", filename.to_string_lossy());
 
         let mut out_path = out_dir.clone();
         out_path.push(filename);

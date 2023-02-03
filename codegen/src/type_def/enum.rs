@@ -1,10 +1,11 @@
+use std::collections::HashMap;
+
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use serde::Deserialize;
 
 use super::{
     combine_flags, expand_combined_flags, impl_flag, impl_flag_display, quote_attrs, Firmware,
-    Variant,
 };
 
 #[derive(Debug, Deserialize)]
@@ -16,8 +17,10 @@ pub struct Enum {
     attrs: Vec<String>,
     unknown: bool,
     unknown_callback: Option<String>,
-    betaflight: Vec<Variant>,
-    inav: Vec<Variant>,
+    betaflight: HashMap<String, u32>,
+    inav: HashMap<String, u32>,
+    #[serde(default)]
+    rename: HashMap<String, String>,
 }
 
 impl Enum {
@@ -25,7 +28,8 @@ impl Enum {
         let name = format_ident!("{}", self.name);
         let attrs = quote_attrs(&self.doc, &self.attrs);
 
-        let (variants, idents, official) = combine_flags(&self.betaflight, &self.inav);
+        let (variants, idents, official) =
+            combine_flags(&self.betaflight, &self.inav, &self.rename);
 
         let enum_def = expand_combined_flags(&name, &variants, &idents, self.unknown);
         let impl_flag = impl_flag(&name, &idents, &official, self.unknown);

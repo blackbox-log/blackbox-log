@@ -1,10 +1,11 @@
+use std::collections::HashMap;
+
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use serde::Deserialize;
 
 use super::{
     combine_flags, expand_combined_flags, impl_flag, impl_flag_display, quote_attrs, Firmware,
-    Variant,
 };
 
 #[derive(Debug, Deserialize)]
@@ -70,8 +71,10 @@ pub struct Flags {
     doc: String,
     #[serde(default)]
     attrs: Vec<String>,
-    betaflight: Vec<Variant>,
-    inav: Vec<Variant>,
+    betaflight: HashMap<String, u32>,
+    inav: HashMap<String, u32>,
+    #[serde(default)]
+    rename: HashMap<String, String>,
 }
 
 impl Flags {
@@ -79,7 +82,7 @@ impl Flags {
         let name = format_ident!("{}", self.name);
         let attrs = quote_attrs(&self.doc, &self.attrs);
 
-        let (flags, idents, official) = combine_flags(&self.betaflight, &self.inav);
+        let (flags, idents, official) = combine_flags(&self.betaflight, &self.inav, &self.rename);
         let enum_def = expand_combined_flags(&name, &flags, &idents, false);
         let impl_flag = impl_flag(&name, &idents, &official, false);
         let impl_flag_display = impl_flag_display(&name);

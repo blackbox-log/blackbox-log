@@ -5,165 +5,127 @@ flags:
   name: FlightMode
   doc: A flight mode. See [`Flag`][`crate::units::Flag`].
   betaflight:
-    - ARM: 0
-    - ANGLE: 1
-    - HORIZON: 2
-    - MAG: 3
-    - official: HEADFREE
-      rust: HeadFree
-      index: 4
-    - PASSTHRU: 5
-    - FAILSAFE: 6
-    - GPS RESCUE: 7
-    - ANTI GRAVITY: 8
-    - official: HEADADJ
-      rust: HeadAdjust
-      index: 9
-    - official: CAMSTAB
-      rust: CamStab
-      index: 10
-    - official: BEEPERON
-      rust: BeeperOn
-      index: 11
-    - official: LEDLOW
-      rust: LedLow
-      index: 12
-    - official: CALIB
-      rust: Calibration
-      index: 13
-    - OSD: 14
-    - TELEMETRY: 15
-    - SERVO1: 16
-    - SERVO2: 17
-    - SERVO3: 18
-    - BLACKBOX: 19
-    - AIRMODE: 20
-    - official: 3D
-      rust: ThreeD
-      index: 21
-    - FPV ANGLE MIX: 22
-    - BLACKBOX ERASE: 23
-    - CAMERA1: 24
-    - CAMERA2: 25
-    - CAMERA3: 26
-    - TURTLE: 27
-    - PREARM: 28
-    - BEEP GPS COUNT: 29
-    - VTX PIT MODE: 30
-    - PARALYZE: 31
-    - USER1: 32
-    - USER2: 33
-    - USER3: 34
-    - USER4: 35
-    - PID AUDIO: 36
-    - ACRO TRAINER: 37
-    - VTX CONTROL DISABLE: 38
-    - LAUNCH CONTROL: 39
-    - official: MSPOVERRIDE
-      rust: MspOverride
-      index: 40
-    - STICK COMMAND DISABLE: 41
-    - BEEPER MUTE: 42
+    ARM: 0
+    ANGLE: 1
+    HORIZON: 2
+    MAG: 3
+    HEADFREE: 4
+    PASSTHRU: 5
+    FAILSAFE: 6
+    GPS RESCUE: 7
+    ANTI GRAVITY: 8
+    HEADADJ: 9
+    CAMSTAB: 10
+    BEEPERON: 11
+    LEDLOW: 12
+    CALIB: 13
+    OSD: 14
+    TELEMETRY: 15
+    SERVO1: 16
+    SERVO2: 17
+    SERVO3: 18
+    BLACKBOX: 19
+    AIRMODE: 20
+    3D: 21
+    FPV ANGLE MIX: 22
+    BLACKBOX ERASE: 23
+    CAMERA1: 24
+    CAMERA2: 25
+    CAMERA3: 26
+    TURTLE: 27
+    PREARM: 28
+    BEEP GPS COUNT: 29
+    VTX PIT MODE: 30
+    PARALYZE: 31
+    USER1: 32
+    USER2: 33
+    USER3: 34
+    USER4: 35
+    PID AUDIO: 36
+    ACRO TRAINER: 37
+    VTX CONTROL DISABLE: 38
+    LAUNCH CONTROL: 39
+    MSPOVERRIDE: 40
+    STICK COMMAND DISABLE: 41
+    BEEPER MUTE: 42
   inav:
-    - ARM: 0
-    - ANGLE: 1
-    - HORIZON: 2
-    - official: NAV ALTHOLD
-      rust: NavAltitudeHold
-      index: 3
-    - official: HEADINGHOLD
-      rust: HeadingHold
-      index: 4
-    - official: HEADFREE
-      rust: HeadFree
-      index: 5
-    - official: HEADADJ
-      rust: HeadAdjust
-      index: 6
-    - official: CAMSTAB
-      rust: CamStab
-      index: 7
-    - NAV RTH: 8
-    - official: NAV POSHOLD
-      rust: NavPositionHold
-      index: 9
-    - MANUAL: 10
-    - official: BEEPERON
-      rust: BeeperOn
-      index: 11
-    - official: LEDLOW
-      rust: LedLow
-      index: 12
-    - LIGHTS: 13
-    - NAV LAUNCH: 14
-    - OSD: 15
-    - TELEMETRY: 16
-    - BLACKBOX: 17
-    - FAILSAFE: 18
-    - official: NAV WP
-      rust: NavWaypoint
-      index: 19
-    - AIRMODE: 20
-    - official: HOMERESET
-      rust: HomeReset
-      index: 21
-    - official: GCSNAV
-      rust: GcsNav
-      index: 22
-    - KILLSWITCH: 23
-    - SURFACE: 24
-    - FLAPERON: 25
-    - official: TURNASSIST
-      rust: TurnAssist
-      index: 26
-    - official: AUTOTRIM
-      rust: AutoTrim
-      index: 27
-    - official: AUTOTUNE
-      rust: AutoTune
-      index: 28
-    - official: CAMERA1
-      rust: Camera1
-      index: 29
-    - official: CAMERA2
-      rust: Camera2
-      index: 30
-    - official: CAMERA3
-      rust: Camera3
-      index: 31
-    - official: OSDALT1
-      rust: OsdAlt1
-      index: 32
-    - official: OSDALT2
-      rust: OsdAlt2
-      index: 33
-    - official: OSDALT3
-      rust: OsdAlt3
-      index: 34
-    - official: NAVCOURSEHOLD
-      rust: NavCourseHold
-      index: 35
-    - BRAKING: 36
-    - USER1: 37
-    - USER2: 38
-    - FPV ANGLE MIX: 39
-    - official: LOITERDIRCHN
-      rust: LoiterChange
-      index: 40
-    - official: MSPRCOVERRIDE
-      rust: MspRcOverride
-      index: 41
-    - PREARM: 42
-    - TURTLE: 43
-    - NAV CRUISE: 44
-    - official: AUTOLEVEL
-      rust: AutoLevel
-      index: 45
-    - official: PLANWPMISSION
-      rust: PlanWpMission
-      index: 46
-    - SOARING: 47
-    - USER3: 48
-    - official: CHANGEMISSION
-      rust: MissionChange
-      index: 49
+    ARM: 0
+    ANGLE: 1
+    HORIZON: 2
+    NAV ALTHOLD: 3
+    HEADINGHOLD: 4
+    HEADFREE: 5
+    HEADADJ: 6
+    CAMSTAB: 7
+    NAV RTH: 8
+    NAV POSHOLD: 9
+    MANUAL: 10
+    BEEPERON: 11
+    LEDLOW: 12
+    LIGHTS: 13
+    NAV LAUNCH: 14
+    OSD: 15
+    TELEMETRY: 16
+    BLACKBOX: 17
+    FAILSAFE: 18
+    NAV WP: 19
+    AIRMODE: 20
+    HOMERESET: 21
+    GCSNAV: 22
+    KILLSWITCH: 23
+    SURFACE: 24
+    FLAPERON: 25
+    TURNASSIST: 26
+    AUTOTRIM: 27
+    AUTOTUNE: 28
+    CAMERA1: 29
+    CAMERA2: 30
+    CAMERA3: 31
+    OSDALT1: 32
+    OSDALT2: 33
+    OSDALT3: 34
+    NAVCOURSEHOLD: 35
+    BRAKING: 36
+    USER1: 37
+    USER2: 38
+    FPV ANGLE MIX: 39
+    LOITERDIRCHN: 40
+    MSPRCOVERRIDE: 41
+    PREARM: 42
+    TURTLE: 43
+    NAV CRUISE: 44
+    AUTOLEVEL: 45
+    PLANWPMISSION: 46
+    SOARING: 47
+    USER3: 48
+    CHANGEMISSION: 49
+  rename:
+    3D: ThreeD
+    AUTOLEVEL: AutoLevel
+    AUTOTRIM: AutoTrim
+    AUTOTUNE: AutoTune
+    BEEPERON: BeeperOn
+    CALIB: Calibration
+    CAMERA1: Camera1
+    CAMERA2: Camera2
+    CAMERA3: Camera3
+    CAMSTAB: CamStab
+    CHANGEMISSION: MissionChange
+    GCSNAV: GcsNav
+    HEADADJ: HeadAdjust
+    HEADFREE: HeadFree
+    HEADINGHOLD: HeadingHold
+    HOMERESET: HomeReset
+    LEDLOW: LedLow
+    LOITERDIRCHN: LoiterChange
+    MSPOVERRIDE: MspOverride
+    MSPRCOVERRIDE: MspRcOverride
+    NAV ALTHOLD: NavAltitudeHold
+    NAV POSHOLD: NavPositionHold
+    NAV WP: NavWaypoint
+    NAVCOURSEHOLD: NavCourseHold
+    OSDALT1: OsdAlt1
+    OSDALT2: OsdAlt2
+    OSDALT3: OsdAlt3
+    PLANWPMISSION: PlanWpMission
+    TURNASSIST: TurnAssist

@@ -6,7 +6,6 @@ use std::collections::HashMap;
 use heck::ToUpperCamelCase;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
-use serde::de::Visitor;
 use serde::Deserialize;
 
 use self::r#enum::Enum;
@@ -33,13 +32,6 @@ impl TypeDef {
 }
 
 #[derive(Debug)]
-struct Variant {
-    official: String,
-    rust: String,
-    index: u32,
-}
-
-#[derive(Debug)]
 struct CombinedVariant {
     official: String,
     rust: String,
@@ -55,37 +47,47 @@ enum Firmware {
 }
 
 fn combine_flags(
-    betaflight: &[Variant],
-    inav: &[Variant],
+    betaflight: &HashMap<String, u32>,
+    inav: &HashMap<String, u32>,
+    rename: &HashMap<String, String>,
 ) -> (Vec<CombinedVariant>, Vec<Ident>, Vec<String>) {
+    let get_rust_name = |official: &str| {
+        rename
+            .get(official)
+            .cloned()
+            .unwrap_or_else(|| official.to_upper_camel_case())
+    };
+
     let mut combined = HashMap::new();
 
-    for flag in betaflight {
-        assert!(combined.get(&flag.rust).is_none());
+    for (official, &index) in betaflight {
+        let rust = get_rust_name(official);
+        assert!(combined.get(&rust).is_none());
         combined.insert(
-            &flag.rust,
+            rust.clone(),
             CombinedVariant {
-                official: flag.official.clone(),
-                rust: flag.rust.clone(),
-                betaflight: Some(flag.index),
+                official: official.clone(),
+                rust,
+                betaflight: Some(index),
                 inav: None,
             },
         );
     }
 
-    for flag in inav {
-        if let Some(combined) = combined.get_mut(&flag.rust) {
-            assert_eq!(combined.official, flag.official);
+    for (official, &index) in inav {
+        let rust = get_rust_name(official);
+        if let Some(combined) = combined.get_mut(&rust) {
+            assert_eq!(&combined.official, official);
             assert!(combined.inav.is_none());
-            combined.inav = Some(flag.index);
+            combined.inav = Some(index);
         } else {
             combined.insert(
-                &flag.rust,
+                rust.clone(),
                 CombinedVariant {
-                    official: flag.official.clone(),
-                    rust: flag.rust.clone(),
+                    official: official.clone(),
+                    rust,
                     betaflight: None,
-                    inav: Some(flag.index),
+                    inav: Some(index),
                 },
             );
         }
@@ -176,91 +178,5 @@ fn impl_flag_display(name: &Ident) -> TokenStream {
                 f.write_str(self.as_name())
             }
         }
-    }
-}
-
-impl<'de> Deserialize<'de> for Variant {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        use serde::de::{Error, MapAccess};
-
-        #[derive(Debug, Deserialize)]
-        #[serde(field_identifier, rename_all = "lowercase")]
-        enum Field {
-            Official,
-            Rust,
-            Index,
-        }
-
-        struct FlagVisitor;
-
-        impl<'de> Visitor<'de> for FlagVisitor {
-            type Value = Variant;
-
-            fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-                write!(
-                    f,
-                    "a map with keys `official`, `rust`, and `index`, or a map with one entry \
-                     `official` -> `index`"
-                )
-            }
-
-            fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
-            where
-                A: MapAccess<'de>,
-            {
-                if map.size_hint() == Some(1) {
-                    let (official, index): (String, u32) = map.next_entry()?.unwrap();
-                    let rust = official.to_upper_camel_case();
-
-                    Ok(Variant {
-                        official,
-                        rust,
-                        index,
-                    })
-                } else {
-                    let mut official = None;
-                    let mut rust = None;
-                    let mut index = None;
-
-                    while let Some(key) = map.next_key()? {
-                        match key {
-                            Field::Official => {
-                                if official.is_some() {
-                                    return Err(Error::duplicate_field("official"));
-                                }
-                                official = Some(map.next_value()?);
-                            }
-                            Field::Rust => {
-                                if rust.is_some() {
-                                    return Err(Error::duplicate_field("rust"));
-                                }
-                                rust = Some(map.next_value()?);
-                            }
-                            Field::Index => {
-                                if index.is_some() {
-                                    return Err(Error::duplicate_field("index"));
-                                }
-                                index = Some(map.next_value()?);
-                            }
-                        }
-                    }
-
-                    let official = official.ok_or_else(|| Error::missing_field("official"))?;
-                    let rust = rust.ok_or_else(|| Error::missing_field("rust"))?;
-                    let index = index.ok_or_else(|| Error::missing_field("index"))?;
-
-                    Ok(Variant {
-                        official,
-                        rust,
-                        index,
-                    })
-                }
-            }
-        }
-
-        deserializer.deserialize_map(FlagVisitor)
     }
 }
