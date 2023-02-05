@@ -3,8 +3,6 @@ enum:
   doc: ''
   unknown: true
   unknownCallback: '|raw| tracing::debug!("invalid debug mode ({raw})")'
-  attrs:
-    - 'cfg_attr(feature = "serde", derive(serde::Serialize))'
   betaflight:
     NONE: 0
     CYCLETIME: 1

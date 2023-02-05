@@ -26,7 +26,7 @@ pub struct Enum {
 impl Enum {
     pub fn expand(&self) -> TokenStream {
         let name = format_ident!("{}", self.name);
-        let attrs = quote_attrs(&self.doc, &self.attrs);
+        let attrs = quote_attrs(&self.doc, &self.attrs, true);
 
         let (variants, idents, official) =
             combine_flags(&self.betaflight, &self.inav, &self.rename);

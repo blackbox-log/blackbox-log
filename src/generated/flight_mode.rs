@@ -41,7 +41,27 @@ impl ::core::fmt::Display for FlightModeSet {
         f.write_str(&names.join("|"))
     }
 }
+#[cfg(feature = "serde")]
+#[allow(clippy::cast_possible_truncation)]
+impl ::serde::Serialize for FlightModeSet {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        use serde::ser::SerializeSeq;
+        let mut seq = serializer.serialize_seq(None)?;
+        for flag in self
+            .raw
+            .iter_ones()
+            .filter_map(|bit| <FlightMode>::from_bit(bit as u32, self.firmware))
+        {
+            seq.serialize_element(&flag)?;
+        }
+        seq.end()
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 /// A flight mode. See [`Flag`][`crate::units::Flag`].
 pub enum FlightMode {
     /// `ACRO TRAINER` (Betaflight only)

@@ -19,7 +19,7 @@ pub struct FlagSet {
 impl FlagSet {
     pub fn expand(&self, flag_name: &str) -> TokenStream {
         let name = format_ident!("{}", self.name);
-        let attrs = quote_attrs(&self.doc, &self.attrs);
+        let attrs = quote_attrs(&self.doc, &self.attrs, false);
         let flag_name = format_ident!("{}", flag_name);
 
         quote! {
@@ -66,6 +66,29 @@ impl FlagSet {
                     f.write_str(&names.join("|"))
                 }
             }
+
+            #[cfg(feature = "serde")]
+            #[allow(clippy::cast_possible_truncation)]
+            impl ::serde::Serialize for #name {
+                fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+                where
+                    S: serde::Serializer,
+                {
+                    use serde::ser::SerializeSeq;
+
+                    // TODO: length
+                    let mut seq = serializer.serialize_seq(None)?;
+
+                    for flag in self.raw
+                        .iter_ones()
+                        .filter_map(|bit| <#flag_name>::from_bit(bit as u32, self.firmware))
+                    {
+                        seq.serialize_element(&flag)?;
+                    }
+
+                    seq.end()
+                }
+            }
         }
     }
 }
@@ -85,7 +108,7 @@ pub struct Flags {
 impl Flags {
     pub fn expand(&self) -> TokenStream {
         let name = format_ident!("{}", self.name);
-        let attrs = quote_attrs(&self.doc, &self.attrs);
+        let attrs = quote_attrs(&self.doc, &self.attrs, true);
 
         let (flags, idents, official) = combine_flags(&self.betaflight, &self.inav, &self.rename);
         let enum_def = expand_combined_flags(&name, &flags, &idents, false);

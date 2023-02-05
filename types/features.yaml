@@ -4,8 +4,6 @@ set:
 flags:
   name: Feature
   doc: ''
-  attrs:
-    - 'cfg_attr(feature = "serde", derive(serde::Serialize))'
   betaflight:
     RX_PPM: 0
     # 1

@@ -136,7 +136,8 @@ fn expand_combined_flags<'f, 'i>(
     }
 }
 
-fn quote_attrs(doc: &str, attrs: &[String]) -> TokenStream {
+fn quote_attrs(doc: &str, attrs: &[String], serde: bool) -> TokenStream {
+    let serde = serde.then_some(quote!(#[cfg_attr(feature = "serde", derive(serde::Serialize))]));
     let doc = doc.lines();
     let attrs = attrs
         .iter()
@@ -144,6 +145,7 @@ fn quote_attrs(doc: &str, attrs: &[String]) -> TokenStream {
 
     quote! {
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+        #serde
         #( #[doc = #doc] )*
         #( #[#attrs] )*
     }
