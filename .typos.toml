@@ -3,3 +3,6 @@ extend-exclude = ["tests/logs", "tests/snapshots"]
 
 [default]
 locale = "en-us"
+
+[default.extend-words]
+iterm = "iterm"
