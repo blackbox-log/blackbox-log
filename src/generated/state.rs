@@ -1,5 +1,5 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-/// All currently enabled states. See [`FlagSet`][`crate::units::FlagSet`] and
+/// All currently enabled states. See [`FlagSet`][crate::units::FlagSet] and
 /// [`State`].
 #[allow(unused_qualifications)]
 pub struct StateSet {
@@ -62,7 +62,7 @@ impl ::serde::Serialize for StateSet {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-/// A flight controller state. See [`Flag`][`crate::units::Flag`].
+/// A flight controller state. See [`Flag`][crate::units::Flag].
 pub enum State {
     /// `ACCELEROMETER_CALIBRATED` (INAV only)
     AccelerometerCalibrated,

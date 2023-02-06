@@ -8,7 +8,7 @@ use crate::parser::to_base_field;
 
 /// A filter for the fields to be included in one kind of frame.
 ///
-/// See [`FrameDef::apply_filter`][`crate::frame::FrameDef::apply_filter`].
+/// See [`FrameDef::apply_filter`][crate::frame::FrameDef::apply_filter].
 #[derive(Debug, Clone)]
 pub struct FieldFilter(HashSet<String>);
 

@@ -1,9 +1,9 @@
 set: 
   name: StateSet
-  doc: All currently enabled states. See [`FlagSet`][`crate::units::FlagSet`] and [`State`].
+  doc: All currently enabled states. See [`FlagSet`][crate::units::FlagSet] and [`State`].
 flags:
   name: State
-  doc: A flight controller state. See [`Flag`][`crate::units::Flag`].
+  doc: A flight controller state. See [`Flag`][crate::units::Flag].
   betaflight:
     GPS_FIX_HOME: 0
     GPS_FIX: 1

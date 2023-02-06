@@ -111,7 +111,7 @@ impl<'data> Headers<'data> {
     /// Parses only the headers of a blackbox log.
     ///
     /// `data` will be advanced to the start of the data section of the log,
-    /// ready to be passed to [`DataParser::new`][`crate::DataParser::new`].
+    /// ready to be passed to [`DataParser::new`][crate::DataParser::new].
     ///
     /// **Note:** This assumes that `data` is aligned to the start of a log.
     pub fn parse(data: &mut Reader<'data>) -> ParseResult<Self> {

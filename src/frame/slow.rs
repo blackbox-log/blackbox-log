@@ -15,7 +15,7 @@ use crate::{units, Headers, Reader};
 /// Data parsed from a slow frame.
 ///
 /// Slow frames do not include any metadata. If that is desired, use the prior
-/// [`MainFrame`][`super::MainFrame`].
+/// [`MainFrame`][super::MainFrame].
 #[derive(Debug, Clone)]
 pub struct SlowFrame<'data, 'headers> {
     headers: &'headers Headers<'data>,
