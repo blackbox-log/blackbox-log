@@ -8,7 +8,6 @@ FileSnapshot(
   logs: [
     Ok(LogSnapshot(
       headers: Headers(
-        version: V2,
         firmware_revision: "Betaflight 4.3.0 (fc8318f54) STM32F405",
         firmware: Betaflight("4.3.0"),
         board_info: Some("MTKS MATEKF405CTR"),

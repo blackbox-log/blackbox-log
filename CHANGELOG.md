@@ -12,6 +12,10 @@
 - Fixed missing & misnamed flight modes
   - Renamed some variants of `FlightMode`
 
+### Removed
+
+- `Headers::version` and `LogVersion`
+
 ## [0.2.0] - 2023-01-28
 
 This version was a major rework of the way the data section is parsed:

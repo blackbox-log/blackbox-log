@@ -26,8 +26,9 @@ pub type ParseResult<T> = Result<T, ParseError>;
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum ParseError {
-    /// The log uses a format version that is unsupported.
-    UnsupportedVersion(String),
+    /// The log uses a format version that is unsupported or could not be
+    /// parsed.
+    UnsupportedVersion,
     /// The `Firmware revision` header could not be parsed.
     InvalidFirmware(String),
     /// Could not parse the value in header `header`.
@@ -44,7 +45,7 @@ pub enum ParseError {
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::UnsupportedVersion(v) => write!(f, "unsupported or invalid version: `{v}`"),
+            Self::UnsupportedVersion => write!(f, "unsupported or invalid data version"),
             Self::InvalidFirmware(firmware) => write!(f, "could not parse firmware: `{firmware}`"),
             Self::InvalidHeader { header, value } => {
                 write!(f, "invalid value for header `{header}`: `{value}`")
@@ -70,9 +71,6 @@ impl std::error::Error for ParseError {}
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[non_exhaustive]
 pub struct Headers<'data> {
-    /// The format version of the log.
-    pub version: LogVersion,
-
     #[cfg_attr(feature = "serde", serde(skip))]
     pub main_frame_def: MainFrameDef<'data>,
     #[cfg_attr(feature = "serde", serde(skip))]
@@ -118,6 +116,10 @@ impl<'data> Headers<'data> {
         // Skip product header
         let product = data.read_line();
         debug_assert_eq!(crate::MARKER.strip_suffix(&[b'\n']), product);
+        let data_version = data.read_line();
+        if !matches!(data_version, Some(b"H Data version:2")) {
+            return Err(ParseError::UnsupportedVersion);
+        }
 
         let mut state = State::new();
 
@@ -211,26 +213,6 @@ impl<'data> Headers<'data> {
     }
 }
 
-/// A supported log format version. (`Data version` header)
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
-#[non_exhaustive]
-pub enum LogVersion {
-    V2,
-}
-
-impl fmt::Display for LogVersion {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if !f.alternate() {
-            write!(f, "v")?;
-        }
-
-        match self {
-            LogVersion::V2 => write!(f, "2"),
-        }
-    }
-}
-
 /// A supported firmware.
 ///
 /// This is not the same as the `Firmware type` header since all modern
@@ -320,7 +302,6 @@ impl MotorOutputRange {
 
 #[derive(Debug)]
 struct State<'data> {
-    version: Option<LogVersion>,
     main_frames: MainFrameDefBuilder<'data>,
     slow_frames: SlowFrameDefBuilder<'data>,
     gps_frames: GpsFrameDefBuilder<'data>,
@@ -348,7 +329,6 @@ struct State<'data> {
 impl<'data> State<'data> {
     fn new() -> Self {
         Self {
-            version: None,
             main_frames: MainFrameDef::builder(),
             slow_frames: SlowFrameDef::builder(),
             gps_frames: GpsFrameDef::builder(),
@@ -379,13 +359,6 @@ impl<'data> State<'data> {
         // TODO: try block
         (|| -> Result<(), ()> {
             match header {
-                "Data version" => {
-                    if value == "2" {
-                        self.version = Some(LogVersion::V2);
-                    } else {
-                        return Err(());
-                    }
-                }
                 "Firmware revision" => self.firmware_revision = Some(value),
                 "Firmware type" => self.firmware_kind = Some(value),
                 "Board information" => self.board_info = Some(value),
@@ -457,7 +430,6 @@ impl<'data> State<'data> {
 
         // TODO: log where each error comes from
         let headers = Headers {
-            version: self.version.ok_or(ParseError::MissingHeader)?,
             main_frame_def: self.main_frames.parse()?,
             slow_frame_def: self.slow_frames.parse()?,
             gps_frame_def: self.gps_frames.parse()?,

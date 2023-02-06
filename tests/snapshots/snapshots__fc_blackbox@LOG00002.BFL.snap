@@ -8,7 +8,6 @@ FileSnapshot(
   logs: [
     Ok(LogSnapshot(
       headers: Headers(
-        version: V2,
         firmware_revision: "Betaflight 4.2.6 (a4b6db1e7) STM32F405",
         firmware: Betaflight("4.2.6"),
         board_info: Some("AIRB OMNIBUSF4"),

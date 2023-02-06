@@ -8,7 +8,6 @@ FileSnapshot(
   logs: [
     Ok(LogSnapshot(
       headers: Headers(
-        version: V2,
         firmware_revision: "Betaflight 4.2.8 (101738d8e) STM32F7X2",
         firmware: Betaflight("4.2.8"),
         board_info: Some("AIKO AIKONF7"),

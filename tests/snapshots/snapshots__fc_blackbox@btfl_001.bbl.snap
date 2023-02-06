@@ -8,7 +8,6 @@ FileSnapshot(
   logs: [
     Ok(LogSnapshot(
       headers: Headers(
-        version: V2,
         firmware_revision: "Betaflight 4.2.11 (948ba6339) STM32F7X2",
         firmware: Betaflight("4.2.11"),
         board_info: Some("ZEEZ ZEEZF7V2"),
@@ -524,7 +523,6 @@ FileSnapshot(
     )),
     Ok(LogSnapshot(
       headers: Headers(
-        version: V2,
         firmware_revision: "Betaflight 4.2.11 (948ba6339) STM32F7X2",
         firmware: Betaflight("4.2.11"),
         board_info: Some("ZEEZ ZEEZF7V2"),

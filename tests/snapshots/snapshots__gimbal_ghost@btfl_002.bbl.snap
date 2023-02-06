@@ -8,7 +8,6 @@ FileSnapshot(
   logs: [
     Ok(LogSnapshot(
       headers: Headers(
-        version: V2,
         firmware_revision: "Betaflight 4.2.9 (e097f4ab7) STM32F7X2",
         firmware: Betaflight("4.2.9"),
         board_info: Some("MAMBA F722 I2C"),
@@ -629,7 +628,6 @@ FileSnapshot(
     )),
     Ok(LogSnapshot(
       headers: Headers(
-        version: V2,
         firmware_revision: "Betaflight 4.2.9 (e097f4ab7) STM32F7X2",
         firmware: Betaflight("4.2.9"),
         board_info: Some("MAMBA F722 I2C"),
