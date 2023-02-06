@@ -12,6 +12,10 @@
 - Fixed missing & misnamed flight modes
   - Renamed some variants of `FlightMode`
 
+### Changed
+
+- All fields of `Headers` are now methods.
+
 ### Removed
 
 - `Headers::version` and `LogVersion`

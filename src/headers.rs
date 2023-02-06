@@ -80,16 +80,14 @@ pub struct Headers<'data> {
     #[cfg_attr(feature = "serde", serde(skip))]
     pub(crate) gps_home_frame_def: Option<GpsHomeFrameDef<'data>>,
 
-    /// The full `Firmware revision` header.
-    pub firmware_revision: &'data str,
-    /// The firmware that wrote the log.
-    pub firmware: Firmware,
-    pub board_info: Option<&'data str>,
-    pub craft_name: Option<&'data str>,
+    firmware_revision: &'data str,
+    pub(crate) firmware: Firmware,
+    board_info: Option<&'data str>,
+    craft_name: Option<&'data str>,
 
-    pub debug_mode: DebugMode,
-    pub disabled_fields: DisabledFields,
-    pub features: FeatureSet,
+    debug_mode: DebugMode,
+    disabled_fields: DisabledFields,
+    features: FeatureSet,
 
     /// The battery voltage measured at arm.
     pub(crate) vbat_reference: Option<u16>,
@@ -101,8 +99,7 @@ pub struct Headers<'data> {
     pub(crate) min_throttle: Option<u16>,
     pub(crate) motor_output_range: Option<MotorOutputRange>,
 
-    /// Any unknown headers with unparsed values
-    pub unknown: HashMap<&'data str, &'data str>,
+    unknown: HashMap<&'data str, &'data str>,
 }
 
 impl<'data> Headers<'data> {
@@ -210,6 +207,48 @@ impl<'data> Headers<'data> {
         }
 
         Ok(())
+    }
+}
+
+/// Getters for various log headers.
+impl<'data> Headers<'data> {
+    /// The full `Firmware revision` header.
+    ///
+    /// Consider using the [`firmware`][Self::firmware] method instead.
+    pub fn firmware_revision(&self) -> &'data str {
+        self.firmware_revision
+    }
+
+    /// The firmware that wrote the log.
+    pub fn firmware(&self) -> Firmware {
+        self.firmware
+    }
+
+    /// The `Board info` header.
+    pub fn board_info(&self) -> Option<&'data str> {
+        self.board_info
+    }
+
+    /// The `Craft name` header.
+    pub fn craft_name(&self) -> Option<&'data str> {
+        self.craft_name
+    }
+
+    pub fn debug_mode(&self) -> DebugMode {
+        self.debug_mode
+    }
+
+    pub fn disabled_fields(&self) -> DisabledFields {
+        self.disabled_fields
+    }
+
+    pub fn features(&self) -> FeatureSet {
+        self.features
+    }
+
+    /// Any unknown headers.
+    pub fn unknown(&self) -> &HashMap<&'data str, &'data str> {
+        &self.unknown
     }
 }
 
