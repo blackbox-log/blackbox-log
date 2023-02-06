@@ -278,6 +278,30 @@ impl Firmware {
         let (Self::Betaflight(version) | Self::Inav(version)) = self;
         *version
     }
+
+    fn parse(firmware_revision: &str) -> Result<Self, ParseError> {
+        let mut iter = firmware_revision.split(' ');
+
+        let invalid_fw = || Err(ParseError::InvalidFirmware(firmware_revision.to_owned()));
+
+        let kind = iter.next().map(str::to_ascii_lowercase);
+        let Some(version) = iter.next().and_then(FirmwareVersion::from_str) else {
+            return invalid_fw();
+        };
+
+        match kind.as_deref() {
+            Some("betaflight") => Ok(Firmware::Betaflight(version)),
+            Some("inav") => Ok(Firmware::Inav(version)),
+            Some("emuflight") => {
+                tracing::error!("EmuFlight is not supported");
+                invalid_fw()
+            }
+            _ => {
+                tracing::error!("Could not parse firmware revision");
+                invalid_fw()
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -465,7 +489,7 @@ impl<'data> State<'data> {
         let not_empty = |s: &&str| !s.is_empty();
 
         let firmware_revision = self.firmware_revision.ok_or(ParseError::MissingHeader)?;
-        let firmware = parse_firmware(firmware_revision)?;
+        let firmware = Firmware::parse(firmware_revision)?;
 
         // TODO: log where each error comes from
         let headers = Headers {
@@ -496,30 +520,6 @@ impl<'data> State<'data> {
         headers.validate()?;
 
         Ok(headers)
-    }
-}
-
-fn parse_firmware(firmware_revision: &str) -> Result<Firmware, ParseError> {
-    let mut iter = firmware_revision.split(' ');
-
-    let invalid_fw = || Err(ParseError::InvalidFirmware(firmware_revision.to_owned()));
-
-    let kind = iter.next().map(str::to_ascii_lowercase);
-    let Some(version) = iter.next().and_then(FirmwareVersion::from_str) else {
-        return invalid_fw();
-    };
-
-    match kind.as_deref() {
-        Some("betaflight") => Ok(Firmware::Betaflight(version)),
-        Some("inav") => Ok(Firmware::Inav(version)),
-        Some("emuflight") => {
-            tracing::error!("EmuFlight is not supported");
-            invalid_fw()
-        }
-        _ => {
-            tracing::error!("Could not parse firmware revision");
-            invalid_fw()
-        }
     }
 }
 
