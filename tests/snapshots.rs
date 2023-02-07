@@ -7,7 +7,6 @@ use blackbox_log::frame::{self, FieldDef, GpsFrameDef};
 use blackbox_log::prelude::*;
 use blackbox_log::units::si;
 use blackbox_log::{headers, Event, Unit, Value};
-use hashbrown::HashMap;
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 
@@ -144,7 +143,7 @@ struct HeadersSnapshot<'data> {
     debug_mode: headers::DebugMode,
     disabled_fields: headers::DisabledFields,
     features: headers::FeatureSet,
-    unknown: HashMap<&'data str, &'data str>,
+    unknown: BTreeMap<&'data str, &'data str>,
 }
 
 impl<'data, 'a> From<&'a Headers<'data>> for HeadersSnapshot<'data> {
@@ -160,7 +159,7 @@ impl<'data, 'a> From<&'a Headers<'data>> for HeadersSnapshot<'data> {
             debug_mode: headers.debug_mode(),
             disabled_fields: headers.disabled_fields(),
             features: headers.features(),
-            unknown: headers.unknown().clone(),
+            unknown: headers.unknown().iter().map(|(&k, &v)| (k, v)).collect(),
         }
     }
 }
