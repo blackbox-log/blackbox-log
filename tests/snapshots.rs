@@ -47,6 +47,7 @@ fn gimbal_ghost() {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename = "File")]
 struct FileSnapshot<'data> {
     count: usize,
     logs: Vec<headers::ParseResult<LogSnapshot<'data>>>,
@@ -73,6 +74,7 @@ impl<'data> From<blackbox_log::File<'data>> for FileSnapshot<'data> {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename = "Log")]
 struct LogSnapshot<'data> {
     headers: HeadersSnapshot<'data>,
     stats: Stats,
@@ -164,6 +166,7 @@ impl<'data, 'a> From<&'a Headers<'data>> for HeadersSnapshot<'data> {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename = "MainFrame")]
 struct MainSnapshot {
     count: u128,
     last_iteration: u32,
@@ -194,6 +197,7 @@ impl MainSnapshot {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename = "SlowFrame")]
 struct SlowSnapshot {
     count: u32,
     fields: Fields,
@@ -215,6 +219,7 @@ impl SlowSnapshot {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename = "GpsFrame")]
 struct GpsSnapshot {
     count: u32,
     time: (),
@@ -262,6 +267,7 @@ impl<'data, U: Into<Unit>> FromIterator<FieldDef<'data, U>> for Fields {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename = "Field")]
 struct FieldSnapshot {
     name: String,
     unit: Unit,

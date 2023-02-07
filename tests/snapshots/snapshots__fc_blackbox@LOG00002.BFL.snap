@@ -3,10 +3,10 @@ source: tests/snapshots.rs
 expression: snapshot
 input_file: ".modules/fc-blackbox/src/test-data/LOG00002.BFL"
 ---
-FileSnapshot(
+File(
   count: 1,
   logs: [
-    Ok(LogSnapshot(
+    Ok(Log(
       headers: Headers(
         firmware_revision: "Betaflight 4.2.6 (a4b6db1e7) STM32F405",
         firmware: Betaflight("4.2.6"),
@@ -131,7 +131,7 @@ FileSnapshot(
         ),
       ),
       capped: true,
-      main: MainSnapshot(
+      main: MainFrame(
         count: 199975,
         last_iteration: 1599750,
         time: FieldSnapshot(
@@ -141,7 +141,7 @@ FileSnapshot(
           histogram: (12489, 12409, 12484, 12724, 12080, 12958, 12731, 12337, 12468, 12231, 12358, 12813, 11953, 12824, 12809, 12307),
         ),
         fields: Fields([
-          FieldSnapshot(
+          Field(
             name: "axisP[0]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -151,7 +151,7 @@ FileSnapshot(
               histogram: (34158, 22167, 18666, 15670, 13416, 12647, 11732, 10940, 9726, 8972, 8355, 7732, 7014, 6536, 6141, 6103),
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "axisP[1]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -161,7 +161,7 @@ FileSnapshot(
               histogram: (30316, 19700, 18151, 16693, 15145, 13566, 12336, 11078, 10416, 9315, 8666, 7883, 7441, 6941, 6446, 5882),
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "axisP[2]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -171,7 +171,7 @@ FileSnapshot(
               histogram: (36194, 20074, 14404, 12779, 12165, 11537, 10585, 9854, 9518, 9536, 9313, 9177, 9020, 8575, 8858, 8386),
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "axisI[0]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -180,7 +180,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "axisI[1]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -189,7 +189,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "axisI[2]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -198,7 +198,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "axisD[0]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -208,7 +208,7 @@ FileSnapshot(
               histogram: (52617, 37702, 29904, 22832, 16444, 11740, 8351, 5894, 4177, 2979, 2168, 1661, 1187, 1008, 735, 576),
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "axisD[1]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -218,7 +218,7 @@ FileSnapshot(
               histogram: (50149, 36233, 29530, 23103, 17227, 12698, 9061, 6458, 4721, 3351, 2340, 1788, 1251, 926, 623, 516),
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "axisF[0]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -227,7 +227,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "axisF[1]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -236,7 +236,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "axisF[2]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -245,7 +245,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "rcCommand[0]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -254,7 +254,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "rcCommand[1]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -263,7 +263,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "rcCommand[2]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -272,7 +272,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "rcCommand[3]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -281,7 +281,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "setpoint[0]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -290,7 +290,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "setpoint[1]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -299,7 +299,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "setpoint[2]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -308,7 +308,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "setpoint[3]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -317,7 +317,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "vbatLatest",
             unit: Voltage,
             history: FieldSnapshot(
@@ -327,7 +327,7 @@ FileSnapshot(
               histogram: (34324, 0, 527, 0, 46796, 0, 79, 0, 7334, 0, 99857, 0, 59, 0, 10999, 0),
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "gyroADC[0]",
             unit: Rotation,
             history: FieldSnapshot(
@@ -337,7 +337,7 @@ FileSnapshot(
               histogram: (26937, 27764, 21819, 17414, 15103, 13795, 12340, 10859, 9794, 8589, 7668, 7054, 6327, 5717, 4676, 4119),
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "gyroADC[1]",
             unit: Rotation,
             history: FieldSnapshot(
@@ -347,7 +347,7 @@ FileSnapshot(
               histogram: (25238, 26454, 22671, 19141, 16106, 13821, 12343, 11041, 9905, 9068, 8045, 6907, 5926, 5102, 4338, 3869),
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "gyroADC[2]",
             unit: Rotation,
             history: FieldSnapshot(
@@ -357,7 +357,7 @@ FileSnapshot(
               histogram: (31266, 26661, 16279, 14238, 13642, 11959, 11553, 10850, 10160, 9825, 9006, 8064, 6817, 6575, 6749, 6331),
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "accSmooth[0]",
             unit: Acceleration,
             history: FieldSnapshot(
@@ -367,7 +367,7 @@ FileSnapshot(
               histogram: (11992, 11843, 12077, 12302, 12278, 11926, 11609, 11351, 11970, 11740, 12085, 12353, 11983, 14007, 16524, 13935),
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "accSmooth[1]",
             unit: Acceleration,
             history: FieldSnapshot(
@@ -377,7 +377,7 @@ FileSnapshot(
               histogram: (11669, 12256, 12903, 12347, 12327, 12251, 12495, 18567, 13543, 11916, 11394, 12619, 11632, 11581, 11232, 11243),
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "accSmooth[2]",
             unit: Acceleration,
             history: FieldSnapshot(
@@ -387,7 +387,7 @@ FileSnapshot(
               histogram: (12701, 13453, 13147, 13018, 12934, 12796, 12791, 12472, 12310, 11821, 11996, 11902, 12155, 12043, 12128, 12308),
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "debug[0]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -397,7 +397,7 @@ FileSnapshot(
               histogram: (26937, 27764, 21819, 17414, 15103, 13795, 12340, 10859, 9794, 8589, 7668, 7054, 6327, 5717, 4676, 4119),
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "debug[1]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -407,7 +407,7 @@ FileSnapshot(
               histogram: (25238, 26454, 22671, 19141, 16106, 13821, 12343, 11041, 9905, 9068, 8045, 6907, 5926, 5102, 4338, 3869),
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "debug[2]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -417,7 +417,7 @@ FileSnapshot(
               histogram: (31266, 26661, 16279, 14238, 13642, 11959, 11553, 10850, 10160, 9825, 9006, 8064, 6817, 6575, 6749, 6331),
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "debug[3]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -426,7 +426,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "motor[0]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -435,7 +435,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "motor[1]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -444,7 +444,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "motor[2]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -453,7 +453,7 @@ FileSnapshot(
               unique: 1,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "motor[3]",
             unit: Unitless,
             history: FieldSnapshot(
@@ -464,27 +464,27 @@ FileSnapshot(
           ),
         ]),
       ),
-      slow: SlowSnapshot(
+      slow: SlowFrame(
         count: 25,
         fields: Fields([
-          FieldSnapshot(
+          Field(
             name: "flightModeFlags",
             unit: FlightMode,
             history: {},
           ),
-          FieldSnapshot(
+          Field(
             name: "stateFlags",
             unit: State,
             history: {},
           ),
-          FieldSnapshot(
+          Field(
             name: "failsafePhase",
             unit: FailsafePhase,
             history: {
               "IDLE": 25,
             },
           ),
-          FieldSnapshot(
+          Field(
             name: "rxSignalReceived",
             unit: Boolean,
             history: History(
@@ -492,7 +492,7 @@ FileSnapshot(
               no: 25,
             ),
           ),
-          FieldSnapshot(
+          Field(
             name: "rxFlightChannelsValid",
             unit: Boolean,
             history: History(
