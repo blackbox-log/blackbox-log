@@ -5,8 +5,7 @@
 //! Ergonomic parser for Betaflight blackbox logs.
 //!
 //! For details about the format of blackbox logs, see the *Blackbox Internals*
-//! development documentation from [INAV][inav-doc], [Betaflight][bf-doc], or
-//! [EmuFlight][emu-doc].
+//! development documentation from [INAV][inav-doc], [Betaflight][bf-doc]
 //!
 //! # Examples
 //!
@@ -84,7 +83,6 @@
 //!
 //! [bf-doc]: https://github.com/betaflight/betaflight/blob/master/docs/development/Blackbox%20Internals.md
 //! [inav-doc]: https://github.com/iNavFlight/inav/blob/master/docs/development/Blackbox%20Internals.md
-//! [emu-doc]: https://github.com/EmuFlight/emuflight/blob/master/docs/development/Blackbox%20Internals.md
 
 extern crate alloc;
 
