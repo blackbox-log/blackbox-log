@@ -5,6 +5,7 @@ use alloc::string::String;
 use core::{fmt, str};
 
 use hashbrown::HashMap;
+use time::PrimitiveDateTime;
 
 use crate::frame::gps::{GpsFrameDef, GpsFrameDefBuilder};
 use crate::frame::gps_home::{GpsHomeFrameDef, GpsHomeFrameDefBuilder};
@@ -82,6 +83,7 @@ pub struct Headers<'data> {
 
     firmware_revision: &'data str,
     pub(crate) firmware: Firmware,
+    firmware_date: Option<&'data str>,
     board_info: Option<&'data str>,
     craft_name: Option<&'data str>,
 
@@ -222,6 +224,15 @@ impl<'data> Headers<'data> {
     /// The firmware that wrote the log.
     pub fn firmware(&self) -> Firmware {
         self.firmware
+    }
+
+    /// The `Firmware date` header
+    pub fn firmware_date(&self) -> Option<Result<PrimitiveDateTime, &'data str>> {
+        let date_format = time::macros::format_description!(
+            "[month repr:short case_sensitive:false] [day] [year] [hour repr:24]:[minute]:[second]"
+        );
+        self.firmware_date
+            .map(|date| PrimitiveDateTime::parse(date, &date_format).map_err(|_| date))
     }
 
     /// The `Board info` header.
@@ -371,6 +382,7 @@ struct State<'data> {
     gps_home_frames: GpsHomeFrameDefBuilder<'data>,
 
     firmware_revision: Option<&'data str>,
+    firmware_date: Option<&'data str>,
     firmware_kind: Option<&'data str>,
     board_info: Option<&'data str>,
     craft_name: Option<&'data str>,
@@ -398,6 +410,7 @@ impl<'data> State<'data> {
             gps_home_frames: GpsHomeFrameDef::builder(),
 
             firmware_revision: None,
+            firmware_date: None,
             firmware_kind: None,
             board_info: None,
             craft_name: None,
@@ -423,6 +436,7 @@ impl<'data> State<'data> {
         (|| -> Result<(), ()> {
             match header {
                 "Firmware revision" => self.firmware_revision = Some(value),
+                "Firmware date" => self.firmware_date = Some(value),
                 "Firmware type" => self.firmware_kind = Some(value),
                 "Board information" => self.board_info = Some(value),
                 "Craft name" => self.craft_name = Some(value),
@@ -500,6 +514,7 @@ impl<'data> State<'data> {
 
             firmware_revision,
             firmware,
+            firmware_date: self.firmware_date,
             board_info: self.board_info.map(str::trim).filter(not_empty),
             craft_name: self.craft_name.map(str::trim).filter(not_empty),
 

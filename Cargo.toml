@@ -25,13 +25,14 @@ rust-version.workspace = true
 [features]
 default = ["std"]
 std = ["memchr/std", "serde?/std", "uom/std"]
-serde = ["dep:serde", "hashbrown/serde", "uom/use_serde"]
+serde = ["dep:serde", "hashbrown/serde", "time/serde", "uom/use_serde"]
 
 [dependencies]
 bitvec = { version = "^1.0.0", default-features = false }
 hashbrown = ">=0.12.0, <0.14.0"
 memchr = { version = "^2.4.0", default-features = false }
 serde = { version = "^1.0.96", default-features = false, features = ["alloc", "derive"], optional = true }
+time = { version = "0.3.17", default-features = false, features = ["macros", "parsing"] }
 tracing = { version = "^0.1.16", default-features = false, features = ["attributes"] }
 uom = { version = "^0.33.0", default-features = false, features = ["si", "f64"] }
 
