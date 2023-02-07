@@ -6,7 +6,8 @@ use blackbox_log::data::Stats;
 use blackbox_log::frame::{self, FieldDef, GpsFrameDef};
 use blackbox_log::prelude::*;
 use blackbox_log::units::si;
-use blackbox_log::{Event, Unit, Value};
+use blackbox_log::{headers, Event, Unit, Value};
+use hashbrown::HashMap;
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 
@@ -48,7 +49,7 @@ fn gimbal_ghost() {
 #[derive(Debug, Serialize)]
 struct FileSnapshot<'data> {
     count: usize,
-    logs: Vec<blackbox_log::headers::ParseResult<LogSnapshot<'data>>>,
+    logs: Vec<headers::ParseResult<LogSnapshot<'data>>>,
 }
 
 impl<'data> From<blackbox_log::File<'data>> for FileSnapshot<'data> {
@@ -73,7 +74,7 @@ impl<'data> From<blackbox_log::File<'data>> for FileSnapshot<'data> {
 
 #[derive(Debug, Serialize)]
 struct LogSnapshot<'data> {
-    headers: Headers<'data>,
+    headers: HeadersSnapshot<'data>,
     stats: Stats,
     capped: bool,
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -88,8 +89,6 @@ struct LogSnapshot<'data> {
 
 impl<'data> LogSnapshot<'data> {
     fn new(headers: &Headers<'data>, mut data: DataParser<'data, '_>) -> Self {
-        let headers = headers.clone();
-
         let mut events = Vec::new();
 
         let main = headers.main_frame_def.iter().collect::<Fields>();
@@ -121,13 +120,45 @@ impl<'data> LogSnapshot<'data> {
         }
 
         Self {
-            headers,
+            headers: headers.into(),
             stats: data.stats().clone(),
             capped,
             events,
             main,
             slow,
             gps,
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename = "Headers")]
+struct HeadersSnapshot<'data> {
+    firmware_revision: &'data str,
+    firmware: headers::Firmware,
+    firmware_date: Option<Result<String, &'data str>>,
+    board_info: Option<&'data str>,
+    craft_name: Option<&'data str>,
+    debug_mode: headers::DebugMode,
+    disabled_fields: headers::DisabledFields,
+    features: headers::FeatureSet,
+    unknown: HashMap<&'data str, &'data str>,
+}
+
+impl<'data, 'a> From<&'a Headers<'data>> for HeadersSnapshot<'data> {
+    fn from(headers: &'a Headers<'data>) -> Self {
+        HeadersSnapshot {
+            firmware_revision: headers.firmware_revision(),
+            firmware: headers.firmware(),
+            firmware_date: headers
+                .firmware_date()
+                .map(|res| res.map(|date| date.to_string())),
+            board_info: headers.board_info(),
+            craft_name: headers.craft_name(),
+            debug_mode: headers.debug_mode(),
+            disabled_fields: headers.disabled_fields(),
+            features: headers.features(),
+            unknown: headers.unknown().clone(),
         }
     }
 }

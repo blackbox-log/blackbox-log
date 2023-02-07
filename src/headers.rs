@@ -69,16 +69,11 @@ impl std::error::Error for ParseError {}
 
 /// Decoded headers containing metadata for a blackbox log.
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[non_exhaustive]
 pub struct Headers<'data> {
-    #[cfg_attr(feature = "serde", serde(skip))]
     pub main_frame_def: MainFrameDef<'data>,
-    #[cfg_attr(feature = "serde", serde(skip))]
     pub slow_frame_def: SlowFrameDef<'data>,
-    #[cfg_attr(feature = "serde", serde(skip))]
     pub gps_frame_def: Option<GpsFrameDef<'data>>,
-    #[cfg_attr(feature = "serde", serde(skip))]
     pub(crate) gps_home_frame_def: Option<GpsHomeFrameDef<'data>>,
 
     firmware_revision: &'data str,
