@@ -25,7 +25,7 @@ jobs:
       - name: std
         run: cargo cranky --no-default-features -F std
       - name: no_std + serde
-        run: cargo cranky --target thumbv7em-none-eabihf --no-default-features -F serde
+        run: cargo cranky --target thumbv7em-none-eabihf --no-default-features -F _serde
       - name: All features
         run: cargo cranky --all-features
       - name: Check fuzz tests

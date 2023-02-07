@@ -7,7 +7,7 @@ use crate::Reader;
 
 /// A decoded blackbox log event.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "_serde", derive(serde::Serialize))]
 pub enum Event {
     SyncBeep(u64),
     InflightAdjustment {
@@ -34,7 +34,7 @@ pub enum Event {
 /// A new value decoded from an
 /// [`InflightAdjustment`](`Event::InflightAdjustment`) event.
 #[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "_serde", derive(serde::Serialize))]
 pub enum AdjustedValue {
     Float(f32),
     Int(i32),

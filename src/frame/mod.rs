@@ -190,7 +190,6 @@ impl<F: Frame> Iterator for FieldIter<'_, F> {
 impl<F: Frame> FusedIterator for FieldIter<'_, F> {}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[repr(u8)]
 pub enum FrameKind {
     Event,
@@ -241,7 +240,7 @@ impl fmt::Display for FrameKind {
 
 byte_enum! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-    #[cfg_attr(feature = "serde", derive(serde::Serialize))]
+    #[cfg_attr(feature = "_serde", derive(serde::Serialize))]
     #[repr(u8)]
     pub enum DataFrameKind {
         Intra = b'I',
@@ -299,7 +298,7 @@ trait FieldDefDetails<'data> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "_serde", derive(serde::Serialize))]
 pub enum Unit {
     Amperage,
     Voltage,

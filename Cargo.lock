@@ -349,7 +349,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
 dependencies = [
  "ahash",
- "serde",
 ]
 
 [[package]]
@@ -771,7 +770,6 @@ version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a561bf4617eebd33bca6434b988f39ed798e527f51a1e797d0ee4f61c0a38376"
 dependencies = [
- "serde",
  "time-core",
  "time-macros",
 ]
@@ -855,7 +853,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "53e68fe0bfdacf0a6cef0efec5dcc295b836cde69b01ad93feb18488fa82050d"
 dependencies = [
  "num-traits",
- "serde",
  "typenum",
 ]
 

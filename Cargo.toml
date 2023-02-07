@@ -25,7 +25,7 @@ rust-version.workspace = true
 [features]
 default = ["std"]
 std = ["memchr/std", "serde?/std", "uom/std"]
-serde = ["dep:serde", "hashbrown/serde", "time/serde", "uom/use_serde"]
+_serde = ["dep:serde"]
 
 [dependencies]
 bitvec = { version = "^1.0.0", default-features = false }
@@ -56,4 +56,4 @@ harness = false
 
 [[test]]
 name = "snapshots"
-required-features = ["serde"]
+required-features = ["_serde"]

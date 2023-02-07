@@ -25,7 +25,7 @@ pub type ParseResult<T> = Result<T, ParseError>;
 
 /// A fatal error encountered while parsing the headers of a log.
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "_serde", derive(serde::Serialize))]
 pub enum ParseError {
     /// The log uses a format version that is unsupported or could not be
     /// parsed.
@@ -264,7 +264,7 @@ impl<'data> Headers<'data> {
 /// firmwares set that to `Cleanflight`. This is instead decoded from `Firmware
 /// revision`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "_serde", derive(serde::Serialize))]
 pub enum Firmware {
     /// [Betaflight](https://github.com/betaflight/betaflight/)
     Betaflight(FirmwareVersion),
@@ -339,7 +339,7 @@ impl fmt::Display for FirmwareVersion {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "_serde")]
 impl serde::Serialize for FirmwareVersion {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -352,7 +352,6 @@ impl serde::Serialize for FirmwareVersion {
 }
 
 #[derive(Debug, Clone, Copy)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub(crate) struct MotorOutputRange {
     pub(crate) min: u16,
     #[allow(dead_code)]

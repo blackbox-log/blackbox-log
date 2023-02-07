@@ -40,7 +40,7 @@ impl ::core::fmt::Display for FeatureSet {
         f.write_str(&names.join("|"))
     }
 }
-#[cfg(feature = "serde")]
+#[cfg(feature = "_serde")]
 #[allow(clippy::cast_possible_truncation)]
 impl ::serde::Serialize for FeatureSet {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -56,7 +56,7 @@ impl ::serde::Serialize for FeatureSet {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "_serde", derive(serde::Serialize))]
 pub enum Feature {
     /// `AIRMODE`
     AirMode,

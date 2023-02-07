@@ -68,7 +68,7 @@ impl FlagSet {
                 }
             }
 
-            #[cfg(feature = "serde")]
+            #[cfg(feature = "_serde")]
             #[allow(clippy::cast_possible_truncation)]
             impl ::serde::Serialize for #name {
                 fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>

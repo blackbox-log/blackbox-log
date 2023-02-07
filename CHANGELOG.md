@@ -19,6 +19,7 @@
 ### Removed
 
 - `Headers::version` and `LogVersion`
+- The unstable `serde` feature
 
 ## [0.2.0] - 2023-01-28
 

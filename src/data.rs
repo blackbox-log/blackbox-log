@@ -159,7 +159,7 @@ impl<'data, 'headers> DataParser<'data, 'headers> {
 
 /// Statistics about a decoded log.
 #[derive(Debug, Clone, Default)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "_serde", derive(serde::Serialize))]
 #[non_exhaustive]
 pub struct Stats {
     /// The number of valid frames found of each type.
@@ -167,7 +167,7 @@ pub struct Stats {
 }
 
 #[derive(Debug, Clone, Copy, Default)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "_serde", derive(serde::Serialize))]
 pub struct FrameCounts {
     pub event: usize,
     pub main: usize,
