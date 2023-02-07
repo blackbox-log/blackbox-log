@@ -27,16 +27,22 @@ impl FlagSet {
             #[allow(unused_qualifications)]
             pub struct #name {
                 firmware: crate::headers::Firmware,
-                raw: ::bitvec::array::BitArray<[u32; 1], ::bitvec::order::Lsb0>
+                raw: ::bitvec::array::BitArray<u32, ::bitvec::order::Lsb0>
             }
 
-            #[allow(unused_qualifications)]
+            #[allow(unused_qualifications, clippy::cast_possible_truncation)]
             impl #name {
                 pub(crate) fn new(raw: u32, firmware: crate::headers::Firmware) -> Self {
                     Self {
                         firmware,
-                        raw: ::bitvec::array::BitArray::new([raw])
+                        raw: ::bitvec::array::BitArray::new(raw)
                     }
+                }
+
+                fn iter(&self) -> impl Iterator<Item = <Self as crate::units::FlagSet>::Flag> + '_ {
+                    self.raw
+                        .iter_ones()
+                        .filter_map(|bit| <#flag_name>::from_bit(bit as u32, self.firmware))
                 }
             }
 
@@ -49,13 +55,8 @@ impl FlagSet {
                 }
 
                 fn as_names(&self) -> ::alloc::vec::Vec<&'static str> {
-                    self.raw
-                        .iter_ones()
-                        .filter_map(|bit| {
-                            let flag = <#flag_name>::from_bit(bit as u32, self.firmware)?;
-                            let name = <#flag_name as crate::units::Flag>::as_name(&flag);
-                            Some(name)
-                        })
+                    self.iter()
+                        .map(|flag| <#flag_name as crate::units::Flag>::as_name(&flag))
                         .collect()
                 }
             }
@@ -79,10 +80,7 @@ impl FlagSet {
                     // TODO: length
                     let mut seq = serializer.serialize_seq(None)?;
 
-                    for flag in self.raw
-                        .iter_ones()
-                        .filter_map(|bit| <#flag_name>::from_bit(bit as u32, self.firmware))
-                    {
+                    for flag in self.iter() {
                         seq.serialize_element(&flag)?;
                     }
 
