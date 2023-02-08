@@ -223,11 +223,12 @@ impl<'data> Headers<'data> {
 
     /// The `Firmware date` header
     pub fn firmware_date(&self) -> Option<Result<PrimitiveDateTime, &'data str>> {
-        let date_format = time::macros::format_description!(
-            "[month repr:short case_sensitive:false] [day] [year] [hour repr:24]:[minute]:[second]"
+        let format = time::macros::format_description!(
+            "[month repr:short case_sensitive:false] [day padding:space] [year] [hour \
+             repr:24]:[minute]:[second]"
         );
         self.firmware_date
-            .map(|date| PrimitiveDateTime::parse(date, &date_format).map_err(|_| date))
+            .map(|date| PrimitiveDateTime::parse(date, &format).map_err(|_| date))
     }
 
     /// The `Board info` header.

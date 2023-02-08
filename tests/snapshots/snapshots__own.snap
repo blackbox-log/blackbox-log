@@ -10,7 +10,7 @@ File(
       headers: Headers(
         firmware_revision: "Betaflight 4.2.11 (948ba6339) STM32F7X2",
         firmware: Betaflight("4.2.11"),
-        firmware_date: Some(Err("Nov  9 2021 20:29:32")),
+        firmware_date: Some(Ok("2021-11-09 20:29:32.0")),
         board_info: Some("ZEEZ ZEEZF7V2"),
         craft_name: None,
         debug_mode: None,

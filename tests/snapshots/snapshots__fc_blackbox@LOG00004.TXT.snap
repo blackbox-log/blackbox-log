@@ -10,7 +10,7 @@ File(
       headers: Headers(
         firmware_revision: "INAV 3.0.1 (753c4479) MATEKF405SE",
         firmware: Inav("3.0.1"),
-        firmware_date: Some(Err("Jul  4 2021 14:17:22")),
+        firmware_date: Some(Ok("2021-07-04 14:17:22.0")),
         board_info: None,
         craft_name: Some(":WDTE"),
         debug_mode: None,

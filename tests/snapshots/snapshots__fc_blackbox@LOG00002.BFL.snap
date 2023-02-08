@@ -10,7 +10,7 @@ File(
       headers: Headers(
         firmware_revision: "Betaflight 4.2.6 (a4b6db1e7) STM32F405",
         firmware: Betaflight("4.2.6"),
-        firmware_date: Some(Err("Jan  5 2021 19:07:23")),
+        firmware_date: Some(Ok("2021-01-05 19:07:23.0")),
         board_info: Some("AIRB OMNIBUSF4"),
         craft_name: None,
         debug_mode: GyroFiltered,
