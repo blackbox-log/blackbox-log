@@ -28,11 +28,9 @@ impl Enum {
         let name = format_ident!("{}", self.name);
         let attrs = quote_attrs(&self.doc, &self.attrs, true);
 
-        let (variants, idents, official) =
-            combine_flags(&self.betaflight, &self.inav, &self.rename);
-
-        let enum_def = expand_combined_flags(&name, &variants, &idents, self.unknown);
-        let impl_flag = impl_flag(&name, &idents, &official, self.unknown);
+        let variants = combine_flags(&self.betaflight, &self.inav, &self.rename);
+        let enum_def = expand_combined_flags(&name, &variants, self.unknown);
+        let impl_flag = impl_flag(&name, &variants, self.unknown);
         let impl_flag_display = impl_flag_display(&name);
 
         let (return_type, default) = if self.unknown {
@@ -45,7 +43,8 @@ impl Enum {
         let unknown_cb = syn::parse_str::<syn::ExprClosure>(unknown_cb).unwrap();
 
         let mut new = Vec::new();
-        for (variant, ident) in variants.iter().zip(idents.iter()) {
+        for variant in variants {
+            let ident = &variant.rust;
             let value = quote!(Self::#ident);
             let value = if self.unknown {
                 value

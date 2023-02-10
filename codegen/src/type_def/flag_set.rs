@@ -108,13 +108,15 @@ impl Flags {
         let name = format_ident!("{}", self.name);
         let attrs = quote_attrs(&self.doc, &self.attrs, true);
 
-        let (flags, idents, official) = combine_flags(&self.betaflight, &self.inav, &self.rename);
-        let enum_def = expand_combined_flags(&name, &flags, &idents, false);
-        let impl_flag = impl_flag(&name, &idents, &official, false);
+        let flags = combine_flags(&self.betaflight, &self.inav, &self.rename);
+        let enum_def = expand_combined_flags(&name, &flags, false);
+        let impl_flag = impl_flag(&name, &flags, false);
         let impl_flag_display = impl_flag_display(&name);
 
         let mut from_bit = Vec::new();
-        for (flag, ident) in flags.iter().zip(idents.iter()) {
+        for flag in &flags {
+            let ident = &flag.rust;
+
             if flag.betaflight == flag.inav && flag.betaflight.is_some() {
                 let bit = flag.betaflight.unwrap();
                 let arm = quote!((#bit, _) => Some(Self::#ident));
@@ -136,7 +138,9 @@ impl Flags {
         let from_bit = from_bit.iter().map(|(_, _, arm)| arm);
 
         let mut to_bit = Vec::new();
-        for (flag, ident) in flags.iter().zip(idents.iter()) {
+        for flag in &flags {
+            let ident = &flag.rust;
+
             if flag.betaflight == flag.inav && flag.betaflight.is_some() {
                 let bit = flag.betaflight.unwrap();
                 to_bit.push(quote!((Self::#ident, _) => Some(#bit)));

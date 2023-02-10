@@ -34,9 +34,20 @@ impl TypeDef {
 #[derive(Debug)]
 struct CombinedVariant {
     official: String,
-    rust: String,
+    rust: Ident,
     betaflight: Option<u32>,
     inav: Option<u32>,
+}
+
+impl CombinedVariant {
+    pub const fn firmware(&self) -> Firmware {
+        match (self.betaflight.is_some(), self.inav.is_some()) {
+            (true, true) => Firmware::Both,
+            (true, false) => Firmware::Betaflight,
+            (false, true) => Firmware::Inav,
+            (false, false) => unreachable!(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -50,7 +61,11 @@ fn combine_flags(
     betaflight: &HashMap<String, u32>,
     inav: &HashMap<String, u32>,
     rename: &HashMap<String, String>,
-) -> (Vec<CombinedVariant>, Vec<Ident>, Vec<String>) {
+) -> Vec<CombinedVariant> {
+    fn str_to_ident(s: &str) -> Ident {
+        format_ident!("{}", s)
+    }
+
     let get_rust_name = |official: &str| {
         rename
             .get(official)
@@ -67,7 +82,7 @@ fn combine_flags(
             rust.clone(),
             CombinedVariant {
                 official: official.clone(),
-                rust,
+                rust: str_to_ident(&rust),
                 betaflight: Some(index),
                 inav: None,
             },
@@ -85,7 +100,7 @@ fn combine_flags(
                 rust.clone(),
                 CombinedVariant {
                     official: official.clone(),
-                    rust,
+                    rust: str_to_ident(&rust),
                     betaflight: None,
                     inav: Some(index),
                 },
@@ -95,36 +110,26 @@ fn combine_flags(
 
     let mut combined = combined.into_values().collect::<Vec<_>>();
     combined.sort_unstable_by_key(|flag| flag.rust.clone());
-
-    let (idents, official) = combined
-        .iter()
-        .map(|variant| (format_ident!("{}", variant.rust), variant.official.clone()))
-        .unzip();
-
-    (combined, idents, official)
+    combined
 }
 
 #[allow(single_use_lifetimes)]
 fn expand_combined_flags<'f, 'i>(
     name: &Ident,
     flags: impl IntoIterator<Item = &'f CombinedVariant>,
-    idents: impl IntoIterator<Item = &'i Ident>,
     unknown: bool,
 ) -> TokenStream {
-    let body = flags
-        .into_iter()
-        .zip(idents.into_iter())
-        .map(|(flag, ident)| {
-            let note = match (flag.betaflight.is_some(), flag.inav.is_some()) {
-                (true, true) => "",
-                (true, false) => " (Betaflight only)",
-                (false, true) => " (INAV only)",
-                _ => unreachable!(),
-            };
+    let body = flags.into_iter().map(|flag| {
+        let note = match flag.firmware() {
+            Firmware::Both => "",
+            Firmware::Betaflight => " (Betaflight only)",
+            Firmware::Inav => " (INAV only)",
+        };
 
-            let doc = format!("`{}`{note}", flag.official);
-            quote! { #[doc = #doc] #ident }
-        });
+        let doc = format!("`{}`{note}", flag.official);
+        let ident = &flag.rust;
+        quote!(#[doc = #doc] #ident)
+    });
 
     let unknown = unknown.then_some(quote!(Unknown));
 
@@ -154,18 +159,23 @@ fn quote_attrs(doc: &str, attrs: &[String], serde: bool) -> TokenStream {
 #[allow(single_use_lifetimes)]
 fn impl_flag<'v>(
     name: &Ident,
-    variants: impl IntoIterator<Item = &'v Ident>,
-    names: &[String],
+    flags: impl IntoIterator<Item = &'v CombinedVariant>,
     unknown: bool,
 ) -> TokenStream {
-    let variants = variants.into_iter();
+    let variants = flags.into_iter().map(|flag| {
+        let variant = &flag.rust;
+        let official = &flag.official;
+
+        quote!(Self::#variant => #official)
+    });
+
     let unknown = unknown.then_some(quote!(Self::Unknown => "UNKNOWN"));
     quote! {
         #[allow(unused_qualifications)]
         impl crate::units::Flag for #name {
             fn as_name(&self) -> &'static str {
                 match self {
-                    #( Self::#variants => #names, )*
+                    #(#variants,)*
                     #unknown
                 }
             }
