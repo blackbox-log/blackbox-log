@@ -34,7 +34,7 @@ memchr = { version = "^2.4.0", default-features = false }
 serde = { version = "^1.0.96", default-features = false, features = ["alloc", "derive"], optional = true }
 time = { version = "^0.3.3", default-features = false, features = ["macros", "parsing"] }
 tracing = { version = "^0.1.16", default-features = false, features = ["attributes"] }
-uom = { version = "^0.33.0", default-features = false, features = ["si", "f64"] }
+uom = { version = "^0.34.0", default-features = false, features = ["si", "f64"] }
 
 [dev-dependencies]
 criterion = { version = "^0.4", features = ["html_reports"] }
