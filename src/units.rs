@@ -9,7 +9,7 @@ use crate::Headers;
 
 #[allow(unreachable_pub)]
 pub(crate) mod prelude {
-    pub use super::si::acceleration::meter_per_second_squared as mps2;
+    pub use super::si::acceleration::{meter_per_second_squared as mps2, standard_gravity};
     pub use super::si::angular_velocity::degree_per_second;
     pub use super::si::electric_current::{ampere, milliampere};
     pub use super::si::electric_potential::{millivolt, volt};
@@ -47,11 +47,8 @@ impl FromRaw for Acceleration {
     type Raw = i32;
 
     fn from_raw(raw: Self::Raw, headers: &Headers) -> Self {
-        // TODO: switch to `standard_gravity` instead of `mps2` once
-        // https://github.com/iliekturtles/uom/pull/351 lands
-
         let gs = f64::from(raw) / f64::from(headers.acceleration_1g.unwrap());
-        Self::new::<prelude::mps2>(gs * 9.80665)
+        Self::new::<prelude::standard_gravity>(gs)
     }
 }
 
@@ -165,19 +162,17 @@ mod tests {
 
         #[test]
         fn acceleration() {
-            use si::acceleration::{
-                kilometer_per_second_squared as kmps2, millimeter_per_second_squared as mmps2,
-            };
+            use si::acceleration::{millimeter_per_second_squared as mmps2, standard_gravity};
 
-            let mm = Acceleration::new::<mmps2>(1.);
-            float_eq!(1., mm.get::<mmps2>());
+            let milli_gs = Acceleration::new::<standard_gravity>(0.001);
+            float_eq!(0.001, milli_gs.get::<standard_gravity>());
 
-            let km = Acceleration::new::<kmps2>(1.);
-            float_eq!(1., km.get::<kmps2>());
+            let hecto_gs = Acceleration::new::<standard_gravity>(100.);
+            float_eq!(100., hecto_gs.get::<standard_gravity>());
 
             float_eq!(
-                mm.get::<mmps2>() + km.get::<mmps2>(),
-                (mm + km).get::<mmps2>()
+                milli_gs.get::<mmps2>() + hecto_gs.get::<mmps2>(),
+                (milli_gs + hecto_gs).get::<mmps2>()
             );
         }
 
