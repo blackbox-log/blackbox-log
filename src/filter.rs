@@ -39,8 +39,6 @@ impl FieldFilterSet {
 }
 
 /// A filter for the fields to be included in one kind of frame.
-///
-/// See [`FrameDef::apply_filter`][crate::frame::FrameDef::apply_filter].
 #[derive(Debug, Clone)]
 pub struct FieldFilter(HashSet<String>);
 
