@@ -19,11 +19,12 @@ pub use self::gps::{GpsFrame, GpsFrameDef, GpsUnit, GpsValue};
 pub(crate) use self::gps_home::{GpsHomeFrame, GpsPosition};
 pub use self::main::{MainFrame, MainFrameDef, MainUnit, MainValue};
 pub use self::slow::{SlowFrame, SlowFrameDef, SlowUnit, SlowValue};
+use crate::filter::AppliedFilter;
 use crate::headers::{ParseError, ParseResult};
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
-use crate::{units, FieldFilter, Reader};
+use crate::{units, Reader};
 
 mod seal {
     pub trait Sealed {}
@@ -61,13 +62,6 @@ pub trait FrameDef<'data>: seal::Sealed {
             _data: &PhantomData,
         }
     }
-
-    /// Removes any existing filter so all fields will be included.
-    fn clear_filter(&mut self);
-
-    /// Applies a filter to restrict the exposed fields, overwriting any
-    /// previous filter.
-    fn apply_filter(&mut self, filter: &FieldFilter);
 }
 
 /// Metadata describing one field.
@@ -188,6 +182,36 @@ impl<F: Frame> Iterator for FieldIter<'_, F> {
 }
 
 impl<F: Frame> FusedIterator for FieldIter<'_, F> {}
+
+#[derive(Debug)]
+pub struct FilteredFrameDef<'a, F> {
+    def: &'a F,
+    filter: &'a AppliedFilter,
+}
+
+impl<'a, F> FilteredFrameDef<'a, F> {
+    pub(super) fn new(def: &'a F, filter: &'a AppliedFilter) -> Self {
+        Self { def, filter }
+    }
+}
+
+impl<F: seal::Sealed> seal::Sealed for FilteredFrameDef<'_, F> {}
+
+impl<'data, F: FrameDef<'data>> FrameDef<'data> for FilteredFrameDef<'_, F> {
+    type Unit = F::Unit;
+
+    fn len(&self) -> usize {
+        self.filter.len()
+    }
+
+    fn get<'def>(&'def self, index: usize) -> Option<FieldDef<'data, Self::Unit>>
+    where
+        'data: 'def,
+    {
+        let index = self.filter.get(index)?;
+        self.def.get(index)
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(u8)]

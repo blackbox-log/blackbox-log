@@ -8,7 +8,7 @@ use super::{
     FrameKind, Unit,
 };
 use crate::data::MainFrameHistory;
-use crate::filter::{AppliedFilter, FieldFilter};
+use crate::filter::AppliedFilter;
 use crate::headers::{ParseError, ParseResult};
 use crate::parser::{decode, Encoding, InternalResult};
 use crate::predictor::{self, Predictor, PredictorContext};
@@ -22,6 +22,7 @@ use crate::{Headers, Reader};
 pub struct MainFrame<'data, 'headers, 'parser> {
     headers: &'headers Headers<'data>,
     raw: &'parser RawMainFrame,
+    filter: &'parser AppliedFilter,
 }
 
 impl super::seal::Sealed for MainFrame<'_, '_, '_> {}
@@ -29,18 +30,19 @@ impl super::seal::Sealed for MainFrame<'_, '_, '_> {}
 impl super::Frame for MainFrame<'_, '_, '_> {
     type Value = MainValue;
 
+    #[inline(always)]
     fn len(&self) -> usize {
-        self.headers.main_frame_def.len()
+        self.filter.len()
     }
 
     fn get_raw(&self, index: usize) -> Option<u32> {
-        let index = self.headers.main_frame_def.filter.get(index)?;
+        let index = self.filter.get(index)?;
         Some(self.raw.values[index])
     }
 
     fn get(&self, index: usize) -> Option<MainValue> {
         let frame_def = &self.headers.main_frame_def;
-        let index = frame_def.filter.get(index)?;
+        let index = self.filter.get(index)?;
 
         let def = &frame_def.fields[index];
         let raw = self.raw.values[index];
@@ -73,8 +75,16 @@ impl super::Frame for MainFrame<'_, '_, '_> {
 }
 
 impl<'data, 'headers, 'parser> MainFrame<'data, 'headers, 'parser> {
-    pub(crate) fn new(headers: &'headers Headers<'data>, raw: &'parser RawMainFrame) -> Self {
-        Self { headers, raw }
+    pub(crate) fn new(
+        headers: &'headers Headers<'data>,
+        raw: &'parser RawMainFrame,
+        filter: &'parser AppliedFilter,
+    ) -> Self {
+        Self {
+            headers,
+            raw,
+            filter,
+        }
     }
 
     /// Returns the `loopIteration` field. This is a 32bit counter incremented
@@ -157,10 +167,8 @@ pub enum MainUnit {
 /// The parsed frame definition for main frames.
 #[derive(Debug, Clone)]
 pub struct MainFrameDef<'data> {
-    pub(crate) fields: Vec<MainFieldDef<'data>>,
-
+    fields: Vec<MainFieldDef<'data>>,
     index_motor_0: Option<usize>,
-    filter: AppliedFilter,
 }
 
 impl super::seal::Sealed for MainFrameDef<'_> {}
@@ -169,30 +177,18 @@ impl<'data> FrameDef<'data> for MainFrameDef<'data> {
     type Unit = MainUnit;
 
     fn len(&self) -> usize {
-        self.filter.len()
+        self.fields.len()
     }
 
     fn get<'a>(&'a self, index: usize) -> Option<FieldDef<'data, Self::Unit>>
     where
         'data: 'a,
     {
-        self.fields.get(self.filter.get(index)?).map(
+        self.fields.get(index).map(
             |&MainFieldDef {
                  name, signed, unit, ..
              }| FieldDef { name, unit, signed },
         )
-    }
-
-    fn clear_filter(&mut self) {
-        self.filter = AppliedFilter::new_unfiltered(self.fields.len());
-    }
-
-    /// Applies a filter to restrict the exposed fields, overwriting any
-    /// previous filter.
-    ///
-    /// **Note:** `loopIteration` and `time` fields will always be included.
-    fn apply_filter(&mut self, filter: &FieldFilter) {
-        self.filter = filter.apply(self.fields.iter().map(|f| f.name));
     }
 }
 
@@ -482,13 +478,10 @@ impl<'data> MainFrameDefBuilder<'data> {
         }
 
         let index_motor_0 = fields.iter().position(|f| f.name == "motor[0]");
-        let filter = AppliedFilter::new_unfiltered(fields.len());
 
         Ok(MainFrameDef {
             fields,
-
             index_motor_0,
-            filter,
         })
     }
 }

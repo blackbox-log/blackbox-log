@@ -15,19 +15,20 @@
 //! use blackbox_log::frame::FieldDef;
 //! use blackbox_log::prelude::*;
 //!
-//! let file = b"...";
-//! for mut reader in blackbox_log::File::new(file).iter() {
-//!     let mut headers = Headers::parse(&mut reader).unwrap();
-//!
+//! let filters = blackbox_log::FieldFilterSet {
 //!     // This restricts the included fields to `loopIteration`, `time` and
 //!     // `rcCommand[0]` through `rcCommand[3]` for main frames
-//!     headers.main_frame_def.apply_filter(&["rcCommand"].into());
-//!
+//!     main: Some(["rcCommand"].into()),
 //!     // ... and only `flightModeFlags` for slow frames
-//!     let filter = FieldFilter::from(["flightModeFlags"]);
-//!     headers.slow_frame_def.apply_filter(&filter);
+//!     slow: Some(["flightModeFlags"].into()),
+//!     gps: None,
+//! };
 //!
-//!     let mut parser = DataParser::new(reader, &headers);
+//! let file = b"...";
+//! for mut reader in blackbox_log::File::new(file).iter() {
+//!     let headers = Headers::parse(&mut reader).unwrap();
+//!
+//!     let mut parser = DataParser::with_filters(reader, &headers, &filters);
 //!     while let Some(event) = parser.next() {
 //!         match event {
 //!             ParserEvent::Main(main) => {
@@ -104,7 +105,7 @@ pub mod units;
 pub use self::data::{DataParser, ParserEvent};
 pub use self::event::Event;
 pub use self::file::File;
-pub use self::filter::FieldFilter;
+pub use self::filter::{FieldFilter, FieldFilterSet};
 pub use self::frame::{Unit, Value};
 pub use self::headers::Headers;
 pub use self::reader::Reader;

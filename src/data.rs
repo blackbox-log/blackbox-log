@@ -1,17 +1,21 @@
 //! Types for the data section of blackbox logs.
 
 use crate::event::Event;
+pub(crate) use crate::filter::AppliedFilter;
 use crate::frame::gps::{GpsFrame, RawGpsFrame};
 use crate::frame::main::{MainFrame, RawMainFrame};
 use crate::frame::slow::{RawSlowFrame, SlowFrame};
-use crate::frame::{DataFrameKind, FrameKind, GpsHomeFrame};
+use crate::frame::{self, DataFrameKind, FilteredFrameDef, FrameKind, GpsHomeFrame};
 use crate::parser::InternalError;
-use crate::{Headers, Reader};
+use crate::{FieldFilterSet, Headers, Reader};
 
 /// An pseudo-event-based parser for the data section of blackbox logs.
 #[derive(Debug)]
 pub struct DataParser<'data, 'headers> {
     headers: &'headers Headers<'data>,
+    main_filter: AppliedFilter,
+    slow_filter: AppliedFilter,
+    gps_filter: AppliedFilter,
     data: Reader<'data>,
     stats: Stats,
     main_frames: MainFrameHistory,
@@ -21,15 +25,42 @@ pub struct DataParser<'data, 'headers> {
 
 impl<'data, 'headers> DataParser<'data, 'headers> {
     /// Constructs a new parser without beginning parsing.
+    #[inline(always)]
     pub fn new(data: Reader<'data>, headers: &'headers Headers<'data>) -> Self {
+        Self::with_filters(data, headers, &FieldFilterSet::default())
+    }
+
+    pub fn with_filters(
+        data: Reader<'data>,
+        headers: &'headers Headers<'data>,
+        filters: &FieldFilterSet,
+    ) -> Self {
         Self {
             headers,
+            main_filter: filters.apply_main(&headers.main_frame_def),
+            slow_filter: filters.apply_slow(&headers.slow_frame_def),
+            gps_filter: filters.apply_gps(&headers.gps_frame_def),
             data,
             stats: Stats::default(),
             main_frames: MainFrameHistory::default(),
             gps_home_frame: None,
             done: false,
         }
+    }
+
+    pub fn main_frame_def<'a>(&'a self) -> FilteredFrameDef<'a, frame::MainFrameDef<'data>> {
+        FilteredFrameDef::new(&self.headers.main_frame_def, &self.main_filter)
+    }
+
+    pub fn slow_frame_def<'a>(&'a self) -> FilteredFrameDef<'a, frame::SlowFrameDef<'data>> {
+        FilteredFrameDef::new(&self.headers.slow_frame_def, &self.slow_filter)
+    }
+
+    pub fn gps_frame_def<'a>(&'a self) -> Option<FilteredFrameDef<'a, frame::GpsFrameDef<'data>>> {
+        self.headers
+            .gps_frame_def
+            .as_ref()
+            .map(|def| FilteredFrameDef::new(def, &self.gps_filter))
     }
 
     /// Returns the current stats.
@@ -126,15 +157,27 @@ impl<'data, 'headers> DataParser<'data, 'headers> {
                             self.stats.counts.main += 1;
                             let main = self.main_frames.push(main);
 
-                            return Some(ParserEvent::Main(MainFrame::new(self.headers, main)));
+                            return Some(ParserEvent::Main(MainFrame::new(
+                                self.headers,
+                                main,
+                                &self.main_filter,
+                            )));
                         }
                         InternalFrame::Slow(slow) => {
                             self.stats.counts.slow += 1;
-                            return Some(ParserEvent::Slow(SlowFrame::new(self.headers, slow)));
+                            return Some(ParserEvent::Slow(SlowFrame::new(
+                                self.headers,
+                                slow,
+                                &self.slow_filter,
+                            )));
                         }
                         InternalFrame::Gps(gps) => {
                             self.stats.counts.gps += 1;
-                            return Some(ParserEvent::Gps(GpsFrame::new(self.headers, gps)));
+                            return Some(ParserEvent::Gps(GpsFrame::new(
+                                self.headers,
+                                gps,
+                                &self.gps_filter,
+                            )));
                         }
                         InternalFrame::GpsHome(gps_home) => {
                             self.stats.counts.gps_home += 1;
@@ -183,8 +226,8 @@ pub struct FrameCounts {
 pub enum ParserEvent<'data, 'headers, 'parser> {
     Event(Event),
     Main(MainFrame<'data, 'headers, 'parser>),
-    Slow(SlowFrame<'data, 'headers>),
-    Gps(GpsFrame<'data, 'headers>),
+    Slow(SlowFrame<'data, 'headers, 'parser>),
+    Gps(GpsFrame<'data, 'headers, 'parser>),
 }
 
 #[cold]

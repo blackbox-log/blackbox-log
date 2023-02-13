@@ -4,7 +4,39 @@ use alloc::vec::Vec;
 
 use hashbrown::HashSet;
 
+use crate::frame::{self, FrameDef};
 use crate::utils::to_base_field;
+
+#[derive(Debug, Default, Clone)]
+pub struct FieldFilterSet {
+    pub main: Option<FieldFilter>,
+    pub slow: Option<FieldFilter>,
+    pub gps: Option<FieldFilter>,
+}
+
+impl FieldFilterSet {
+    pub(crate) fn apply_main(&self, frame: &frame::MainFrameDef) -> AppliedFilter {
+        self.main.as_ref().map_or_else(
+            || AppliedFilter::new_unfiltered(frame.len()),
+            |filter| filter.apply(frame),
+        )
+    }
+
+    pub(crate) fn apply_slow(&self, frame: &frame::SlowFrameDef) -> AppliedFilter {
+        self.slow.as_ref().map_or_else(
+            || AppliedFilter::new_unfiltered(frame.len()),
+            |filter| filter.apply(frame),
+        )
+    }
+
+    pub(crate) fn apply_gps(&self, frame: &Option<frame::GpsFrameDef>) -> AppliedFilter {
+        match (&self.gps, frame) {
+            (Some(filter), Some(frame)) => filter.apply(frame),
+            (None, Some(frame)) => AppliedFilter::new_unfiltered(frame.len()),
+            _ => AppliedFilter::new_unfiltered(0),
+        }
+    }
+}
 
 /// A filter for the fields to be included in one kind of frame.
 ///
@@ -13,11 +45,11 @@ use crate::utils::to_base_field;
 pub struct FieldFilter(HashSet<String>);
 
 impl FieldFilter {
-    #[allow(single_use_lifetimes)]
-    pub(crate) fn apply<'a>(&self, fields: impl Iterator<Item = &'a str>) -> AppliedFilter {
-        fields
+    pub(crate) fn apply<'data, F: FrameDef<'data>>(&self, frame: &F) -> AppliedFilter {
+        frame
+            .iter()
             .enumerate()
-            .filter_map(|(i, field)| self.0.contains(to_base_field(field)).then_some(i))
+            .filter_map(|(i, field)| self.0.contains(to_base_field(field.name)).then_some(i))
             .collect()
     }
 }

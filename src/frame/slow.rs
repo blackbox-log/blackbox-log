@@ -5,7 +5,7 @@ use tracing::instrument;
 use super::{
     read_field_values, DataFrameKind, DataFrameProperty, FieldDef, FieldDefDetails, FrameDef, Unit,
 };
-use crate::filter::{AppliedFilter, FieldFilter};
+use crate::filter::AppliedFilter;
 use crate::headers::ParseResult;
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
@@ -17,28 +17,30 @@ use crate::{units, Headers, Reader};
 /// Slow frames do not include any metadata. If that is desired, use the prior
 /// [`MainFrame`][super::MainFrame].
 #[derive(Debug, Clone)]
-pub struct SlowFrame<'data, 'headers> {
+pub struct SlowFrame<'data, 'headers, 'parser> {
     headers: &'headers Headers<'data>,
     raw: RawSlowFrame,
+    filter: &'parser AppliedFilter,
 }
 
-impl super::seal::Sealed for SlowFrame<'_, '_> {}
+impl super::seal::Sealed for SlowFrame<'_, '_, '_> {}
 
-impl super::Frame for SlowFrame<'_, '_> {
+impl super::Frame for SlowFrame<'_, '_, '_> {
     type Value = SlowValue;
 
+    #[inline(always)]
     fn len(&self) -> usize {
-        self.headers.slow_frame_def.len()
+        self.filter.len()
     }
 
     fn get_raw(&self, index: usize) -> Option<u32> {
-        let index = self.headers.slow_frame_def.filter.get(index)?;
+        let index = self.filter.get(index)?;
         Some(self.raw.0[index])
     }
 
     fn get(&self, index: usize) -> Option<Self::Value> {
         let frame_def = &self.headers.slow_frame_def;
-        let index = frame_def.filter.get(index)?;
+        let index = self.filter.get(index)?;
 
         let def = &frame_def.fields[index];
         let raw = self.raw.0[index];
@@ -64,9 +66,17 @@ impl super::Frame for SlowFrame<'_, '_> {
     }
 }
 
-impl<'data, 'headers> SlowFrame<'data, 'headers> {
-    pub(crate) fn new(headers: &'headers Headers<'data>, raw: RawSlowFrame) -> Self {
-        Self { headers, raw }
+impl<'data, 'headers, 'parser> SlowFrame<'data, 'headers, 'parser> {
+    pub(crate) fn new(
+        headers: &'headers Headers<'data>,
+        raw: RawSlowFrame,
+        filter: &'parser AppliedFilter,
+    ) -> Self {
+        Self {
+            headers,
+            raw,
+            filter,
+        }
     }
 }
 
@@ -107,8 +117,7 @@ pub enum SlowUnit {
 /// The parsed frame definition for slow frames.
 #[derive(Debug, Clone)]
 pub struct SlowFrameDef<'data> {
-    pub(crate) fields: Vec<SlowFieldDef<'data>>,
-    filter: AppliedFilter,
+    fields: Vec<SlowFieldDef<'data>>,
 }
 
 impl super::seal::Sealed for SlowFrameDef<'_> {}
@@ -117,26 +126,18 @@ impl<'data> FrameDef<'data> for SlowFrameDef<'data> {
     type Unit = SlowUnit;
 
     fn len(&self) -> usize {
-        self.filter.len()
+        self.fields.len()
     }
 
     fn get<'a>(&'a self, index: usize) -> Option<FieldDef<'data, Self::Unit>>
     where
         'data: 'a,
     {
-        self.fields.get(self.filter.get(index)?).map(
+        self.fields.get(index).map(
             |&SlowFieldDef {
                  name, unit, signed, ..
              }| FieldDef { name, unit, signed },
         )
-    }
-
-    fn clear_filter(&mut self) {
-        self.filter = AppliedFilter::new_unfiltered(self.fields.len());
-    }
-
-    fn apply_filter(&mut self, filter: &FieldFilter) {
-        self.filter = filter.apply(self.fields.iter().map(|f| f.name));
     }
 }
 
@@ -257,9 +258,7 @@ impl<'data> SlowFrameDefBuilder<'data> {
             tracing::warn!("not all slow frame definition headers are of equal length");
         }
 
-        let filter = AppliedFilter::new_unfiltered(fields.len());
-
-        Ok(SlowFrameDef { fields, filter })
+        Ok(SlowFrameDef { fields })
     }
 }
 

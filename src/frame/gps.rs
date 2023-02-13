@@ -7,7 +7,7 @@ use super::{
     read_field_values, DataFrameKind, DataFrameProperty, FieldDef, FieldDefDetails, FrameDef,
     GpsHomeFrame, Unit,
 };
-use crate::filter::{AppliedFilter, FieldFilter};
+use crate::filter::AppliedFilter;
 use crate::headers::{ParseError, ParseResult};
 use crate::parser::{decode, Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
@@ -18,29 +18,29 @@ use crate::{Headers, Reader};
 
 /// Data parsed from a GPS frame.
 #[derive(Debug, Clone)]
-pub struct GpsFrame<'data, 'headers> {
+pub struct GpsFrame<'data, 'headers, 'parser> {
     headers: &'headers Headers<'data>,
     raw: RawGpsFrame,
+    filter: &'parser AppliedFilter,
 }
 
-impl super::seal::Sealed for GpsFrame<'_, '_> {}
+impl super::seal::Sealed for GpsFrame<'_, '_, '_> {}
 
-impl super::Frame for GpsFrame<'_, '_> {
+impl super::Frame for GpsFrame<'_, '_, '_> {
     type Value = GpsValue;
 
     fn len(&self) -> usize {
-        self.headers.gps_frame_def.as_ref().map_or(0, FrameDef::len)
+        self.filter.len()
     }
 
     fn get_raw(&self, index: usize) -> Option<u32> {
-        let def = self.headers.gps_frame_def.as_ref().unwrap();
-        let index = def.filter.get(index)?;
+        let index = self.filter.get(index)?;
         Some(self.raw.values[index])
     }
 
     fn get(&self, index: usize) -> Option<Self::Value> {
         let frame_def = self.headers.gps_frame_def.as_ref().unwrap();
-        let index = frame_def.filter.get(index)?;
+        let index = self.filter.get(index)?;
 
         let def = &frame_def.fields[index];
         let raw = self.raw.values[index];
@@ -76,9 +76,17 @@ impl super::Frame for GpsFrame<'_, '_> {
     }
 }
 
-impl<'data, 'headers> GpsFrame<'data, 'headers> {
-    pub(crate) fn new(headers: &'headers Headers<'data>, raw: RawGpsFrame) -> Self {
-        Self { headers, raw }
+impl<'data, 'headers, 'parser> GpsFrame<'data, 'headers, 'parser> {
+    pub(crate) fn new(
+        headers: &'headers Headers<'data>,
+        raw: RawGpsFrame,
+        filter: &'parser AppliedFilter,
+    ) -> Self {
+        Self {
+            headers,
+            raw,
+            filter,
+        }
     }
 
     /// Returns the parsed time since power on.
@@ -133,8 +141,7 @@ pub enum GpsUnit {
 /// The parsed frame definition for GPS frames.
 #[derive(Debug, Clone)]
 pub struct GpsFrameDef<'data> {
-    pub(crate) fields: Vec<GpsFieldDef<'data>>,
-    filter: AppliedFilter,
+    fields: Vec<GpsFieldDef<'data>>,
 }
 
 impl super::seal::Sealed for GpsFrameDef<'_> {}
@@ -143,30 +150,18 @@ impl<'data> FrameDef<'data> for GpsFrameDef<'data> {
     type Unit = GpsUnit;
 
     fn len(&self) -> usize {
-        self.filter.len()
+        self.fields.len()
     }
 
     fn get<'a>(&'a self, index: usize) -> Option<FieldDef<'data, Self::Unit>>
     where
         'data: 'a,
     {
-        self.fields.get(self.filter.get(index)?).map(
+        self.fields.get(index).map(
             |&GpsFieldDef {
                  name, unit, signed, ..
              }| FieldDef { name, unit, signed },
         )
-    }
-
-    fn clear_filter(&mut self) {
-        self.filter = AppliedFilter::new_unfiltered(self.fields.len());
-    }
-
-    /// Applies a filter to restrict the exposed fields, overwriting any
-    /// previous filter.
-    ///
-    /// **Note:** The `time` field will always be included.
-    fn apply_filter(&mut self, filter: &FieldFilter) {
-        self.filter = filter.apply(self.fields.iter().map(|f| f.name));
     }
 }
 
@@ -346,9 +341,7 @@ impl<'data> GpsFrameDefBuilder<'data> {
             tracing::warn!("not all GPS definition headers are of equal length");
         }
 
-        let filter = AppliedFilter::new_unfiltered(fields.len());
-
-        Ok(Some(GpsFrameDef { fields, filter }))
+        Ok(Some(GpsFrameDef { fields }))
     }
 }
 
