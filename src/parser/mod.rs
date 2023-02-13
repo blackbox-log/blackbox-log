@@ -12,7 +12,3 @@ pub(crate) enum InternalError {
     /// Found the end of file.
     Eof,
 }
-
-pub(crate) fn to_base_field(field: &str) -> &str {
-    field.split_once('[').map_or(field, |(base, _)| base)
-}

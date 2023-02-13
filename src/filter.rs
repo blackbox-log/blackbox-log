@@ -4,7 +4,7 @@ use alloc::vec::Vec;
 
 use hashbrown::HashSet;
 
-use crate::parser::to_base_field;
+use crate::utils::to_base_field;
 
 /// A filter for the fields to be included in one kind of frame.
 ///

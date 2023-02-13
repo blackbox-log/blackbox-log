@@ -9,11 +9,11 @@ use super::{
 };
 use crate::filter::{AppliedFilter, FieldFilter};
 use crate::headers::{ParseError, ParseResult};
-use crate::parser::{decode, to_base_field, Encoding, InternalResult};
+use crate::parser::{decode, Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
 use crate::units::FromRaw;
-use crate::utils::as_i32;
+use crate::utils::{as_i32, to_base_field};
 use crate::{Headers, Reader};
 
 /// Data parsed from a GPS frame.

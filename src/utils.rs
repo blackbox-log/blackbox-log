@@ -1,3 +1,7 @@
+pub(crate) fn to_base_field(field: &str) -> &str {
+    field.split_once('[').map_or(field, |(base, _)| base)
+}
+
 macro_rules! include_generated {
     ($file:literal) => {
         include!(concat!(
