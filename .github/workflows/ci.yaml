@@ -8,6 +8,8 @@ on:
       - '.github/workflows/pages.yaml'
       - '.github/renovate.json'
   pull_request:
+  merge_group:
+    types: [checks_requested]
 
 permissions:
   contents: read
