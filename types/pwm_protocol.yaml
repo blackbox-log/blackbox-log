@@ -1,0 +1,24 @@
+enum:
+  name: PwmProtocol
+  doc: ''
+  unknown: true
+  unknownCallback: '|raw| tracing::debug!("invalid pwm protocol ({raw})")'
+  betaflight:
+    STANDARD: 0
+    ONESHOT125: 1
+    ONESHOT42: 2
+    MULTISHOT: 3
+    BRUSHED: 4
+    DSHOT150: 5
+    DSHOT300: 6
+    DSHOT600: 7
+    PROSHOT1000: 8
+    DISABLED: 9
+  inav:
+    STANDARD: 0
+    ONESHOT125: 1
+    MULTISHOT: 2
+    BRUSHED: 3
+    DSHOT150: 4
+    DSHOT300: 5
+    DSHOT600: 6

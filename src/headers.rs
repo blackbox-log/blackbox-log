@@ -20,6 +20,7 @@ use crate::{Reader, Unit};
 include_generated!("debug_mode");
 include_generated!("disabled_fields");
 include_generated!("features");
+include_generated!("pwm_protocol");
 
 pub type ParseResult<T> = Result<T, ParseError>;
 
@@ -85,6 +86,7 @@ pub struct Headers<'data> {
     debug_mode: DebugMode,
     disabled_fields: DisabledFields,
     features: FeatureSet,
+    pwm_protocol: PwmProtocol,
 
     /// The battery voltage measured at arm.
     pub(crate) vbat_reference: Option<u16>,
@@ -253,6 +255,10 @@ impl<'data> Headers<'data> {
         self.features
     }
 
+    pub fn pwm_protocol(&self) -> PwmProtocol {
+        self.pwm_protocol
+    }
+
     /// Any unknown headers.
     pub fn unknown(&self) -> &HashMap<&'data str, &'data str> {
         &self.unknown
@@ -385,6 +391,7 @@ struct State<'data> {
     debug_mode: u32,
     disabled_fields: u32,
     features: u32,
+    pwm_protocol: Option<u32>,
 
     vbat_reference: Option<u16>,
     acceleration_1g: Option<u16>,
@@ -413,6 +420,7 @@ impl<'data> State<'data> {
             debug_mode: 0,
             disabled_fields: 0,
             features: 0,
+            pwm_protocol: None,
 
             vbat_reference: None,
             acceleration_1g: None,
@@ -439,6 +447,7 @@ impl<'data> State<'data> {
                 "debug_mode" => self.debug_mode = value.parse().map_err(|_| ())?,
                 "fields_disabled_mask" => self.disabled_fields = value.parse().map_err(|_| ())?,
                 "features" => self.features = as_u32(value.parse().map_err(|_| ())?),
+                "motor_pwm_protocol" => self.pwm_protocol = Some(value.parse().map_err(|_| ())?),
 
                 "vbatref" => {
                     let vbat_reference = value.parse().map_err(|_| ())?;
@@ -516,6 +525,10 @@ impl<'data> State<'data> {
             debug_mode: DebugMode::new(self.debug_mode, firmware),
             disabled_fields: DisabledFields::new(self.disabled_fields, firmware),
             features: FeatureSet::new(self.features, firmware),
+            pwm_protocol: self
+                .pwm_protocol
+                .map(|raw| PwmProtocol::new(raw, firmware))
+                .ok_or(ParseError::MissingHeader)?,
 
             vbat_reference: self.vbat_reference,
             acceleration_1g: self.acceleration_1g,

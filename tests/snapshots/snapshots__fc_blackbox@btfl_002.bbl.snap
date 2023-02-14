@@ -24,6 +24,7 @@ File(
           EscSensor,
           AntiGravity,
         ],
+        pwm_protocol: Dshot600,
         unknown: {
           "I interval": "256",
           "Log start datetime": "0000-01-01T00:00:00.000+00:00",
@@ -87,7 +88,6 @@ File(
           "magPID": "40",
           "mag_hardware": "1",
           "maxthrottle": "2000",
-          "motor_pwm_protocol": "7",
           "motor_pwm_rate": "480",
           "pidAtMinThrottle": "1",
           "pid_process_denom": "1",

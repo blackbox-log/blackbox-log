@@ -25,6 +25,7 @@ File(
           AirMode,
           AntiGravity,
         ],
+        pwm_protocol: Dshot600,
         unknown: {
           "I interval": "128",
           "Log start datetime": "2022-02-05T21:36:29.913+00:00",
@@ -88,7 +89,6 @@ File(
           "magPID": "40",
           "mag_hardware": "0",
           "maxthrottle": "2000",
-          "motor_pwm_protocol": "7",
           "motor_pwm_rate": "480",
           "pidAtMinThrottle": "1",
           "pid_process_denom": "2",
@@ -647,6 +647,7 @@ File(
           AirMode,
           AntiGravity,
         ],
+        pwm_protocol: Dshot600,
         unknown: {
           "I interval": "128",
           "Log start datetime": "2022-02-05T21:37:42.761+00:00",
@@ -710,7 +711,6 @@ File(
           "magPID": "40",
           "mag_hardware": "0",
           "maxthrottle": "2000",
-          "motor_pwm_protocol": "7",
           "motor_pwm_rate": "480",
           "pidAtMinThrottle": "1",
           "pid_process_denom": "2",

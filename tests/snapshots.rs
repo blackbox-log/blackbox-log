@@ -143,6 +143,7 @@ struct HeadersSnapshot<'data> {
     debug_mode: headers::DebugMode,
     disabled_fields: headers::DisabledFields,
     features: headers::FeatureSet,
+    pwm_protocol: headers::PwmProtocol,
     unknown: BTreeMap<&'data str, &'data str>,
 }
 
@@ -159,6 +160,7 @@ impl<'data, 'a> From<&'a Headers<'data>> for HeadersSnapshot<'data> {
             debug_mode: headers.debug_mode(),
             disabled_fields: headers.disabled_fields(),
             features: headers.features(),
+            pwm_protocol: headers.pwm_protocol(),
             unknown: headers.unknown().iter().map(|(&k, &v)| (k, v)).collect(),
         }
     }

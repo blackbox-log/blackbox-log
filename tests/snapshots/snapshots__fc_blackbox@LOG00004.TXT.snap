@@ -29,6 +29,7 @@ File(
           Osd,
           FwAutotrim,
         ],
+        pwm_protocol: Standard,
         unknown: {
           "I interval": "32",
           "Log start datetime": "2021-08-28T12:07:01.109+00:00",
@@ -59,7 +60,6 @@ File(
           "magPID": "60",
           "mag_hardware": "0",
           "maxthrottle": "1850",
-          "motor_pwm_protocol": "0",
           "motor_pwm_rate": "400",
           "pidSumLimit": "500",
           "pidSumLimitYaw": "350",
