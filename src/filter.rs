@@ -29,7 +29,7 @@ impl FieldFilterSet {
         )
     }
 
-    pub(crate) fn apply_gps(&self, frame: &Option<frame::GpsFrameDef>) -> AppliedFilter {
+    pub(crate) fn apply_gps(&self, frame: Option<&frame::GpsFrameDef>) -> AppliedFilter {
         match (&self.gps, frame) {
             (Some(filter), Some(frame)) => filter.apply(frame),
             (None, Some(frame)) => AppliedFilter::new_unfiltered(frame.len()),

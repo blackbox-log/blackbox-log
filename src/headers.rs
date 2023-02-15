@@ -72,13 +72,13 @@ impl std::error::Error for ParseError {}
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub struct Headers<'data> {
-    pub main_frame_def: MainFrameDef<'data>,
-    pub slow_frame_def: SlowFrameDef<'data>,
-    pub gps_frame_def: Option<GpsFrameDef<'data>>,
-    pub(crate) gps_home_frame_def: Option<GpsHomeFrameDef<'data>>,
+    main_frame_def: MainFrameDef<'data>,
+    slow_frame_def: SlowFrameDef<'data>,
+    gps_frame_def: Option<GpsFrameDef<'data>>,
+    gps_home_frame_def: Option<GpsHomeFrameDef<'data>>,
 
     firmware_revision: &'data str,
-    pub(crate) firmware: Firmware,
+    firmware: Firmware,
     firmware_date: Option<&'data str>,
     board_info: Option<&'data str>,
     craft_name: Option<&'data str>,
@@ -211,6 +211,22 @@ impl<'data> Headers<'data> {
 
 /// Getters for various log headers.
 impl<'data> Headers<'data> {
+    pub fn main_frame_def(&self) -> &MainFrameDef<'data> {
+        &self.main_frame_def
+    }
+
+    pub fn slow_frame_def(&self) -> &SlowFrameDef<'data> {
+        &self.slow_frame_def
+    }
+
+    pub fn gps_frame_def(&self) -> Option<&GpsFrameDef<'data>> {
+        self.gps_frame_def.as_ref()
+    }
+
+    pub(crate) fn gps_home_frame_def(&self) -> Option<&GpsHomeFrameDef<'data>> {
+        self.gps_home_frame_def.as_ref()
+    }
+
     /// The full `Firmware revision` header.
     ///
     /// Consider using the [`firmware`][Self::firmware] method instead.

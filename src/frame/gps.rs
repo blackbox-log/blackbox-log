@@ -39,7 +39,7 @@ impl super::Frame for GpsFrame<'_, '_, '_> {
     }
 
     fn get(&self, index: usize) -> Option<Self::Value> {
-        let frame_def = self.headers.gps_frame_def.as_ref().unwrap();
+        let frame_def = self.headers.gps_frame_def().unwrap();
         let index = self.filter.get(index)?;
 
         let def = &frame_def.fields[index];

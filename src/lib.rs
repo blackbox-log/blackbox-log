@@ -33,14 +33,14 @@
 //!         match event {
 //!             ParserEvent::Main(main) => {
 //!                 for (value, FieldDef { name, .. }) in
-//!                     main.iter().zip(headers.main_frame_def.iter())
+//!                     main.iter().zip(headers.main_frame_def().iter())
 //!                 {
 //!                     println!("{name}: {value:?}");
 //!                 }
 //!             }
 //!             ParserEvent::Slow(slow) => {
 //!                 for (value, FieldDef { name, .. }) in
-//!                     slow.iter().zip(headers.slow_frame_def.iter())
+//!                     slow.iter().zip(headers.slow_frame_def().iter())
 //!                 {
 //!                     println!("{name}: {value:?}");
 //!                 }
@@ -63,7 +63,7 @@
 //! for mut reader in file.iter() {
 //!     let headers = Headers::parse(&mut reader).unwrap();
 //!
-//!     if let Some(gps_def) = &headers.gps_frame_def {
+//!     if let Some(gps_def) = &headers.gps_frame_def() {
 //!         let mut parser = DataParser::new(reader, &headers);
 //!
 //!         while let Some(event) = parser.next() {

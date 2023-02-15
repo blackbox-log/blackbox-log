@@ -3,7 +3,7 @@ use std::fs;
 use std::io::Read;
 
 use blackbox_log::data::Stats;
-use blackbox_log::frame::{self, FieldDef, GpsFrameDef};
+use blackbox_log::frame::{self, FieldDef};
 use blackbox_log::prelude::*;
 use blackbox_log::units::si;
 use blackbox_log::{headers, Event, Unit, Value};
@@ -92,16 +92,16 @@ impl<'data> LogSnapshot<'data> {
     fn new(headers: &Headers<'data>, mut data: DataParser<'data, '_>) -> Self {
         let mut events = Vec::new();
 
-        let main = headers.main_frame_def.iter().collect::<Fields>();
+        let main = headers.main_frame_def().iter().collect::<Fields>();
         let mut main = MainSnapshot::new(main);
 
-        let slow = headers.slow_frame_def.iter().collect::<Fields>();
+        let slow = headers.slow_frame_def().iter().collect::<Fields>();
         let mut slow = SlowSnapshot::new(slow);
 
         let gps = headers
-            .gps_frame_def
+            .gps_frame_def()
             .iter()
-            .flat_map(GpsFrameDef::iter)
+            .flat_map(|def| def.iter())
             .collect::<Fields>();
         let mut gps = GpsSnapshot::new(gps);
 

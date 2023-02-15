@@ -37,9 +37,9 @@ impl<'data, 'headers> DataParser<'data, 'headers> {
     ) -> Self {
         Self {
             headers,
-            main_filter: filters.apply_main(&headers.main_frame_def),
-            slow_filter: filters.apply_slow(&headers.slow_frame_def),
-            gps_filter: filters.apply_gps(&headers.gps_frame_def),
+            main_filter: filters.apply_main(headers.main_frame_def()),
+            slow_filter: filters.apply_slow(headers.slow_frame_def()),
+            gps_filter: filters.apply_gps(headers.gps_frame_def()),
             data,
             stats: Stats::default(),
             main_frames: MainFrameHistory::default(),
@@ -49,17 +49,16 @@ impl<'data, 'headers> DataParser<'data, 'headers> {
     }
 
     pub fn main_frame_def<'a>(&'a self) -> FilteredFrameDef<'a, frame::MainFrameDef<'data>> {
-        FilteredFrameDef::new(&self.headers.main_frame_def, &self.main_filter)
+        FilteredFrameDef::new(self.headers.main_frame_def(), &self.main_filter)
     }
 
     pub fn slow_frame_def<'a>(&'a self) -> FilteredFrameDef<'a, frame::SlowFrameDef<'data>> {
-        FilteredFrameDef::new(&self.headers.slow_frame_def, &self.slow_filter)
+        FilteredFrameDef::new(self.headers.slow_frame_def(), &self.slow_filter)
     }
 
     pub fn gps_frame_def<'a>(&'a self) -> Option<FilteredFrameDef<'a, frame::GpsFrameDef<'data>>> {
         self.headers
-            .gps_frame_def
-            .as_ref()
+            .gps_frame_def()
             .map(|def| FilteredFrameDef::new(def, &self.gps_filter))
     }
 
@@ -99,11 +98,11 @@ impl<'data, 'headers> DataParser<'data, 'headers> {
                 }
                 FrameKind::Data(DataFrameKind::Slow) => self
                     .headers
-                    .slow_frame_def
+                    .slow_frame_def()
                     .parse(&mut self.data, self.headers)
                     .map(InternalFrame::Slow),
                 FrameKind::Data(DataFrameKind::Gps) => {
-                    self.headers.gps_frame_def.as_ref().map_or_else(
+                    self.headers.gps_frame_def().as_ref().map_or_else(
                         || {
                             tracing::debug!("found GPS frame without GPS frame definition");
                             Err(InternalError::Retry)
@@ -120,7 +119,7 @@ impl<'data, 'headers> DataParser<'data, 'headers> {
                     )
                 }
                 FrameKind::Data(DataFrameKind::GpsHome) => {
-                    self.headers.gps_home_frame_def.as_ref().map_or_else(
+                    self.headers.gps_home_frame_def().as_ref().map_or_else(
                         || {
                             tracing::debug!(
                                 "found GPS home frame without GPS home frame definition"
