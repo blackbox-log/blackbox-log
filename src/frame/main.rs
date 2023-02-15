@@ -30,7 +30,7 @@ impl super::seal::Sealed for MainFrame<'_, '_, '_> {}
 impl super::Frame for MainFrame<'_, '_, '_> {
     type Value = MainValue;
 
-    #[inline(always)]
+    #[inline]
     fn len(&self) -> usize {
         self.filter.len()
     }
@@ -89,11 +89,13 @@ impl<'data, 'headers, 'parser> MainFrame<'data, 'headers, 'parser> {
 
     /// Returns the `loopIteration` field. This is a 32bit counter incremented
     /// in each flight controller loop.
+    #[inline]
     pub fn iteration(&self) -> u32 {
         self.raw.iteration
     }
 
     /// Returns the parsed time since power on.
+    #[inline]
     pub fn time(&self) -> Time {
         Time::from_raw(self.raw.time, self.headers)
     }
@@ -102,6 +104,7 @@ impl<'data, 'headers, 'parser> MainFrame<'data, 'headers, 'parser> {
     ///
     /// **Note:** This does not currently handle overflow of the transmitted
     /// 32bit counter.
+    #[inline]
     pub fn time_raw(&self) -> u64 {
         self.raw.time
     }
@@ -176,6 +179,7 @@ impl super::seal::Sealed for MainFrameDef<'_> {}
 impl<'data> FrameDef<'data> for MainFrameDef<'data> {
     type Unit = MainUnit;
 
+    #[inline]
     fn len(&self) -> usize {
         self.fields.len()
     }

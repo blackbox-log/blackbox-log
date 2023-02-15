@@ -29,6 +29,7 @@ impl super::seal::Sealed for GpsFrame<'_, '_, '_> {}
 impl super::Frame for GpsFrame<'_, '_, '_> {
     type Value = GpsValue;
 
+    #[inline]
     fn len(&self) -> usize {
         self.filter.len()
     }
@@ -149,6 +150,7 @@ impl super::seal::Sealed for GpsFrameDef<'_> {}
 impl<'data> FrameDef<'data> for GpsFrameDef<'data> {
     type Unit = GpsUnit;
 
+    #[inline]
     fn len(&self) -> usize {
         self.fields.len()
     }

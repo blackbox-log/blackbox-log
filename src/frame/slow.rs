@@ -28,7 +28,7 @@ impl super::seal::Sealed for SlowFrame<'_, '_, '_> {}
 impl super::Frame for SlowFrame<'_, '_, '_> {
     type Value = SlowValue;
 
-    #[inline(always)]
+    #[inline]
     fn len(&self) -> usize {
         self.filter.len()
     }
@@ -125,6 +125,7 @@ impl super::seal::Sealed for SlowFrameDef<'_> {}
 impl<'data> FrameDef<'data> for SlowFrameDef<'data> {
     type Unit = SlowUnit;
 
+    #[inline]
     fn len(&self) -> usize {
         self.fields.len()
     }

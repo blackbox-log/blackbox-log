@@ -397,7 +397,6 @@ impl<const N: usize, T> NumberHistory<N, T> {
 
     /// Bucket so that sequential values go in sequential buckets, since data is
     /// usually clustered
-    #[inline(always)]
     fn update_histogram(&mut self, value: u128) {
         self.histogram[(value % N as u128) as usize] += 1;
     }
@@ -440,7 +439,6 @@ where
     }
 }
 
-#[inline(always)]
 fn serialize<const N: usize, T, S, U>(
     snapshot: &NumberHistory<N, T>,
     min: U,

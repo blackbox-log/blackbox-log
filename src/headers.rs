@@ -211,18 +211,22 @@ impl<'data> Headers<'data> {
 
 /// Getters for various log headers.
 impl<'data> Headers<'data> {
+    #[inline]
     pub fn main_frame_def(&self) -> &MainFrameDef<'data> {
         &self.main_frame_def
     }
 
+    #[inline]
     pub fn slow_frame_def(&self) -> &SlowFrameDef<'data> {
         &self.slow_frame_def
     }
 
+    #[inline]
     pub fn gps_frame_def(&self) -> Option<&GpsFrameDef<'data>> {
         self.gps_frame_def.as_ref()
     }
 
+    #[inline]
     pub(crate) fn gps_home_frame_def(&self) -> Option<&GpsHomeFrameDef<'data>> {
         self.gps_home_frame_def.as_ref()
     }
@@ -230,11 +234,13 @@ impl<'data> Headers<'data> {
     /// The full `Firmware revision` header.
     ///
     /// Consider using the [`firmware`][Self::firmware] method instead.
+    #[inline]
     pub fn firmware_revision(&self) -> &'data str {
         self.firmware_revision
     }
 
     /// The firmware that wrote the log.
+    #[inline]
     pub fn firmware(&self) -> Firmware {
         self.firmware
     }
@@ -250,32 +256,39 @@ impl<'data> Headers<'data> {
     }
 
     /// The `Board info` header.
+    #[inline]
     pub fn board_info(&self) -> Option<&'data str> {
         self.board_info
     }
 
     /// The `Craft name` header.
+    #[inline]
     pub fn craft_name(&self) -> Option<&'data str> {
         self.craft_name
     }
 
+    #[inline]
     pub fn debug_mode(&self) -> DebugMode {
         self.debug_mode
     }
 
+    #[inline]
     pub fn disabled_fields(&self) -> DisabledFields {
         self.disabled_fields
     }
 
+    #[inline]
     pub fn features(&self) -> FeatureSet {
         self.features
     }
 
+    #[inline]
     pub fn pwm_protocol(&self) -> PwmProtocol {
         self.pwm_protocol
     }
 
     /// Any unknown headers.
+    #[inline]
     pub fn unknown(&self) -> &HashMap<&'data str, &'data str> {
         &self.unknown
     }

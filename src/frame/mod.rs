@@ -200,6 +200,7 @@ impl<F: seal::Sealed> seal::Sealed for FilteredFrameDef<'_, F> {}
 impl<'data, F: FrameDef<'data>> FrameDef<'data> for FilteredFrameDef<'_, F> {
     type Unit = F::Unit;
 
+    #[inline]
     fn len(&self) -> usize {
         self.filter.len()
     }

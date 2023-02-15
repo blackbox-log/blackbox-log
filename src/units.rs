@@ -38,6 +38,7 @@ pub(crate) use from_raw::FromRaw;
 impl FromRaw for Time {
     type Raw = u64;
 
+    #[inline]
     fn from_raw(raw: Self::Raw, _headers: &Headers) -> Self {
         Self::new::<prelude::microsecond>(raw as f64)
     }
@@ -72,7 +73,6 @@ impl FromRaw for ElectricCurrent {
 }
 
 /// Correct from BF 3.1.7 (3.1.0?), INAV 2.0.0
-#[inline(always)]
 fn new_amps(raw: i32) -> ElectricCurrent {
     ElectricCurrent::new::<si::electric_current::centiampere>(raw.into())
 }
@@ -86,7 +86,6 @@ impl FromRaw for ElectricPotential {
 }
 
 /// Correct from BF 4.0.0, INAV 3.0.0?
-#[inline(always)]
 fn new_vbat(raw: u32) -> ElectricPotential {
     ElectricPotential::new::<si::electric_potential::centivolt>(raw.into())
 }

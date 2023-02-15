@@ -25,7 +25,7 @@ pub struct DataParser<'data, 'headers> {
 
 impl<'data, 'headers> DataParser<'data, 'headers> {
     /// Constructs a new parser without beginning parsing.
-    #[inline(always)]
+    #[inline]
     pub fn new(data: Reader<'data>, headers: &'headers Headers<'data>) -> Self {
         Self::with_filters(data, headers, &FieldFilterSet::default())
     }
@@ -63,11 +63,13 @@ impl<'data, 'headers> DataParser<'data, 'headers> {
     }
 
     /// Returns the current stats.
+    #[inline]
     pub fn stats(&self) -> &Stats {
         &self.stats
     }
 
     /// Returns `true` if the parser has reached the end of the log.
+    #[inline]
     pub fn is_done(&self) -> bool {
         self.done
     }
@@ -250,7 +252,6 @@ pub(crate) struct MainFrameHistory {
 }
 
 impl MainFrameHistory {
-    #[inline(always)]
     fn index_old(&self) -> usize {
         (self.index_new + 1) % self.history.len()
     }

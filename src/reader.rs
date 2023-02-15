@@ -21,6 +21,7 @@ impl<'data> Reader<'data> {
     ///
     /// This will panic if `data` has a length of `usize::MAX`, since `Reader`
     /// relies on being able to internally store an index `>= data.len()`.
+    #[inline]
     #[must_use]
     pub const fn new(data: &'data [u8]) -> Self {
         if data.len() == usize::MAX {
