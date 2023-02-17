@@ -1,12 +1,12 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[allow(unused_qualifications)]
 pub struct DisabledFields {
-    firmware: crate::headers::Firmware,
+    firmware: crate::headers::InternalFirmware,
     raw: ::bitvec::array::BitArray<u32, ::bitvec::order::Lsb0>,
 }
 #[allow(unused_qualifications, clippy::cast_possible_truncation)]
 impl DisabledFields {
-    pub(crate) fn new(raw: u32, firmware: crate::headers::Firmware) -> Self {
+    pub(crate) fn new(raw: u32, firmware: crate::headers::InternalFirmware) -> Self {
         Self {
             firmware,
             raw: ::bitvec::array::BitArray::new(raw),
@@ -109,46 +109,44 @@ impl ::core::fmt::Display for FieldGroup {
     }
 }
 #[allow(
-    unused_imports,
     unused_qualifications,
     clippy::match_same_arms,
-    clippy::unseparated_literal_suffix
+    clippy::unseparated_literal_suffix,
+    clippy::wildcard_enum_match_arm
 )]
 impl FieldGroup {
-    const fn from_bit(bit: u32, firmware: crate::headers::Firmware) -> Option<Self> {
-        use crate::headers::Firmware::{Betaflight, Inav};
-        match (bit, firmware) {
-            (0u32, Betaflight(_)) => Some(Self::Pid),
-            (1u32, Betaflight(_)) => Some(Self::RcCommands),
-            (2u32, Betaflight(_)) => Some(Self::Setpoint),
-            (3u32, Betaflight(_)) => Some(Self::Battery),
-            (4u32, Betaflight(_)) => Some(Self::Mag),
-            (5u32, Betaflight(_)) => Some(Self::Altitude),
-            (6u32, Betaflight(_)) => Some(Self::Rssi),
-            (7u32, Betaflight(_)) => Some(Self::Gyro),
-            (8u32, Betaflight(_)) => Some(Self::Acc),
-            (9u32, Betaflight(_)) => Some(Self::DebugLog),
-            (10u32, Betaflight(_)) => Some(Self::Motor),
-            (11u32, Betaflight(_)) => Some(Self::Gps),
+    const fn from_bit(bit: u32, fw: crate::headers::InternalFirmware) -> Option<Self> {
+        match bit {
+            0u32 if fw.is_betaflight() => Some(Self::Pid),
+            1u32 if fw.is_betaflight() => Some(Self::RcCommands),
+            2u32 if fw.is_betaflight() => Some(Self::Setpoint),
+            3u32 if fw.is_betaflight() => Some(Self::Battery),
+            4u32 if fw.is_betaflight() => Some(Self::Mag),
+            5u32 if fw.is_betaflight() => Some(Self::Altitude),
+            6u32 if fw.is_betaflight() => Some(Self::Rssi),
+            7u32 if fw.is_betaflight() => Some(Self::Gyro),
+            8u32 if fw.is_betaflight() => Some(Self::Acc),
+            9u32 if fw.is_betaflight() => Some(Self::DebugLog),
+            10u32 if fw.is_betaflight() => Some(Self::Motor),
+            11u32 if fw.is_betaflight() => Some(Self::Gps),
             _ => None,
         }
     }
 
-    const fn to_bit(self, firmware: crate::headers::Firmware) -> Option<u32> {
-        use crate::headers::Firmware::{Betaflight, Inav};
-        match (self, firmware) {
-            (Self::Acc, Betaflight(_)) => Some(8u32),
-            (Self::Altitude, Betaflight(_)) => Some(5u32),
-            (Self::Battery, Betaflight(_)) => Some(3u32),
-            (Self::DebugLog, Betaflight(_)) => Some(9u32),
-            (Self::Gps, Betaflight(_)) => Some(11u32),
-            (Self::Gyro, Betaflight(_)) => Some(7u32),
-            (Self::Mag, Betaflight(_)) => Some(4u32),
-            (Self::Motor, Betaflight(_)) => Some(10u32),
-            (Self::Pid, Betaflight(_)) => Some(0u32),
-            (Self::RcCommands, Betaflight(_)) => Some(1u32),
-            (Self::Rssi, Betaflight(_)) => Some(6u32),
-            (Self::Setpoint, Betaflight(_)) => Some(2u32),
+    const fn to_bit(self, fw: crate::headers::InternalFirmware) -> Option<u32> {
+        match self {
+            Self::Acc if fw.is_betaflight() => Some(8u32),
+            Self::Altitude if fw.is_betaflight() => Some(5u32),
+            Self::Battery if fw.is_betaflight() => Some(3u32),
+            Self::DebugLog if fw.is_betaflight() => Some(9u32),
+            Self::Gps if fw.is_betaflight() => Some(11u32),
+            Self::Gyro if fw.is_betaflight() => Some(7u32),
+            Self::Mag if fw.is_betaflight() => Some(4u32),
+            Self::Motor if fw.is_betaflight() => Some(10u32),
+            Self::Pid if fw.is_betaflight() => Some(0u32),
+            Self::RcCommands if fw.is_betaflight() => Some(1u32),
+            Self::Rssi if fw.is_betaflight() => Some(6u32),
+            Self::Setpoint if fw.is_betaflight() => Some(2u32),
             _ => None,
         }
     }

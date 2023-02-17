@@ -78,7 +78,7 @@ pub struct Headers<'data> {
     gps_home_frame_def: Option<GpsHomeFrameDef<'data>>,
 
     firmware_revision: &'data str,
-    firmware: Firmware,
+    pub(crate) firmware: InternalFirmware,
     firmware_date: Option<&'data str>,
     board_info: Option<&'data str>,
     craft_name: Option<&'data str>,
@@ -242,7 +242,7 @@ impl<'data> Headers<'data> {
     /// The firmware that wrote the log.
     #[inline]
     pub fn firmware(&self) -> Firmware {
-        self.firmware
+        self.firmware.into()
     }
 
     /// The `Firmware date` header
@@ -320,30 +320,6 @@ impl Firmware {
         let (Self::Betaflight(version) | Self::Inav(version)) = self;
         *version
     }
-
-    fn parse(firmware_revision: &str) -> Result<Self, ParseError> {
-        let mut iter = firmware_revision.split(' ');
-
-        let invalid_fw = || Err(ParseError::InvalidFirmware(firmware_revision.to_owned()));
-
-        let kind = iter.next().map(str::to_ascii_lowercase);
-        let Some(version) = iter.next().and_then(FirmwareVersion::from_str) else {
-            return invalid_fw();
-        };
-
-        match kind.as_deref() {
-            Some("betaflight") => Ok(Firmware::Betaflight(version)),
-            Some("inav") => Ok(Firmware::Inav(version)),
-            Some("emuflight") => {
-                tracing::error!("EmuFlight is not supported");
-                invalid_fw()
-            }
-            _ => {
-                tracing::error!("Could not parse firmware revision");
-                invalid_fw()
-            }
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -354,18 +330,12 @@ pub struct FirmwareVersion {
 }
 
 impl FirmwareVersion {
-    fn from_str(s: &str) -> Option<Self> {
-        let mut components = s.splitn(3, '.').map(|s| s.parse().ok());
-
-        let major = components.next()??;
-        let minor = components.next()??;
-        let patch = components.next()??;
-
-        Some(Self {
+    pub const fn new(major: u8, minor: u8, patch: u8) -> Self {
+        Self {
             major,
             minor,
             patch,
-        })
+        }
     }
 }
 
@@ -384,6 +354,91 @@ impl serde::Serialize for FirmwareVersion {
         #[cfg(not(feature = "std"))]
         use alloc::string::ToString;
         serializer.serialize_str(&self.to_string())
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub(crate) enum InternalFirmware {
+    Betaflight4_2_0,
+    Betaflight4_2_6,
+    Betaflight4_2_8,
+    Betaflight4_2_9,
+    Betaflight4_2_11,
+    Inav3_0_1,
+
+    Betaflight4_3_0,
+    Betaflight4_3_1,
+    Inav5_0_0,
+}
+
+impl InternalFirmware {
+    pub(crate) const fn is_betaflight(self) -> bool {
+        match self {
+            Self::Betaflight4_2_0
+            | Self::Betaflight4_2_6
+            | Self::Betaflight4_2_8
+            | Self::Betaflight4_2_9
+            | Self::Betaflight4_2_11
+            | Self::Betaflight4_3_0
+            | Self::Betaflight4_3_1 => true,
+            Self::Inav3_0_1 | Self::Inav5_0_0 => false,
+        }
+    }
+
+    pub(crate) const fn is_inav(self) -> bool {
+        // Will need to be changed if any new firmwares are added
+        !self.is_betaflight()
+    }
+
+    fn parse(revision: &str) -> ParseResult<Self> {
+        let mut iter = revision.split(' ');
+
+        let invalid_fw = || ParseError::InvalidFirmware(revision.to_owned());
+
+        let kind = iter.next().map(str::to_ascii_lowercase);
+        let version = iter.next().ok_or_else(invalid_fw)?;
+
+        match kind.as_deref() {
+            Some("betaflight") => match version {
+                "4.2.0" => Ok(Self::Betaflight4_2_0),
+                "4.2.6" => Ok(Self::Betaflight4_2_6),
+                "4.2.8" => Ok(Self::Betaflight4_2_8),
+                "4.2.9" => Ok(Self::Betaflight4_2_9),
+                "4.2.11" => Ok(Self::Betaflight4_2_11),
+                "4.3.0" => Ok(Self::Betaflight4_3_0),
+                "4.3.1" => Ok(Self::Betaflight4_3_1),
+                _ => Err(invalid_fw()),
+            },
+            Some("inav") => match version {
+                "3.0.1" => Ok(Self::Inav3_0_1),
+                "5.0.0" => Ok(Self::Inav5_0_0),
+                _ => Err(invalid_fw()),
+            },
+            Some("emuflight") => {
+                tracing::error!("EmuFlight is not supported");
+                Err(invalid_fw())
+            }
+            _ => {
+                tracing::error!("Could not parse firmware revision");
+                Err(invalid_fw())
+            }
+        }
+    }
+}
+
+impl From<InternalFirmware> for Firmware {
+    fn from(fw: InternalFirmware) -> Self {
+        match fw {
+            InternalFirmware::Betaflight4_2_0 => Self::Betaflight(FirmwareVersion::new(4, 2, 0)),
+            InternalFirmware::Betaflight4_2_6 => Self::Betaflight(FirmwareVersion::new(4, 2, 6)),
+            InternalFirmware::Betaflight4_2_8 => Self::Betaflight(FirmwareVersion::new(4, 2, 8)),
+            InternalFirmware::Betaflight4_2_9 => Self::Betaflight(FirmwareVersion::new(4, 2, 9)),
+            InternalFirmware::Betaflight4_2_11 => Self::Betaflight(FirmwareVersion::new(4, 2, 11)),
+            InternalFirmware::Betaflight4_3_0 => Self::Betaflight(FirmwareVersion::new(4, 3, 0)),
+            InternalFirmware::Betaflight4_3_1 => Self::Betaflight(FirmwareVersion::new(4, 3, 1)),
+            InternalFirmware::Inav3_0_1 => Self::Inav(FirmwareVersion::new(3, 0, 1)),
+            InternalFirmware::Inav5_0_0 => Self::Inav(FirmwareVersion::new(5, 0, 0)),
+        }
     }
 }
 
@@ -536,7 +591,7 @@ impl<'data> State<'data> {
         let not_empty = |s: &&str| !s.is_empty();
 
         let firmware_revision = self.firmware_revision.ok_or(ParseError::MissingHeader)?;
-        let firmware = Firmware::parse(firmware_revision)?;
+        let firmware = InternalFirmware::parse(firmware_revision)?;
 
         // TODO: log where each error comes from
         let headers = Headers {

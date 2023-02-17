@@ -26,13 +26,13 @@ impl FlagSet {
             #attrs
             #[allow(unused_qualifications)]
             pub struct #name {
-                firmware: crate::headers::Firmware,
+                firmware: crate::headers::InternalFirmware,
                 raw: ::bitvec::array::BitArray<u32, ::bitvec::order::Lsb0>
             }
 
             #[allow(unused_qualifications, clippy::cast_possible_truncation)]
             impl #name {
-                pub(crate) fn new(raw: u32, firmware: crate::headers::Firmware) -> Self {
+                pub(crate) fn new(raw: u32, firmware: crate::headers::InternalFirmware) -> Self {
                     Self {
                         firmware,
                         raw: ::bitvec::array::BitArray::new(raw)
@@ -119,18 +119,18 @@ impl Flags {
 
             if flag.betaflight == flag.inav && flag.betaflight.is_some() {
                 let bit = flag.betaflight.unwrap();
-                let arm = quote!((#bit, _) => Some(Self::#ident));
+                let arm = quote!(#bit => Some(Self::#ident));
                 from_bit.push((bit, Firmware::Both, arm));
                 continue;
             }
 
             if let Some(bit) = flag.betaflight {
-                let arm = quote!((#bit, Betaflight(_)) => Some(Self::#ident));
+                let arm = quote!(#bit if fw.is_betaflight() => Some(Self::#ident));
                 from_bit.push((bit, Firmware::Betaflight, arm));
             }
 
             if let Some(bit) = flag.inav {
-                let arm = quote!((#bit, Inav(_)) => Some(Self::#ident));
+                let arm = quote!(#bit if fw.is_inav() => Some(Self::#ident));
                 from_bit.push((bit, Firmware::Inav, arm));
             }
         }
@@ -143,16 +143,16 @@ impl Flags {
 
             if flag.betaflight == flag.inav && flag.betaflight.is_some() {
                 let bit = flag.betaflight.unwrap();
-                to_bit.push(quote!((Self::#ident, _) => Some(#bit)));
+                to_bit.push(quote!(Self::#ident => Some(#bit)));
                 continue;
             }
 
             if let Some(bit) = flag.betaflight {
-                to_bit.push(quote!((Self::#ident, Betaflight(_)) => Some(#bit)));
+                to_bit.push(quote!(Self::#ident if fw.is_betaflight() => Some(#bit)));
             }
 
             if let Some(bit) = flag.inav {
-                to_bit.push(quote!((Self::#ident, Inav(_)) => Some(#bit)));
+                to_bit.push(quote!(Self::#ident if fw.is_inav() => Some(#bit)));
             }
         }
 
@@ -162,19 +162,17 @@ impl Flags {
             #impl_flag
             #impl_flag_display
 
-            #[allow(unused_imports, unused_qualifications, clippy::match_same_arms, clippy::unseparated_literal_suffix)]
+            #[allow(unused_qualifications, clippy::match_same_arms, clippy::unseparated_literal_suffix, clippy::wildcard_enum_match_arm)]
             impl #name {
-                const fn from_bit(bit: u32, firmware: crate::headers::Firmware) -> Option<Self> {
-                    use crate::headers::Firmware::{Betaflight, Inav};
-                    match (bit, firmware) {
+                const fn from_bit(bit: u32, fw: crate::headers::InternalFirmware) -> Option<Self> {
+                    match bit {
                         #(#from_bit,)*
                         _ => None
                     }
                 }
 
-                const fn to_bit(self, firmware: crate::headers::Firmware) -> Option<u32> {
-                    use crate::headers::Firmware::{Betaflight, Inav};
-                    match (self, firmware) {
+                const fn to_bit(self, fw: crate::headers::InternalFirmware) -> Option<u32> {
+                    match self {
                         #(#to_bit,)*
                         _ => None
                     }

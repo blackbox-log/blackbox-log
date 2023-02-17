@@ -54,18 +54,18 @@ impl Enum {
 
             if variant.betaflight == variant.inav && variant.betaflight.is_some() {
                 let index = variant.betaflight.unwrap();
-                let arm = quote!((#index, _) => #value);
+                let arm = quote!(#index => #value);
                 new.push((index, Firmware::Both, arm));
                 continue;
             }
 
             if let Some(index) = variant.betaflight {
-                let arm = quote!((#index, Betaflight(_)) => #value);
+                let arm = quote!(#index if fw.is_betaflight() => #value);
                 new.push((index, Firmware::Betaflight, arm));
             }
 
             if let Some(index) = variant.inav {
-                let arm = quote!((#index, Inav(_)) => #value);
+                let arm = quote!(#index if fw.is_inav() => #value);
                 new.push((index, Firmware::Inav, arm));
             }
         }
@@ -78,11 +78,10 @@ impl Enum {
             #impl_flag
             #impl_flag_display
 
-            #[allow(unused_imports, unused_qualifications, clippy::match_same_arms, clippy::unseparated_literal_suffix)]
+            #[allow(unused_qualifications, clippy::match_same_arms, clippy::unseparated_literal_suffix)]
             impl #name {
-                pub(crate) fn new(raw: u32, firmware: crate::headers::Firmware) -> #return_type {
-                    use crate::headers::Firmware::{Betaflight, Inav};
-                    match (raw, firmware) {
+                pub(crate) fn new(raw: u32, fw: crate::headers::InternalFirmware) -> #return_type {
+                    match raw {
                         #(#new,)*
                         _ => {
                             #[allow(clippy::redundant_closure_call)]

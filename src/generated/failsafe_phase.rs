@@ -46,28 +46,26 @@ impl ::core::fmt::Display for FailsafePhase {
     }
 }
 #[allow(
-    unused_imports,
     unused_qualifications,
     clippy::match_same_arms,
     clippy::unseparated_literal_suffix
 )]
 impl FailsafePhase {
-    pub(crate) fn new(raw: u32, firmware: crate::headers::Firmware) -> Self {
-        use crate::headers::Firmware::{Betaflight, Inav};
-        match (raw, firmware) {
-            (0u32, _) => Self::Idle,
-            (1u32, _) => Self::RxLossDetected,
-            (2u32, Betaflight(_)) => Self::Landing,
-            (2u32, Inav(_)) => Self::RxLossIdle,
-            (3u32, Betaflight(_)) => Self::Landed,
-            (3u32, Inav(_)) => Self::ReturnToHome,
-            (4u32, Betaflight(_)) => Self::RxLossMonitoring,
-            (4u32, Inav(_)) => Self::Landing,
-            (5u32, Betaflight(_)) => Self::RxLossRecovered,
-            (5u32, Inav(_)) => Self::Landed,
-            (6u32, Betaflight(_)) => Self::GpsRescue,
-            (6u32, Inav(_)) => Self::RxLossMonitoring,
-            (7u32, Inav(_)) => Self::RxLossRecovered,
+    pub(crate) fn new(raw: u32, fw: crate::headers::InternalFirmware) -> Self {
+        match raw {
+            0u32 => Self::Idle,
+            1u32 => Self::RxLossDetected,
+            2u32 if fw.is_betaflight() => Self::Landing,
+            2u32 if fw.is_inav() => Self::RxLossIdle,
+            3u32 if fw.is_betaflight() => Self::Landed,
+            3u32 if fw.is_inav() => Self::ReturnToHome,
+            4u32 if fw.is_betaflight() => Self::RxLossMonitoring,
+            4u32 if fw.is_inav() => Self::Landing,
+            5u32 if fw.is_betaflight() => Self::RxLossRecovered,
+            5u32 if fw.is_inav() => Self::Landed,
+            6u32 if fw.is_betaflight() => Self::GpsRescue,
+            6u32 if fw.is_inav() => Self::RxLossMonitoring,
+            7u32 if fw.is_inav() => Self::RxLossRecovered,
             _ => {
                 #[allow(clippy::redundant_closure_call)]
                 (|raw| tracing::debug!("invalid failsafe phase ({raw})"))(raw);

@@ -48,30 +48,28 @@ impl ::core::fmt::Display for PwmProtocol {
     }
 }
 #[allow(
-    unused_imports,
     unused_qualifications,
     clippy::match_same_arms,
     clippy::unseparated_literal_suffix
 )]
 impl PwmProtocol {
-    pub(crate) fn new(raw: u32, firmware: crate::headers::Firmware) -> Self {
-        use crate::headers::Firmware::{Betaflight, Inav};
-        match (raw, firmware) {
-            (0u32, _) => Self::Standard,
-            (1u32, _) => Self::Oneshot125,
-            (2u32, Betaflight(_)) => Self::Oneshot42,
-            (2u32, Inav(_)) => Self::Multishot,
-            (3u32, Betaflight(_)) => Self::Multishot,
-            (3u32, Inav(_)) => Self::Brushed,
-            (4u32, Betaflight(_)) => Self::Brushed,
-            (4u32, Inav(_)) => Self::Dshot150,
-            (5u32, Betaflight(_)) => Self::Dshot150,
-            (5u32, Inav(_)) => Self::Dshot300,
-            (6u32, Betaflight(_)) => Self::Dshot300,
-            (6u32, Inav(_)) => Self::Dshot600,
-            (7u32, Betaflight(_)) => Self::Dshot600,
-            (8u32, Betaflight(_)) => Self::Proshot1000,
-            (9u32, Betaflight(_)) => Self::Disabled,
+    pub(crate) fn new(raw: u32, fw: crate::headers::InternalFirmware) -> Self {
+        match raw {
+            0u32 => Self::Standard,
+            1u32 => Self::Oneshot125,
+            2u32 if fw.is_betaflight() => Self::Oneshot42,
+            2u32 if fw.is_inav() => Self::Multishot,
+            3u32 if fw.is_betaflight() => Self::Multishot,
+            3u32 if fw.is_inav() => Self::Brushed,
+            4u32 if fw.is_betaflight() => Self::Brushed,
+            4u32 if fw.is_inav() => Self::Dshot150,
+            5u32 if fw.is_betaflight() => Self::Dshot150,
+            5u32 if fw.is_inav() => Self::Dshot300,
+            6u32 if fw.is_betaflight() => Self::Dshot300,
+            6u32 if fw.is_inav() => Self::Dshot600,
+            7u32 if fw.is_betaflight() => Self::Dshot600,
+            8u32 if fw.is_betaflight() => Self::Proshot1000,
+            9u32 if fw.is_betaflight() => Self::Disabled,
             _ => {
                 #[allow(clippy::redundant_closure_call)]
                 (|raw| tracing::debug!("invalid pwm protocol ({raw})"))(raw);
