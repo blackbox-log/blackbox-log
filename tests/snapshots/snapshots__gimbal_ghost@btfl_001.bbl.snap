@@ -563,7 +563,12 @@ File(
       ),
       gps: GpsFrame(
         count: 354,
-        time: (),
+        time: FieldSnapshot(
+          min: 0,
+          max: 285916010,
+          unique: 354,
+          histogram: (21, 19, 25, 23, 21, 31, 29, 10, 29, 18, 20, 23, 31, 23, 19, 12),
+        ),
         fields: Fields([
           Field(
             name: "GPS_numSat",
@@ -1185,7 +1190,12 @@ File(
       ),
       gps: GpsFrame(
         count: 457,
-        time: (),
+        time: FieldSnapshot(
+          min: 0,
+          max: 381772759,
+          unique: 457,
+          histogram: (29, 11, 34, 31, 25, 29, 35, 32, 22, 22, 33, 45, 26, 30, 28, 25),
+        ),
         fields: Fields([
           Field(
             name: "GPS_numSat",

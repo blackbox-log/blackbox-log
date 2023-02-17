@@ -1133,7 +1133,12 @@ File(
       ),
       gps: GpsFrame(
         count: 4041,
-        time: (),
+        time: FieldSnapshot(
+          min: 0,
+          max: 504262470,
+          unique: 4041,
+          histogram: (240, 239, 264, 251, 269, 270, 265, 250, 224, 287, 266, 235, 240, 253, 240, 248),
+        ),
         fields: Fields([
           Field(
             name: "GPS_fixType",

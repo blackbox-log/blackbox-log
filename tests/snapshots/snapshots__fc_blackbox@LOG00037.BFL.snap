@@ -597,7 +597,12 @@ File(
       ),
       gps: GpsFrame(
         count: 86,
-        time: (),
+        time: FieldSnapshot(
+          min: 0,
+          max: 469166774,
+          unique: 86,
+          histogram: (8, 4, 5, 3, 5, 6, 8, 4, 6, 4, 5, 8, 4, 5, 5, 6),
+        ),
         fields: Fields([
           Field(
             name: "GPS_numSat",

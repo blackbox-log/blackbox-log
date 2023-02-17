@@ -223,7 +223,7 @@ impl SlowSnapshot {
 #[serde(rename = "GpsFrame")]
 struct GpsSnapshot {
     count: u32,
-    time: (),
+    time: NumberHistory<16, i128>,
     fields: Fields,
 }
 
@@ -231,13 +231,14 @@ impl GpsSnapshot {
     fn new(fields: Fields) -> Self {
         Self {
             count: 0,
-            time: (),
+            time: NumberHistory::new(),
             fields,
         }
     }
 
     fn update(&mut self, frame: frame::GpsFrame) {
         self.count += 1;
+        self.time.update(frame.time_raw().into());
         self.fields.update(frame);
     }
 
