@@ -115,7 +115,7 @@ jobs:
       - name: Install llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: Generate coverage
-        run: cargo llvm-cov --all-features --lcov --output-path=coverage.lcov nextest --profile=ci --run-ignored=all
+        run: cargo llvm-cov --all-features --lcov --output-path=coverage.lcov --ignore-filename-regex generated nextest --profile=ci --run-ignored=all
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
