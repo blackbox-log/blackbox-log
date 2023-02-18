@@ -1,8 +1,8 @@
 enum:
   name: DebugMode
   doc: ''
-  unknown: true
-  unknownCallback: '|raw| tracing::debug!("invalid debug mode ({raw})")'
+  unknown: false
+  unknownCallback: '|raw| tracing::error!("invalid debug mode: {raw}")'
   betaflight:
     NONE: 0
     CYCLETIME: 1

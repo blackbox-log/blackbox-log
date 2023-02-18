@@ -2,6 +2,7 @@
 
 use alloc::borrow::ToOwned;
 use alloc::string::String;
+use core::str::FromStr;
 use core::{fmt, str};
 
 use hashbrown::HashMap;
@@ -460,6 +461,32 @@ impl MotorOutputRange {
 }
 
 #[derive(Debug)]
+struct RawHeaderValue<'data, T> {
+    header: &'data str,
+    raw: &'data str,
+    value: T,
+}
+
+impl<T> RawHeaderValue<'_, T> {
+    fn invalid_header_error(&self) -> ParseError {
+        ParseError::InvalidHeader {
+            header: self.header.to_owned(),
+            value: self.raw.to_owned(),
+        }
+    }
+}
+
+impl<'data, T: FromStr> RawHeaderValue<'data, T> {
+    fn parse(header: &'data str, raw: &'data str) -> Result<Self, <T as FromStr>::Err> {
+        Ok(Self {
+            header,
+            raw,
+            value: raw.parse()?,
+        })
+    }
+}
+
+#[derive(Debug)]
 struct State<'data> {
     main_frames: MainFrameDefBuilder<'data>,
     slow_frames: SlowFrameDefBuilder<'data>,
@@ -472,10 +499,10 @@ struct State<'data> {
     board_info: Option<&'data str>,
     craft_name: Option<&'data str>,
 
-    debug_mode: u32,
+    debug_mode: Option<RawHeaderValue<'data, u32>>,
     disabled_fields: u32,
     features: u32,
-    pwm_protocol: Option<u32>,
+    pwm_protocol: Option<RawHeaderValue<'data, u32>>,
 
     vbat_reference: Option<u16>,
     acceleration_1g: Option<u16>,
@@ -501,7 +528,7 @@ impl<'data> State<'data> {
             board_info: None,
             craft_name: None,
 
-            debug_mode: 0,
+            debug_mode: None,
             disabled_fields: 0,
             features: 0,
             pwm_protocol: None,
@@ -528,10 +555,16 @@ impl<'data> State<'data> {
                 "Board information" => self.board_info = Some(value),
                 "Craft name" => self.craft_name = Some(value),
 
-                "debug_mode" => self.debug_mode = value.parse().map_err(|_| ())?,
+                "debug_mode" => {
+                    let debug_mode = RawHeaderValue::parse(header, value).map_err(|_| ())?;
+                    self.debug_mode = Some(debug_mode);
+                }
                 "fields_disabled_mask" => self.disabled_fields = value.parse().map_err(|_| ())?,
                 "features" => self.features = as_u32(value.parse().map_err(|_| ())?),
-                "motor_pwm_protocol" => self.pwm_protocol = Some(value.parse().map_err(|_| ())?),
+                "motor_pwm_protocol" => {
+                    let protocol = RawHeaderValue::parse(header, value).map_err(|_| ())?;
+                    self.pwm_protocol = Some(protocol);
+                }
 
                 "vbatref" => {
                     let vbat_reference = value.parse().map_err(|_| ())?;
@@ -606,13 +639,17 @@ impl<'data> State<'data> {
             board_info: self.board_info.map(str::trim).filter(not_empty),
             craft_name: self.craft_name.map(str::trim).filter(not_empty),
 
-            debug_mode: DebugMode::new(self.debug_mode, firmware),
+            debug_mode: self.debug_mode.map_or(Ok(DebugMode::None), |raw| {
+                DebugMode::new(raw.value, firmware).ok_or_else(|| raw.invalid_header_error())
+            })?,
             disabled_fields: DisabledFields::new(self.disabled_fields, firmware),
             features: FeatureSet::new(self.features, firmware),
             pwm_protocol: self
                 .pwm_protocol
-                .map(|raw| PwmProtocol::new(raw, firmware))
-                .ok_or(ParseError::MissingHeader)?,
+                .ok_or(ParseError::MissingHeader)
+                .and_then(|raw| {
+                    PwmProtocol::new(raw.value, firmware).ok_or_else(|| raw.invalid_header_error())
+                })?,
 
             vbat_reference: self.vbat_reference,
             acceleration_1g: self.acceleration_1g,

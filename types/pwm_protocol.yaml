@@ -1,8 +1,8 @@
 enum:
   name: PwmProtocol
   doc: ''
-  unknown: true
-  unknownCallback: '|raw| tracing::debug!("invalid pwm protocol ({raw})")'
+  unknown: false
+  unknownCallback: '|raw| tracing::error!("invalid pwm protocol: {raw}")'
   betaflight:
     STANDARD: 0
     ONESHOT125: 1
