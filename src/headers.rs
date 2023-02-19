@@ -361,12 +361,17 @@ impl serde::Serialize for FirmwareVersion {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub(crate) enum InternalFirmware {
     Betaflight4_2_0,
+    Betaflight4_2_1,
+    Betaflight4_2_2,
+    Betaflight4_2_3,
+    Betaflight4_2_4,
+    Betaflight4_2_5,
     Betaflight4_2_6,
+    Betaflight4_2_7,
     Betaflight4_2_8,
     Betaflight4_2_9,
+    Betaflight4_2_10,
     Betaflight4_2_11,
-    Inav3_0_1,
-
     Betaflight4_3_0,
     Betaflight4_3_1,
     Inav5_0_0,
@@ -376,13 +381,20 @@ impl InternalFirmware {
     pub(crate) const fn is_betaflight(self) -> bool {
         match self {
             Self::Betaflight4_2_0
+            | Self::Betaflight4_2_1
+            | Self::Betaflight4_2_2
+            | Self::Betaflight4_2_3
+            | Self::Betaflight4_2_4
+            | Self::Betaflight4_2_5
             | Self::Betaflight4_2_6
+            | Self::Betaflight4_2_7
             | Self::Betaflight4_2_8
             | Self::Betaflight4_2_9
+            | Self::Betaflight4_2_10
             | Self::Betaflight4_2_11
             | Self::Betaflight4_3_0
             | Self::Betaflight4_3_1 => true,
-            Self::Inav3_0_1 | Self::Inav5_0_0 => false,
+            Self::Inav5_0_0 => false,
         }
     }
 
@@ -402,16 +414,22 @@ impl InternalFirmware {
         match kind.as_deref() {
             Some("betaflight") => match version {
                 "4.2.0" => Ok(Self::Betaflight4_2_0),
+                "4.2.1" => Ok(Self::Betaflight4_2_1),
+                "4.2.2" => Ok(Self::Betaflight4_2_2),
+                "4.2.3" => Ok(Self::Betaflight4_2_3),
+                "4.2.4" => Ok(Self::Betaflight4_2_4),
+                "4.2.5" => Ok(Self::Betaflight4_2_5),
                 "4.2.6" => Ok(Self::Betaflight4_2_6),
+                "4.2.7" => Ok(Self::Betaflight4_2_7),
                 "4.2.8" => Ok(Self::Betaflight4_2_8),
                 "4.2.9" => Ok(Self::Betaflight4_2_9),
+                "4.2.10" => Ok(Self::Betaflight4_2_10),
                 "4.2.11" => Ok(Self::Betaflight4_2_11),
                 "4.3.0" => Ok(Self::Betaflight4_3_0),
                 "4.3.1" => Ok(Self::Betaflight4_3_1),
                 _ => Err(invalid_fw()),
             },
             Some("inav") => match version {
-                "3.0.1" => Ok(Self::Inav3_0_1),
                 "5.0.0" => Ok(Self::Inav5_0_0),
                 _ => Err(invalid_fw()),
             },
@@ -429,16 +447,23 @@ impl InternalFirmware {
 
 impl From<InternalFirmware> for Firmware {
     fn from(fw: InternalFirmware) -> Self {
+        let v = FirmwareVersion::new;
         match fw {
-            InternalFirmware::Betaflight4_2_0 => Self::Betaflight(FirmwareVersion::new(4, 2, 0)),
-            InternalFirmware::Betaflight4_2_6 => Self::Betaflight(FirmwareVersion::new(4, 2, 6)),
-            InternalFirmware::Betaflight4_2_8 => Self::Betaflight(FirmwareVersion::new(4, 2, 8)),
-            InternalFirmware::Betaflight4_2_9 => Self::Betaflight(FirmwareVersion::new(4, 2, 9)),
-            InternalFirmware::Betaflight4_2_11 => Self::Betaflight(FirmwareVersion::new(4, 2, 11)),
-            InternalFirmware::Betaflight4_3_0 => Self::Betaflight(FirmwareVersion::new(4, 3, 0)),
-            InternalFirmware::Betaflight4_3_1 => Self::Betaflight(FirmwareVersion::new(4, 3, 1)),
-            InternalFirmware::Inav3_0_1 => Self::Inav(FirmwareVersion::new(3, 0, 1)),
-            InternalFirmware::Inav5_0_0 => Self::Inav(FirmwareVersion::new(5, 0, 0)),
+            InternalFirmware::Betaflight4_2_0 => Self::Betaflight(v(4, 2, 0)),
+            InternalFirmware::Betaflight4_2_1 => Self::Betaflight(v(4, 2, 1)),
+            InternalFirmware::Betaflight4_2_2 => Self::Betaflight(v(4, 2, 2)),
+            InternalFirmware::Betaflight4_2_3 => Self::Betaflight(v(4, 2, 3)),
+            InternalFirmware::Betaflight4_2_4 => Self::Betaflight(v(4, 2, 4)),
+            InternalFirmware::Betaflight4_2_5 => Self::Betaflight(v(4, 2, 5)),
+            InternalFirmware::Betaflight4_2_6 => Self::Betaflight(v(4, 2, 6)),
+            InternalFirmware::Betaflight4_2_7 => Self::Betaflight(v(4, 2, 7)),
+            InternalFirmware::Betaflight4_2_8 => Self::Betaflight(v(4, 2, 8)),
+            InternalFirmware::Betaflight4_2_9 => Self::Betaflight(v(4, 2, 9)),
+            InternalFirmware::Betaflight4_2_10 => Self::Betaflight(v(4, 2, 10)),
+            InternalFirmware::Betaflight4_2_11 => Self::Betaflight(v(4, 2, 11)),
+            InternalFirmware::Betaflight4_3_0 => Self::Betaflight(v(4, 3, 0)),
+            InternalFirmware::Betaflight4_3_1 => Self::Betaflight(v(4, 3, 1)),
+            InternalFirmware::Inav5_0_0 => Self::Inav(v(5, 0, 0)),
         }
     }
 }
