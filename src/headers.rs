@@ -3,7 +3,7 @@
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use core::str::FromStr;
-use core::{fmt, str};
+use core::{cmp, fmt, str};
 
 use hashbrown::HashMap;
 use time::PrimitiveDateTime;
@@ -331,6 +331,16 @@ impl Firmware {
     }
 }
 
+impl PartialOrd for Firmware {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        match (self, other) {
+            (Firmware::Betaflight(fw_self), Firmware::Betaflight(fw_other))
+            | (Firmware::Inav(fw_self), Firmware::Inav(fw_other)) => fw_self.partial_cmp(fw_other),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FirmwareVersion {
     pub major: u8,
@@ -497,6 +507,16 @@ impl From<InternalFirmware> for Firmware {
             InternalFirmware::Betaflight4_3_1 => Self::Betaflight(v(4, 3, 1)),
             InternalFirmware::Inav5_0_0 => Self::Inav(v(5, 0, 0)),
         }
+    }
+}
+
+impl PartialOrd for InternalFirmware {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        if self.is_betaflight() != other.is_betaflight() {
+            return None;
+        }
+
+        Some((*self as u8).cmp(&(*other as u8)))
     }
 }
 
