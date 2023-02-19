@@ -15,6 +15,9 @@
 ### Changed
 
 - All fields of `Headers` are now methods.
+- `ParseError::UnsupportedVersion` is now `::UnsupportedDataVersion`
+- Unsupported versions of supported firmwares now return the
+  `ParseError::UnsupportedFirmwareVersion` error
 
 ### Removed
 

@@ -29,11 +29,14 @@ pub type ParseResult<T> = Result<T, ParseError>;
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "_serde", derive(serde::Serialize))]
 pub enum ParseError {
-    /// The log uses a format version that is unsupported or could not be
+    /// The log uses a data format version that is unsupported or could not be
     /// parsed.
-    UnsupportedVersion,
-    /// The `Firmware revision` header could not be parsed.
+    UnsupportedDataVersion,
+    /// The `Firmware revision` header could not be parsed, or is from an
+    /// unsupported firmware.
     InvalidFirmware(String),
+    /// The log comes from an unsupported version of a known firmware.
+    UnsupportedFirmwareVersion(Firmware),
     /// Could not parse the value in header `header`.
     InvalidHeader { header: String, value: String },
     // TODO: include header
@@ -48,8 +51,13 @@ pub enum ParseError {
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::UnsupportedVersion => write!(f, "unsupported or invalid data version"),
+            Self::UnsupportedDataVersion => write!(f, "unsupported or invalid data version"),
             Self::InvalidFirmware(firmware) => write!(f, "could not parse firmware: `{firmware}`"),
+            Self::UnsupportedFirmwareVersion(firmware) => {
+                let name = firmware.name();
+                let version = firmware.version();
+                write!(f, "logs from {name} v{version} are not supported")
+            }
             Self::InvalidHeader { header, value } => {
                 write!(f, "invalid value for header `{header}`: `{value}`")
             }
@@ -115,7 +123,7 @@ impl<'data> Headers<'data> {
         debug_assert_eq!(crate::MARKER.strip_suffix(&[b'\n']), product);
         let data_version = data.read_line();
         if !matches!(data_version, Some(b"H Data version:2")) {
-            return Err(ParseError::UnsupportedVersion);
+            return Err(ParseError::UnsupportedDataVersion);
         }
 
         let mut state = State::new();
@@ -338,6 +346,20 @@ impl FirmwareVersion {
             patch,
         }
     }
+
+    fn parse(s: &str) -> Option<Self> {
+        let mut components = s.splitn(3, '.').map(|s| s.parse().ok());
+
+        let major = components.next()??;
+        let minor = components.next()??;
+        let patch = components.next()??;
+
+        Some(Self {
+            major,
+            minor,
+            patch,
+        })
+    }
 }
 
 impl fmt::Display for FirmwareVersion {
@@ -404,6 +426,16 @@ impl InternalFirmware {
     }
 
     fn parse(revision: &str) -> ParseResult<Self> {
+        fn bad_version(
+            version: &str,
+            fw: impl FnOnce(FirmwareVersion) -> Firmware,
+            invalid_fw: impl FnOnce() -> ParseError,
+        ) -> ParseError {
+            FirmwareVersion::parse(version).map_or_else(invalid_fw, |version| {
+                ParseError::UnsupportedFirmwareVersion(fw(version))
+            })
+        }
+
         let mut iter = revision.split(' ');
 
         let invalid_fw = || ParseError::InvalidFirmware(revision.to_owned());
@@ -427,11 +459,11 @@ impl InternalFirmware {
                 "4.2.11" => Ok(Self::Betaflight4_2_11),
                 "4.3.0" => Ok(Self::Betaflight4_3_0),
                 "4.3.1" => Ok(Self::Betaflight4_3_1),
-                _ => Err(invalid_fw()),
+                _ => Err(bad_version(version, Firmware::Betaflight, invalid_fw)),
             },
             Some("inav") => match version {
                 "5.0.0" => Ok(Self::Inav5_0_0),
-                _ => Err(invalid_fw()),
+                _ => Err(bad_version(version, Firmware::Inav, invalid_fw)),
             },
             Some("emuflight") => {
                 tracing::error!("EmuFlight is not supported");

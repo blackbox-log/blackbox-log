@@ -6,6 +6,6 @@ input_file: ".modules/fc-blackbox/src/test-data/LOG00004.TXT"
 File(
   count: 1,
   logs: [
-    Err(InvalidFirmware("INAV 3.0.1 (753c4479) MATEKF405SE")),
+    Err(UnsupportedFirmwareVersion(Inav("3.0.1"))),
   ],
 )
