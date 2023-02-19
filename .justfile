@@ -27,7 +27,7 @@ test-all:
 # Generate a full test coverage report using cargo-llvm-cov
 [no-cd]
 cov *args='':
-    cargo llvm-cov --all-features --html nextest --status-level=leak --run-ignored=all {{ args }}
+    cargo llvm-cov --all-features --html nextest --status-level=leak --run-ignored=all --ignore-filename-regex generated {{ args }}
 
 # Run benchmarks with cargo-criterion
 [no-cd]
