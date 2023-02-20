@@ -189,17 +189,11 @@ impl<'data> Headers<'data> {
         };
 
         let unit = |field, unit| {
-            let ok = if unit == Unit::Acceleration {
-                has_accel
-            } else {
-                true
-            };
-
-            if ok {
-                Ok(())
-            } else {
+            if unit == Unit::Acceleration && !has_accel {
                 tracing::error!(field, ?unit, "missing required headers");
                 Err(ParseError::MissingHeader)
+            } else {
+                Ok(())
             }
         };
 
