@@ -338,9 +338,17 @@ impl Firmware {
             return invalid_fw();
         };
 
-        let (fw, support) = match kind.as_deref() {
-            Some("betaflight") => (Firmware::Betaflight(version), crate::BETAFLIGHT_SUPPORT),
-            Some("inav") => (Firmware::Inav(version), crate::INAV_SUPPORT),
+        let (fw, is_supported) = match kind.as_deref() {
+            Some("betaflight") => (
+                Firmware::Betaflight(version),
+                crate::BETAFLIGHT_SUPPORT.contains(&version),
+            ),
+            Some("inav") => (
+                Firmware::Inav(version),
+                crate::INAV_SUPPORT
+                    .iter()
+                    .any(|range| range.contains(&version)),
+            ),
             Some("emuflight") => {
                 tracing::error!("EmuFlight is not supported");
                 return invalid_fw();
@@ -351,7 +359,7 @@ impl Firmware {
             }
         };
 
-        if support.contains(&version) {
+        if is_supported {
             Ok(fw)
         } else {
             Err(ParseError::UnsupportedFirmwareVersion(fw))
@@ -424,13 +432,14 @@ pub(crate) enum InternalFirmware {
     Betaflight4_3_0,
     Betaflight4_4_0,
     Inav5_0_0,
+    Inav6_0_0,
 }
 
 impl InternalFirmware {
     pub(crate) const fn is_betaflight(self) -> bool {
         match self {
             Self::Betaflight4_2_0 | Self::Betaflight4_3_0 | Self::Betaflight4_4_0 => true,
-            Self::Inav5_0_0 => false,
+            Self::Inav5_0_0 | Self::Inav6_0_0 => false,
         }
     }
 
@@ -455,6 +464,7 @@ impl From<Firmware> for InternalFirmware {
                 major: 4, minor: 4, ..
             }) => Self::Betaflight4_4_0,
             Firmware::Inav(FirmwareVersion { major: 5, .. }) => Self::Inav5_0_0,
+            Firmware::Inav(FirmwareVersion { major: 6, .. }) => Self::Inav6_0_0,
             _ => unreachable!(),
         }
     }
