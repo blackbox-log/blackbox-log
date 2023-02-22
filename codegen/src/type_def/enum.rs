@@ -38,7 +38,7 @@ impl Enum {
             .chain(self.unknown.then_some(quote!(Unknown)));
 
         let as_name = get_as_name_arms(&variants)
-            .chain(self.unknown.then_some(quote!(Self::Unknown => "UKNOWN")));
+            .chain(self.unknown.then_some(quote!(Self::Unknown => "UNKNOWN")));
         let impl_flag = impl_flag(&name, as_name);
 
         quote! {

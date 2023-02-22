@@ -35,7 +35,7 @@ impl crate::units::Flag for FailsafePhase {
             Self::RxLossIdle => "RX_LOSS_IDLE",
             Self::RxLossMonitoring => "RX_LOSS_MONITORING",
             Self::RxLossRecovered => "RX_LOSS_RECOVERED",
-            Self::Unknown => "UKNOWN",
+            Self::Unknown => "UNKNOWN",
         }
     }
 }
