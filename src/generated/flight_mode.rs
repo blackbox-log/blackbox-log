@@ -61,35 +61,35 @@ impl ::serde::Serialize for FlightModeSet {
 #[cfg_attr(feature = "_serde", derive(serde::Serialize))]
 /// A flight mode. See [`Flag`][crate::units::Flag].
 pub enum FlightMode {
-    /// `ACRO TRAINER` (Betaflight only)
+    /// `ACRO TRAINER`
     AcroTrainer,
     /// `AIRMODE`
     Airmode,
     /// `ANGLE`
     Angle,
-    /// `ANTI GRAVITY` (Betaflight only)
+    /// `ANTI GRAVITY`
     AntiGravity,
     /// `ARM`
     Arm,
-    /// `AUTOLEVEL` (INAV only)
+    /// `AUTOLEVEL`
     AutoLevel,
-    /// `AUTOTRIM` (INAV only)
+    /// `AUTOTRIM`
     AutoTrim,
-    /// `AUTOTUNE` (INAV only)
+    /// `AUTOTUNE`
     AutoTune,
-    /// `BEEP GPS COUNT` (Betaflight only)
+    /// `BEEP GPS COUNT`
     BeepGpsCount,
-    /// `BEEPER MUTE` (Betaflight only)
+    /// `BEEPER MUTE`
     BeeperMute,
     /// `BEEPERON`
     BeeperOn,
     /// `BLACKBOX`
     Blackbox,
-    /// `BLACKBOX ERASE` (Betaflight only)
+    /// `BLACKBOX ERASE`
     BlackboxErase,
-    /// `BRAKING` (INAV only)
+    /// `BRAKING`
     Braking,
-    /// `CALIB` (Betaflight only)
+    /// `CALIB`
     Calibration,
     /// `CAMSTAB`
     CamStab,
@@ -101,93 +101,93 @@ pub enum FlightMode {
     Camera3,
     /// `FAILSAFE`
     Failsafe,
-    /// `FLAPERON` (INAV only)
+    /// `FLAPERON`
     Flaperon,
     /// `FPV ANGLE MIX`
     FpvAngleMix,
-    /// `GCSNAV` (INAV only)
+    /// `GCSNAV`
     GcsNav,
-    /// `GPS RESCUE` (Betaflight only)
+    /// `GPS RESCUE`
     GpsRescue,
     /// `HEADADJ`
     HeadAdjust,
     /// `HEADFREE`
     HeadFree,
-    /// `HEADINGHOLD` (INAV only)
+    /// `HEADINGHOLD`
     HeadingHold,
-    /// `HOMERESET` (INAV only)
+    /// `HOMERESET`
     HomeReset,
     /// `HORIZON`
     Horizon,
-    /// `KILLSWITCH` (INAV only)
+    /// `KILLSWITCH`
     Killswitch,
-    /// `LAUNCH CONTROL` (Betaflight only)
+    /// `LAUNCH CONTROL`
     LaunchControl,
     /// `LEDLOW`
     LedLow,
-    /// `LIGHTS` (INAV only)
+    /// `LIGHTS`
     Lights,
-    /// `LOITERDIRCHN` (INAV only)
+    /// `LOITERDIRCHN`
     LoiterChange,
-    /// `MAG` (Betaflight only)
+    /// `MAG`
     Mag,
-    /// `MANUAL` (INAV only)
+    /// `MANUAL`
     Manual,
-    /// `CHANGEMISSION` (INAV only)
+    /// `CHANGEMISSION`
     MissionChange,
-    /// `MSPOVERRIDE` (Betaflight only)
+    /// `MSPOVERRIDE`
     MspOverride,
-    /// `MSPRCOVERRIDE` (INAV only)
+    /// `MSPRCOVERRIDE`
     MspRcOverride,
-    /// `NAV ALTHOLD` (INAV only)
+    /// `NAV ALTHOLD`
     NavAltitudeHold,
-    /// `NAVCOURSEHOLD` (INAV only)
+    /// `NAVCOURSEHOLD`
     NavCourseHold,
-    /// `NAV CRUISE` (INAV only)
+    /// `NAV CRUISE`
     NavCruise,
-    /// `NAV LAUNCH` (INAV only)
+    /// `NAV LAUNCH`
     NavLaunch,
-    /// `NAV POSHOLD` (INAV only)
+    /// `NAV POSHOLD`
     NavPositionHold,
-    /// `NAV RTH` (INAV only)
+    /// `NAV RTH`
     NavRth,
-    /// `NAV WP` (INAV only)
+    /// `NAV WP`
     NavWaypoint,
     /// `OSD`
     Osd,
-    /// `OSDALT1` (INAV only)
+    /// `OSDALT1`
     OsdAlt1,
-    /// `OSDALT2` (INAV only)
+    /// `OSDALT2`
     OsdAlt2,
-    /// `OSDALT3` (INAV only)
+    /// `OSDALT3`
     OsdAlt3,
-    /// `PARALYZE` (Betaflight only)
+    /// `PARALYZE`
     Paralyze,
-    /// `PASSTHRU` (Betaflight only)
+    /// `PASSTHRU`
     Passthru,
-    /// `PID AUDIO` (Betaflight only)
+    /// `PID AUDIO`
     PidAudio,
-    /// `PLANWPMISSION` (INAV only)
+    /// `PLANWPMISSION`
     PlanWpMission,
     /// `PREARM`
     Prearm,
-    /// `SERVO1` (Betaflight only)
+    /// `SERVO1`
     Servo1,
-    /// `SERVO2` (Betaflight only)
+    /// `SERVO2`
     Servo2,
-    /// `SERVO3` (Betaflight only)
+    /// `SERVO3`
     Servo3,
-    /// `SOARING` (INAV only)
+    /// `SOARING`
     Soaring,
-    /// `STICK COMMAND DISABLE` (Betaflight only)
+    /// `STICK COMMAND DISABLE`
     StickCommandDisable,
-    /// `SURFACE` (INAV only)
+    /// `SURFACE`
     Surface,
     /// `TELEMETRY`
     Telemetry,
-    /// `3D` (Betaflight only)
+    /// `3D`
     ThreeD,
-    /// `TURNASSIST` (INAV only)
+    /// `TURNASSIST`
     TurnAssist,
     /// `TURTLE`
     Turtle,
@@ -197,11 +197,11 @@ pub enum FlightMode {
     User2,
     /// `USER3`
     User3,
-    /// `USER4` (Betaflight only)
+    /// `USER4`
     User4,
-    /// `VTX CONTROL DISABLE` (Betaflight only)
+    /// `VTX CONTROL DISABLE`
     VtxControlDisable,
-    /// `VTX PIT MODE` (Betaflight only)
+    /// `VTX PIT MODE`
     VtxPitMode,
 }
 #[allow(unused_qualifications)]
@@ -290,193 +290,195 @@ impl ::core::fmt::Display for FlightMode {
 }
 #[allow(
     unused_qualifications,
+    clippy::enum_glob_use,
     clippy::match_same_arms,
-    clippy::unseparated_literal_suffix,
-    clippy::wildcard_enum_match_arm
+    clippy::unseparated_literal_suffix
 )]
 impl FlightMode {
     const fn from_bit(bit: u32, fw: crate::headers::InternalFirmware) -> Option<Self> {
-        match bit {
-            0u32 => Some(Self::Arm),
-            1u32 => Some(Self::Angle),
-            2u32 => Some(Self::Horizon),
-            3u32 if fw.is_betaflight() => Some(Self::Mag),
-            3u32 if fw.is_inav() => Some(Self::NavAltitudeHold),
-            4u32 if fw.is_betaflight() => Some(Self::HeadFree),
-            4u32 if fw.is_inav() => Some(Self::HeadingHold),
-            5u32 if fw.is_betaflight() => Some(Self::Passthru),
-            5u32 if fw.is_inav() => Some(Self::HeadFree),
-            6u32 if fw.is_betaflight() => Some(Self::Failsafe),
-            6u32 if fw.is_inav() => Some(Self::HeadAdjust),
-            7u32 if fw.is_betaflight() => Some(Self::GpsRescue),
-            7u32 if fw.is_inav() => Some(Self::CamStab),
-            8u32 if fw.is_betaflight() => Some(Self::AntiGravity),
-            8u32 if fw.is_inav() => Some(Self::NavRth),
-            9u32 if fw.is_betaflight() => Some(Self::HeadAdjust),
-            9u32 if fw.is_inav() => Some(Self::NavPositionHold),
-            10u32 if fw.is_betaflight() => Some(Self::CamStab),
-            10u32 if fw.is_inav() => Some(Self::Manual),
-            11u32 => Some(Self::BeeperOn),
-            12u32 => Some(Self::LedLow),
-            13u32 if fw.is_betaflight() => Some(Self::Calibration),
-            13u32 if fw.is_inav() => Some(Self::Lights),
-            14u32 if fw.is_betaflight() => Some(Self::Osd),
-            14u32 if fw.is_inav() => Some(Self::NavLaunch),
-            15u32 if fw.is_betaflight() => Some(Self::Telemetry),
-            15u32 if fw.is_inav() => Some(Self::Osd),
-            16u32 if fw.is_betaflight() => Some(Self::Servo1),
-            16u32 if fw.is_inav() => Some(Self::Telemetry),
-            17u32 if fw.is_betaflight() => Some(Self::Servo2),
-            17u32 if fw.is_inav() => Some(Self::Blackbox),
-            18u32 if fw.is_betaflight() => Some(Self::Servo3),
-            18u32 if fw.is_inav() => Some(Self::Failsafe),
-            19u32 if fw.is_betaflight() => Some(Self::Blackbox),
-            19u32 if fw.is_inav() => Some(Self::NavWaypoint),
-            20u32 => Some(Self::Airmode),
-            21u32 if fw.is_betaflight() => Some(Self::ThreeD),
-            21u32 if fw.is_inav() => Some(Self::HomeReset),
-            22u32 if fw.is_betaflight() => Some(Self::FpvAngleMix),
-            22u32 if fw.is_inav() => Some(Self::GcsNav),
-            23u32 if fw.is_betaflight() => Some(Self::BlackboxErase),
-            23u32 if fw.is_inav() => Some(Self::Killswitch),
-            24u32 if fw.is_betaflight() => Some(Self::Camera1),
-            24u32 if fw.is_inav() => Some(Self::Surface),
-            25u32 if fw.is_betaflight() => Some(Self::Camera2),
-            25u32 if fw.is_inav() => Some(Self::Flaperon),
-            26u32 if fw.is_betaflight() => Some(Self::Camera3),
-            26u32 if fw.is_inav() => Some(Self::TurnAssist),
-            27u32 if fw.is_betaflight() => Some(Self::Turtle),
-            27u32 if fw.is_inav() => Some(Self::AutoTrim),
-            28u32 if fw.is_betaflight() => Some(Self::Prearm),
-            28u32 if fw.is_inav() => Some(Self::AutoTune),
-            29u32 if fw.is_betaflight() => Some(Self::BeepGpsCount),
-            29u32 if fw.is_inav() => Some(Self::Camera1),
-            30u32 if fw.is_betaflight() => Some(Self::VtxPitMode),
-            30u32 if fw.is_inav() => Some(Self::Camera2),
-            31u32 if fw.is_betaflight() => Some(Self::Paralyze),
-            31u32 if fw.is_inav() => Some(Self::Camera3),
-            32u32 if fw.is_betaflight() => Some(Self::User1),
-            32u32 if fw.is_inav() => Some(Self::OsdAlt1),
-            33u32 if fw.is_betaflight() => Some(Self::User2),
-            33u32 if fw.is_inav() => Some(Self::OsdAlt2),
-            34u32 if fw.is_betaflight() => Some(Self::User3),
-            34u32 if fw.is_inav() => Some(Self::OsdAlt3),
-            35u32 if fw.is_betaflight() => Some(Self::User4),
-            35u32 if fw.is_inav() => Some(Self::NavCourseHold),
-            36u32 if fw.is_betaflight() => Some(Self::PidAudio),
-            36u32 if fw.is_inav() => Some(Self::Braking),
-            37u32 if fw.is_betaflight() => Some(Self::AcroTrainer),
-            37u32 if fw.is_inav() => Some(Self::User1),
-            38u32 if fw.is_betaflight() => Some(Self::VtxControlDisable),
-            38u32 if fw.is_inav() => Some(Self::User2),
-            39u32 if fw.is_betaflight() => Some(Self::LaunchControl),
-            39u32 if fw.is_inav() => Some(Self::FpvAngleMix),
-            40u32 if fw.is_betaflight() => Some(Self::MspOverride),
-            40u32 if fw.is_inav() => Some(Self::LoiterChange),
-            41u32 if fw.is_betaflight() => Some(Self::StickCommandDisable),
-            41u32 if fw.is_inav() => Some(Self::MspRcOverride),
-            42u32 if fw.is_betaflight() => Some(Self::BeeperMute),
-            42u32 if fw.is_inav() => Some(Self::Prearm),
-            43u32 if fw.is_inav() => Some(Self::Turtle),
-            44u32 if fw.is_inav() => Some(Self::NavCruise),
-            45u32 if fw.is_inav() => Some(Self::AutoLevel),
-            46u32 if fw.is_inav() => Some(Self::PlanWpMission),
-            47u32 if fw.is_inav() => Some(Self::Soaring),
-            48u32 if fw.is_inav() => Some(Self::User3),
-            49u32 if fw.is_inav() => Some(Self::MissionChange),
+        use crate::headers::InternalFirmware::*;
+        match (bit, fw) {
+            (0u32, Betaflight4_3_0 | Inav5_0_0) => Some(Self::Arm),
+            (1u32, Betaflight4_3_0 | Inav5_0_0) => Some(Self::Angle),
+            (2u32, Betaflight4_3_0 | Inav5_0_0) => Some(Self::Horizon),
+            (3u32, Betaflight4_3_0) => Some(Self::Mag),
+            (3u32, Inav5_0_0) => Some(Self::NavAltitudeHold),
+            (4u32, Betaflight4_3_0) => Some(Self::HeadFree),
+            (4u32, Inav5_0_0) => Some(Self::HeadingHold),
+            (5u32, Betaflight4_3_0) => Some(Self::Passthru),
+            (5u32, Inav5_0_0) => Some(Self::HeadFree),
+            (6u32, Betaflight4_3_0) => Some(Self::Failsafe),
+            (6u32, Inav5_0_0) => Some(Self::HeadAdjust),
+            (7u32, Betaflight4_3_0) => Some(Self::GpsRescue),
+            (7u32, Inav5_0_0) => Some(Self::CamStab),
+            (8u32, Betaflight4_3_0) => Some(Self::AntiGravity),
+            (8u32, Inav5_0_0) => Some(Self::NavRth),
+            (9u32, Betaflight4_3_0) => Some(Self::HeadAdjust),
+            (9u32, Inav5_0_0) => Some(Self::NavPositionHold),
+            (10u32, Betaflight4_3_0) => Some(Self::CamStab),
+            (10u32, Inav5_0_0) => Some(Self::Manual),
+            (11u32, Betaflight4_3_0 | Inav5_0_0) => Some(Self::BeeperOn),
+            (12u32, Betaflight4_3_0 | Inav5_0_0) => Some(Self::LedLow),
+            (13u32, Betaflight4_3_0) => Some(Self::Calibration),
+            (13u32, Inav5_0_0) => Some(Self::Lights),
+            (14u32, Betaflight4_3_0) => Some(Self::Osd),
+            (14u32, Inav5_0_0) => Some(Self::NavLaunch),
+            (15u32, Betaflight4_3_0) => Some(Self::Telemetry),
+            (15u32, Inav5_0_0) => Some(Self::Osd),
+            (16u32, Betaflight4_3_0) => Some(Self::Servo1),
+            (16u32, Inav5_0_0) => Some(Self::Telemetry),
+            (17u32, Betaflight4_3_0) => Some(Self::Servo2),
+            (17u32, Inav5_0_0) => Some(Self::Blackbox),
+            (18u32, Betaflight4_3_0) => Some(Self::Servo3),
+            (18u32, Inav5_0_0) => Some(Self::Failsafe),
+            (19u32, Betaflight4_3_0) => Some(Self::Blackbox),
+            (19u32, Inav5_0_0) => Some(Self::NavWaypoint),
+            (20u32, Betaflight4_3_0 | Inav5_0_0) => Some(Self::Airmode),
+            (21u32, Betaflight4_3_0) => Some(Self::ThreeD),
+            (21u32, Inav5_0_0) => Some(Self::HomeReset),
+            (22u32, Betaflight4_3_0) => Some(Self::FpvAngleMix),
+            (22u32, Inav5_0_0) => Some(Self::GcsNav),
+            (23u32, Betaflight4_3_0) => Some(Self::BlackboxErase),
+            (23u32, Inav5_0_0) => Some(Self::Killswitch),
+            (24u32, Betaflight4_3_0) => Some(Self::Camera1),
+            (24u32, Inav5_0_0) => Some(Self::Surface),
+            (25u32, Betaflight4_3_0) => Some(Self::Camera2),
+            (25u32, Inav5_0_0) => Some(Self::Flaperon),
+            (26u32, Betaflight4_3_0) => Some(Self::Camera3),
+            (26u32, Inav5_0_0) => Some(Self::TurnAssist),
+            (27u32, Betaflight4_3_0) => Some(Self::Turtle),
+            (27u32, Inav5_0_0) => Some(Self::AutoTrim),
+            (28u32, Betaflight4_3_0) => Some(Self::Prearm),
+            (28u32, Inav5_0_0) => Some(Self::AutoTune),
+            (29u32, Betaflight4_3_0) => Some(Self::BeepGpsCount),
+            (29u32, Inav5_0_0) => Some(Self::Camera1),
+            (30u32, Betaflight4_3_0) => Some(Self::VtxPitMode),
+            (30u32, Inav5_0_0) => Some(Self::Camera2),
+            (31u32, Betaflight4_3_0) => Some(Self::Paralyze),
+            (31u32, Inav5_0_0) => Some(Self::Camera3),
+            (32u32, Betaflight4_3_0) => Some(Self::User1),
+            (32u32, Inav5_0_0) => Some(Self::OsdAlt1),
+            (33u32, Betaflight4_3_0) => Some(Self::User2),
+            (33u32, Inav5_0_0) => Some(Self::OsdAlt2),
+            (34u32, Betaflight4_3_0) => Some(Self::User3),
+            (34u32, Inav5_0_0) => Some(Self::OsdAlt3),
+            (35u32, Betaflight4_3_0) => Some(Self::User4),
+            (35u32, Inav5_0_0) => Some(Self::NavCourseHold),
+            (36u32, Betaflight4_3_0) => Some(Self::PidAudio),
+            (36u32, Inav5_0_0) => Some(Self::Braking),
+            (37u32, Betaflight4_3_0) => Some(Self::AcroTrainer),
+            (37u32, Inav5_0_0) => Some(Self::User1),
+            (38u32, Betaflight4_3_0) => Some(Self::VtxControlDisable),
+            (38u32, Inav5_0_0) => Some(Self::User2),
+            (39u32, Betaflight4_3_0) => Some(Self::LaunchControl),
+            (39u32, Inav5_0_0) => Some(Self::FpvAngleMix),
+            (40u32, Betaflight4_3_0) => Some(Self::MspOverride),
+            (40u32, Inav5_0_0) => Some(Self::LoiterChange),
+            (41u32, Betaflight4_3_0) => Some(Self::StickCommandDisable),
+            (41u32, Inav5_0_0) => Some(Self::MspRcOverride),
+            (42u32, Betaflight4_3_0) => Some(Self::BeeperMute),
+            (42u32, Inav5_0_0) => Some(Self::Prearm),
+            (43u32, Inav5_0_0) => Some(Self::Turtle),
+            (44u32, Inav5_0_0) => Some(Self::NavCruise),
+            (45u32, Inav5_0_0) => Some(Self::AutoLevel),
+            (46u32, Inav5_0_0) => Some(Self::PlanWpMission),
+            (47u32, Inav5_0_0) => Some(Self::Soaring),
+            (48u32, Inav5_0_0) => Some(Self::User3),
+            (49u32, Inav5_0_0) => Some(Self::MissionChange),
             _ => None,
         }
     }
 
     const fn to_bit(self, fw: crate::headers::InternalFirmware) -> Option<u32> {
-        match self {
-            Self::AcroTrainer if fw.is_betaflight() => Some(37u32),
-            Self::Airmode => Some(20u32),
-            Self::Angle => Some(1u32),
-            Self::AntiGravity if fw.is_betaflight() => Some(8u32),
-            Self::Arm => Some(0u32),
-            Self::AutoLevel if fw.is_inav() => Some(45u32),
-            Self::AutoTrim if fw.is_inav() => Some(27u32),
-            Self::AutoTune if fw.is_inav() => Some(28u32),
-            Self::BeepGpsCount if fw.is_betaflight() => Some(29u32),
-            Self::BeeperMute if fw.is_betaflight() => Some(42u32),
-            Self::BeeperOn => Some(11u32),
-            Self::Blackbox if fw.is_betaflight() => Some(19u32),
-            Self::Blackbox if fw.is_inav() => Some(17u32),
-            Self::BlackboxErase if fw.is_betaflight() => Some(23u32),
-            Self::Braking if fw.is_inav() => Some(36u32),
-            Self::Calibration if fw.is_betaflight() => Some(13u32),
-            Self::CamStab if fw.is_betaflight() => Some(10u32),
-            Self::CamStab if fw.is_inav() => Some(7u32),
-            Self::Camera1 if fw.is_betaflight() => Some(24u32),
-            Self::Camera1 if fw.is_inav() => Some(29u32),
-            Self::Camera2 if fw.is_betaflight() => Some(25u32),
-            Self::Camera2 if fw.is_inav() => Some(30u32),
-            Self::Camera3 if fw.is_betaflight() => Some(26u32),
-            Self::Camera3 if fw.is_inav() => Some(31u32),
-            Self::Failsafe if fw.is_betaflight() => Some(6u32),
-            Self::Failsafe if fw.is_inav() => Some(18u32),
-            Self::Flaperon if fw.is_inav() => Some(25u32),
-            Self::FpvAngleMix if fw.is_betaflight() => Some(22u32),
-            Self::FpvAngleMix if fw.is_inav() => Some(39u32),
-            Self::GcsNav if fw.is_inav() => Some(22u32),
-            Self::GpsRescue if fw.is_betaflight() => Some(7u32),
-            Self::HeadAdjust if fw.is_betaflight() => Some(9u32),
-            Self::HeadAdjust if fw.is_inav() => Some(6u32),
-            Self::HeadFree if fw.is_betaflight() => Some(4u32),
-            Self::HeadFree if fw.is_inav() => Some(5u32),
-            Self::HeadingHold if fw.is_inav() => Some(4u32),
-            Self::HomeReset if fw.is_inav() => Some(21u32),
-            Self::Horizon => Some(2u32),
-            Self::Killswitch if fw.is_inav() => Some(23u32),
-            Self::LaunchControl if fw.is_betaflight() => Some(39u32),
-            Self::LedLow => Some(12u32),
-            Self::Lights if fw.is_inav() => Some(13u32),
-            Self::LoiterChange if fw.is_inav() => Some(40u32),
-            Self::Mag if fw.is_betaflight() => Some(3u32),
-            Self::Manual if fw.is_inav() => Some(10u32),
-            Self::MissionChange if fw.is_inav() => Some(49u32),
-            Self::MspOverride if fw.is_betaflight() => Some(40u32),
-            Self::MspRcOverride if fw.is_inav() => Some(41u32),
-            Self::NavAltitudeHold if fw.is_inav() => Some(3u32),
-            Self::NavCourseHold if fw.is_inav() => Some(35u32),
-            Self::NavCruise if fw.is_inav() => Some(44u32),
-            Self::NavLaunch if fw.is_inav() => Some(14u32),
-            Self::NavPositionHold if fw.is_inav() => Some(9u32),
-            Self::NavRth if fw.is_inav() => Some(8u32),
-            Self::NavWaypoint if fw.is_inav() => Some(19u32),
-            Self::Osd if fw.is_betaflight() => Some(14u32),
-            Self::Osd if fw.is_inav() => Some(15u32),
-            Self::OsdAlt1 if fw.is_inav() => Some(32u32),
-            Self::OsdAlt2 if fw.is_inav() => Some(33u32),
-            Self::OsdAlt3 if fw.is_inav() => Some(34u32),
-            Self::Paralyze if fw.is_betaflight() => Some(31u32),
-            Self::Passthru if fw.is_betaflight() => Some(5u32),
-            Self::PidAudio if fw.is_betaflight() => Some(36u32),
-            Self::PlanWpMission if fw.is_inav() => Some(46u32),
-            Self::Prearm if fw.is_betaflight() => Some(28u32),
-            Self::Prearm if fw.is_inav() => Some(42u32),
-            Self::Servo1 if fw.is_betaflight() => Some(16u32),
-            Self::Servo2 if fw.is_betaflight() => Some(17u32),
-            Self::Servo3 if fw.is_betaflight() => Some(18u32),
-            Self::Soaring if fw.is_inav() => Some(47u32),
-            Self::StickCommandDisable if fw.is_betaflight() => Some(41u32),
-            Self::Surface if fw.is_inav() => Some(24u32),
-            Self::Telemetry if fw.is_betaflight() => Some(15u32),
-            Self::Telemetry if fw.is_inav() => Some(16u32),
-            Self::ThreeD if fw.is_betaflight() => Some(21u32),
-            Self::TurnAssist if fw.is_inav() => Some(26u32),
-            Self::Turtle if fw.is_betaflight() => Some(27u32),
-            Self::Turtle if fw.is_inav() => Some(43u32),
-            Self::User1 if fw.is_betaflight() => Some(32u32),
-            Self::User1 if fw.is_inav() => Some(37u32),
-            Self::User2 if fw.is_betaflight() => Some(33u32),
-            Self::User2 if fw.is_inav() => Some(38u32),
-            Self::User3 if fw.is_betaflight() => Some(34u32),
-            Self::User3 if fw.is_inav() => Some(48u32),
-            Self::User4 if fw.is_betaflight() => Some(35u32),
-            Self::VtxControlDisable if fw.is_betaflight() => Some(38u32),
-            Self::VtxPitMode if fw.is_betaflight() => Some(30u32),
+        use crate::headers::InternalFirmware::*;
+        match (self, fw) {
+            (Self::Arm, Betaflight4_3_0 | Inav5_0_0) => Some(0u32),
+            (Self::Angle, Betaflight4_3_0 | Inav5_0_0) => Some(1u32),
+            (Self::Horizon, Betaflight4_3_0 | Inav5_0_0) => Some(2u32),
+            (Self::Mag, Betaflight4_3_0) => Some(3u32),
+            (Self::NavAltitudeHold, Inav5_0_0) => Some(3u32),
+            (Self::HeadFree, Betaflight4_3_0) => Some(4u32),
+            (Self::HeadingHold, Inav5_0_0) => Some(4u32),
+            (Self::Passthru, Betaflight4_3_0) => Some(5u32),
+            (Self::HeadFree, Inav5_0_0) => Some(5u32),
+            (Self::Failsafe, Betaflight4_3_0) => Some(6u32),
+            (Self::HeadAdjust, Inav5_0_0) => Some(6u32),
+            (Self::GpsRescue, Betaflight4_3_0) => Some(7u32),
+            (Self::CamStab, Inav5_0_0) => Some(7u32),
+            (Self::AntiGravity, Betaflight4_3_0) => Some(8u32),
+            (Self::NavRth, Inav5_0_0) => Some(8u32),
+            (Self::HeadAdjust, Betaflight4_3_0) => Some(9u32),
+            (Self::NavPositionHold, Inav5_0_0) => Some(9u32),
+            (Self::CamStab, Betaflight4_3_0) => Some(10u32),
+            (Self::Manual, Inav5_0_0) => Some(10u32),
+            (Self::BeeperOn, Betaflight4_3_0 | Inav5_0_0) => Some(11u32),
+            (Self::LedLow, Betaflight4_3_0 | Inav5_0_0) => Some(12u32),
+            (Self::Calibration, Betaflight4_3_0) => Some(13u32),
+            (Self::Lights, Inav5_0_0) => Some(13u32),
+            (Self::Osd, Betaflight4_3_0) => Some(14u32),
+            (Self::NavLaunch, Inav5_0_0) => Some(14u32),
+            (Self::Telemetry, Betaflight4_3_0) => Some(15u32),
+            (Self::Osd, Inav5_0_0) => Some(15u32),
+            (Self::Servo1, Betaflight4_3_0) => Some(16u32),
+            (Self::Telemetry, Inav5_0_0) => Some(16u32),
+            (Self::Servo2, Betaflight4_3_0) => Some(17u32),
+            (Self::Blackbox, Inav5_0_0) => Some(17u32),
+            (Self::Servo3, Betaflight4_3_0) => Some(18u32),
+            (Self::Failsafe, Inav5_0_0) => Some(18u32),
+            (Self::Blackbox, Betaflight4_3_0) => Some(19u32),
+            (Self::NavWaypoint, Inav5_0_0) => Some(19u32),
+            (Self::Airmode, Betaflight4_3_0 | Inav5_0_0) => Some(20u32),
+            (Self::ThreeD, Betaflight4_3_0) => Some(21u32),
+            (Self::HomeReset, Inav5_0_0) => Some(21u32),
+            (Self::FpvAngleMix, Betaflight4_3_0) => Some(22u32),
+            (Self::GcsNav, Inav5_0_0) => Some(22u32),
+            (Self::BlackboxErase, Betaflight4_3_0) => Some(23u32),
+            (Self::Killswitch, Inav5_0_0) => Some(23u32),
+            (Self::Camera1, Betaflight4_3_0) => Some(24u32),
+            (Self::Surface, Inav5_0_0) => Some(24u32),
+            (Self::Camera2, Betaflight4_3_0) => Some(25u32),
+            (Self::Flaperon, Inav5_0_0) => Some(25u32),
+            (Self::Camera3, Betaflight4_3_0) => Some(26u32),
+            (Self::TurnAssist, Inav5_0_0) => Some(26u32),
+            (Self::Turtle, Betaflight4_3_0) => Some(27u32),
+            (Self::AutoTrim, Inav5_0_0) => Some(27u32),
+            (Self::Prearm, Betaflight4_3_0) => Some(28u32),
+            (Self::AutoTune, Inav5_0_0) => Some(28u32),
+            (Self::BeepGpsCount, Betaflight4_3_0) => Some(29u32),
+            (Self::Camera1, Inav5_0_0) => Some(29u32),
+            (Self::VtxPitMode, Betaflight4_3_0) => Some(30u32),
+            (Self::Camera2, Inav5_0_0) => Some(30u32),
+            (Self::Paralyze, Betaflight4_3_0) => Some(31u32),
+            (Self::Camera3, Inav5_0_0) => Some(31u32),
+            (Self::User1, Betaflight4_3_0) => Some(32u32),
+            (Self::OsdAlt1, Inav5_0_0) => Some(32u32),
+            (Self::User2, Betaflight4_3_0) => Some(33u32),
+            (Self::OsdAlt2, Inav5_0_0) => Some(33u32),
+            (Self::User3, Betaflight4_3_0) => Some(34u32),
+            (Self::OsdAlt3, Inav5_0_0) => Some(34u32),
+            (Self::User4, Betaflight4_3_0) => Some(35u32),
+            (Self::NavCourseHold, Inav5_0_0) => Some(35u32),
+            (Self::PidAudio, Betaflight4_3_0) => Some(36u32),
+            (Self::Braking, Inav5_0_0) => Some(36u32),
+            (Self::AcroTrainer, Betaflight4_3_0) => Some(37u32),
+            (Self::User1, Inav5_0_0) => Some(37u32),
+            (Self::VtxControlDisable, Betaflight4_3_0) => Some(38u32),
+            (Self::User2, Inav5_0_0) => Some(38u32),
+            (Self::LaunchControl, Betaflight4_3_0) => Some(39u32),
+            (Self::FpvAngleMix, Inav5_0_0) => Some(39u32),
+            (Self::MspOverride, Betaflight4_3_0) => Some(40u32),
+            (Self::LoiterChange, Inav5_0_0) => Some(40u32),
+            (Self::StickCommandDisable, Betaflight4_3_0) => Some(41u32),
+            (Self::MspRcOverride, Inav5_0_0) => Some(41u32),
+            (Self::BeeperMute, Betaflight4_3_0) => Some(42u32),
+            (Self::Prearm, Inav5_0_0) => Some(42u32),
+            (Self::Turtle, Inav5_0_0) => Some(43u32),
+            (Self::NavCruise, Inav5_0_0) => Some(44u32),
+            (Self::AutoLevel, Inav5_0_0) => Some(45u32),
+            (Self::PlanWpMission, Inav5_0_0) => Some(46u32),
+            (Self::Soaring, Inav5_0_0) => Some(47u32),
+            (Self::User3, Inav5_0_0) => Some(48u32),
+            (Self::MissionChange, Inav5_0_0) => Some(49u32),
             _ => None,
         }
     }

@@ -2,7 +2,7 @@
 #[cfg_attr(feature = "_serde", derive(serde::Serialize))]
 /// The current failsafe phase. See [`Flag`][crate::units::Flag].
 pub enum FailsafePhase {
-    /// `GPS_RESCUE` (Betaflight only)
+    /// `GPS_RESCUE`
     GpsRescue,
     /// `IDLE`
     Idle,
@@ -10,11 +10,11 @@ pub enum FailsafePhase {
     Landed,
     /// `LANDING`
     Landing,
-    /// `RETURN_TO_HOME` (INAV only)
+    /// `RETURN_TO_HOME`
     ReturnToHome,
     /// `RX_LOSS_DETECTED`
     RxLossDetected,
-    /// `RX_LOSS_IDLE` (INAV only)
+    /// `RX_LOSS_IDLE`
     RxLossIdle,
     /// `RX_LOSS_MONITORING`
     RxLossMonitoring,
@@ -35,7 +35,7 @@ impl crate::units::Flag for FailsafePhase {
             Self::RxLossIdle => "RX_LOSS_IDLE",
             Self::RxLossMonitoring => "RX_LOSS_MONITORING",
             Self::RxLossRecovered => "RX_LOSS_RECOVERED",
-            Self::Unknown => "UNKNOWN",
+            Self::Unknown => "UKNOWN",
         }
     }
 }
@@ -47,25 +47,27 @@ impl ::core::fmt::Display for FailsafePhase {
 }
 #[allow(
     unused_qualifications,
+    clippy::enum_glob_use,
     clippy::match_same_arms,
     clippy::unseparated_literal_suffix
 )]
 impl FailsafePhase {
     pub(crate) fn new(raw: u32, fw: crate::headers::InternalFirmware) -> Self {
-        match raw {
-            0u32 => Self::Idle,
-            1u32 => Self::RxLossDetected,
-            2u32 if fw.is_betaflight() => Self::Landing,
-            2u32 if fw.is_inav() => Self::RxLossIdle,
-            3u32 if fw.is_betaflight() => Self::Landed,
-            3u32 if fw.is_inav() => Self::ReturnToHome,
-            4u32 if fw.is_betaflight() => Self::RxLossMonitoring,
-            4u32 if fw.is_inav() => Self::Landing,
-            5u32 if fw.is_betaflight() => Self::RxLossRecovered,
-            5u32 if fw.is_inav() => Self::Landed,
-            6u32 if fw.is_betaflight() => Self::GpsRescue,
-            6u32 if fw.is_inav() => Self::RxLossMonitoring,
-            7u32 if fw.is_inav() => Self::RxLossRecovered,
+        use crate::headers::InternalFirmware::*;
+        match (raw, fw) {
+            (0u32, Betaflight4_3_0 | Inav5_0_0) => Self::Idle,
+            (1u32, Betaflight4_3_0 | Inav5_0_0) => Self::RxLossDetected,
+            (2u32, Betaflight4_3_0) => Self::Landing,
+            (2u32, Inav5_0_0) => Self::RxLossIdle,
+            (3u32, Betaflight4_3_0) => Self::Landed,
+            (3u32, Inav5_0_0) => Self::ReturnToHome,
+            (4u32, Betaflight4_3_0) => Self::RxLossMonitoring,
+            (4u32, Inav5_0_0) => Self::Landing,
+            (5u32, Betaflight4_3_0) => Self::RxLossRecovered,
+            (5u32, Inav5_0_0) => Self::Landed,
+            (6u32, Betaflight4_3_0) => Self::GpsRescue,
+            (6u32, Inav5_0_0) => Self::RxLossMonitoring,
+            (7u32, Inav5_0_0) => Self::RxLossRecovered,
             _ => {
                 #[allow(clippy::redundant_closure_call)]
                 (|raw| tracing::debug!("invalid failsafe phase ({raw})"))(raw);

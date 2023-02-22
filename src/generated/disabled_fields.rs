@@ -58,29 +58,29 @@ impl ::serde::Serialize for DisabledFields {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "_serde", derive(serde::Serialize))]
 pub enum FieldGroup {
-    /// `ACC` (Betaflight only)
+    /// `ACC`
     Acc,
-    /// `ALTITUDE` (Betaflight only)
+    /// `ALTITUDE`
     Altitude,
-    /// `BATTERY` (Betaflight only)
+    /// `BATTERY`
     Battery,
-    /// `DEBUG_LOG` (Betaflight only)
+    /// `DEBUG_LOG`
     DebugLog,
-    /// `GPS` (Betaflight only)
+    /// `GPS`
     Gps,
-    /// `GYRO` (Betaflight only)
+    /// `GYRO`
     Gyro,
-    /// `MAG` (Betaflight only)
+    /// `MAG`
     Mag,
-    /// `MOTOR` (Betaflight only)
+    /// `MOTOR`
     Motor,
-    /// `PID` (Betaflight only)
+    /// `PID`
     Pid,
-    /// `RC_COMMANDS` (Betaflight only)
+    /// `RC_COMMANDS`
     RcCommands,
-    /// `RSSI` (Betaflight only)
+    /// `RSSI`
     Rssi,
-    /// `SETPOINT` (Betaflight only)
+    /// `SETPOINT`
     Setpoint,
 }
 #[allow(unused_qualifications)]
@@ -110,43 +110,45 @@ impl ::core::fmt::Display for FieldGroup {
 }
 #[allow(
     unused_qualifications,
+    clippy::enum_glob_use,
     clippy::match_same_arms,
-    clippy::unseparated_literal_suffix,
-    clippy::wildcard_enum_match_arm
+    clippy::unseparated_literal_suffix
 )]
 impl FieldGroup {
     const fn from_bit(bit: u32, fw: crate::headers::InternalFirmware) -> Option<Self> {
-        match bit {
-            0u32 if fw.is_betaflight() => Some(Self::Pid),
-            1u32 if fw.is_betaflight() => Some(Self::RcCommands),
-            2u32 if fw.is_betaflight() => Some(Self::Setpoint),
-            3u32 if fw.is_betaflight() => Some(Self::Battery),
-            4u32 if fw.is_betaflight() => Some(Self::Mag),
-            5u32 if fw.is_betaflight() => Some(Self::Altitude),
-            6u32 if fw.is_betaflight() => Some(Self::Rssi),
-            7u32 if fw.is_betaflight() => Some(Self::Gyro),
-            8u32 if fw.is_betaflight() => Some(Self::Acc),
-            9u32 if fw.is_betaflight() => Some(Self::DebugLog),
-            10u32 if fw.is_betaflight() => Some(Self::Motor),
-            11u32 if fw.is_betaflight() => Some(Self::Gps),
+        use crate::headers::InternalFirmware::*;
+        match (bit, fw) {
+            (0u32, Betaflight4_3_0) => Some(Self::Pid),
+            (1u32, Betaflight4_3_0) => Some(Self::RcCommands),
+            (2u32, Betaflight4_3_0) => Some(Self::Setpoint),
+            (3u32, Betaflight4_3_0) => Some(Self::Battery),
+            (4u32, Betaflight4_3_0) => Some(Self::Mag),
+            (5u32, Betaflight4_3_0) => Some(Self::Altitude),
+            (6u32, Betaflight4_3_0) => Some(Self::Rssi),
+            (7u32, Betaflight4_3_0) => Some(Self::Gyro),
+            (8u32, Betaflight4_3_0) => Some(Self::Acc),
+            (9u32, Betaflight4_3_0) => Some(Self::DebugLog),
+            (10u32, Betaflight4_3_0) => Some(Self::Motor),
+            (11u32, Betaflight4_3_0) => Some(Self::Gps),
             _ => None,
         }
     }
 
     const fn to_bit(self, fw: crate::headers::InternalFirmware) -> Option<u32> {
-        match self {
-            Self::Acc if fw.is_betaflight() => Some(8u32),
-            Self::Altitude if fw.is_betaflight() => Some(5u32),
-            Self::Battery if fw.is_betaflight() => Some(3u32),
-            Self::DebugLog if fw.is_betaflight() => Some(9u32),
-            Self::Gps if fw.is_betaflight() => Some(11u32),
-            Self::Gyro if fw.is_betaflight() => Some(7u32),
-            Self::Mag if fw.is_betaflight() => Some(4u32),
-            Self::Motor if fw.is_betaflight() => Some(10u32),
-            Self::Pid if fw.is_betaflight() => Some(0u32),
-            Self::RcCommands if fw.is_betaflight() => Some(1u32),
-            Self::Rssi if fw.is_betaflight() => Some(6u32),
-            Self::Setpoint if fw.is_betaflight() => Some(2u32),
+        use crate::headers::InternalFirmware::*;
+        match (self, fw) {
+            (Self::Pid, Betaflight4_3_0) => Some(0u32),
+            (Self::RcCommands, Betaflight4_3_0) => Some(1u32),
+            (Self::Setpoint, Betaflight4_3_0) => Some(2u32),
+            (Self::Battery, Betaflight4_3_0) => Some(3u32),
+            (Self::Mag, Betaflight4_3_0) => Some(4u32),
+            (Self::Altitude, Betaflight4_3_0) => Some(5u32),
+            (Self::Rssi, Betaflight4_3_0) => Some(6u32),
+            (Self::Gyro, Betaflight4_3_0) => Some(7u32),
+            (Self::Acc, Betaflight4_3_0) => Some(8u32),
+            (Self::DebugLog, Betaflight4_3_0) => Some(9u32),
+            (Self::Motor, Betaflight4_3_0) => Some(10u32),
+            (Self::Gps, Betaflight4_3_0) => Some(11u32),
             _ => None,
         }
     }
