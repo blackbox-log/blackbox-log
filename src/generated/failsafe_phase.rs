@@ -55,17 +55,19 @@ impl FailsafePhase {
     pub(crate) fn new(raw: u32, fw: crate::headers::InternalFirmware) -> Self {
         use crate::headers::InternalFirmware::*;
         match (raw, fw) {
-            (0u32, Betaflight4_3_0 | Inav5_0_0) => Self::Idle,
-            (1u32, Betaflight4_3_0 | Inav5_0_0) => Self::RxLossDetected,
-            (2u32, Betaflight4_3_0) => Self::Landing,
+            (0u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0 | Inav5_0_0) => Self::Idle,
+            (1u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0 | Inav5_0_0) => {
+                Self::RxLossDetected
+            }
+            (2u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Self::Landing,
             (2u32, Inav5_0_0) => Self::RxLossIdle,
-            (3u32, Betaflight4_3_0) => Self::Landed,
+            (3u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Self::Landed,
             (3u32, Inav5_0_0) => Self::ReturnToHome,
-            (4u32, Betaflight4_3_0) => Self::RxLossMonitoring,
+            (4u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Self::RxLossMonitoring,
             (4u32, Inav5_0_0) => Self::Landing,
-            (5u32, Betaflight4_3_0) => Self::RxLossRecovered,
+            (5u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Self::RxLossRecovered,
             (5u32, Inav5_0_0) => Self::Landed,
-            (6u32, Betaflight4_3_0) => Self::GpsRescue,
+            (6u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Self::GpsRescue,
             (6u32, Inav5_0_0) => Self::RxLossMonitoring,
             (7u32, Inav5_0_0) => Self::RxLossRecovered,
             _ => {

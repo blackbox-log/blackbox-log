@@ -419,13 +419,14 @@ impl serde::Serialize for FirmwareVersion {
 pub(crate) enum InternalFirmware {
     Betaflight4_2_0,
     Betaflight4_3_0,
+    Betaflight4_4_0,
     Inav5_0_0,
 }
 
 impl InternalFirmware {
     pub(crate) const fn is_betaflight(self) -> bool {
         match self {
-            Self::Betaflight4_2_0 | Self::Betaflight4_3_0 => true,
+            Self::Betaflight4_2_0 | Self::Betaflight4_3_0 | Self::Betaflight4_4_0 => true,
             Self::Inav5_0_0 => false,
         }
     }
@@ -439,6 +440,7 @@ impl InternalFirmware {
 
 impl From<Firmware> for InternalFirmware {
     fn from(fw: Firmware) -> Self {
+        #[allow(clippy::wildcard_enum_match_arm)]
         match fw {
             Firmware::Betaflight(FirmwareVersion {
                 major: 4, minor: 2, ..
@@ -446,13 +448,14 @@ impl From<Firmware> for InternalFirmware {
             Firmware::Betaflight(FirmwareVersion {
                 major: 4, minor: 3, ..
             }) => Self::Betaflight4_3_0,
+            Firmware::Betaflight(FirmwareVersion {
+                major: 4, minor: 4, ..
+            }) => Self::Betaflight4_4_0,
             Firmware::Inav(FirmwareVersion {
                 major: 5,
                 minor: 0,
                 patch: 0,
             }) => Self::Inav5_0_0,
-
-            #[allow(clippy::wildcard_enum_match_arm)]
             _ => unreachable!(),
         }
     }

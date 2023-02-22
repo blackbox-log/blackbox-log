@@ -163,9 +163,13 @@ impl State {
     const fn from_bit(bit: u32, fw: crate::headers::InternalFirmware) -> Option<Self> {
         use crate::headers::InternalFirmware::*;
         match (bit, fw) {
-            (0u32, Betaflight4_3_0 | Inav5_0_0) => Some(Self::GpsFixHome),
-            (1u32, Betaflight4_3_0 | Inav5_0_0) => Some(Self::GpsFix),
-            (2u32, Betaflight4_3_0) => Some(Self::GpsFixEver),
+            (0u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0 | Inav5_0_0) => {
+                Some(Self::GpsFixHome)
+            }
+            (1u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0 | Inav5_0_0) => {
+                Some(Self::GpsFix)
+            }
+            (2u32, Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::GpsFixEver),
             (2u32, Inav5_0_0) => Some(Self::CalibrateMag),
             (3u32, Inav5_0_0) => Some(Self::SmallAngle),
             (5u32, Inav5_0_0) => Some(Self::AntiWindup),
@@ -196,9 +200,13 @@ impl State {
     const fn to_bit(self, fw: crate::headers::InternalFirmware) -> Option<u32> {
         use crate::headers::InternalFirmware::*;
         match (self, fw) {
-            (Self::GpsFixHome, Betaflight4_3_0 | Inav5_0_0) => Some(0u32),
-            (Self::GpsFix, Betaflight4_3_0 | Inav5_0_0) => Some(1u32),
-            (Self::GpsFixEver, Betaflight4_3_0) => Some(2u32),
+            (Self::GpsFixHome, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0 | Inav5_0_0) => {
+                Some(0u32)
+            }
+            (Self::GpsFix, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0 | Inav5_0_0) => {
+                Some(1u32)
+            }
+            (Self::GpsFixEver, Betaflight4_3_0 | Betaflight4_4_0) => Some(2u32),
             (Self::CalibrateMag, Inav5_0_0) => Some(2u32),
             (Self::SmallAngle, Inav5_0_0) => Some(3u32),
             (Self::AntiWindup, Inav5_0_0) => Some(5u32),
