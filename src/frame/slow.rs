@@ -45,7 +45,7 @@ impl super::Frame for SlowFrame<'_, '_, '_> {
         let def = &frame_def.fields[index];
         let raw = self.raw.0[index];
 
-        let firmware = self.headers.firmware;
+        let firmware = self.headers.internal_firmware;
         let value = match def.unit {
             SlowUnit::FlightMode => SlowValue::FlightMode(units::FlightModeSet::new(raw, firmware)),
             SlowUnit::State => SlowValue::State(units::StateSet::new(raw, firmware)),

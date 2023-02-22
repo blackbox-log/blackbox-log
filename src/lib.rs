@@ -102,13 +102,21 @@ pub mod prelude;
 mod reader;
 pub mod units;
 
+use core::ops::Range;
+
 pub use self::data::{DataParser, ParserEvent};
 pub use self::event::Event;
 pub use self::file::File;
 pub use self::filter::{FieldFilter, FieldFilterSet};
 pub use self::frame::{Unit, Value};
+use self::headers::FirmwareVersion;
 pub use self::headers::Headers;
 pub use self::reader::Reader;
 
 /// The first line of any blackbox log.
 const MARKER: &[u8] = b"H Product:Blackbox flight data recorder by Nicholas Sherlock\n";
+
+const BETAFLIGHT_SUPPORT: Range<FirmwareVersion> =
+    FirmwareVersion::new(4, 2, 0)..FirmwareVersion::new(4, 4, 0);
+const INAV_SUPPORT: Range<FirmwareVersion> =
+    FirmwareVersion::new(5, 0, 0)..FirmwareVersion::new(5, 1, 0);
