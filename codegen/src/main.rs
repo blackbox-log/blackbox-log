@@ -2,6 +2,7 @@
 
 mod type_def;
 
+use std::collections::HashMap;
 use std::fs::{self, File};
 use std::io::{self, BufWriter, Write};
 use std::path::PathBuf;
@@ -11,7 +12,8 @@ use glob::glob;
 
 use crate::type_def::TypeDef;
 
-const TYPES_GLOB: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../types/*.yaml");
+const DATA_GLOB: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../types/data/*/*/*.yaml");
+const META_GLOB: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../types/meta/*.yaml");
 
 fn main() {
     let out_dir = get_out_dir();
@@ -25,20 +27,51 @@ fn main() {
 
     fs::create_dir(&out_dir).expect("failed to recreate generated dir");
 
-    for yaml in glob(TYPES_GLOB).unwrap() {
-        let yaml = yaml.unwrap();
-        let filename = yaml.file_stem().unwrap();
-        println!("Generating {}", filename.to_string_lossy());
+    let mut type_defs = HashMap::<String, TypeDef>::new();
+    for meta in glob(META_GLOB).unwrap() {
+        let meta = meta.unwrap();
+        let name = meta.file_stem().unwrap().to_string_lossy().to_string();
 
+        let def = File::open(meta).unwrap();
+        let def = serde_yaml::from_reader(def).unwrap();
+
+        type_defs.insert(name, def);
+    }
+
+    for path in glob(DATA_GLOB).unwrap() {
+        let path = path.unwrap();
+        let name = path.file_stem().unwrap().to_str().unwrap();
+
+        let mut dirs = path
+            .ancestors()
+            .skip(1)
+            .map(|p| p.file_name().unwrap().to_str().unwrap());
+        let version = dirs.next().unwrap();
+        let firmware = dirs.next().unwrap();
+
+        let firmware = match firmware {
+            "Betaflight" => "Betaflight",
+            "INAV" => "Inav",
+            _ => panic!("invalid firmware: `{firmware}`"),
+        };
+
+        let fw_version = format!("{firmware}{}", version.replace('.', "_"));
+
+        let f = File::open(&path).unwrap();
+        let data = serde_yaml::from_reader(f).unwrap();
+
+        let def = type_defs.get_mut(name).unwrap();
+        def.add_data(fw_version, data);
+    }
+
+    for (name, def) in type_defs {
         let mut out_path = out_dir.clone();
-        out_path.push(filename);
+        out_path.push(name);
         out_path.set_extension("rs");
         let mut out = File::create(&out_path).unwrap();
 
-        let yaml = File::open(yaml).unwrap();
-        let s = std::io::read_to_string(yaml).unwrap();
-
-        let src = generate(&s);
+        let tokens = def.expand();
+        let src = rustfmt(&tokens.to_string());
         out.write_all(src.as_bytes()).unwrap();
     }
 }
@@ -48,13 +81,6 @@ fn get_out_dir() -> PathBuf {
     dir.pop();
     dir.push("src/generated");
     dir
-}
-
-fn generate(yaml: &str) -> String {
-    let type_def: TypeDef = serde_yaml::from_str(yaml).unwrap();
-    let tokens = type_def.expand();
-
-    rustfmt(&tokens.to_string())
 }
 
 fn rustfmt(src: &str) -> String {

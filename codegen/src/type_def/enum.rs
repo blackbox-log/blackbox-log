@@ -1,12 +1,10 @@
 use std::collections::HashMap;
 
-use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
+use proc_macro2::{Ident, TokenStream};
+use quote::quote;
 use serde::Deserialize;
 
-use super::{
-    combine_flags, expand_combined_flags, impl_flag, impl_flag_display, quote_attrs, Firmware,
-};
+use super::{get_as_name_arms, impl_flag, quote_attrs, str_to_ident, AugmentedData};
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -17,76 +15,87 @@ pub struct Enum {
     attrs: Vec<String>,
     unknown: bool,
     unknown_callback: Option<String>,
-    betaflight: HashMap<String, u32>,
-    inav: HashMap<String, u32>,
     #[serde(default)]
     rename: HashMap<String, String>,
+    #[serde(default)]
+    pub(super) data: HashMap<String, HashMap<u32, Vec<String>>>,
 }
 
 impl Enum {
     pub fn expand(&self) -> TokenStream {
-        let name = format_ident!("{}", self.name);
+        let name = self.name();
         let attrs = quote_attrs(&self.doc, &self.attrs, true);
 
-        let variants = combine_flags(&self.betaflight, &self.inav, &self.rename);
-        let enum_def = expand_combined_flags(&name, &variants, self.unknown);
-        let impl_flag = impl_flag(&name, &variants, self.unknown);
-        let impl_flag_display = impl_flag_display(&name);
+        let (data, variants) = super::augment_data(&self.data, &self.rename);
+        let new = self.expand_new(&data);
 
-        let (return_type, default) = if self.unknown {
-            (quote!(Self), quote!(Self::Unknown))
-        } else {
-            (quote!(Option<Self>), quote!(None))
-        };
+        let enum_def = variants
+            .iter()
+            .map(|(official, rust)| {
+                let doc = format!("`{official}`");
+                quote!(#[doc = #doc] #rust)
+            })
+            .chain(self.unknown.then_some(quote!(Unknown)));
 
-        let unknown_cb = self.unknown_callback.as_deref().unwrap_or("|_| ()");
-        let unknown_cb = syn::parse_str::<syn::ExprClosure>(unknown_cb).unwrap();
-
-        let mut new = Vec::new();
-        for variant in variants {
-            let ident = &variant.rust;
-            let value = quote!(Self::#ident);
-            let value = if self.unknown {
-                value
-            } else {
-                quote!(Some(#value))
-            };
-
-            if variant.betaflight == variant.inav && variant.betaflight.is_some() {
-                let index = variant.betaflight.unwrap();
-                let arm = quote!(#index => #value);
-                new.push((index, Firmware::Both, arm));
-                continue;
-            }
-
-            if let Some(index) = variant.betaflight {
-                let arm = quote!(#index if fw.is_betaflight() => #value);
-                new.push((index, Firmware::Betaflight, arm));
-            }
-
-            if let Some(index) = variant.inav {
-                let arm = quote!(#index if fw.is_inav() => #value);
-                new.push((index, Firmware::Inav, arm));
-            }
-        }
-        new.sort_unstable_by_key(|(index, firmware, _)| (*index, *firmware));
-        let new = new.iter().map(|(_, _, arm)| arm);
+        let as_name = get_as_name_arms(&variants)
+            .chain(self.unknown.then_some(quote!(Self::Unknown => "UKNOWN")));
+        let impl_flag = impl_flag(&name, as_name);
 
         quote! {
             #attrs
-            #enum_def
-            #impl_flag
-            #impl_flag_display
+            pub enum #name {
+                #(#enum_def),*
+            }
 
-            #[allow(unused_qualifications, clippy::match_same_arms, clippy::unseparated_literal_suffix)]
+            #impl_flag
+            #new
+        }
+    }
+
+    fn name(&self) -> Ident {
+        str_to_ident(&self.name)
+    }
+
+    fn expand_new(&self, data: &AugmentedData<'_>) -> TokenStream {
+        let name = self.name();
+
+        let mut arms = Vec::new();
+        for ((_, rust), indices) in data {
+            for (index, firmwares) in indices.iter() {
+                let key = (index, firmwares[0].clone());
+                let variant = quote!(Self::#rust);
+                let variant = if self.unknown {
+                    variant
+                } else {
+                    quote!(Some(#variant))
+                };
+
+                arms.push((key, quote!((#index, #(#firmwares)|*) => #variant)));
+            }
+        }
+        arms.sort_unstable_by_key(|(key, _)| key.clone());
+        let arms = arms.into_iter().map(|(_, tokens)| tokens);
+
+        let unknown_callback = self.unknown_callback.as_deref().unwrap_or("|_| {}");
+        let unknown_callback = syn::parse_str::<syn::ExprClosure>(unknown_callback).unwrap();
+
+        let (unknown, return_type) = if self.unknown {
+            (quote!(Self::Unknown), quote!(Self))
+        } else {
+            (quote!(None), quote!(Option<Self>))
+        };
+
+        quote! {
+            #[allow(unused_qualifications, clippy::enum_glob_use, clippy::match_same_arms, clippy::unseparated_literal_suffix)]
             impl #name {
                 pub(crate) fn new(raw: u32, fw: crate::headers::InternalFirmware) -> #return_type {
-                    match raw {
-                        #(#new,)*
+                    use crate::headers::InternalFirmware::*;
+                    match (raw, fw) {
+                        #(#arms,)*
                         _ => {
                             #[allow(clippy::redundant_closure_call)]
-                            (#unknown_cb)(raw);
-                            #default
+                            (#unknown_callback)(raw);
+                            #unknown
                         }
                     }
                 }

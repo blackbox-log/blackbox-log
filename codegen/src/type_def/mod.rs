@@ -29,114 +29,21 @@ impl TypeDef {
             Self::Enum { r#enum } => r#enum.expand(),
         }
     }
-}
 
-#[derive(Debug)]
-struct CombinedVariant {
-    official: String,
-    rust: Ident,
-    betaflight: Option<u32>,
-    inav: Option<u32>,
-}
-
-impl CombinedVariant {
-    pub const fn firmware(&self) -> Firmware {
-        match (self.betaflight.is_some(), self.inav.is_some()) {
-            (true, true) => Firmware::Both,
-            (true, false) => Firmware::Betaflight,
-            (false, true) => Firmware::Inav,
-            (false, false) => unreachable!(),
+    pub fn add_data(&mut self, firmware: String, new_data: HashMap<String, u32>) {
+        let (Self::Flags {
+            flags: Flags { data, .. },
+            ..
         }
-    }
-}
+        | Self::Enum {
+            r#enum: Enum { data, .. },
+        }) = self;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-enum Firmware {
-    Both,
-    Betaflight,
-    Inav,
-}
-
-fn combine_flags(
-    betaflight: &HashMap<String, u32>,
-    inav: &HashMap<String, u32>,
-    rename: &HashMap<String, String>,
-) -> Vec<CombinedVariant> {
-    fn str_to_ident(s: &str) -> Ident {
-        format_ident!("{}", s)
-    }
-
-    let get_rust_name = |official: &str| {
-        rename
-            .get(official)
-            .cloned()
-            .unwrap_or_else(|| official.to_upper_camel_case())
-    };
-
-    let mut combined = HashMap::new();
-
-    for (official, &index) in betaflight {
-        let rust = get_rust_name(official);
-        assert!(combined.get(&rust).is_none());
-        combined.insert(
-            rust.clone(),
-            CombinedVariant {
-                official: official.clone(),
-                rust: str_to_ident(&rust),
-                betaflight: Some(index),
-                inav: None,
-            },
-        );
-    }
-
-    for (official, &index) in inav {
-        let rust = get_rust_name(official);
-        if let Some(combined) = combined.get_mut(&rust) {
-            assert_eq!(&combined.official, official);
-            assert!(combined.inav.is_none());
-            combined.inav = Some(index);
-        } else {
-            combined.insert(
-                rust.clone(),
-                CombinedVariant {
-                    official: official.clone(),
-                    rust: str_to_ident(&rust),
-                    betaflight: None,
-                    inav: Some(index),
-                },
-            );
-        }
-    }
-
-    let mut combined = combined.into_values().collect::<Vec<_>>();
-    combined.sort_unstable_by_key(|flag| flag.rust.clone());
-    combined
-}
-
-#[allow(single_use_lifetimes)]
-fn expand_combined_flags<'f, 'i>(
-    name: &Ident,
-    flags: impl IntoIterator<Item = &'f CombinedVariant>,
-    unknown: bool,
-) -> TokenStream {
-    let body = flags.into_iter().map(|flag| {
-        let note = match flag.firmware() {
-            Firmware::Both => "",
-            Firmware::Betaflight => " (Betaflight only)",
-            Firmware::Inav => " (INAV only)",
-        };
-
-        let doc = format!("`{}`{note}", flag.official);
-        let ident = &flag.rust;
-        quote!(#[doc = #doc] #ident)
-    });
-
-    let unknown = unknown.then_some(quote!(Unknown));
-
-    quote! {
-        pub enum #name {
-            #(#body, )*
-            #unknown
+        for (official, index) in new_data {
+            let indices = data.entry(official).or_default();
+            let firmwares = indices.entry(index).or_default();
+            let i = firmwares.partition_point(|s| s < &firmware);
+            firmwares.insert(i, firmware.clone());
         }
     }
 }
@@ -156,35 +63,59 @@ fn quote_attrs(doc: &str, attrs: &[String], serde: bool) -> TokenStream {
     }
 }
 
-#[allow(single_use_lifetimes)]
-fn impl_flag<'v>(
-    name: &Ident,
-    flags: impl IntoIterator<Item = &'v CombinedVariant>,
-    unknown: bool,
-) -> TokenStream {
-    let variants = flags.into_iter().map(|flag| {
-        let variant = &flag.rust;
-        let official = &flag.official;
+type AugmentedData<'a> = HashMap<(&'a str, Ident), HashMap<u32, Vec<Ident>>>;
 
-        quote!(Self::#variant => #official)
-    });
+fn augment_data<'d>(
+    data: &'d HashMap<String, HashMap<u32, Vec<String>>>,
+    rename: &HashMap<String, String>,
+) -> (AugmentedData<'d>, Vec<(&'d str, Ident)>) {
+    let data = data
+        .iter()
+        .map(|(official, indices)| {
+            let rust = rename
+                .get(official)
+                .cloned()
+                .unwrap_or_else(|| official.to_upper_camel_case());
+            let rust = str_to_ident(&rust);
 
-    let unknown = unknown.then_some(quote!(Self::Unknown => "UNKNOWN"));
+            let indices = indices
+                .iter()
+                .map(|(i, fw)| (*i, fw.iter().map(|s| str_to_ident(s)).collect::<Vec<_>>()))
+                .collect();
+
+            ((official.as_str(), rust), indices)
+        })
+        .collect::<HashMap<_, _>>();
+
+    let mut variants = data
+        .keys()
+        .map(|(official, rust)| (*official, rust.clone()))
+        .collect::<Vec<_>>();
+    variants.sort_unstable_by_key(|(_, rust)| rust.clone());
+
+    (data, variants)
+}
+
+fn get_as_name_arms<'a>(
+    variants: &'a [(&'a str, Ident)],
+) -> impl Iterator<Item = TokenStream> + 'a {
+    variants
+        .iter()
+        .map(|(official, rust)| quote!(Self::#rust => #official))
+}
+
+fn impl_flag(name: &Ident, as_name: impl Iterator<Item = TokenStream>) -> TokenStream {
     quote! {
         #[allow(unused_qualifications)]
         impl crate::units::Flag for #name {
             fn as_name(&self) -> &'static str {
                 match self {
-                    #(#variants,)*
-                    #unknown
+                    #(#as_name),*
                 }
             }
         }
-    }
-}
 
-fn impl_flag_display(name: &Ident) -> TokenStream {
-    quote! {
+
         impl ::core::fmt::Display for #name {
             fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
                 let s = <Self as crate::units::Flag>::as_name(self);
@@ -192,4 +123,8 @@ fn impl_flag_display(name: &Ident) -> TokenStream {
             }
         }
     }
+}
+
+fn str_to_ident(s: &str) -> Ident {
+    format_ident!("{}", s)
 }

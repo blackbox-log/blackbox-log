@@ -1,0 +1,9 @@
+enum:
+  name: DebugMode
+  doc: ''
+  unknown: false
+  unknownCallback: '|raw| tracing::error!("invalid debug mode: {raw}")'
+  rename:
+    AUTOLEVEL: AutoLevel
+    AUTOTRIM: AutoTrim
+    AUTOTUNE: AutoTune

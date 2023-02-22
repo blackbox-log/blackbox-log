@@ -1,12 +1,11 @@
 use std::collections::HashMap;
 
-use proc_macro2::TokenStream;
+use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 use serde::Deserialize;
 
-use super::{
-    combine_flags, expand_combined_flags, impl_flag, impl_flag_display, quote_attrs, Firmware,
-};
+use super::{impl_flag, quote_attrs, str_to_ident, AugmentedData};
+use crate::type_def::get_as_name_arms;
 
 #[derive(Debug, Deserialize)]
 pub struct FlagSet {
@@ -97,88 +96,95 @@ pub struct Flags {
     doc: String,
     #[serde(default)]
     attrs: Vec<String>,
-    betaflight: HashMap<String, u32>,
-    inav: HashMap<String, u32>,
     #[serde(default)]
     rename: HashMap<String, String>,
+    #[serde(default)]
+    pub(super) data: HashMap<String, HashMap<u32, Vec<String>>>,
 }
 
 impl Flags {
     pub fn expand(&self) -> TokenStream {
-        let name = format_ident!("{}", self.name);
+        let name = self.name();
         let attrs = quote_attrs(&self.doc, &self.attrs, true);
 
-        let flags = combine_flags(&self.betaflight, &self.inav, &self.rename);
-        let enum_def = expand_combined_flags(&name, &flags, false);
-        let impl_flag = impl_flag(&name, &flags, false);
-        let impl_flag_display = impl_flag_display(&name);
+        let (data, flags) = super::augment_data(&self.data, &self.rename);
+        let bit_conversions = self.bit_conversions(&data);
 
-        let mut from_bit = Vec::new();
-        for flag in &flags {
-            let ident = &flag.rust;
+        let as_name = get_as_name_arms(&flags);
+        let impl_flag = impl_flag(&name, as_name);
 
-            if flag.betaflight == flag.inav && flag.betaflight.is_some() {
-                let bit = flag.betaflight.unwrap();
-                let arm = quote!(#bit => Some(Self::#ident));
-                from_bit.push((bit, Firmware::Both, arm));
-                continue;
-            }
-
-            if let Some(bit) = flag.betaflight {
-                let arm = quote!(#bit if fw.is_betaflight() => Some(Self::#ident));
-                from_bit.push((bit, Firmware::Betaflight, arm));
-            }
-
-            if let Some(bit) = flag.inav {
-                let arm = quote!(#bit if fw.is_inav() => Some(Self::#ident));
-                from_bit.push((bit, Firmware::Inav, arm));
-            }
-        }
-        from_bit.sort_unstable_by_key(|(index, firmware, _)| (*index, *firmware));
-        let from_bit = from_bit.iter().map(|(_, _, arm)| arm);
-
-        let mut to_bit = Vec::new();
-        for flag in &flags {
-            let ident = &flag.rust;
-
-            if flag.betaflight == flag.inav && flag.betaflight.is_some() {
-                let bit = flag.betaflight.unwrap();
-                to_bit.push(quote!(Self::#ident => Some(#bit)));
-                continue;
-            }
-
-            if let Some(bit) = flag.betaflight {
-                to_bit.push(quote!(Self::#ident if fw.is_betaflight() => Some(#bit)));
-            }
-
-            if let Some(bit) = flag.inav {
-                to_bit.push(quote!(Self::#ident if fw.is_inav() => Some(#bit)));
-            }
-        }
+        let enum_def = flags.iter().map(|(official, rust)| {
+            let doc = format!("`{official}`");
+            quote!(#[doc = #doc] #rust)
+        });
 
         quote! {
             #attrs
-            #enum_def
-            #impl_flag
-            #impl_flag_display
+            pub enum #name {
+                #(#enum_def),*
+            }
 
-            #[allow(unused_qualifications, clippy::match_same_arms, clippy::unseparated_literal_suffix, clippy::wildcard_enum_match_arm)]
+            #impl_flag
+            #bit_conversions
+        }
+    }
+
+    fn name(&self) -> Ident {
+        str_to_ident(&self.name)
+    }
+
+    fn bit_conversions(&self, data: &AugmentedData<'_>) -> TokenStream {
+        let name = self.name();
+
+        let mut from_bit = Vec::new();
+        for ((_, rust), indices) in data {
+            for (index, firmwares) in indices.iter() {
+                let key = (index, firmwares[0].clone());
+                from_bit.push((
+                    key,
+                    quote! {
+                        (#index, #(#firmwares)|*) => Some(Self::#rust)
+                    },
+                ));
+            }
+        }
+        from_bit.sort_unstable_by_key(|(key, _)| key.clone());
+        let from_bit = from_bit.into_iter().map(|(_, tokens)| tokens);
+
+        let mut to_bit = Vec::new();
+        for ((_, rust), indices) in data {
+            for (index, firmwares) in indices.iter() {
+                let key = (index, firmwares[0].clone());
+                to_bit.push((
+                    key,
+                    quote! {
+                        (Self::#rust, #(#firmwares)|*) => Some(#index)
+                    },
+                ));
+            }
+        }
+        to_bit.sort_unstable_by_key(|(key, _)| key.clone());
+        let to_bit = to_bit.into_iter().map(|(_, tokens)| tokens);
+
+        quote! {
+            #[allow(unused_qualifications, clippy::enum_glob_use, clippy::match_same_arms, clippy::unseparated_literal_suffix)]
             impl #name {
                 const fn from_bit(bit: u32, fw: crate::headers::InternalFirmware) -> Option<Self> {
-                    match bit {
+                    use crate::headers::InternalFirmware::*;
+                    match (bit, fw) {
                         #(#from_bit,)*
                         _ => None
                     }
                 }
 
                 const fn to_bit(self, fw: crate::headers::InternalFirmware) -> Option<u32> {
-                    match self {
+                    use crate::headers::InternalFirmware::*;
+                    match (self, fw) {
                         #(#to_bit,)*
                         _ => None
                     }
                 }
             }
-
         }
     }
 }

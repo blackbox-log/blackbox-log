@@ -424,6 +424,7 @@ impl InternalFirmware {
         }
     }
 
+    #[allow(unused)]
     pub(crate) const fn is_inav(self) -> bool {
         // Will need to be changed if any new firmwares are added
         !self.is_betaflight()

@@ -1,0 +1,13 @@
+set: 
+  name: FeatureSet
+  doc: ''
+flags:
+  name: Feature
+  doc: ''
+  rename:
+    3D: ThreeD
+    AIRMODE: AirMode
+    RANGEFINDER: RangeFinder
+    SOFTSERIAL: SoftSerial
+    THR_VBAT_COMP: ThrottleVbatCompensation
+    TX_PROF_SEL: TxProfileSelection

@@ -1,0 +1,36 @@
+set:
+  name: FlightModeSet
+  doc: All currently enabled flight modes. See [`FlagSet`][crate::units::FlagSet] and [`FlightMode`].
+flags:
+  name: FlightMode
+  doc: A flight mode. See [`Flag`][crate::units::Flag].
+  rename:
+    3D: ThreeD
+    AUTOLEVEL: AutoLevel
+    AUTOTRIM: AutoTrim
+    AUTOTUNE: AutoTune
+    BEEPERON: BeeperOn
+    CALIB: Calibration
+    CAMERA1: Camera1
+    CAMERA2: Camera2
+    CAMERA3: Camera3
+    CAMSTAB: CamStab
+    CHANGEMISSION: MissionChange
+    GCSNAV: GcsNav
+    HEADADJ: HeadAdjust
+    HEADFREE: HeadFree
+    HEADINGHOLD: HeadingHold
+    HOMERESET: HomeReset
+    LEDLOW: LedLow
+    LOITERDIRCHN: LoiterChange
+    MSPOVERRIDE: MspOverride
+    MSPRCOVERRIDE: MspRcOverride
+    NAV ALTHOLD: NavAltitudeHold
+    NAV POSHOLD: NavPositionHold
+    NAV WP: NavWaypoint
+    NAVCOURSEHOLD: NavCourseHold
+    OSDALT1: OsdAlt1
+    OSDALT2: OsdAlt2
+    OSDALT3: OsdAlt3
+    PLANWPMISSION: PlanWpMission
+    TURNASSIST: TurnAssist
