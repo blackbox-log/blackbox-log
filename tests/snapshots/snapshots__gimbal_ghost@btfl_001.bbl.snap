@@ -24,6 +24,7 @@ File(
           Osd,
           AirMode,
           AntiGravity,
+          DynamicFilter,
         ],
         pwm_protocol: Dshot600,
         unknown: {
@@ -651,6 +652,7 @@ File(
           Osd,
           AirMode,
           AntiGravity,
+          DynamicFilter,
         ],
         pwm_protocol: Dshot600,
         unknown: {

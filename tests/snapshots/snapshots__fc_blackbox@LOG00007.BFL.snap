@@ -19,6 +19,7 @@ File(
           RxSerial,
           AirMode,
           AntiGravity,
+          DynamicFilter,
         ],
         pwm_protocol: Dshot600,
         unknown: {
