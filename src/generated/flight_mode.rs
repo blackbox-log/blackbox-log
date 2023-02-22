@@ -133,8 +133,6 @@ pub enum FlightMode {
     Mag,
     /// `MANUAL`
     Manual,
-    /// `CHANGEMISSION`
-    MissionChange,
     /// `MSPOVERRIDE`
     MspOverride,
     /// `MSPRCOVERRIDE`
@@ -244,7 +242,6 @@ impl crate::units::Flag for FlightMode {
             Self::LoiterChange => "LOITERDIRCHN",
             Self::Mag => "MAG",
             Self::Manual => "MANUAL",
-            Self::MissionChange => "CHANGEMISSION",
             Self::MspOverride => "MSPOVERRIDE",
             Self::MspRcOverride => "MSPRCOVERRIDE",
             Self::NavAltitudeHold => "NAV ALTHOLD",
@@ -405,8 +402,6 @@ impl FlightMode {
             (45u32, Inav5_0_0) => Some(Self::AutoLevel),
             (46u32, Inav5_0_0) => Some(Self::PlanWpMission),
             (47u32, Inav5_0_0) => Some(Self::Soaring),
-            (48u32, Inav5_0_0) => Some(Self::User3),
-            (49u32, Inav5_0_0) => Some(Self::MissionChange),
             _ => None,
         }
     }
@@ -521,8 +516,6 @@ impl FlightMode {
             (Self::AutoLevel, Inav5_0_0) => Some(45u32),
             (Self::PlanWpMission, Inav5_0_0) => Some(46u32),
             (Self::Soaring, Inav5_0_0) => Some(47u32),
-            (Self::User3, Inav5_0_0) => Some(48u32),
-            (Self::MissionChange, Inav5_0_0) => Some(49u32),
             _ => None,
         }
     }

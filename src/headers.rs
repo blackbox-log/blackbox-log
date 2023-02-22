@@ -451,11 +451,7 @@ impl From<Firmware> for InternalFirmware {
             Firmware::Betaflight(FirmwareVersion {
                 major: 4, minor: 4, ..
             }) => Self::Betaflight4_4_0,
-            Firmware::Inav(FirmwareVersion {
-                major: 5,
-                minor: 0,
-                patch: 0,
-            }) => Self::Inav5_0_0,
+            Firmware::Inav(FirmwareVersion { major: 5, .. }) => Self::Inav5_0_0,
             _ => unreachable!(),
         }
     }

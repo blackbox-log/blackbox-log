@@ -81,6 +81,8 @@ pub enum State {
     CompassCalibrated,
     /// `ESC_SENSOR_ENABLED`
     EscSensorEnabled,
+    /// `FIXED_WING_LEGACY`
+    FixedWingLegacy,
     /// `FLAPERON_AVAILABLE`
     FlaperonAvailable,
     /// `FW_HEADING_USE_YAW`
@@ -128,6 +130,7 @@ impl crate::units::Flag for State {
             Self::CalibrateMag => "CALIBRATE_MAG",
             Self::CompassCalibrated => "COMPASS_CALIBRATED",
             Self::EscSensorEnabled => "ESC_SENSOR_ENABLED",
+            Self::FixedWingLegacy => "FIXED_WING_LEGACY",
             Self::FlaperonAvailable => "FLAPERON_AVAILABLE",
             Self::FwHeadingUseYaw => "FW_HEADING_USE_YAW",
             Self::GpsFix => "GPS_FIX",
@@ -172,6 +175,7 @@ impl State {
             (2u32, Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::GpsFixEver),
             (2u32, Inav5_0_0) => Some(Self::CalibrateMag),
             (3u32, Inav5_0_0) => Some(Self::SmallAngle),
+            (4u32, Inav5_0_0) => Some(Self::FixedWingLegacy),
             (5u32, Inav5_0_0) => Some(Self::AntiWindup),
             (6u32, Inav5_0_0) => Some(Self::FlaperonAvailable),
             (7u32, Inav5_0_0) => Some(Self::NavMotorStopOrIdle),
@@ -209,6 +213,7 @@ impl State {
             (Self::GpsFixEver, Betaflight4_3_0 | Betaflight4_4_0) => Some(2u32),
             (Self::CalibrateMag, Inav5_0_0) => Some(2u32),
             (Self::SmallAngle, Inav5_0_0) => Some(3u32),
+            (Self::FixedWingLegacy, Inav5_0_0) => Some(4u32),
             (Self::AntiWindup, Inav5_0_0) => Some(5u32),
             (Self::FlaperonAvailable, Inav5_0_0) => Some(6u32),
             (Self::NavMotorStopOrIdle, Inav5_0_0) => Some(7u32),

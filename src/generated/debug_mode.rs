@@ -67,8 +67,14 @@ pub enum DebugMode {
     DynIdle,
     /// `DYN_LPF`
     DynLpf,
+    /// `DYNAMIC_FILTER`
+    DynamicFilter,
+    /// `DYNAMIC_FILTER_FREQUENCY`
+    DynamicFilterFrequency,
     /// `DYNAMIC_GYRO_LPF`
     DynamicGyroLpf,
+    /// `ERPM`
+    Erpm,
     /// `ESC_SENSOR`
     EscSensor,
     /// `ESC_SENSOR_RPM`
@@ -111,6 +117,8 @@ pub enum DebugMode {
     GpsRescueTracking,
     /// `GPS_RESCUE_VELOCITY`
     GpsRescueVelocity,
+    /// `GYRO`
+    Gyro,
     /// `GYRO_FILTERED`
     GyroFiltered,
     /// `GYRO_RAW`
@@ -119,8 +127,14 @@ pub enum DebugMode {
     GyroSample,
     /// `GYRO_SCALED`
     GyroScaled,
+    /// `IMU2`
+    Imu2,
+    /// `IRLOCK`
+    Irlock,
     /// `ITERM_RELAX`
     ItermRelax,
+    /// `KALMAN_GAIN`
+    KalmanGain,
     /// `LANDING`
     Landing,
     /// `LIDAR_TF`
@@ -135,6 +149,8 @@ pub enum DebugMode {
     None,
     /// `PCF8574`
     Pcf8574,
+    /// `PID_MEASUREMENT`
+    PidMeasurement,
     /// `PIDLOOP`
     Pidloop,
     /// `RANGEFINDER`
@@ -153,6 +169,8 @@ pub enum DebugMode {
     RemFlightTime,
     /// `RPM_FILTER`
     RpmFilter,
+    /// `RPM_FREQ`
+    RpmFreq,
     /// `RTH`
     Rth,
     /// `RUNAWAY_TAKEOFF`
@@ -185,6 +203,14 @@ pub enum DebugMode {
     Sdio,
     /// `SMARTAUDIO`
     Smartaudio,
+    /// `SMITH_PREDICTOR`
+    SmithPredictor,
+    /// `SPM_CELLS`
+    SpmCells,
+    /// `SPM_VARIO`
+    SpmVario,
+    /// `SPM_VS600`
+    SpmVs600,
     /// `STACK`
     Stack,
     /// `TIMING_ACCURACY`
@@ -235,7 +261,10 @@ impl crate::units::Flag for DebugMode {
             Self::DualGyroScaled => "DUAL_GYRO_SCALED",
             Self::DynIdle => "DYN_IDLE",
             Self::DynLpf => "DYN_LPF",
+            Self::DynamicFilter => "DYNAMIC_FILTER",
+            Self::DynamicFilterFrequency => "DYNAMIC_FILTER_FREQUENCY",
             Self::DynamicGyroLpf => "DYNAMIC_GYRO_LPF",
+            Self::Erpm => "ERPM",
             Self::EscSensor => "ESC_SENSOR",
             Self::EscSensorRpm => "ESC_SENSOR_RPM",
             Self::EscSensorTmp => "ESC_SENSOR_TMP",
@@ -257,11 +286,15 @@ impl crate::units::Flag for DebugMode {
             Self::GpsRescueThrottlePid => "GPS_RESCUE_THROTTLE_PID",
             Self::GpsRescueTracking => "GPS_RESCUE_TRACKING",
             Self::GpsRescueVelocity => "GPS_RESCUE_VELOCITY",
+            Self::Gyro => "GYRO",
             Self::GyroFiltered => "GYRO_FILTERED",
             Self::GyroRaw => "GYRO_RAW",
             Self::GyroSample => "GYRO_SAMPLE",
             Self::GyroScaled => "GYRO_SCALED",
+            Self::Imu2 => "IMU2",
+            Self::Irlock => "IRLOCK",
             Self::ItermRelax => "ITERM_RELAX",
+            Self::KalmanGain => "KALMAN_GAIN",
             Self::Landing => "LANDING",
             Self::LidarTf => "LIDAR_TF",
             Self::Max7456Signal => "MAX7456_SIGNAL",
@@ -269,6 +302,7 @@ impl crate::units::Flag for DebugMode {
             Self::NavYaw => "NAV_YAW",
             Self::None => "NONE",
             Self::Pcf8574 => "PCF8574",
+            Self::PidMeasurement => "PID_MEASUREMENT",
             Self::Pidloop => "PIDLOOP",
             Self::Rangefinder => "RANGEFINDER",
             Self::RangefinderQuality => "RANGEFINDER_QUALITY",
@@ -278,6 +312,7 @@ impl crate::units::Flag for DebugMode {
             Self::RcSmoothingRate => "RC_SMOOTHING_RATE",
             Self::RemFlightTime => "REM_FLIGHT_TIME",
             Self::RpmFilter => "RPM_FILTER",
+            Self::RpmFreq => "RPM_FREQ",
             Self::Rth => "RTH",
             Self::RunawayTakeoff => "RUNAWAY_TAKEOFF",
             Self::RxExpresslrsPhaselock => "RX_EXPRESSLRS_PHASELOCK",
@@ -294,6 +329,10 @@ impl crate::units::Flag for DebugMode {
             Self::SchedulerDeterminism => "SCHEDULER_DETERMINISM",
             Self::Sdio => "SDIO",
             Self::Smartaudio => "SMARTAUDIO",
+            Self::SmithPredictor => "SMITH_PREDICTOR",
+            Self::SpmCells => "SPM_CELLS",
+            Self::SpmVario => "SPM_VARIO",
+            Self::SpmVs600 => "SPM_VS600",
             Self::Stack => "STACK",
             Self::TimingAccuracy => "TIMING_ACCURACY",
             Self::Usb => "USB",
@@ -323,79 +362,95 @@ impl DebugMode {
                 Some(Self::None)
             }
             (1u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Cycletime),
-            (1u32, Inav5_0_0) => Some(Self::Agl),
+            (1u32, Inav5_0_0) => Some(Self::Gyro),
             (2u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Battery),
-            (2u32, Inav5_0_0) => Some(Self::FlowRaw),
+            (2u32, Inav5_0_0) => Some(Self::Agl),
             (3u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::GyroFiltered),
-            (3u32, Inav5_0_0) => Some(Self::Flow),
+            (3u32, Inav5_0_0) => Some(Self::FlowRaw),
             (4u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
                 Some(Self::Accelerometer)
             }
-            (4u32, Inav5_0_0) => Some(Self::Always),
+            (4u32, Inav5_0_0) => Some(Self::Flow),
             (5u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Pidloop),
-            (5u32, Inav5_0_0) => Some(Self::SagCompVoltage),
+            (5u32, Inav5_0_0) => Some(Self::Sbus),
             (6u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::GyroScaled),
-            (6u32, Inav5_0_0) => Some(Self::Vibe),
+            (6u32, Inav5_0_0) => Some(Self::Fport),
             (7u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
                 Some(Self::RcInterpolation)
             }
-            (7u32, Inav5_0_0) => Some(Self::Cruise),
+            (7u32, Inav5_0_0) => Some(Self::Always),
             (8u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Anglerate),
-            (8u32, Inav5_0_0) => Some(Self::RemFlightTime),
+            (8u32, Inav5_0_0) => Some(Self::SagCompVoltage),
             (9u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::EscSensor),
-            (9u32, Inav5_0_0) => Some(Self::Smartaudio),
+            (9u32, Inav5_0_0) => Some(Self::Vibe),
             (10u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Scheduler),
-            (10u32, Inav5_0_0) => Some(Self::Acc),
+            (10u32, Inav5_0_0) => Some(Self::Cruise),
             (11u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Stack),
-            (11u32, Inav5_0_0) => Some(Self::NavYaw),
+            (11u32, Inav5_0_0) => Some(Self::RemFlightTime),
             (12u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
                 Some(Self::EscSensorRpm)
             }
-            (12u32, Inav5_0_0) => Some(Self::Pcf8574),
+            (12u32, Inav5_0_0) => Some(Self::Smartaudio),
             (13u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
                 Some(Self::EscSensorTmp)
             }
-            (13u32, Inav5_0_0) => Some(Self::DynamicGyroLpf),
+            (13u32, Inav5_0_0) => Some(Self::Acc),
             (14u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Altitude),
-            (14u32, Inav5_0_0) => Some(Self::AutoLevel),
+            (14u32, Inav5_0_0) => Some(Self::Erpm),
             (15u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Fft),
-            (15u32, Inav5_0_0) => Some(Self::Altitude),
+            (15u32, Inav5_0_0) => Some(Self::RpmFilter),
             (16u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::FftTime),
-            (16u32, Inav5_0_0) => Some(Self::AutoTrim),
+            (16u32, Inav5_0_0) => Some(Self::RpmFreq),
             (17u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::FftFreq),
-            (17u32, Inav5_0_0) => Some(Self::AutoTune),
+            (17u32, Inav5_0_0) => Some(Self::NavYaw),
             (18u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::RxFrskySpi),
-            (18u32, Inav5_0_0) => Some(Self::RateDynamics),
+            (18u32, Inav5_0_0) => Some(Self::DynamicFilter),
             (19u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::RxSfhssSpi),
-            (19u32, Inav5_0_0) => Some(Self::Landing),
+            (19u32, Inav5_0_0) => Some(Self::DynamicFilterFrequency),
             (20u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::GyroRaw),
+            (20u32, Inav5_0_0) => Some(Self::Irlock),
             (21u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::DualGyroRaw),
+            (21u32, Inav5_0_0) => Some(Self::KalmanGain),
             (22u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
                 Some(Self::DualGyroDiff)
             }
+            (22u32, Inav5_0_0) => Some(Self::PidMeasurement),
             (23u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
                 Some(Self::Max7456Signal)
             }
+            (23u32, Inav5_0_0) => Some(Self::SpmCells),
             (24u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
                 Some(Self::Max7456Spiclock)
             }
+            (24u32, Inav5_0_0) => Some(Self::SpmVs600),
             (25u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Sbus),
+            (25u32, Inav5_0_0) => Some(Self::SpmVario),
             (26u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Fport),
+            (26u32, Inav5_0_0) => Some(Self::Pcf8574),
             (27u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Rangefinder),
+            (27u32, Inav5_0_0) => Some(Self::DynamicGyroLpf),
             (28u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
                 Some(Self::RangefinderQuality)
             }
+            (28u32, Inav5_0_0) => Some(Self::AutoLevel),
             (29u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::LidarTf),
+            (29u32, Inav5_0_0) => Some(Self::Imu2),
             (30u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::AdcInternal),
+            (30u32, Inav5_0_0) => Some(Self::Altitude),
             (31u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
                 Some(Self::RunawayTakeoff)
             }
+            (31u32, Inav5_0_0) => Some(Self::SmithPredictor),
             (32u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Sdio),
+            (32u32, Inav5_0_0) => Some(Self::AutoTrim),
             (33u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
                 Some(Self::CurrentSensor)
             }
+            (33u32, Inav5_0_0) => Some(Self::AutoTune),
             (34u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Usb),
+            (34u32, Inav5_0_0) => Some(Self::RateDynamics),
             (35u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Smartaudio),
+            (35u32, Inav5_0_0) => Some(Self::Landing),
             (36u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Rth),
             (37u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::ItermRelax),
             (38u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::AcroTrainer),
