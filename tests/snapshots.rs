@@ -170,7 +170,6 @@ impl<'data, 'a> From<&'a Headers<'data>> for HeadersSnapshot<'data> {
 #[serde(rename = "MainFrame")]
 struct MainSnapshot {
     count: u128,
-    last_iteration: u32,
     time: NumberHistory<16, i128>,
     fields: Fields,
 }
@@ -179,7 +178,6 @@ impl MainSnapshot {
     fn new(fields: Fields) -> Self {
         Self {
             count: 0,
-            last_iteration: 0,
             time: NumberHistory::new(),
             fields,
         }
@@ -187,7 +185,6 @@ impl MainSnapshot {
 
     fn update(&mut self, frame: frame::MainFrame) {
         self.count += 1;
-        self.last_iteration = frame.iteration();
         self.time.update(frame.time_raw().into());
         self.fields.update(frame);
     }

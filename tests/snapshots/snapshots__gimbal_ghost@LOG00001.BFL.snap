@@ -163,7 +163,6 @@ File(
       ],
       main: MainFrame(
         count: 198955,
-        last_iteration: 1591562,
         time: FieldSnapshot(
           min: 0,
           max: 589915901,
@@ -171,6 +170,16 @@ File(
           histogram: (12296, 12414, 12374, 12409, 12440, 12433, 12334, 12471, 12361, 12483, 12257, 12552, 12638, 12457, 12434, 12602),
         ),
         fields: Fields([
+          Field(
+            name: "loopIteration",
+            unit: Unitless,
+            history: FieldSnapshot(
+              min: 0,
+              max: 1591562,
+              unique: 198955,
+              histogram: (12435, 12435, 12435, 12435, 12435, 12435, 12435, 12435, 12435, 12435, 12435, 12434, 12434, 12434, 12434, 12434),
+            ),
+          ),
           Field(
             name: "axisP[0]",
             unit: Unitless,

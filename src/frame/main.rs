@@ -37,12 +37,24 @@ impl super::Frame for MainFrame<'_, '_, '_> {
 
     fn get_raw(&self, index: usize) -> Option<u32> {
         let index = self.filter.get(index)?;
-        Some(self.raw.values[index])
+
+        let value = if index == 0 {
+            self.raw.iteration
+        } else {
+            self.raw.values[index - 1]
+        };
+
+        Some(value)
     }
 
     fn get(&self, index: usize) -> Option<MainValue> {
         let frame_def = self.headers.main_frame_def();
         let index = self.filter.get(index)?;
+
+        if index == 0 {
+            return Some(MainValue::Unsigned(self.raw.iteration));
+        }
+        let index = index - 1;
 
         let def = &frame_def.fields[index];
         let raw = self.raw.values[index];
@@ -85,13 +97,6 @@ impl<'data, 'headers, 'parser> MainFrame<'data, 'headers, 'parser> {
             raw,
             filter,
         }
-    }
-
-    /// Returns the `loopIteration` field. This is a 32bit counter incremented
-    /// in each flight controller loop.
-    #[inline]
-    pub fn iteration(&self) -> u32 {
-        self.raw.iteration
     }
 
     /// Returns the parsed time since power on.
@@ -170,6 +175,7 @@ pub enum MainUnit {
 /// The parsed frame definition for main frames.
 #[derive(Debug, Clone)]
 pub struct MainFrameDef<'data> {
+    iteration: MainFieldDef<'data>,
     fields: Vec<MainFieldDef<'data>>,
     index_motor_0: Option<usize>,
 }
@@ -181,14 +187,21 @@ impl<'data> FrameDef<'data> for MainFrameDef<'data> {
 
     #[inline]
     fn len(&self) -> usize {
-        self.fields.len()
+        // Plus loopIteration
+        self.fields.len() + 1
     }
 
     fn get<'a>(&'a self, index: usize) -> Option<FieldDef<'data, Self::Unit>>
     where
         'data: 'a,
     {
-        self.fields.get(index).map(
+        let field = if index == 0 {
+            Some(&self.iteration)
+        } else {
+            self.fields.get(index - 1)
+        };
+
+        field.map(
             |&MainFieldDef {
                  name, signed, unit, ..
              }| FieldDef { name, unit, signed },
@@ -433,22 +446,21 @@ impl<'data> MainFrameDefBuilder<'data> {
                 },
             );
 
-        if !matches!(
-            fields.next().transpose()?,
-            Some(MainFieldDef {
+        let Some(
+            iteration @ MainFieldDef {
                 name: "loopIteration",
                 predictor_intra: Predictor::Zero,
                 predictor_inter: Predictor::Increment,
                 encoding_intra: Encoding::Variable,
                 encoding_inter: Encoding::Null,
                 ..
-            })
-        ) {
+            },
+        ) = fields.next().transpose()? else {
             return Err(ParseError::MissingField {
                 frame: DataFrameKind::Intra,
                 field: "loopIteration".to_owned(),
             });
-        }
+        };
 
         if !matches!(
             fields.next().transpose()?,
@@ -484,6 +496,7 @@ impl<'data> MainFrameDefBuilder<'data> {
         let index_motor_0 = fields.iter().position(|f| f.name == "motor[0]");
 
         Ok(MainFrameDef {
+            iteration,
             fields,
             index_motor_0,
         })
