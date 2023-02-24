@@ -103,7 +103,7 @@ impl<'data, 'headers, 'parser> MainFrame<'data, 'headers, 'parser> {
     /// Returns the raw microsecond counter since power on.
     ///
     /// **Note:** This does not currently handle overflow of the transmitted
-    /// 32bit counter.
+    /// 32bit counter. See [#54](https://github.com/blackbox-log/blackbox-log/issues/54).
     #[inline]
     pub fn time_raw(&self) -> u64 {
         self.raw.time

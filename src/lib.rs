@@ -82,7 +82,7 @@
 //! - `std`: **Enabled** by default. Currently, this only implements
 //!   [`std::error::Error`] for [`headers::ParseError`].
 //!
-//! [bf-doc]: https://github.com/betaflight/betaflight/blob/master/docs/development/Blackbox%20Internals.md
+//! [bf-doc]: https://betaflight.com/docs/development/Blackbox%20Internals
 //! [inav-doc]: https://github.com/iNavFlight/inav/blob/master/docs/development/Blackbox%20Internals.md
 
 extern crate alloc;
