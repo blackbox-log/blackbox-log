@@ -183,6 +183,8 @@ impl<F: Frame> Iterator for FieldIter<'_, F> {
 
 impl<F: Frame> FusedIterator for FieldIter<'_, F> {}
 
+/// A wrapper around a frame definition that applies any filter configured in
+/// the [`DataParser`][crate::DataParser].
 #[derive(Debug)]
 pub struct FilteredFrameDef<'a, F> {
     def: &'a F,

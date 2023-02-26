@@ -7,6 +7,8 @@ use hashbrown::HashSet;
 use crate::frame::{self, FrameDef};
 use crate::utils::to_base_field;
 
+/// A complete set of filters to be passed to
+/// [`DataParser::with_filters`][crate::DataParser::with_filters].
 #[derive(Debug, Default, Clone)]
 pub struct FieldFilterSet {
     pub main: Option<FieldFilter>,
