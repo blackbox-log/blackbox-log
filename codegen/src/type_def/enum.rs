@@ -43,6 +43,7 @@ impl Enum {
 
         quote! {
             #attrs
+            #[non_exhaustive]
             pub enum #name {
                 #(#enum_def),*
             }

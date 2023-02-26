@@ -60,6 +60,7 @@ impl ::serde::Serialize for StateSet {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "_serde", derive(serde::Serialize))]
 /// A flight controller state. See [`Flag`][crate::units::Flag].
+#[non_exhaustive]
 pub enum State {
     /// `ACCELEROMETER_CALIBRATED`
     AccelerometerCalibrated,

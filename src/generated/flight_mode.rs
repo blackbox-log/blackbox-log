@@ -60,6 +60,7 @@ impl ::serde::Serialize for FlightModeSet {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "_serde", derive(serde::Serialize))]
 /// A flight mode. See [`Flag`][crate::units::Flag].
+#[non_exhaustive]
 pub enum FlightMode {
     /// `ACRO TRAINER`
     AcroTrainer,

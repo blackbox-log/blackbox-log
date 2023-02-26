@@ -57,6 +57,7 @@ impl ::serde::Serialize for DisabledFields {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "_serde", derive(serde::Serialize))]
+#[non_exhaustive]
 pub enum FieldGroup {
     /// `ACC`
     Acc,
