@@ -16,11 +16,11 @@
 //! use blackbox_log::prelude::*;
 //!
 //! let filters = blackbox_log::FieldFilterSet {
-//!     // This restricts the included fields to `loopIteration`, `time` and
-//!     // `rcCommand[0]` through `rcCommand[3]` for main frames
+//!     // This restricts the included fields to `rcCommand[0]` through `rcCommand[3]`
 //!     main: Some(["rcCommand"].into()),
-//!     // ... and only `flightModeFlags` for slow frames
+//!     // ... only `flightModeFlags` for slow frames
 //!     slow: Some(["flightModeFlags"].into()),
+//!     // ... and no filter for gps frames -- include all fields
 //!     gps: None,
 //! };
 //!
