@@ -2,27 +2,33 @@
 
 ## [Unreleased]
 
-### Breaking
+### Added
 
-- Renamed `ParseError::UnknownFirmware` -> `ParseError::InvalidFirmware` to
-  better match its use for any error while parsing the `Firmware revision`
-  header.
-- Renamed the `firmware_kind` field of `Headers` to `firmware` and the
-  `FirmwareKind` -> `Firmware`, now including the parsed version.
-- Fixed missing & misnamed flight modes
-  - Renamed some variants of `FlightMode`
+- Parse the headers for debug mode, enabled features, motor protocol, and
+  Betaflight's disabled fields
 
 ### Changed
 
-- All fields of `Headers` are now methods.
-- `ParseError::UnsupportedVersion` is now `::UnsupportedDataVersion`
-- Unsupported versions of supported firmwares now return the
+- All public fields of `Headers` are now getters.
+- Renamed `ParseError::UnknownFirmware` -> `InvalidFirmware` to better match
+  its use for any error while parsing the `Firmware revision` header.
+- Renamed the `firmware_kind` field of `Headers` to `firmware` and the
+  `FirmwareKind` -> `Firmware`, now including the parsed version.
+- `ParseError::UnsupportedVersion` is now `UnsupportedDataVersion`
+- Unsupported versions of supported firmwares now return the new
   `ParseError::UnsupportedFirmwareVersion` error
+- Filters are now applied when creating the `DataParser` using
+  `DataParser::with_filters`
 
 ### Removed
 
-- `Headers::version` and `LogVersion`
+- EmuFlight support ([`4b1c412`](https://github.com/blackbox-log/blackbox-log/commit/4b1c41298f7ab70b1b2a7efdb0a7b513a746a847))
+- `Headers::version` and `LogVersion` representing the log format version
 - The unstable `serde` feature
+
+### Fixed
+
+- Missing & misnamed flight modes
 
 ## [0.2.0] - 2023-01-28
 
