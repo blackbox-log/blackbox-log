@@ -34,10 +34,19 @@ anywhere that supports Rust or WebAssembly.
 
 ## Contributing
 
-At the moment, `blackbox-log` is still in heavy development and probably isn't
-quite ready for code contributions. However, [bug reports][bugs] are welcomed.
-If at all possible, please include a log file exhibiting the bug. If you've got
-any other questions or ideas, feel free to start a [discussion][discussions].
+All contributions are welcome. Testing and [bug reports] are greatly
+appreciated. If at all possible, please include a log file exhibiting the bug.
+If you've got any other questions or ideas, feel free to start a [discussion].
+
+If you're looking to contribute code or log files, see the
+[help wanted](https://github.com/blackbox-log/blackbox-log/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22)
+and
+[needs logs](https://github.com/blackbox-log/blackbox-log/issues?q=is%3Aopen+is%3Aissue+label%3A%22needs+logs)
+tags.
+
+Most development tasks are run using [`just`](https://github.com/casey/just).
+Run `just` in the project root to get a list of available tasks. If modifying
+the yaml files in `types/`, make sure to commit the result of `just codegen`.
 
 ## References/Prior Art
 
@@ -61,6 +70,6 @@ and INAV projects.
 [inav-viewer]: https://github.com/iNavFlight/blackbox-log-viewer
 [betaflight]: https://github.com/betaflight/betaflight
 [inav]: https://github.com/iNavFlight/inav
-[bugs]: https://github.com/blackbox-log/blackbox-log/issues
-[discussions]: https://github.com/blackbox-log/blackbox-log/discussions
+[bug reports]: https://github.com/blackbox-log/blackbox-log/issues
+[discussion]: https://github.com/blackbox-log/blackbox-log/discussions
 [gpl-ports]: https://www.gnu.org/licenses/gpl-faq.html#TranslateCode
