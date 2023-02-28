@@ -1,4 +1,7 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// All disabled field groups in a Betaflight log.
+///
+/// See [`FlagSet`][crate::units::FlagSet] and [`FieldGroup`].
 #[allow(unused_qualifications)]
 pub struct DisabledFields {
     firmware: crate::headers::InternalFirmware,
@@ -57,6 +60,9 @@ impl ::serde::Serialize for DisabledFields {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "_serde", derive(serde::Serialize))]
+/// A set of fields that can be disabled in Betaflight logs.
+///
+/// See [`Flag`][crate::units::Flag].
 #[non_exhaustive]
 pub enum FieldGroup {
     /// `ACC`

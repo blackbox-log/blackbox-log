@@ -1,9 +1,9 @@
 set:
   name: FlightModeSet
-  doc: All currently enabled flight modes. See [`FlagSet`][crate::units::FlagSet] and [`FlightMode`].
+  doc: All currently enabled flight modes.
 flags:
   name: FlightMode
-  doc: A flight mode. See [`Flag`][crate::units::Flag].
+  doc: A flight mode.
   rename:
     3D: ThreeD
     AUTOLEVEL: AutoLevel

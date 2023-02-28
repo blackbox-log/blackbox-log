@@ -1,9 +1,9 @@
 set: 
   name: FeatureSet
-  doc: ''
+  doc: All enabled features.
 flags:
   name: Feature
-  doc: ''
+  doc: A feature defined by any supported firmware.
   rename:
     3D: ThreeD
     AIRMODE: AirMode

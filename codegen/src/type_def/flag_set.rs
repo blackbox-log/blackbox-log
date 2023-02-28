@@ -5,7 +5,7 @@ use quote::{format_ident, quote};
 use serde::Deserialize;
 
 use super::{impl_flag, quote_attrs, str_to_ident, AugmentedData};
-use crate::type_def::get_as_name_arms;
+use crate::type_def::{flag_docs, get_as_name_arms};
 
 #[derive(Debug, Deserialize)]
 pub struct FlagSet {
@@ -17,8 +17,13 @@ pub struct FlagSet {
 
 impl FlagSet {
     pub fn expand(&self, flag_name: &str) -> TokenStream {
+        let doc = format!(
+            "{}\n\nSee [`FlagSet`][crate::units::FlagSet] and [`{flag_name}`].",
+            self.doc
+        );
+        let attrs = quote_attrs(&doc, &self.attrs, false);
+
         let name = format_ident!("{}", self.name);
-        let attrs = quote_attrs(&self.doc, &self.attrs, false);
         let flag_name = format_ident!("{}", flag_name);
 
         quote! {
@@ -105,7 +110,7 @@ pub struct Flags {
 impl Flags {
     pub fn expand(&self) -> TokenStream {
         let name = self.name();
-        let attrs = quote_attrs(&self.doc, &self.attrs, true);
+        let attrs = quote_attrs(&flag_docs(&self.doc), &self.attrs, true);
 
         let (data, flags) = super::augment_data(&self.data, &self.rename);
         let bit_conversions = self.bit_conversions(&data);

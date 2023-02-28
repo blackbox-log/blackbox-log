@@ -1,4 +1,7 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// All enabled features.
+///
+/// See [`FlagSet`][crate::units::FlagSet] and [`Feature`].
 #[allow(unused_qualifications)]
 pub struct FeatureSet {
     firmware: crate::headers::InternalFirmware,
@@ -57,6 +60,9 @@ impl ::serde::Serialize for FeatureSet {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "_serde", derive(serde::Serialize))]
+/// A feature defined by any supported firmware.
+///
+/// See [`Flag`][crate::units::Flag].
 #[non_exhaustive]
 pub enum Feature {
     /// `AIRMODE`

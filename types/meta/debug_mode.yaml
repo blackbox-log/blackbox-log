@@ -1,6 +1,6 @@
 enum:
   name: DebugMode
-  doc: ''
+  doc: The configured debugging info for a log.
   unknown: false
   unknownCallback: '|raw| tracing::error!("invalid debug mode: {raw}")'
   rename:

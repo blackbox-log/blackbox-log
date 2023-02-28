@@ -1,5 +1,5 @@
 enum:
   name: FailsafePhase
-  doc: The current failsafe phase. See [`Flag`][crate::units::Flag].
+  doc: The current failsafe phase.
   unknown: true
   unknownCallback: '|raw| tracing::debug!("invalid failsafe phase ({raw})")'

@@ -1,8 +1,8 @@
 set: 
   name: StateSet
-  doc: All currently enabled states. See [`FlagSet`][crate::units::FlagSet] and [`State`].
+  doc: All currently enabled states.
 flags:
   name: State
-  doc: A flight controller state. See [`Flag`][crate::units::Flag].
+  doc: A flight controller state.
   rename:
     AIRMODE_ACTIVE: AirMode

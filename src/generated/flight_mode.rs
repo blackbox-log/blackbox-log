@@ -1,6 +1,7 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-/// All currently enabled flight modes. See [`FlagSet`][crate::units::FlagSet]
-/// and [`FlightMode`].
+/// All currently enabled flight modes.
+///
+/// See [`FlagSet`][crate::units::FlagSet] and [`FlightMode`].
 #[allow(unused_qualifications)]
 pub struct FlightModeSet {
     firmware: crate::headers::InternalFirmware,
@@ -59,7 +60,9 @@ impl ::serde::Serialize for FlightModeSet {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "_serde", derive(serde::Serialize))]
-/// A flight mode. See [`Flag`][crate::units::Flag].
+/// A flight mode.
+///
+/// See [`Flag`][crate::units::Flag].
 #[non_exhaustive]
 pub enum FlightMode {
     /// `ACRO TRAINER`

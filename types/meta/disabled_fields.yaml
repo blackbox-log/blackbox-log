@@ -1,6 +1,6 @@
 set:
   name: DisabledFields
-  doc: ''
+  doc: All disabled field groups in a Betaflight log.
 flags:
   name: FieldGroup
-  doc: ''
+  doc: A set of fields that can be disabled in Betaflight logs.

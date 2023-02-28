@@ -1,6 +1,6 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "_serde", derive(serde::Serialize))]
-/// The current failsafe phase. See [`Flag`][crate::units::Flag].
+/// The current failsafe phase.
 #[non_exhaustive]
 pub enum FailsafePhase {
     /// `GPS_RESCUE`

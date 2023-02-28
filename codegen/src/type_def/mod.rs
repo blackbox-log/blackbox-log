@@ -48,6 +48,10 @@ impl TypeDef {
     }
 }
 
+fn flag_docs(doc: &str) -> String {
+    format!("{doc}\n\nSee [`Flag`][crate::units::Flag].")
+}
+
 fn quote_attrs(doc: &str, attrs: &[String], serde: bool) -> TokenStream {
     let serde = serde.then_some(quote!(#[cfg_attr(feature = "_serde", derive(serde::Serialize))]));
     let doc = doc.lines();
