@@ -340,7 +340,8 @@ impl<'data> GpsFrameDefBuilder<'data> {
             || encodings.next().is_some()
             || signs.next().is_some()
         {
-            tracing::warn!("not all GPS definition headers are of equal length");
+            tracing::error!("not all gps definition headers are of equal length");
+            return Err(ParseError::MalformedFrameDef(DataFrameKind::Gps));
         }
 
         Ok(Some(GpsFrameDef { fields }))

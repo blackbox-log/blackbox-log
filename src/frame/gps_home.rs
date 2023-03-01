@@ -173,7 +173,8 @@ impl<'data> GpsHomeFrameDefBuilder<'data> {
             || encodings.next().is_some()
             || signs.next().is_some()
         {
-            tracing::warn!("not all GPS home definition headers are of equal length");
+            tracing::error!("not all GPS home definition headers are of equal length");
+            return Err(ParseError::MalformedFrameDef(DataFrameKind::GpsHome));
         }
 
         Ok(Some(GpsHomeFrameDef([latitude, longitude], rest)))

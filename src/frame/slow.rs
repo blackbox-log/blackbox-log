@@ -6,7 +6,7 @@ use super::{
     read_field_values, DataFrameKind, DataFrameProperty, FieldDef, FieldDefDetails, FrameDef, Unit,
 };
 use crate::filter::AppliedFilter;
-use crate::headers::ParseResult;
+use crate::headers::{ParseError, ParseResult};
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::utils::as_i32;
@@ -256,7 +256,8 @@ impl<'data> SlowFrameDefBuilder<'data> {
             || encodings.next().is_some()
             || signs.next().is_some()
         {
-            tracing::warn!("not all slow frame definition headers are of equal length");
+            tracing::error!("not all slow definition headers are of equal length");
+            return Err(ParseError::MalformedFrameDef(DataFrameKind::Slow));
         }
 
         Ok(SlowFrameDef { fields })

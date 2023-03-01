@@ -483,14 +483,16 @@ impl<'data> MainFrameDefBuilder<'data> {
 
         if names.next().is_some()
             || predictors_intra.next().is_some()
-            || predictors_inter.next().is_some()
             || encodings_intra.next().is_some()
-            || encodings_inter.next().is_some()
             || signs.next().is_some()
         {
-            tracing::warn!(
-                "not all interframe & intraframe definition headers are of equal length"
-            );
+            tracing::error!("not all intraframe definition headers are of equal length");
+            return Err(ParseError::MalformedFrameDef(DataFrameKind::Intra));
+        }
+
+        if predictors_inter.next().is_some() || encodings_inter.next().is_some() {
+            tracing::error!("not all interframe definition headers are of equal length");
+            return Err(ParseError::MalformedFrameDef(DataFrameKind::Inter));
         }
 
         let index_motor_0 = fields.iter().position(|f| f.name == "motor[0]");

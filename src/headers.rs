@@ -46,6 +46,8 @@ pub enum ParseError {
     IncompleteHeaders,
     /// Definition for frame type `frame` is missing required a required field.
     MissingField { frame: DataFrameKind, field: String },
+    /// Unknown unrecoverable error in the frame definition.
+    MalformedFrameDef(DataFrameKind),
 }
 
 impl fmt::Display for ParseError {
@@ -68,6 +70,7 @@ impl fmt::Display for ParseError {
             Self::MissingField { frame, field } => {
                 write!(f, "missing field `{field}` in `{frame}` frame definition")
             }
+            Self::MalformedFrameDef(frame) => write!(f, "malformed {frame} frame definition"),
         }
     }
 }
