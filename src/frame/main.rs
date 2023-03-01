@@ -177,7 +177,7 @@ pub enum MainUnit {
 pub struct MainFrameDef<'data> {
     iteration: MainFieldDef<'data>,
     fields: Vec<MainFieldDef<'data>>,
-    index_motor_0: Option<usize>,
+    pub(crate) index_motor_0: Option<usize>,
 }
 
 impl super::seal::Sealed for MainFrameDef<'_> {}
@@ -214,10 +214,6 @@ impl<'data> MainFrameDef<'data> {
         MainFrameDefBuilder::default()
     }
 
-    pub(crate) const fn has_motor_0(&self) -> bool {
-        self.index_motor_0.is_some()
-    }
-
     /// # Panics
     ///
     /// Panics if there is no `motor[0]` field in the frame
@@ -227,20 +223,23 @@ impl<'data> MainFrameDef<'data> {
 
     pub(crate) fn validate(
         &self,
-        check_predictor: impl Fn(&'data str, Predictor) -> ParseResult<()>,
-        check_unit: impl Fn(&'data str, Unit) -> ParseResult<()>,
+        check_predictor: impl Fn(DataFrameKind, &'data str, Predictor, usize) -> ParseResult<()>,
+        check_unit: impl Fn(DataFrameKind, &'data str, Unit) -> ParseResult<()>,
     ) -> ParseResult<()> {
-        for MainFieldDef {
-            name,
-            predictor_intra,
-            predictor_inter,
-            unit,
-            ..
-        } in &self.fields
+        for (
+            i,
+            MainFieldDef {
+                name,
+                predictor_intra,
+                predictor_inter,
+                unit,
+                ..
+            },
+        ) in self.fields.iter().enumerate()
         {
-            check_predictor(name, *predictor_intra)?;
-            check_predictor(name, *predictor_inter)?;
-            check_unit(name, Unit::from(*unit))?;
+            check_predictor(DataFrameKind::Intra, name, *predictor_intra, i)?;
+            check_predictor(DataFrameKind::Inter, name, *predictor_inter, i)?;
+            check_unit(DataFrameKind::Intra, name, Unit::from(*unit))?;
         }
 
         Ok(())

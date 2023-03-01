@@ -29,14 +29,17 @@ impl<'data> GpsHomeFrameDef<'data> {
 
     pub(crate) fn validate(
         &self,
-        check_predictor: impl Fn(&'data str, Predictor) -> ParseResult<()>,
-        _check_unit: impl Fn(&'data str, super::Unit) -> ParseResult<()>,
+        check_predictor: impl Fn(DataFrameKind, &'data str, Predictor, usize) -> ParseResult<()>,
+        _check_unit: impl Fn(DataFrameKind, &'data str, super::Unit) -> ParseResult<()>,
     ) -> ParseResult<()> {
-        for GpsHomeFieldDef {
-            name, predictor, ..
-        } in &self.0
+        for (
+            i,
+            GpsHomeFieldDef {
+                name, predictor, ..
+            },
+        ) in self.0.iter().enumerate()
         {
-            check_predictor(name, *predictor)?;
+            check_predictor(DataFrameKind::GpsHome, name, *predictor, i)?;
         }
 
         Ok(())

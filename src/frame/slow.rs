@@ -149,18 +149,21 @@ impl<'data> SlowFrameDef<'data> {
 
     pub(crate) fn validate(
         &self,
-        check_predictor: impl Fn(&'data str, Predictor) -> ParseResult<()>,
-        check_unit: impl Fn(&'data str, Unit) -> ParseResult<()>,
+        check_predictor: impl Fn(DataFrameKind, &'data str, Predictor, usize) -> ParseResult<()>,
+        check_unit: impl Fn(DataFrameKind, &'data str, Unit) -> ParseResult<()>,
     ) -> ParseResult<()> {
-        for SlowFieldDef {
-            name,
-            predictor,
-            unit,
-            ..
-        } in &self.fields
+        for (
+            i,
+            SlowFieldDef {
+                name,
+                predictor,
+                unit,
+                ..
+            },
+        ) in self.fields.iter().enumerate()
         {
-            check_predictor(name, *predictor)?;
-            check_unit(name, Unit::from(*unit))?;
+            check_predictor(DataFrameKind::Slow, name, *predictor, i)?;
+            check_unit(DataFrameKind::Slow, name, Unit::from(*unit))?;
         }
 
         Ok(())

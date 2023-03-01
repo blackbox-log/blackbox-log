@@ -163,15 +163,15 @@ impl<'data> Headers<'data> {
         let has_accel = self.acceleration_1g.is_some();
         let has_min_throttle = self.min_throttle.is_some();
         // TODO: also check it is in a main frame
-        let has_motor_0 = self.main_frame_def.has_motor_0();
+        let motor_0 = self.main_frame_def.index_motor_0;
         let has_vbat_ref = self.vbat_reference.is_some();
         let has_min_motor = self.motor_output_range.is_some();
         let has_gps_home = self.gps_home_frame_def.is_some();
 
-        let predictor = |field, predictor| {
+        let predictor = |frame, field, predictor, index| {
             let ok = match predictor {
                 Predictor::MinThrottle => has_min_throttle,
-                Predictor::Motor0 => has_motor_0,
+                Predictor::Motor0 => motor_0.is_some() && index > motor_0.unwrap(),
                 Predictor::HomeLat | Predictor::HomeLon => has_gps_home,
                 Predictor::VBatReference => has_vbat_ref,
                 Predictor::MinMotor => has_min_motor,
@@ -187,15 +187,15 @@ impl<'data> Headers<'data> {
             if ok {
                 Ok(())
             } else {
-                tracing::error!(field, ?predictor, "missing required headers");
-                Err(ParseError::MissingHeader)
+                tracing::error!(field, ?predictor, "bad predictor");
+                Err(ParseError::MalformedFrameDef(frame))
             }
         };
 
-        let unit = |field, unit| {
+        let unit = |frame, field, unit| {
             if unit == Unit::Acceleration && !has_accel {
-                tracing::error!(field, ?unit, "missing required headers");
-                Err(ParseError::MissingHeader)
+                tracing::error!(field, ?unit, "bad unit");
+                Err(ParseError::MalformedFrameDef(frame))
             } else {
                 Ok(())
             }
