@@ -9,7 +9,7 @@ license.workspace = true
 [dependencies]
 glob = "0.3.1"
 heck = "0.4.1"
-proc-macro2 = { version = "1.0.51", default-features = false }
+proc-macro2 = { version = "1.0.52", default-features = false }
 quote = "1.0.23"
 serde = { version = "^1.0.155", features = ["derive"] }
 serde_yaml = "0.9.19"
