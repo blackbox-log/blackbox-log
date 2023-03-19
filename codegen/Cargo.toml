@@ -13,4 +13,4 @@ proc-macro2 = { version = "1.0.52", default-features = false }
 quote = "1.0.26"
 serde = { version = "^1.0.157", features = ["derive"] }
 serde_yaml = "0.9.19"
-syn = { version = "1.0.109", features = ["full"] }
+syn = { version = "2.0.2", features = ["full"] }
