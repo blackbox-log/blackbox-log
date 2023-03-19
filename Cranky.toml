@@ -45,7 +45,6 @@ warn = [
     "clippy::match_same_arms",
     "clippy::match_wildcard_for_single_variants",
     "clippy::mismatching_type_param_order",
-    "clippy::multiple_crate_versions",
     "clippy::multiple_inherent_impl",
     "clippy::needless_for_each",
     "clippy::option_if_let_else",
@@ -70,4 +69,6 @@ warn = [
     "clippy::use_debug",
     "clippy::verbose_file_reads",
     "clippy::wildcard_enum_match_arm",
+
+    # "clippy::multiple_crate_versions",
 ]
