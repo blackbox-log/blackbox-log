@@ -15,12 +15,12 @@
       "rangeStrategy": "widen"
     },
     {
+      "groupName": "codegen dependencies",
       "matchFiles": [
         "codegen/Cargo.toml"
       ],
-      "matchUpdateTypes": "patch",
       "schedule": [
-        "before 4am"
+        "before 4am on Saturday"
       ],
       "automerge": true
     }
