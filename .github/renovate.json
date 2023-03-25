@@ -4,6 +4,9 @@
     "github>blackbox-log/renovate-config"
   ],
   "platformAutomerge": true,
+  "schedule": [
+    "before 4am on Saturday"
+  ],
   "packageRules": [
     {
       "matchFiles": [
@@ -18,11 +21,7 @@
       "groupName": "codegen dependencies",
       "matchFiles": [
         "codegen/Cargo.toml"
-      ],
-      "schedule": [
-        "before 4am on Saturday"
-      ],
-      "automerge": true
+      ]
     }
   ]
 }
