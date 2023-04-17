@@ -32,6 +32,8 @@ jobs:
 
       - name: Add redirect
         run: cp .github/workflows/pages.index.html target/doc/index.html
+      - name: Disable Jekyll
+        run: touch target/doc/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
