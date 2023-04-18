@@ -12,7 +12,7 @@
 This is a Rust port of Betaflight's & INAV's blackbox tools. Check the [GitHub
 organization][org] for related projects. Or, read the [docs] to get started.
 
-> **Note:** `blackbox-log` is not quite ready for production use yet --
+> **Note**: `blackbox-log` is not quite ready for production use yet --
 consider it early-mid beta quality.
 
 ## Why?
