@@ -135,6 +135,7 @@ File(
           gps: 24,
           gps_home: 1,
         ),
+        progress: 0.081020355,
       ),
       capped: false,
       events: [
@@ -762,6 +763,7 @@ File(
           gps: 2,
           gps_home: 1,
         ),
+        progress: 0.0031238198,
       ),
       capped: false,
       events: [

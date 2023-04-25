@@ -64,7 +64,7 @@ impl<'data> Reader<'data> {
 
     /// Returns the number of bytes that have not yet been read.
     #[must_use]
-    const fn remaining(&self) -> usize {
+    pub(crate) const fn remaining(&self) -> usize {
         self.data.len() - self.index
     }
 

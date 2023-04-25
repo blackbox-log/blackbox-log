@@ -17,6 +17,7 @@ pub struct DataParser<'data, 'headers> {
     slow_filter: AppliedFilter,
     gps_filter: AppliedFilter,
     data: Reader<'data>,
+    data_len: usize,
     stats: Stats,
     main_frames: MainFrameHistory,
     gps_home_frame: Option<GpsHomeFrame>,
@@ -35,12 +36,15 @@ impl<'data, 'headers> DataParser<'data, 'headers> {
         headers: &'headers Headers<'data>,
         filters: &FieldFilterSet,
     ) -> Self {
+        let data_len = data.remaining();
+
         Self {
             headers,
             main_filter: filters.apply_main(headers.main_frame_def()),
             slow_filter: filters.apply_slow(headers.slow_frame_def()),
             gps_filter: filters.apply_gps(headers.gps_frame_def()),
             data,
+            data_len,
             stats: Stats::default(),
             main_frames: MainFrameHistory::default(),
             gps_home_frame: None,
@@ -137,6 +141,8 @@ impl<'data, 'headers> DataParser<'data, 'headers> {
                 }
             };
 
+            self.stats.progress = 1. - ((self.data.remaining() as f32) / (self.data_len as f32));
+
             match result {
                 // Check for a good frame kind byte, or EOF
                 Ok(frame)
@@ -149,6 +155,7 @@ impl<'data, 'headers> DataParser<'data, 'headers> {
                         InternalFrame::Event(event) => {
                             if matches!(event, Event::End { .. }) {
                                 self.done = true;
+                                self.stats.progress = 1.;
                             }
 
                             self.stats.counts.event += 1;
@@ -208,6 +215,13 @@ impl<'data, 'headers> DataParser<'data, 'headers> {
 pub struct Stats {
     /// The number of valid frames found of each type.
     pub counts: FrameCounts,
+
+    /// The approximate percentage of the log data parsed so far as a number in
+    /// the range `0..=1`.
+    ///
+    /// If there is extra data between logs this could massively underestimate,
+    /// but it will not overestimate.
+    pub progress: f32,
 }
 
 #[derive(Debug, Clone, Copy, Default)]

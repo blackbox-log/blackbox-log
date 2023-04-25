@@ -133,6 +133,7 @@ File(
           gps: 86,
           gps_home: 1,
         ),
+        progress: 1.0,
       ),
       capped: false,
       events: [

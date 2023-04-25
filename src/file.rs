@@ -44,7 +44,12 @@ impl<'data> File<'data> {
     /// This panics if `index >= self.log_count()`.
     pub fn get_reader(&self, index: usize) -> Reader<'data> {
         let start = self.offsets[index];
-        Reader::new(&self.data[start..])
+        let data = if let Some(&next) = self.offsets.get(index + 1) {
+            &self.data[start..next]
+        } else {
+            &self.data[start..]
+        };
+        Reader::new(data)
     }
 }
 

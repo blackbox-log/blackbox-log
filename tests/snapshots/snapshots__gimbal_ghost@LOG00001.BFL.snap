@@ -156,6 +156,7 @@ File(
           gps: 1015,
           gps_home: 0,
         ),
+        progress: 0.866997,
       ),
       capped: true,
       events: [

@@ -130,6 +130,7 @@ File(
           gps: 0,
           gps_home: 0,
         ),
+        progress: 0.8432378,
       ),
       capped: true,
       main: MainFrame(
