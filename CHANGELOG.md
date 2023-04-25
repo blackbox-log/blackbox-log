@@ -4,7 +4,8 @@
 
 ### Added
 
-- `Stats.progress`: Estimate how much of the log data has been parsed so far.
+- Support for INAV version 6.0
+- `Stats.progress`: Estimate of how much of the log data has been parsed so far.
 
 ## [0.3.0] - 2023-03-01
 
