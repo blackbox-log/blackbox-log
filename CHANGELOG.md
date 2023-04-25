@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Support INAV version 6.1
+
 ## [0.3.1] - 2023-04-25
 
 ### Added
