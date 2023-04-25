@@ -53,7 +53,7 @@ the yaml files in `types/`, make sure to commit the result of `just codegen`.
 - `blackbox_decode` ([Betaflight][bf-tools], [INAV][inav-tools])
 - Blackbox log viewer ([Betaflight][bf-viewer], [INAV][inav-viewer])
 - [Betaflight][betaflight] and [INAV][inav] source code; mainly in `src/main/blackbox/`
-- The Blackbox Internals development documentation ([Betaflight](https://betaflight.com/docs/development/Blackbox%20Internals), [INAV](https://github.com/iNavFlight/inav/blob/master/docs/development/Blackbox%20Internals.md))
+- The Blackbox Internals development documentation ([Betaflight](https://betaflight.com/docs/development/Blackbox-Internals), [INAV](https://github.com/iNavFlight/inav/blob/master/docs/development/Blackbox%20Internals.md))
 - [`fc-blackbox`](https://lib.rs/crates/fc-blackbox)
 
 ## License
