@@ -65,6 +65,7 @@ impl FlagSet {
                 }
             }
 
+            #[allow(unused_qualifications)]
             impl ::core::fmt::Display for #name {
                 fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
                     let names = <Self as crate::units::FlagSet>::as_names(self);

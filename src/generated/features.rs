@@ -37,6 +37,7 @@ impl crate::units::FlagSet for FeatureSet {
             .collect()
     }
 }
+#[allow(unused_qualifications)]
 impl ::core::fmt::Display for FeatureSet {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         let names = <Self as crate::units::FlagSet>::as_names(self);
@@ -178,6 +179,7 @@ impl crate::units::Flag for Feature {
         }
     }
 }
+#[allow(unused_qualifications)]
 impl ::core::fmt::Display for Feature {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         let s = <Self as crate::units::Flag>::as_name(self);

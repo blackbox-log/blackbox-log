@@ -41,6 +41,7 @@ impl crate::units::Flag for PwmProtocol {
         }
     }
 }
+#[allow(unused_qualifications)]
 impl ::core::fmt::Display for PwmProtocol {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         let s = <Self as crate::units::Flag>::as_name(self);

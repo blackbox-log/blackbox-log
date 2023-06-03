@@ -347,6 +347,7 @@ impl crate::units::Flag for DebugMode {
         }
     }
 }
+#[allow(unused_qualifications)]
 impl ::core::fmt::Display for DebugMode {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         let s = <Self as crate::units::Flag>::as_name(self);

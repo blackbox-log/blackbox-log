@@ -37,6 +37,7 @@ impl crate::units::FlagSet for DisabledFields {
             .collect()
     }
 }
+#[allow(unused_qualifications)]
 impl ::core::fmt::Display for DisabledFields {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         let names = <Self as crate::units::FlagSet>::as_names(self);
@@ -109,6 +110,7 @@ impl crate::units::Flag for FieldGroup {
         }
     }
 }
+#[allow(unused_qualifications)]
 impl ::core::fmt::Display for FieldGroup {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         let s = <Self as crate::units::Flag>::as_name(self);

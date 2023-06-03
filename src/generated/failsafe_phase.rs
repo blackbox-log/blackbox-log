@@ -40,6 +40,7 @@ impl crate::units::Flag for FailsafePhase {
         }
     }
 }
+#[allow(unused_qualifications)]
 impl ::core::fmt::Display for FailsafePhase {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         let s = <Self as crate::units::Flag>::as_name(self);

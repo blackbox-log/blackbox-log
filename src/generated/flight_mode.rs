@@ -37,6 +37,7 @@ impl crate::units::FlagSet for FlightModeSet {
             .collect()
     }
 }
+#[allow(unused_qualifications)]
 impl ::core::fmt::Display for FlightModeSet {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         let names = <Self as crate::units::FlagSet>::as_names(self);
@@ -286,6 +287,7 @@ impl crate::units::Flag for FlightMode {
         }
     }
 }
+#[allow(unused_qualifications)]
 impl ::core::fmt::Display for FlightMode {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         let s = <Self as crate::units::Flag>::as_name(self);

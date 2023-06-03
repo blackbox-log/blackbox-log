@@ -37,6 +37,7 @@ impl crate::units::FlagSet for StateSet {
             .collect()
     }
 }
+#[allow(unused_qualifications)]
 impl ::core::fmt::Display for StateSet {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         let names = <Self as crate::units::FlagSet>::as_names(self);
@@ -154,6 +155,7 @@ impl crate::units::Flag for State {
         }
     }
 }
+#[allow(unused_qualifications)]
 impl ::core::fmt::Display for State {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         let s = <Self as crate::units::Flag>::as_name(self);

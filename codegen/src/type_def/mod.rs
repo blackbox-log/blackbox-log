@@ -119,7 +119,7 @@ fn impl_flag(name: &Ident, as_name: impl Iterator<Item = TokenStream>) -> TokenS
             }
         }
 
-
+        #[allow(unused_qualifications)]
         impl ::core::fmt::Display for #name {
             fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
                 let s = <Self as crate::units::Flag>::as_name(self);
