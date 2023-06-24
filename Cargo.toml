@@ -38,7 +38,7 @@ uom = { version = "^0.34.0", default-features = false, features = ["si", "f64"] 
 
 [dev-dependencies]
 criterion = { version = "^0.5.1", features = ["html_reports"] }
-insta = { version = "^1.29.0", default-features = false, features = ["colors", "glob", "ron"] }
+insta = { version = "^1.30.0", default-features = false, features = ["colors", "glob", "ron"] }
 test-case = "^3.1.0"
 
 [profile.dev.package.insta]
