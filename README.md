@@ -54,7 +54,13 @@ the yaml files in `types/`, make sure to commit the result of `just codegen`.
 - Blackbox log viewer ([Betaflight][bf-viewer], [INAV][inav-viewer])
 - [Betaflight][betaflight] and [INAV][inav] source code; mainly in `src/main/blackbox/`
 - The Blackbox Internals development documentation ([Betaflight](https://betaflight.com/docs/development/Blackbox-Internals), [INAV](https://github.com/iNavFlight/inav/blob/master/docs/development/Blackbox%20Internals.md))
-- [`fc-blackbox`](https://lib.rs/crates/fc-blackbox)
+- [`fc-blackbox`](https://lib.rs/crates/fc-blackbox) written by [Ilya Epifanov](https://github.com/ilya-epifanov)
+
+Many thanks to [Nicholas Sherlock](https://github.com/thenickdude) for his
+[original logging implementation](https://github.com/thenickdude/blackbox) and
+to [the Cleanflight project](https://github.com/cleanflight) (which Betaflight &
+INAV are forked from) for integrating it
+(https://github.com/cleanflight/cleanflight/pull/227).
 
 ## License
 
