@@ -50,11 +50,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: rm rust-toolchain*
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: nightly
-          components: rustfmt
+      - run: rustup toolchain install nightly --profile minimal --component rustfmt
       - run: cargo run -p codegen
       - run: git diff --exit-code src/generated/
 
