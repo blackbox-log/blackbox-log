@@ -74,7 +74,9 @@ impl<'data> GpsHomeFrameDef<'data> {
             .collect::<Vec<_>>();
 
         // `values` can only have two elements thanks to zipping with `self.0`
-        let [latitude, longitude, ..] = values[..] else { unreachable!() };
+        let [latitude, longitude, ..] = values[..] else {
+            unreachable!()
+        };
 
         Ok(GpsHomeFrame(GpsPosition {
             latitude,

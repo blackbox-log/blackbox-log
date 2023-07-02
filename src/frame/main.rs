@@ -454,7 +454,8 @@ impl<'data> MainFrameDefBuilder<'data> {
                 encoding_inter: Encoding::Null,
                 ..
             },
-        ) = fields.next().transpose()? else {
+        ) = fields.next().transpose()?
+        else {
             return Err(ParseError::MissingField {
                 frame: DataFrameKind::Intra,
                 field: "loopIteration".to_owned(),
