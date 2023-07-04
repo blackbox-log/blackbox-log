@@ -55,7 +55,4 @@ install:
         cargo-criterion \
         cargo-llvm-cov \
         cargo-nextest \
-        flamegraph \
-        wasm-opt
-
-    cargo install --locked --git https://github.com/wetheredge/wasm-multi-value-reverse-polyfill
+        flamegraph
