@@ -13,9 +13,8 @@ use crate::headers::{ParseError, ParseResult};
 use crate::parser::{decode, Encoding, InternalResult};
 use crate::predictor::{self, Predictor, PredictorContext};
 use crate::units::prelude::*;
-use crate::units::FromRaw;
 use crate::utils::{as_i32, to_base_field};
-use crate::{Headers, Reader};
+use crate::{units, Headers, Reader};
 
 /// Data parsed from a main frame.
 #[derive(Debug)]
@@ -63,21 +62,21 @@ impl super::Frame for MainFrame<'_, '_, '_> {
             MainUnit::Amperage => {
                 debug_assert!(def.signed);
                 let raw = as_i32(raw);
-                MainValue::Amperage(ElectricCurrent::from_raw(raw, self.headers))
+                MainValue::Amperage(units::new::current(raw))
             }
             MainUnit::Voltage => {
                 debug_assert!(!def.signed);
-                MainValue::Voltage(ElectricPotential::from_raw(raw, self.headers))
+                MainValue::Voltage(units::new::vbat(raw))
             }
             MainUnit::Acceleration => {
                 debug_assert!(def.signed);
                 let raw = as_i32(raw);
-                MainValue::Acceleration(Acceleration::from_raw(raw, self.headers))
+                MainValue::Acceleration(units::new::acceleration(raw, self.headers))
             }
             MainUnit::Rotation => {
                 debug_assert!(def.signed);
                 let raw = as_i32(raw);
-                MainValue::Rotation(AngularVelocity::from_raw(raw, self.headers))
+                MainValue::Rotation(units::new::angular_velocity(raw, self.headers))
             }
             MainUnit::Unitless => MainValue::new_unitless(raw, def.signed),
         };
@@ -102,7 +101,7 @@ impl<'data, 'headers, 'parser> MainFrame<'data, 'headers, 'parser> {
     /// Returns the parsed time since power on.
     #[inline]
     pub fn time(&self) -> Time {
-        Time::from_raw(self.raw.time, self.headers)
+        units::new::time(self.raw.time)
     }
 
     /// Returns the raw microsecond counter since power on.

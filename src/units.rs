@@ -21,80 +21,41 @@ pub(crate) mod prelude {
     };
 }
 
-mod from_raw {
-    #[allow(unreachable_pub)]
-    pub trait FromRaw {
-        type Raw;
-        fn from_raw(raw: Self::Raw, headers: &super::Headers) -> Self;
-    }
-}
-
 include_generated!("failsafe_phase");
 include_generated!("flight_mode");
 include_generated!("state");
 
-pub(crate) use from_raw::FromRaw;
+pub(crate) mod new {
+    use super::*;
 
-impl FromRaw for Time {
-    type Raw = u64;
-
-    #[inline]
-    fn from_raw(raw: Self::Raw, _headers: &Headers) -> Self {
-        Self::new::<prelude::microsecond>(raw as f64)
+    pub(crate) fn time(raw: u64) -> Time {
+        Time::new::<prelude::microsecond>(raw as f64)
     }
-}
 
-impl FromRaw for Acceleration {
-    type Raw = i32;
-
-    fn from_raw(raw: Self::Raw, headers: &Headers) -> Self {
+    pub(crate) fn acceleration(raw: i32, headers: &Headers) -> Acceleration {
         let gs = f64::from(raw) / f64::from(headers.acceleration_1g.unwrap());
-        Self::new::<prelude::standard_gravity>(gs)
+        Acceleration::new::<prelude::standard_gravity>(gs)
     }
-}
 
-impl FromRaw for AngularVelocity {
-    type Raw = i32;
-
-    fn from_raw(raw: Self::Raw, headers: &Headers) -> Self {
+    pub(crate) fn angular_velocity(raw: i32, headers: &Headers) -> AngularVelocity {
         let scale = headers.gyro_scale.unwrap();
         let rad = f64::from(scale) * f64::from(raw);
 
         AngularVelocity::new::<si::angular_velocity::radian_per_second>(rad)
     }
-}
 
-impl FromRaw for ElectricCurrent {
-    type Raw = i32;
-
-    fn from_raw(raw: Self::Raw, _headers: &Headers) -> Self {
-        new_amps(raw)
+    pub(crate) fn current(raw: i32) -> ElectricCurrent {
+        // Correct from BF 3.1.7 (3.1.0?), INAV 2.0.0
+        ElectricCurrent::new::<si::electric_current::centiampere>(raw.into())
     }
-}
 
-/// Correct from BF 3.1.7 (3.1.0?), INAV 2.0.0
-fn new_amps(raw: i32) -> ElectricCurrent {
-    ElectricCurrent::new::<si::electric_current::centiampere>(raw.into())
-}
-
-impl FromRaw for ElectricPotential {
-    type Raw = u32;
-
-    fn from_raw(raw: Self::Raw, _headers: &Headers) -> Self {
-        new_vbat(raw)
+    pub(crate) fn vbat(raw: u32) -> ElectricPotential {
+        // Correct from BF 4.0.0, INAV 3.0.0?
+        ElectricPotential::new::<si::electric_potential::centivolt>(raw.into())
     }
-}
 
-/// Correct from BF 4.0.0, INAV 3.0.0?
-fn new_vbat(raw: u32) -> ElectricPotential {
-    ElectricPotential::new::<si::electric_potential::centivolt>(raw.into())
-}
-
-impl FromRaw for Velocity {
-    type Raw = u32;
-
-    fn from_raw(raw: Self::Raw, _headers: &Headers) -> Self {
-        Self::new::<si::velocity::centimeter_per_second>(raw.into())
+    pub(crate) fn velocity(raw: u32) -> Velocity {
+        Velocity::new::<si::velocity::centimeter_per_second>(raw.into())
     }
 }
 
@@ -132,12 +93,12 @@ mod tests {
 
     #[test]
     fn electric_current() {
-        float_eq!(1.39, new_amps(139).get::<prelude::ampere>());
+        float_eq!(1.39, new::current(139).get::<prelude::ampere>());
     }
 
     #[test]
     fn electric_potential() {
-        float_eq!(16.32, new_vbat(1632).get::<prelude::volt>());
+        float_eq!(16.32, new::vbat(1632).get::<prelude::volt>());
     }
 
     mod resolution {

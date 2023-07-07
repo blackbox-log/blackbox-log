@@ -12,9 +12,8 @@ use crate::headers::{ParseError, ParseResult};
 use crate::parser::{decode, Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
 use crate::units::prelude::*;
-use crate::units::FromRaw;
 use crate::utils::{as_i32, to_base_field};
-use crate::{Headers, Reader};
+use crate::{units, Headers, Reader};
 
 /// Data parsed from a GPS frame.
 #[derive(Debug, Clone)]
@@ -64,7 +63,7 @@ impl super::Frame for GpsFrame<'_, '_, '_> {
             }
             GpsUnit::Velocity => {
                 assert!(!def.signed);
-                GpsValue::Velocity(Velocity::from_raw(raw, self.headers))
+                GpsValue::Velocity(units::new::velocity(raw))
             }
             GpsUnit::Heading => {
                 assert!(!def.signed);
@@ -92,7 +91,7 @@ impl<'data, 'headers, 'parser> GpsFrame<'data, 'headers, 'parser> {
 
     /// Returns the parsed time since power on.
     pub fn time(&self) -> Time {
-        Time::from_raw(self.raw.time, self.headers)
+        units::new::time(self.raw.time)
     }
 
     /// Returns the raw microsecond counter since power on.
