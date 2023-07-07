@@ -105,6 +105,19 @@ impl SlowValue {
     }
 }
 
+impl From<SlowValue> for super::Value {
+    fn from(value: SlowValue) -> Self {
+        match value {
+            SlowValue::FlightMode(m) => Self::FlightMode(m),
+            SlowValue::State(s) => Self::State(s),
+            SlowValue::FailsafePhase(p) => Self::FailsafePhase(p),
+            SlowValue::Boolean(b) => Self::Boolean(b),
+            SlowValue::Unsigned(x) => Self::Unsigned(x),
+            SlowValue::Signed(x) => Self::Signed(x),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum SlowUnit {
     FlightMode,
@@ -112,6 +125,18 @@ pub enum SlowUnit {
     FailsafePhase,
     Boolean,
     Unitless,
+}
+
+impl From<SlowUnit> for Unit {
+    fn from(unit: SlowUnit) -> Self {
+        match unit {
+            SlowUnit::FlightMode => Self::FlightMode,
+            SlowUnit::State => Self::State,
+            SlowUnit::FailsafePhase => Self::FailsafePhase,
+            SlowUnit::Boolean => Self::Boolean,
+            SlowUnit::Unitless => Self::Unitless,
+        }
+    }
 }
 
 /// The parsed frame definition for slow frames.

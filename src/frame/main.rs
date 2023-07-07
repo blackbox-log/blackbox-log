@@ -163,6 +163,19 @@ impl MainValue {
     }
 }
 
+impl From<MainValue> for super::Value {
+    fn from(value: MainValue) -> Self {
+        match value {
+            MainValue::Amperage(a) => Self::Amperage(a),
+            MainValue::Voltage(v) => Self::Voltage(v),
+            MainValue::Acceleration(a) => Self::Acceleration(a),
+            MainValue::Rotation(r) => Self::Rotation(r),
+            MainValue::Unsigned(x) => Self::Unsigned(x),
+            MainValue::Signed(x) => Self::Signed(x),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum MainUnit {
     Amperage,
@@ -170,6 +183,18 @@ pub enum MainUnit {
     Acceleration,
     Rotation,
     Unitless,
+}
+
+impl From<MainUnit> for Unit {
+    fn from(unit: MainUnit) -> Self {
+        match unit {
+            MainUnit::Amperage => Self::Amperage,
+            MainUnit::Voltage => Self::Voltage,
+            MainUnit::Acceleration => Self::Acceleration,
+            MainUnit::Rotation => Self::Rotation,
+            MainUnit::Unitless => Self::Unitless,
+        }
+    }
 }
 
 /// The parsed frame definition for main frames.

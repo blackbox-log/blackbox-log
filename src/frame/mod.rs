@@ -342,42 +342,6 @@ pub enum Unit {
     Unitless,
 }
 
-impl From<MainUnit> for Unit {
-    fn from(unit: MainUnit) -> Self {
-        match unit {
-            MainUnit::Amperage => Self::Amperage,
-            MainUnit::Voltage => Self::Voltage,
-            MainUnit::Acceleration => Self::Acceleration,
-            MainUnit::Rotation => Self::Rotation,
-            MainUnit::Unitless => Self::Unitless,
-        }
-    }
-}
-
-impl From<SlowUnit> for Unit {
-    fn from(unit: SlowUnit) -> Self {
-        match unit {
-            SlowUnit::FlightMode => Self::FlightMode,
-            SlowUnit::State => Self::State,
-            SlowUnit::FailsafePhase => Self::FailsafePhase,
-            SlowUnit::Boolean => Self::Boolean,
-            SlowUnit::Unitless => Self::Unitless,
-        }
-    }
-}
-
-impl From<GpsUnit> for Unit {
-    fn from(unit: GpsUnit) -> Self {
-        match unit {
-            GpsUnit::Coordinate => Self::GpsCoordinate,
-            GpsUnit::Altitude => Self::Altitude,
-            GpsUnit::Velocity => Self::Velocity,
-            GpsUnit::Heading => Self::GpsHeading,
-            GpsUnit::Unitless => Self::Unitless,
-        }
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Value {
     Amperage(ElectricCurrent),
@@ -394,45 +358,6 @@ pub enum Value {
     GpsHeading(f64),
     Unsigned(u32),
     Signed(i32),
-}
-
-impl From<MainValue> for Value {
-    fn from(value: MainValue) -> Self {
-        match value {
-            MainValue::Amperage(a) => Self::Amperage(a),
-            MainValue::Voltage(v) => Self::Voltage(v),
-            MainValue::Acceleration(a) => Self::Acceleration(a),
-            MainValue::Rotation(r) => Self::Rotation(r),
-            MainValue::Unsigned(x) => Self::Unsigned(x),
-            MainValue::Signed(x) => Self::Signed(x),
-        }
-    }
-}
-
-impl From<SlowValue> for Value {
-    fn from(value: SlowValue) -> Self {
-        match value {
-            SlowValue::FlightMode(m) => Self::FlightMode(m),
-            SlowValue::State(s) => Self::State(s),
-            SlowValue::FailsafePhase(p) => Self::FailsafePhase(p),
-            SlowValue::Boolean(b) => Self::Boolean(b),
-            SlowValue::Unsigned(x) => Self::Unsigned(x),
-            SlowValue::Signed(x) => Self::Signed(x),
-        }
-    }
-}
-
-impl From<GpsValue> for Value {
-    fn from(value: GpsValue) -> Self {
-        match value {
-            GpsValue::Coordinate(c) => Self::GpsCoordinate(c),
-            GpsValue::Altitude(a) => Self::Altitude(a),
-            GpsValue::Velocity(v) => Self::Velocity(v),
-            GpsValue::Heading(h) => Self::GpsHeading(h),
-            GpsValue::Unsigned(x) => Self::Unsigned(x),
-            GpsValue::Signed(x) => Self::Signed(x),
-        }
-    }
 }
 
 pub(crate) fn is_frame_def_header(header: &str) -> bool {

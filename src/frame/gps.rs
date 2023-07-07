@@ -130,6 +130,19 @@ impl GpsValue {
     }
 }
 
+impl From<GpsValue> for super::Value {
+    fn from(value: GpsValue) -> Self {
+        match value {
+            GpsValue::Coordinate(c) => Self::GpsCoordinate(c),
+            GpsValue::Altitude(a) => Self::Altitude(a),
+            GpsValue::Velocity(v) => Self::Velocity(v),
+            GpsValue::Heading(h) => Self::GpsHeading(h),
+            GpsValue::Unsigned(x) => Self::Unsigned(x),
+            GpsValue::Signed(x) => Self::Signed(x),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum GpsUnit {
     Coordinate,
@@ -137,6 +150,18 @@ pub enum GpsUnit {
     Velocity,
     Heading,
     Unitless,
+}
+
+impl From<GpsUnit> for Unit {
+    fn from(unit: GpsUnit) -> Self {
+        match unit {
+            GpsUnit::Coordinate => Self::GpsCoordinate,
+            GpsUnit::Altitude => Self::Altitude,
+            GpsUnit::Velocity => Self::Velocity,
+            GpsUnit::Heading => Self::GpsHeading,
+            GpsUnit::Unitless => Self::Unitless,
+        }
+    }
 }
 
 /// The parsed frame definition for GPS frames.
