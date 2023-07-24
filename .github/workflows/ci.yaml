@@ -5,6 +5,7 @@ on:
       - 'main'
       - 'ci'
     paths-ignore:
+      - '.github/workflows/devcontainer.yaml'
       - '.github/workflows/pages.yaml'
       - '.github/renovate.json'
   pull_request:
