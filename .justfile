@@ -58,7 +58,7 @@ install:
         flamegraph
 
 devpod-up:
-    devpod up .
+    devpod up . --devcontainer-path .devcontainer/default-prebuilt/devcontainer.json
 
 devpod-delete:
     devpod delete .

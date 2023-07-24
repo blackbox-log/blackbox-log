@@ -1,0 +1,4 @@
+{
+	"name": "Default (prebuilt)",
+	"image": "ghcr.io/blackbox-log/blackbox-log-devcontainer:latest",
+}
