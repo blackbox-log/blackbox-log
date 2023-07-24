@@ -19,12 +19,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: latest
+      - name: Install devcontainer cli
+        run: npm install -g @devcontainers/cli
+
       - uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: devcontainers/ci@v0.3
-        with:
-          imageName: ghcr.io/blackbox-log/blackbox-log-devcontainer
-          cacheFrom: ghcr.io/blackbox-log/dev-blackbox-log
+      - name: Build and push
+        run: devcontainer build --workspace-folder . --config .devcontainer/default/devcontainer.json --image-name ghcr.io/blackbox-log/blackbox-log-devcontainer --cache-from ghcr.io/blackbox-log/dev-blackbox-log --push
