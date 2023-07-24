@@ -34,6 +34,8 @@ jobs:
         run: cp .github/workflows/pages.index.html target/doc/index.html
       - name: Disable Jekyll
         run: touch target/doc/.nojekyll
+      - name: Fix permissions
+        run: chmod -cR +rX ./target/doc
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
