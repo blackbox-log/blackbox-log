@@ -1,4 +1,4 @@
-name: Devcontainer Prebuild
+name: Devcontainer prebuild
 on:
   push:
     branches:
@@ -26,5 +26,5 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: devcontainers/ci@v0.3
         with:
-          imageName: ghcr.io/blackbox-log/dev-blackbox-log
+          imageName: ghcr.io/blackbox-log/blackbox-log-devcontainer
           cacheFrom: ghcr.io/blackbox-log/dev-blackbox-log

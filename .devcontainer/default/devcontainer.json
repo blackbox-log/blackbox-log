@@ -1,4 +1,5 @@
 {
+	"name": "Default",
 	"build": {
 		"dockerfile": "Dockerfile",
 	},
@@ -16,6 +17,16 @@
 		"seccomp=unconfined",
 	],
 	"postCreateCommand": "git config devcontainers-theme.show-dirty 1",
+
+	// Use 'mounts' to make the cargo cache persistent in a Docker Volume.
+	// "mounts": [
+	// 	{
+	// 		"source": "devcontainer-cargo-cache-${devcontainerId}",
+	// 		"target": "/usr/local/cargo",
+	// 		"type": "volume"
+	// 	}
+	// ]
+
 	"customizations": {
 		"vscode": {
 			// Based on https://github.com/devcontainers/features/tree/main/src/rust#vs-code-extensions
