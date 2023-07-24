@@ -36,7 +36,7 @@ jobs:
         run: touch target/doc/.nojekyll
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v2
         with:
           path: ./target/doc
 
