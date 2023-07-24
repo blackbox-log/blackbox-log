@@ -56,3 +56,12 @@ install:
         cargo-llvm-cov \
         cargo-nextest \
         flamegraph
+
+devpod-up:
+    devpod up .
+
+devpod-delete:
+    devpod delete .
+
+devpod-ssh:
+    devpod ssh --command 'cd /workspaces/blackbox-log && zsh' .

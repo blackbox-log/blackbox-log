@@ -1,0 +1,31 @@
+{
+	"build": {
+		"dockerfile": "Dockerfile",
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"username": "vscode",
+			// Already done by Dockerfile
+			"upgradePackages": false,
+		},
+	},
+	"capAdd": [
+		"SYS_PTRACE",
+	],
+	"securityOpt": [
+		"seccomp=unconfined",
+	],
+	"postCreateCommand": "git config devcontainers-theme.show-dirty 1",
+	"customizations": {
+		"vscode": {
+			// Based on https://github.com/devcontainers/features/tree/main/src/rust#vs-code-extensions
+			"extensions": [
+				"vadimcn.vscode-lldb",
+				"mutantdino.resourcemonitor",
+				"rust-lang.rust-analyzer",
+				"tamasfe.even-better-toml",
+				"serayuzgur.crates",
+			],
+		},
+	},
+}
