@@ -2,6 +2,9 @@
 	"name": "Default",
 	"build": {
 		"dockerfile": "Dockerfile",
+		"args": {
+			"msrv": "1.66",
+		},
 	},
 	"features": {
 		"ghcr.io/devcontainers/features/common-utils:2": {

@@ -15,6 +15,8 @@ RUN mkdir /out && \
 
 FROM mcr.microsoft.com/devcontainers/base:alpine
 
+ARG msrv
+
 COPY --from=cargo-binstall /binstall/* /usr/local/bin/
 COPY --from=cargo-criterion /out/* /usr/local/bin/
 
@@ -23,6 +25,6 @@ RUN apk upgrade && \
 
 USER vscode
 
-RUN rustup-init -y --default-toolchain 1.66 --component llvm-tools-preview --target thumbv7em-none-eabihf
+RUN rustup-init -y --default-toolchain $msrv --component llvm-tools-preview --target thumbv7em-none-eabihf
 
 RUN $HOME/.cargo/bin/rustup toolchain install nightly --profile minimal --component rustfmt
