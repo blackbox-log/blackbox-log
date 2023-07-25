@@ -48,6 +48,15 @@ Most development tasks are run using [`just`](https://github.com/casey/just).
 Run `just` in the project root to get a list of available tasks. If modifying
 the yaml files in `types/`, make sure to commit the result of `just codegen`.
 
+There are 2 devcontainers set up with all necessary development tools. `Default`
+will build the container from scratch, while `Default (prebuilt)` will download
+a prebuilt container and will likely be faster to start.
+
+[![Open in DevPod](https://devpod.sh/assets/open-in-devpod.svg)](https://devpod.sh/open#https://github.com/blackbox-log/blackbox-log)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/blackbox-log/blackbox-log?devcontainer_path=.devcontainer%2Fdefault-prebuilt%2Fdevcontainer.json)
+
+> **Note**: At least 4 cores and 4GiB of RAM is recommended.
+
 ## References/Prior Art
 
 - `blackbox_decode` ([Betaflight][bf-tools], [INAV][inav-tools])
