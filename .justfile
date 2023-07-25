@@ -48,15 +48,6 @@ profile-bench file bench time='10' *args='':
 codegen:
     cargo run -p codegen
 
-# Install/update all dev tools from crates.io
-install:
-    cargo install --locked \
-        cargo-cranky \
-        cargo-criterion \
-        cargo-llvm-cov \
-        cargo-nextest \
-        flamegraph
-
 devpod-up:
     devpod up . --devcontainer-path .devcontainer/default-prebuilt/devcontainer.json
 
