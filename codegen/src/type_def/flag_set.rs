@@ -145,7 +145,7 @@ impl Flags {
 
         let mut from_bit = Vec::new();
         for ((_, rust), indices) in data {
-            for (index, firmwares) in indices.iter() {
+            for (index, firmwares) in indices {
                 let key = (index, firmwares[0].clone());
                 from_bit.push((
                     key,
@@ -160,7 +160,7 @@ impl Flags {
 
         let mut to_bit = Vec::new();
         for ((_, rust), indices) in data {
-            for (index, firmwares) in indices.iter() {
+            for (index, firmwares) in indices {
                 let key = (index, firmwares[0].clone());
                 to_bit.push((
                     key,

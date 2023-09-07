@@ -62,7 +62,7 @@ impl Enum {
 
         let mut arms = Vec::new();
         for ((_, rust), indices) in data {
-            for (index, firmwares) in indices.iter() {
+            for (index, firmwares) in indices {
                 let key = (index, firmwares[0].clone());
                 let variant = quote!(Self::#rust);
                 let variant = if self.unknown {
