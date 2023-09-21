@@ -73,9 +73,12 @@ INAV are forked from) for integrating it
 
 ## License
 
-In accordance with the [GNU FAQ][gpl-ports]'s guidance that ports are
-derivative works, all code is licensed under the GPLv3 to match the Betaflight
-and INAV projects.
+Licensed under either of
+
+- Apache License, Version 2.0 ([LICENSE-APACHE] or <http://www.apache.org/licenses/LICENSE-2.0>)
+- MIT license ([LICENSE-MIT] or <http://opensource.org/licenses/MIT>)
+
+at your option.
 
 [org]: https://github.com/blackbox-log/
 [docs]: https://docs.rs/blackbox-log
@@ -87,4 +90,5 @@ and INAV projects.
 [inav]: https://github.com/iNavFlight/inav
 [bug reports]: https://github.com/blackbox-log/blackbox-log/issues
 [discussion]: https://github.com/blackbox-log/blackbox-log/discussions
-[gpl-ports]: https://www.gnu.org/licenses/gpl-faq.html#TranslateCode
+[LICENSE-APACHE]: https://github.com/blackbox-log/blackbox-log/blob/main/LICENSE-APACHE
+[LICENSE-MIT]: https://github.com/blackbox-log/blackbox-log/blob/main/LICENSE-MIT
