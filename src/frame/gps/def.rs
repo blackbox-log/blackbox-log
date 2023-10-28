@@ -3,173 +3,23 @@ use alloc::vec::Vec;
 
 use tracing::instrument;
 
-use super::{
-    read_field_values, DataFrameKind, DataFrameProperty, FieldDef, FieldDefDetails, FrameDef,
-    GpsHomeFrame, Unit,
+use super::{GpsUnit, RawGpsFrame};
+use crate::frame::{
+    self, DataFrameKind, DataFrameProperty, FieldDef, FieldDefDetails, FrameDef, GpsHomeFrame,
 };
-use crate::filter::AppliedFilter;
 use crate::headers::{ParseError, ParseResult};
 use crate::parser::{decode, Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
-use crate::units::prelude::*;
-use crate::utils::{as_i32, to_base_field};
-use crate::{units, Headers, Reader};
-
-/// Data parsed from a GPS frame.
-#[derive(Debug, Clone)]
-pub struct GpsFrame<'data, 'headers, 'parser> {
-    headers: &'headers Headers<'data>,
-    raw: RawGpsFrame,
-    filter: &'parser AppliedFilter,
-}
-
-impl super::seal::Sealed for GpsFrame<'_, '_, '_> {}
-
-impl super::Frame for GpsFrame<'_, '_, '_> {
-    type Value = GpsValue;
-
-    #[inline]
-    fn len(&self) -> usize {
-        self.filter.len()
-    }
-
-    fn get_raw(&self, index: usize) -> Option<u32> {
-        let index = self.filter.get(index)?;
-        Some(self.raw.values[index])
-    }
-
-    fn get(&self, index: usize) -> Option<Self::Value> {
-        let frame_def = self.headers.gps_frame_def().unwrap();
-        let index = self.filter.get(index)?;
-
-        let def = &frame_def.fields[index];
-        let raw = self.raw.values[index];
-
-        let value = match def.unit {
-            GpsUnit::Coordinate => {
-                assert!(def.signed);
-                let value = as_i32(raw);
-
-                GpsValue::Coordinate(f64::from(value) / 10000000.)
-            }
-            GpsUnit::Altitude => {
-                let altitude = if def.signed {
-                    as_i32(raw).into()
-                } else {
-                    raw.into()
-                };
-
-                GpsValue::Altitude(Length::new::<meter>(altitude))
-            }
-            GpsUnit::Velocity => {
-                assert!(!def.signed);
-                GpsValue::Velocity(units::new::velocity(raw))
-            }
-            GpsUnit::Heading => {
-                assert!(!def.signed);
-                GpsValue::Heading(f64::from(raw) / 10.)
-            }
-            GpsUnit::Unitless => GpsValue::new_unitless(raw, def.signed),
-        };
-
-        Some(value)
-    }
-}
-
-impl<'data, 'headers, 'parser> GpsFrame<'data, 'headers, 'parser> {
-    pub(crate) fn new(
-        headers: &'headers Headers<'data>,
-        raw: RawGpsFrame,
-        filter: &'parser AppliedFilter,
-    ) -> Self {
-        Self {
-            headers,
-            raw,
-            filter,
-        }
-    }
-
-    /// Returns the parsed time since power on.
-    pub fn time(&self) -> Time {
-        units::new::time(self.raw.time)
-    }
-
-    /// Returns the raw microsecond counter since power on.
-    ///
-    /// **Note:** This does not currently handle overflow of the transmitted
-    /// 32bit counter.
-    pub fn time_raw(&self) -> u64 {
-        self.raw.time
-    }
-}
-
-#[derive(Debug, Clone)]
-pub(crate) struct RawGpsFrame {
-    pub(crate) time: u64,
-    pub(crate) values: Vec<u32>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum GpsValue {
-    Coordinate(f64),
-    Altitude(Length),
-    Velocity(Velocity),
-    Heading(f64),
-    Unsigned(u32),
-    Signed(i32),
-}
-
-impl GpsValue {
-    const fn new_unitless(value: u32, signed: bool) -> Self {
-        if signed {
-            Self::Signed(as_i32(value))
-        } else {
-            Self::Unsigned(value)
-        }
-    }
-}
-
-impl From<GpsValue> for super::Value {
-    fn from(value: GpsValue) -> Self {
-        match value {
-            GpsValue::Coordinate(c) => Self::GpsCoordinate(c),
-            GpsValue::Altitude(a) => Self::Altitude(a),
-            GpsValue::Velocity(v) => Self::Velocity(v),
-            GpsValue::Heading(h) => Self::GpsHeading(h),
-            GpsValue::Unsigned(x) => Self::Unsigned(x),
-            GpsValue::Signed(x) => Self::Signed(x),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum GpsUnit {
-    Coordinate,
-    Altitude,
-    Velocity,
-    Heading,
-    Unitless,
-}
-
-impl From<GpsUnit> for Unit {
-    fn from(unit: GpsUnit) -> Self {
-        match unit {
-            GpsUnit::Coordinate => Self::GpsCoordinate,
-            GpsUnit::Altitude => Self::Altitude,
-            GpsUnit::Velocity => Self::Velocity,
-            GpsUnit::Heading => Self::GpsHeading,
-            GpsUnit::Unitless => Self::Unitless,
-        }
-    }
-}
+use crate::utils::to_base_field;
+use crate::{Headers, Reader, Unit};
 
 /// The parsed frame definition for GPS frames.
 #[derive(Debug, Clone)]
 pub struct GpsFrameDef<'data> {
-    fields: Vec<GpsFieldDef<'data>>,
+    pub(super) fields: Vec<GpsFieldDef<'data>>,
 }
 
-impl super::seal::Sealed for GpsFrameDef<'_> {}
+impl frame::seal::Sealed for GpsFrameDef<'_> {}
 
 impl<'data> FrameDef<'data> for GpsFrameDef<'data> {
     type Unit = GpsUnit;
@@ -235,7 +85,7 @@ impl<'data> GpsFrameDef<'data> {
             time
         };
 
-        let raw = read_field_values(data, &self.fields, |f| f.encoding)?;
+        let raw = frame::read_field_values(data, &self.fields, |f| f.encoding)?;
 
         let ctx = PredictorContext::with_home(headers, last_home.map(|home| home.0));
         let mut values = Vec::with_capacity(raw.len());
@@ -321,10 +171,10 @@ impl<'data> GpsFrameDefBuilder<'data> {
             return Ok(None);
         }
 
-        let mut names = super::parse_names(kind, self.names)?;
-        let mut predictors = super::parse_predictors(kind, self.predictors)?;
-        let mut encodings = super::parse_encodings(kind, self.encodings)?;
-        let mut signs = super::parse_signs(kind, self.signs)?;
+        let mut names = frame::parse_names(kind, self.names)?;
+        let mut predictors = frame::parse_predictors(kind, self.predictors)?;
+        let mut encodings = frame::parse_encodings(kind, self.encodings)?;
+        let mut signs = frame::parse_signs(kind, self.signs)?;
 
         let mut fields = (names.by_ref().zip(signs.by_ref()))
             .zip(predictors.by_ref().zip(encodings.by_ref()))
