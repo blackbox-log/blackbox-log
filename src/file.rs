@@ -29,7 +29,7 @@ impl<'data> File<'data> {
 
     /// Returns an iterator over parsed [`Headers`] for each log.
     ///
-    /// Roughly equivalent to repeatedly calling [`File::get_reader`], but may
+    /// Roughly equivalent to repeatedly calling [`File::parse`], but may
     /// be able to eliminate bounds checks and skips the `Option`
     /// wrapper.
     pub fn iter(&self) -> impl Iterator<Item = ParseResult<Headers<'data>>> + '_ {
