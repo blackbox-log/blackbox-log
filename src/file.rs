@@ -3,7 +3,7 @@ use core::fmt;
 
 use memchr::memmem;
 
-use crate::Reader;
+use crate::headers::{Headers, ParseResult};
 
 /// A complete blackbox log file containing zero or more logs.
 pub struct File<'data> {
@@ -27,29 +27,28 @@ impl<'data> File<'data> {
         self.offsets.len()
     }
 
-    /// Returns an iterator over [`Reader`]s for each log.
+    /// Returns an iterator over parsed [`Headers`] for each log.
     ///
-    /// Equivalent to repeatedly calling [`File::get_reader`], but may be able
-    /// to eliminate bounds checks and cannot panic.
-    pub fn iter(&self) -> impl Iterator<Item = Reader<'data>> + '_ {
+    /// Roughly equivalent to repeatedly calling [`File::get_reader`], but may
+    /// be able to eliminate bounds checks and skips the `Option`
+    /// wrapper.
+    pub fn iter(&self) -> impl Iterator<Item = ParseResult<Headers<'data>>> + '_ {
         self.offsets
             .iter()
-            .map(|&offset| Reader::new(&self.data[offset..]))
+            .map(|&offset| Headers::parse(&self.data[offset..]))
     }
 
-    /// Returns a [`Reader`] aligned to the start of the `index`-th log.
-    ///
-    /// # Panics
-    ///
-    /// This panics if `index >= self.log_count()`.
-    pub fn get_reader(&self, index: usize) -> Reader<'data> {
-        let start = self.offsets[index];
+    /// Attempts to parse the headers of the `index`-th log. Returns `None` if
+    /// there is no log number `index`.
+    pub fn parse(&self, index: usize) -> Option<ParseResult<Headers<'data>>> {
+        let start = *self.offsets.get(index)?;
         let data = if let Some(&next) = self.offsets.get(index + 1) {
             &self.data[start..next]
         } else {
             &self.data[start..]
         };
-        Reader::new(data)
+
+        Some(Headers::parse(data))
     }
 }
 

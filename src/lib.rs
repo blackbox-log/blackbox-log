@@ -25,10 +25,10 @@
 //! };
 //!
 //! let file = b"...";
-//! for mut reader in blackbox_log::File::new(file).iter() {
-//!     let headers = Headers::parse(&mut reader).unwrap();
+//! for headers in blackbox_log::File::new(file).iter() {
+//!     let headers = headers.expect("valid log headers");
 //!
-//!     let mut parser = DataParser::with_filters(reader, &headers, &filters);
+//!     let mut parser = headers.data_parser_with_filters(&filters);
 //!     while let Some(event) = parser.next() {
 //!         match event {
 //!             ParserEvent::Main(main) => {
@@ -58,13 +58,11 @@
 //! use blackbox_log::prelude::*;
 //!
 //! let file = b"...";
-//! let file = blackbox_log::File::new(file);
-//!
-//! for mut reader in file.iter() {
-//!     let headers = Headers::parse(&mut reader).unwrap();
+//! for headers in blackbox_log::File::new(file).iter() {
+//!     let headers = headers.expect("valid log headers");
 //!
 //!     if let Some(gps_def) = &headers.gps_frame_def() {
-//!         let mut parser = DataParser::new(reader, &headers);
+//!         let mut parser = headers.data_parser();
 //!
 //!         while let Some(event) = parser.next() {
 //!             if let ParserEvent::Gps(gps) = event {
@@ -111,7 +109,7 @@ pub use self::filter::{FieldFilter, FieldFilterSet};
 pub use self::frame::{Unit, Value};
 use self::headers::FirmwareVersion;
 pub use self::headers::Headers;
-pub use self::reader::Reader;
+use self::reader::Reader;
 
 /// The first line of any blackbox log.
 const MARKER: &[u8] = b"H Product:Blackbox flight data recorder by Nicholas Sherlock\n";

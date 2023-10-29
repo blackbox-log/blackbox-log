@@ -1,15 +1,9 @@
 #![no_main]
 
-use blackbox_log::prelude::*;
-
 fuzz::fuzz_target!(|data: &[u8]| {
     let f = blackbox_log::File::new(data);
-    for mut reader in f.iter() {
-        let Ok(headers) = Headers::parse(&mut reader) else {
-            return;
-        };
-        let mut data = DataParser::new(reader, &headers);
-
+    for headers in f.iter().filter_map(Result::ok) {
+        let mut data = headers.data_parser();
         while data.next().is_some() {}
     }
 });

@@ -56,12 +56,7 @@ impl<'data> From<blackbox_log::File<'data>> for FileSnapshot<'data> {
     fn from(file: blackbox_log::File<'data>) -> Self {
         let logs = file
             .iter()
-            .map(|mut reader| {
-                Headers::parse(&mut reader).map(|headers| {
-                    let data = DataParser::new(reader, &headers);
-                    LogSnapshot::new(&headers, data)
-                })
-            })
+            .map(|headers| headers.map(|headers| LogSnapshot::new(&headers)))
             .take(MAX_LOGS)
             .collect::<Vec<_>>();
 
@@ -89,7 +84,7 @@ struct LogSnapshot<'data> {
 }
 
 impl<'data> LogSnapshot<'data> {
-    fn new(headers: &Headers<'data>, mut data: DataParser<'data, '_>) -> Self {
+    fn new(headers: &Headers<'data>) -> Self {
         let mut events = Vec::new();
 
         let main = headers.main_frame_def().iter().collect::<Fields>();
@@ -105,6 +100,7 @@ impl<'data> LogSnapshot<'data> {
             .collect::<Fields>();
         let mut gps = GpsSnapshot::new(gps);
 
+        let mut data = headers.data_parser();
         let mut capped = true;
         for _ in 0..MAX_EVENTS {
             let Some(frame) = data.next() else {

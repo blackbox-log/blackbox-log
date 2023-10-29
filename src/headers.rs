@@ -16,7 +16,7 @@ use crate::frame::{is_frame_def_header, parse_frame_def_header, DataFrameKind};
 use crate::parser::{InternalError, InternalResult};
 use crate::predictor::Predictor;
 use crate::utils::as_u32;
-use crate::{Reader, Unit};
+use crate::{DataParser, FieldFilterSet, Reader, Unit};
 
 include_generated!("debug_mode");
 include_generated!("disabled_fields");
@@ -84,6 +84,8 @@ impl std::error::Error for ParseError {}
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub struct Headers<'data> {
+    data: Reader<'data>,
+
     main_frame_def: MainFrameDef<'data>,
     slow_frame_def: SlowFrameDef<'data>,
     gps_frame_def: Option<GpsFrameDef<'data>>,
@@ -121,7 +123,9 @@ impl<'data> Headers<'data> {
     /// ready to be passed to [`DataParser::new`][crate::DataParser::new].
     ///
     /// **Note:** This assumes that `data` is aligned to the start of a log.
-    pub fn parse(data: &mut Reader<'data>) -> ParseResult<Self> {
+    pub(crate) fn parse(data: &'data [u8]) -> ParseResult<Self> {
+        let mut data = Reader::new(data);
+
         // Skip product header
         let product = data.read_line();
         debug_assert_eq!(crate::MARKER.strip_suffix(&[b'\n']), product);
@@ -138,7 +142,7 @@ impl<'data> Headers<'data> {
             }
 
             let restore = data.get_restore_point();
-            let (name, value) = match parse_header(data) {
+            let (name, value) = match parse_header(&mut data) {
                 Ok(x) => x,
                 Err(InternalError::Retry) => {
                     tracing::debug!("found corrupted header");
@@ -156,7 +160,7 @@ impl<'data> Headers<'data> {
             }
         }
 
-        state.finish()
+        state.finish(data)
     }
 
     fn validate(&self) -> ParseResult<()> {
@@ -213,6 +217,20 @@ impl<'data> Headers<'data> {
         }
 
         Ok(())
+    }
+}
+
+impl<'data> Headers<'data> {
+    /// Returns a new [`DataParser`] without beginning parsing.
+    pub fn data_parser<'headers>(&'headers self) -> DataParser<'data, 'headers> {
+        DataParser::new(self.data.clone(), self, &FieldFilterSet::default())
+    }
+
+    pub fn data_parser_with_filters<'headers>(
+        &'headers self,
+        filters: &FieldFilterSet,
+    ) -> DataParser<'data, 'headers> {
+        DataParser::new(self.data.clone(), self, filters)
     }
 }
 
@@ -657,7 +675,7 @@ impl<'data> State<'data> {
         .is_ok()
     }
 
-    fn finish(self) -> ParseResult<Headers<'data>> {
+    fn finish(self, data: Reader<'data>) -> ParseResult<Headers<'data>> {
         let not_empty = |s: &&str| !s.is_empty();
 
         let firmware_revision = self.firmware_revision.ok_or(ParseError::MissingHeader)?;
@@ -666,6 +684,8 @@ impl<'data> State<'data> {
 
         // TODO: log where each error comes from
         let headers = Headers {
+            data,
+
             main_frame_def: self.main_frames.parse()?,
             slow_frame_def: self.slow_frames.parse()?,
             gps_frame_def: self.gps_frames.parse()?,

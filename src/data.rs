@@ -25,13 +25,7 @@ pub struct DataParser<'data, 'headers> {
 }
 
 impl<'data, 'headers> DataParser<'data, 'headers> {
-    /// Constructs a new parser without beginning parsing.
-    #[inline]
-    pub fn new(data: Reader<'data>, headers: &'headers Headers<'data>) -> Self {
-        Self::with_filters(data, headers, &FieldFilterSet::default())
-    }
-
-    pub fn with_filters(
+    pub(crate) fn new(
         data: Reader<'data>,
         headers: &'headers Headers<'data>,
         filters: &FieldFilterSet,

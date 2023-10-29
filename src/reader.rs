@@ -4,7 +4,7 @@ use crate::utils::as_i8;
 
 /// A wrapper around a byte slice to efficiently read data from a blackbox log.
 #[derive(Clone)]
-pub struct Reader<'data> {
+pub(crate) struct Reader<'data> {
     /// Index of the next byte to read
     index: usize,
     data: &'data [u8],
@@ -23,7 +23,7 @@ impl<'data> Reader<'data> {
     /// relies on being able to internally store an index `>= data.len()`.
     #[inline]
     #[must_use]
-    pub const fn new(data: &'data [u8]) -> Self {
+    pub(crate) const fn new(data: &'data [u8]) -> Self {
         if data.len() == usize::MAX {
             panic!("cannot create a Reader containing usize::MAX bytes");
         }
