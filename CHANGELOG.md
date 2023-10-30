@@ -2,7 +2,21 @@
 
 ## [Unreleased]
 
-### [0.3.2] - 2023-07-04
+## [0.4.0] - 2023-10-29
+
+### Changed
+
+- Relicensed as MIT OR APACHE-2.0 to match Rust convention
+- **BREAKING**: Library users no longer need to keep track of the
+  internal `Reader` instance used in parsing. The `File::get_reader`
+  method has been replaced with `File::parse` that returns the parsed
+  `Headers` directly. A `DataParser` is now created using the `Headers::
+  {data_parser,data_parser_with_filters}` methods.
+- **BREAKING**: The filter API has been redone to improve clarity.
+  `FieldFilterSet` is now `FilterSet` and there is a new `Filter` enum to
+  represent the filter for each frame kind rather than using an `Option`.
+
+## [0.3.2] - 2023-07-04
 
 ### Added
 
@@ -60,7 +74,8 @@ This version was a major rework of the way the data section is parsed:
 
 Initial release
 
-[unreleased]: https://github.com/blackbox-log/blackbox-log/compare/v0.3.2...HEAD
+[unreleased]: https://github.com/blackbox-log/blackbox-log/compare/v0.4.0...HEAD
+[0.3.2]: https://github.com/blackbox-log/blackbox-log/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/blackbox-log/blackbox-log/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/blackbox-log/blackbox-log/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/blackbox-log/blackbox-log/compare/v0.2.0...v0.3.0
