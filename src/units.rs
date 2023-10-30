@@ -7,7 +7,7 @@ pub use uom::si::f64::{
 
 use crate::Headers;
 
-#[allow(unreachable_pub)]
+#[allow(unreachable_pub, unused_imports)]
 pub(crate) mod prelude {
     pub use super::si::acceleration::{meter_per_second_squared as mps2, standard_gravity};
     pub use super::si::angular_velocity::degree_per_second;
