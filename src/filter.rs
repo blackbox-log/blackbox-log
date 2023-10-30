@@ -4,53 +4,51 @@ use alloc::vec::Vec;
 
 use hashbrown::HashSet;
 
-use crate::frame::{self, FrameDef};
+use crate::frame::FrameDef;
 use crate::utils::to_base_field;
 
-/// A complete set of filters to be passed to
-/// [`DataParser::with_filters`][crate::DataParser::with_filters].
+/// A complete set of filters ready to be passed to
+/// [`Headers::data_parser_with_filters`][crate::Headers::data_parser_with_filters].
 #[derive(Debug, Default, Clone)]
-pub struct FieldFilterSet {
-    pub main: Option<FieldFilter>,
-    pub slow: Option<FieldFilter>,
-    pub gps: Option<FieldFilter>,
+pub struct FilterSet {
+    pub main: Filter,
+    pub slow: Filter,
+    pub gps: Filter,
 }
 
-impl FieldFilterSet {
-    pub(crate) fn apply_main(&self, frame: &frame::MainFrameDef) -> AppliedFilter {
-        self.main.as_ref().map_or_else(
-            || AppliedFilter::new_unfiltered(frame.len()),
-            |filter| filter.apply(frame),
-        )
-    }
-
-    pub(crate) fn apply_slow(&self, frame: &frame::SlowFrameDef) -> AppliedFilter {
-        self.slow.as_ref().map_or_else(
-            || AppliedFilter::new_unfiltered(frame.len()),
-            |filter| filter.apply(frame),
-        )
-    }
-
-    pub(crate) fn apply_gps(&self, frame: Option<&frame::GpsFrameDef>) -> AppliedFilter {
-        match (&self.gps, frame) {
-            (Some(filter), Some(frame)) => filter.apply(frame),
-            (None, Some(frame)) => AppliedFilter::new_unfiltered(frame.len()),
-            _ => AppliedFilter::new_unfiltered(0),
-        }
-    }
+/// A filter for the fields to include in one kind of frame.
+#[derive(Debug, Clone, Default)]
+pub enum Filter {
+    /// Include all fields of this frame kind.
+    #[default]
+    Unfiltered,
+    /// Include a subset of fields from this frame kind.
+    ///
+    /// **Note**: Any fields requested that are not present in the log will not
+    /// be included.
+    OnlyFields(FieldFilter),
 }
 
-/// A filter for the fields to be included in one kind of frame.
+/// A set of field names to include in one kind of frame.
 #[derive(Debug, Clone)]
 pub struct FieldFilter(HashSet<String>);
 
-impl FieldFilter {
+impl Filter {
+    /// Only include any required fields (ie time for main and gps frames and
+    /// none for slow frames).
+    pub fn only_required() -> Self {
+        Self::OnlyFields(FieldFilter(HashSet::new()))
+    }
+
     pub(crate) fn apply<'data, F: FrameDef<'data>>(&self, frame: &F) -> AppliedFilter {
-        frame
-            .iter()
-            .enumerate()
-            .filter_map(|(i, field)| self.0.contains(to_base_field(field.name)).then_some(i))
-            .collect()
+        match self {
+            Filter::Unfiltered => AppliedFilter::new_unfiltered(frame.len()),
+            Filter::OnlyFields(fields) => frame
+                .iter()
+                .enumerate()
+                .filter_map(|(i, field)| fields.0.contains(field.name).then_some(i))
+                .collect(),
+        }
     }
 }
 
@@ -85,11 +83,11 @@ where
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub(crate) struct AppliedFilter(Vec<usize>);
 
 impl AppliedFilter {
-    pub(crate) fn new_unfiltered(len: usize) -> Self {
+    fn new_unfiltered(len: usize) -> Self {
         Self((0..len).collect())
     }
 

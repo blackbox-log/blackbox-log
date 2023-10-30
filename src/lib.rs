@@ -14,14 +14,15 @@
 //! ```
 //! use blackbox_log::frame::FieldDef;
 //! use blackbox_log::prelude::*;
+//! use blackbox_log::Filter;
 //!
-//! let filters = blackbox_log::FieldFilterSet {
+//! let filters = blackbox_log::FilterSet {
 //!     // This restricts the included fields to `rcCommand[0]` through `rcCommand[3]`
-//!     main: Some(["rcCommand"].into()),
+//!     main: Filter::OnlyFields(["rcCommand"].into()),
 //!     // ... only `flightModeFlags` for slow frames
-//!     slow: Some(["flightModeFlags"].into()),
+//!     slow: Filter::OnlyFields(["flightModeFlags"].into()),
 //!     // ... and no filter for gps frames -- include all fields
-//!     gps: None,
+//!     gps: Filter::Unfiltered,
 //! };
 //!
 //! let file = b"...";
@@ -105,7 +106,7 @@ use core::ops::Range;
 pub use self::data::{DataParser, ParserEvent};
 pub use self::event::Event;
 pub use self::file::File;
-pub use self::filter::{FieldFilter, FieldFilterSet};
+pub use self::filter::{FieldFilter, Filter, FilterSet};
 pub use self::frame::{Unit, Value};
 use self::headers::FirmwareVersion;
 pub use self::headers::Headers;

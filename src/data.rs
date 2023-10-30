@@ -1,13 +1,13 @@
 //! Types for the data section of blackbox logs.
 
 use crate::event::Event;
-pub(crate) use crate::filter::AppliedFilter;
+use crate::filter::AppliedFilter;
 use crate::frame::gps::{GpsFrame, RawGpsFrame};
 use crate::frame::main::{MainFrame, RawMainFrame};
 use crate::frame::slow::{RawSlowFrame, SlowFrame};
 use crate::frame::{self, DataFrameKind, FilteredFrameDef, FrameKind, GpsHomeFrame};
 use crate::parser::InternalError;
-use crate::{FieldFilterSet, Headers, Reader};
+use crate::{FilterSet, Headers, Reader};
 
 /// An pseudo-event-based parser for the data section of blackbox logs.
 #[derive(Debug)]
@@ -28,15 +28,18 @@ impl<'data, 'headers> DataParser<'data, 'headers> {
     pub(crate) fn new(
         data: Reader<'data>,
         headers: &'headers Headers<'data>,
-        filters: &FieldFilterSet,
+        filters: &FilterSet,
     ) -> Self {
         let data_len = data.remaining();
 
         Self {
             headers,
-            main_filter: filters.apply_main(headers.main_frame_def()),
-            slow_filter: filters.apply_slow(headers.slow_frame_def()),
-            gps_filter: filters.apply_gps(headers.gps_frame_def()),
+            main_filter: filters.main.apply(headers.main_frame_def()),
+            slow_filter: filters.slow.apply(headers.slow_frame_def()),
+            gps_filter: headers
+                .gps_frame_def()
+                .map(|def| filters.gps.apply(def))
+                .unwrap_or_default(),
             data,
             data_len,
             stats: Stats::default(),

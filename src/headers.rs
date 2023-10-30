@@ -16,7 +16,7 @@ use crate::frame::{is_frame_def_header, parse_frame_def_header, DataFrameKind};
 use crate::parser::{InternalError, InternalResult};
 use crate::predictor::Predictor;
 use crate::utils::as_u32;
-use crate::{DataParser, FieldFilterSet, Reader, Unit};
+use crate::{DataParser, FilterSet, Reader, Unit};
 
 include_generated!("debug_mode");
 include_generated!("disabled_fields");
@@ -223,12 +223,12 @@ impl<'data> Headers<'data> {
 impl<'data> Headers<'data> {
     /// Returns a new [`DataParser`] without beginning parsing.
     pub fn data_parser<'headers>(&'headers self) -> DataParser<'data, 'headers> {
-        DataParser::new(self.data.clone(), self, &FieldFilterSet::default())
+        DataParser::new(self.data.clone(), self, &FilterSet::default())
     }
 
     pub fn data_parser_with_filters<'headers>(
         &'headers self,
-        filters: &FieldFilterSet,
+        filters: &FilterSet,
     ) -> DataParser<'data, 'headers> {
         DataParser::new(self.data.clone(), self, filters)
     }
