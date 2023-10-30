@@ -6,7 +6,7 @@
 [![crates.io](https://img.shields.io/crates/v/blackbox-log)](https://crates.io/blackbox-log)
 [![docs.rs](https://img.shields.io/docsrs/blackbox-log)](https://docs.rs/blackbox-log)
 [![MSRV](https://img.shields.io/static/v1?logo=rust&label=MSRV&color=dea584&message=1.66)](https://github.com/rust-lang/rust/blob/master/RELEASES.md)
-[![license](https://img.shields.io/github/license/blackbox-log/blackbox-log)](https://github.com/blackbox-log/blackbox-log/blob/main/COPYING)
+![license](https://img.shields.io/crates/l/blackbox-log)
 
 
 This is a Rust port of Betaflight's & INAV's blackbox tools. Check the [GitHub
