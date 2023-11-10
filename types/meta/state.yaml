@@ -6,3 +6,4 @@ flags:
   doc: A flight controller state.
   rename:
     AIRMODE_ACTIVE: AirMode
+    IN_FLIGHT_EMERG_REARM: InFlightEmergencyRearm
