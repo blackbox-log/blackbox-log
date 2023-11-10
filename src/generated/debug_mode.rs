@@ -364,195 +364,159 @@ impl DebugMode {
     pub(crate) fn new(raw: u32, fw: crate::headers::InternalFirmware) -> Option<Self> {
         use crate::headers::InternalFirmware::*;
         match (raw, fw) {
-            (
-                0u32,
-                Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0 | Inav5_0_0 | Inav6_0_0
-                | Inav7_0_0,
-            ) => Some(Self::None),
-            (1u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Cycletime),
-            (1u32, Inav5_0_0) => Some(Self::Gyro),
-            (1u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Agl),
-            (2u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Battery),
-            (2u32, Inav5_0_0) => Some(Self::Agl),
-            (2u32, Inav6_0_0 | Inav7_0_0) => Some(Self::FlowRaw),
-            (3u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::GyroFiltered),
-            (3u32, Inav5_0_0) => Some(Self::FlowRaw),
-            (3u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Flow),
-            (4u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::Accelerometer)
+            (0u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Inav5 | Inav6 | Inav7) => {
+                Some(Self::None)
             }
-            (4u32, Inav5_0_0) => Some(Self::Flow),
-            (4u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Always),
-            (5u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Pidloop),
-            (5u32, Inav5_0_0) => Some(Self::Sbus),
-            (5u32, Inav6_0_0 | Inav7_0_0) => Some(Self::SagCompVoltage),
-            (6u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::GyroScaled),
-            (6u32, Inav5_0_0) => Some(Self::Fport),
-            (6u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Vibe),
-            (7u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::RcInterpolation)
-            }
-            (7u32, Inav5_0_0) => Some(Self::Always),
-            (7u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Cruise),
-            (8u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Anglerate),
-            (8u32, Inav5_0_0) => Some(Self::SagCompVoltage),
-            (8u32, Inav6_0_0 | Inav7_0_0) => Some(Self::RemFlightTime),
-            (9u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::EscSensor),
-            (9u32, Inav5_0_0) => Some(Self::Vibe),
-            (9u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Smartaudio),
-            (10u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Scheduler),
-            (10u32, Inav5_0_0) => Some(Self::Cruise),
-            (10u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Acc),
-            (11u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Stack),
-            (11u32, Inav5_0_0) => Some(Self::RemFlightTime),
-            (11u32, Inav6_0_0 | Inav7_0_0) => Some(Self::NavYaw),
-            (12u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::EscSensorRpm)
-            }
-            (12u32, Inav5_0_0) => Some(Self::Smartaudio),
-            (12u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Pcf8574),
-            (13u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::EscSensorTmp)
-            }
-            (13u32, Inav5_0_0) => Some(Self::Acc),
-            (13u32, Inav6_0_0 | Inav7_0_0) => Some(Self::DynamicGyroLpf),
-            (14u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Altitude),
-            (14u32, Inav5_0_0) => Some(Self::Erpm),
-            (14u32, Inav6_0_0 | Inav7_0_0) => Some(Self::AutoLevel),
-            (15u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Fft),
-            (15u32, Inav5_0_0) => Some(Self::RpmFilter),
-            (15u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Altitude),
-            (16u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::FftTime),
-            (16u32, Inav5_0_0) => Some(Self::RpmFreq),
-            (16u32, Inav6_0_0 | Inav7_0_0) => Some(Self::AutoTrim),
-            (17u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::FftFreq),
-            (17u32, Inav5_0_0) => Some(Self::NavYaw),
-            (17u32, Inav6_0_0 | Inav7_0_0) => Some(Self::AutoTune),
-            (18u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::RxFrskySpi),
-            (18u32, Inav5_0_0) => Some(Self::DynamicFilter),
-            (18u32, Inav6_0_0 | Inav7_0_0) => Some(Self::RateDynamics),
-            (19u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::RxSfhssSpi),
-            (19u32, Inav5_0_0) => Some(Self::DynamicFilterFrequency),
-            (19u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Landing),
-            (20u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::GyroRaw),
-            (20u32, Inav5_0_0) => Some(Self::Irlock),
-            (20u32, Inav6_0_0 | Inav7_0_0) => Some(Self::PosEst),
-            (21u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::DualGyroRaw),
-            (21u32, Inav5_0_0) => Some(Self::KalmanGain),
-            (22u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::DualGyroDiff)
-            }
-            (22u32, Inav5_0_0) => Some(Self::PidMeasurement),
-            (23u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::Max7456Signal)
-            }
-            (23u32, Inav5_0_0) => Some(Self::SpmCells),
-            (24u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::Max7456Spiclock)
-            }
-            (24u32, Inav5_0_0) => Some(Self::SpmVs600),
-            (25u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Sbus),
-            (25u32, Inav5_0_0) => Some(Self::SpmVario),
-            (26u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Fport),
-            (26u32, Inav5_0_0) => Some(Self::Pcf8574),
-            (27u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Rangefinder),
-            (27u32, Inav5_0_0) => Some(Self::DynamicGyroLpf),
-            (28u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
+            (1u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Cycletime),
+            (1u32, Inav5) => Some(Self::Gyro),
+            (1u32, Inav6 | Inav7) => Some(Self::Agl),
+            (2u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Battery),
+            (2u32, Inav5) => Some(Self::Agl),
+            (2u32, Inav6 | Inav7) => Some(Self::FlowRaw),
+            (3u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::GyroFiltered),
+            (3u32, Inav5) => Some(Self::FlowRaw),
+            (3u32, Inav6 | Inav7) => Some(Self::Flow),
+            (4u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Accelerometer),
+            (4u32, Inav5) => Some(Self::Flow),
+            (4u32, Inav6 | Inav7) => Some(Self::Always),
+            (5u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Pidloop),
+            (5u32, Inav5) => Some(Self::Sbus),
+            (5u32, Inav6 | Inav7) => Some(Self::SagCompVoltage),
+            (6u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::GyroScaled),
+            (6u32, Inav5) => Some(Self::Fport),
+            (6u32, Inav6 | Inav7) => Some(Self::Vibe),
+            (7u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::RcInterpolation),
+            (7u32, Inav5) => Some(Self::Always),
+            (7u32, Inav6 | Inav7) => Some(Self::Cruise),
+            (8u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Anglerate),
+            (8u32, Inav5) => Some(Self::SagCompVoltage),
+            (8u32, Inav6 | Inav7) => Some(Self::RemFlightTime),
+            (9u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::EscSensor),
+            (9u32, Inav5) => Some(Self::Vibe),
+            (9u32, Inav6 | Inav7) => Some(Self::Smartaudio),
+            (10u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Scheduler),
+            (10u32, Inav5) => Some(Self::Cruise),
+            (10u32, Inav6 | Inav7) => Some(Self::Acc),
+            (11u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Stack),
+            (11u32, Inav5) => Some(Self::RemFlightTime),
+            (11u32, Inav6 | Inav7) => Some(Self::NavYaw),
+            (12u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::EscSensorRpm),
+            (12u32, Inav5) => Some(Self::Smartaudio),
+            (12u32, Inav6 | Inav7) => Some(Self::Pcf8574),
+            (13u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::EscSensorTmp),
+            (13u32, Inav5) => Some(Self::Acc),
+            (13u32, Inav6 | Inav7) => Some(Self::DynamicGyroLpf),
+            (14u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Altitude),
+            (14u32, Inav5) => Some(Self::Erpm),
+            (14u32, Inav6 | Inav7) => Some(Self::AutoLevel),
+            (15u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Fft),
+            (15u32, Inav5) => Some(Self::RpmFilter),
+            (15u32, Inav6 | Inav7) => Some(Self::Altitude),
+            (16u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::FftTime),
+            (16u32, Inav5) => Some(Self::RpmFreq),
+            (16u32, Inav6 | Inav7) => Some(Self::AutoTrim),
+            (17u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::FftFreq),
+            (17u32, Inav5) => Some(Self::NavYaw),
+            (17u32, Inav6 | Inav7) => Some(Self::AutoTune),
+            (18u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::RxFrskySpi),
+            (18u32, Inav5) => Some(Self::DynamicFilter),
+            (18u32, Inav6 | Inav7) => Some(Self::RateDynamics),
+            (19u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::RxSfhssSpi),
+            (19u32, Inav5) => Some(Self::DynamicFilterFrequency),
+            (19u32, Inav6 | Inav7) => Some(Self::Landing),
+            (20u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::GyroRaw),
+            (20u32, Inav5) => Some(Self::Irlock),
+            (20u32, Inav6 | Inav7) => Some(Self::PosEst),
+            (21u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::DualGyroRaw),
+            (21u32, Inav5) => Some(Self::KalmanGain),
+            (22u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::DualGyroDiff),
+            (22u32, Inav5) => Some(Self::PidMeasurement),
+            (23u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Max7456Signal),
+            (23u32, Inav5) => Some(Self::SpmCells),
+            (24u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Max7456Spiclock),
+            (24u32, Inav5) => Some(Self::SpmVs600),
+            (25u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Sbus),
+            (25u32, Inav5) => Some(Self::SpmVario),
+            (26u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Fport),
+            (26u32, Inav5) => Some(Self::Pcf8574),
+            (27u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Rangefinder),
+            (27u32, Inav5) => Some(Self::DynamicGyroLpf),
+            (28u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => {
                 Some(Self::RangefinderQuality)
             }
-            (28u32, Inav5_0_0) => Some(Self::AutoLevel),
-            (29u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::LidarTf),
-            (29u32, Inav5_0_0) => Some(Self::Imu2),
-            (30u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::AdcInternal),
-            (30u32, Inav5_0_0) => Some(Self::Altitude),
-            (31u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::RunawayTakeoff)
-            }
-            (31u32, Inav5_0_0) => Some(Self::SmithPredictor),
-            (32u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Sdio),
-            (32u32, Inav5_0_0) => Some(Self::AutoTrim),
-            (33u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::CurrentSensor)
-            }
-            (33u32, Inav5_0_0) => Some(Self::AutoTune),
-            (34u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Usb),
-            (34u32, Inav5_0_0) => Some(Self::RateDynamics),
-            (35u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Smartaudio),
-            (35u32, Inav5_0_0) => Some(Self::Landing),
-            (36u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Rth),
-            (37u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::ItermRelax),
-            (38u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::AcroTrainer),
-            (39u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::RcSmoothing),
-            (40u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::RxSignalLoss)
-            }
-            (41u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::RcSmoothingRate)
-            }
-            (42u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::AntiGravity),
-            (43u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::DynLpf),
-            (44u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::RxSpektrumSpi)
-            }
-            (45u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::DshotRpmTelemetry)
-            }
-            (46u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::RpmFilter),
-            (47u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::DMin),
-            (48u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::AcCorrection)
-            }
-            (49u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::AcError),
-            (50u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::DualGyroScaled)
-            }
-            (51u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::DshotRpmErrors)
-            }
-            (52u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
+            (28u32, Inav5) => Some(Self::AutoLevel),
+            (29u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::LidarTf),
+            (29u32, Inav5) => Some(Self::Imu2),
+            (30u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::AdcInternal),
+            (30u32, Inav5) => Some(Self::Altitude),
+            (31u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::RunawayTakeoff),
+            (31u32, Inav5) => Some(Self::SmithPredictor),
+            (32u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Sdio),
+            (32u32, Inav5) => Some(Self::AutoTrim),
+            (33u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::CurrentSensor),
+            (33u32, Inav5) => Some(Self::AutoTune),
+            (34u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Usb),
+            (34u32, Inav5) => Some(Self::RateDynamics),
+            (35u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Smartaudio),
+            (35u32, Inav5) => Some(Self::Landing),
+            (36u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Rth),
+            (37u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::ItermRelax),
+            (38u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::AcroTrainer),
+            (39u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::RcSmoothing),
+            (40u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::RxSignalLoss),
+            (41u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::RcSmoothingRate),
+            (42u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::AntiGravity),
+            (43u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::DynLpf),
+            (44u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::RxSpektrumSpi),
+            (45u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::DshotRpmTelemetry),
+            (46u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::RpmFilter),
+            (47u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::DMin),
+            (48u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::AcCorrection),
+            (49u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::AcError),
+            (50u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::DualGyroScaled),
+            (51u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::DshotRpmErrors),
+            (52u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => {
                 Some(Self::CrsfLinkStatisticsUplink)
             }
-            (53u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
+            (53u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => {
                 Some(Self::CrsfLinkStatisticsPwr)
             }
-            (54u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
+            (54u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => {
                 Some(Self::CrsfLinkStatisticsDown)
             }
-            (55u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Baro),
-            (56u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
+            (55u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::Baro),
+            (56u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => {
                 Some(Self::GpsRescueThrottlePid)
             }
-            (57u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::DynIdle),
-            (58u32, Betaflight4_2_0) => Some(Self::FfLimit),
-            (58u32, Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::FeedforwardLimit),
-            (59u32, Betaflight4_2_0) => Some(Self::FfInterpolated),
-            (59u32, Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Feedforward),
-            (60u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
-                Some(Self::BlackboxOutput)
-            }
-            (61u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::GyroSample),
-            (62u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::RxTiming),
-            (63u32, Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::DLpf),
-            (64u32, Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::VtxTramp),
-            (65u32, Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Ghst),
-            (66u32, Betaflight4_3_0) => Some(Self::SchedulerDeterminism),
-            (66u32, Betaflight4_4_0) => Some(Self::GhstMsp),
-            (67u32, Betaflight4_3_0) => Some(Self::TimingAccuracy),
-            (67u32, Betaflight4_4_0) => Some(Self::SchedulerDeterminism),
-            (68u32, Betaflight4_3_0) => Some(Self::RxExpresslrsSpi),
-            (68u32, Betaflight4_4_0) => Some(Self::TimingAccuracy),
-            (69u32, Betaflight4_3_0) => Some(Self::RxExpresslrsPhaselock),
-            (69u32, Betaflight4_4_0) => Some(Self::RxExpresslrsSpi),
-            (70u32, Betaflight4_3_0) => Some(Self::RxStateTime),
-            (70u32, Betaflight4_4_0) => Some(Self::RxExpresslrsPhaselock),
-            (71u32, Betaflight4_4_0) => Some(Self::RxStateTime),
-            (72u32, Betaflight4_4_0) => Some(Self::GpsRescueVelocity),
-            (73u32, Betaflight4_4_0) => Some(Self::GpsRescueHeading),
-            (74u32, Betaflight4_4_0) => Some(Self::GpsRescueTracking),
-            (75u32, Betaflight4_4_0) => Some(Self::Attitude),
-            (76u32, Betaflight4_4_0) => Some(Self::VtxMsp),
-            (77u32, Betaflight4_4_0) => Some(Self::GpsDop),
-            (78u32, Betaflight4_4_0) => Some(Self::Failsafe),
+            (57u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::DynIdle),
+            (58u32, Betaflight4_2) => Some(Self::FfLimit),
+            (58u32, Betaflight4_3 | Betaflight4_4) => Some(Self::FeedforwardLimit),
+            (59u32, Betaflight4_2) => Some(Self::FfInterpolated),
+            (59u32, Betaflight4_3 | Betaflight4_4) => Some(Self::Feedforward),
+            (60u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::BlackboxOutput),
+            (61u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::GyroSample),
+            (62u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4) => Some(Self::RxTiming),
+            (63u32, Betaflight4_3 | Betaflight4_4) => Some(Self::DLpf),
+            (64u32, Betaflight4_3 | Betaflight4_4) => Some(Self::VtxTramp),
+            (65u32, Betaflight4_3 | Betaflight4_4) => Some(Self::Ghst),
+            (66u32, Betaflight4_3) => Some(Self::SchedulerDeterminism),
+            (66u32, Betaflight4_4) => Some(Self::GhstMsp),
+            (67u32, Betaflight4_3) => Some(Self::TimingAccuracy),
+            (67u32, Betaflight4_4) => Some(Self::SchedulerDeterminism),
+            (68u32, Betaflight4_3) => Some(Self::RxExpresslrsSpi),
+            (68u32, Betaflight4_4) => Some(Self::TimingAccuracy),
+            (69u32, Betaflight4_3) => Some(Self::RxExpresslrsPhaselock),
+            (69u32, Betaflight4_4) => Some(Self::RxExpresslrsSpi),
+            (70u32, Betaflight4_3) => Some(Self::RxStateTime),
+            (70u32, Betaflight4_4) => Some(Self::RxExpresslrsPhaselock),
+            (71u32, Betaflight4_4) => Some(Self::RxStateTime),
+            (72u32, Betaflight4_4) => Some(Self::GpsRescueVelocity),
+            (73u32, Betaflight4_4) => Some(Self::GpsRescueHeading),
+            (74u32, Betaflight4_4) => Some(Self::GpsRescueTracking),
+            (75u32, Betaflight4_4) => Some(Self::Attitude),
+            (76u32, Betaflight4_4) => Some(Self::VtxMsp),
+            (77u32, Betaflight4_4) => Some(Self::GpsDop),
+            (78u32, Betaflight4_4) => Some(Self::Failsafe),
             _ => {
                 #[allow(clippy::redundant_closure_call)]
                 (|raw| tracing::error!("invalid debug mode: {raw}"))(raw);
