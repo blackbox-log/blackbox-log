@@ -451,13 +451,14 @@ pub(crate) enum InternalFirmware {
     Betaflight4_4_0,
     Inav5_0_0,
     Inav6_0_0,
+    Inav7_0_0,
 }
 
 impl InternalFirmware {
     pub(crate) const fn is_betaflight(self) -> bool {
         match self {
             Self::Betaflight4_2_0 | Self::Betaflight4_3_0 | Self::Betaflight4_4_0 => true,
-            Self::Inav5_0_0 | Self::Inav6_0_0 => false,
+            Self::Inav5_0_0 | Self::Inav6_0_0 | Self::Inav7_0_0 => false,
         }
     }
 
@@ -483,6 +484,7 @@ impl From<Firmware> for InternalFirmware {
             }) => Self::Betaflight4_4_0,
             Firmware::Inav(FirmwareVersion { major: 5, .. }) => Self::Inav5_0_0,
             Firmware::Inav(FirmwareVersion { major: 6, .. }) => Self::Inav6_0_0,
+            Firmware::Inav(FirmwareVersion { major: 7, .. }) => Self::Inav7_0_0,
             _ => unreachable!(),
         }
     }

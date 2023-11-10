@@ -364,77 +364,79 @@ impl DebugMode {
     pub(crate) fn new(raw: u32, fw: crate::headers::InternalFirmware) -> Option<Self> {
         use crate::headers::InternalFirmware::*;
         match (raw, fw) {
-            (0u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0 | Inav5_0_0 | Inav6_0_0) => {
-                Some(Self::None)
-            }
+            (
+                0u32,
+                Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0 | Inav5_0_0 | Inav6_0_0
+                | Inav7_0_0,
+            ) => Some(Self::None),
             (1u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Cycletime),
             (1u32, Inav5_0_0) => Some(Self::Gyro),
-            (1u32, Inav6_0_0) => Some(Self::Agl),
+            (1u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Agl),
             (2u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Battery),
             (2u32, Inav5_0_0) => Some(Self::Agl),
-            (2u32, Inav6_0_0) => Some(Self::FlowRaw),
+            (2u32, Inav6_0_0 | Inav7_0_0) => Some(Self::FlowRaw),
             (3u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::GyroFiltered),
             (3u32, Inav5_0_0) => Some(Self::FlowRaw),
-            (3u32, Inav6_0_0) => Some(Self::Flow),
+            (3u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Flow),
             (4u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
                 Some(Self::Accelerometer)
             }
             (4u32, Inav5_0_0) => Some(Self::Flow),
-            (4u32, Inav6_0_0) => Some(Self::Always),
+            (4u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Always),
             (5u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Pidloop),
             (5u32, Inav5_0_0) => Some(Self::Sbus),
-            (5u32, Inav6_0_0) => Some(Self::SagCompVoltage),
+            (5u32, Inav6_0_0 | Inav7_0_0) => Some(Self::SagCompVoltage),
             (6u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::GyroScaled),
             (6u32, Inav5_0_0) => Some(Self::Fport),
-            (6u32, Inav6_0_0) => Some(Self::Vibe),
+            (6u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Vibe),
             (7u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
                 Some(Self::RcInterpolation)
             }
             (7u32, Inav5_0_0) => Some(Self::Always),
-            (7u32, Inav6_0_0) => Some(Self::Cruise),
+            (7u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Cruise),
             (8u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Anglerate),
             (8u32, Inav5_0_0) => Some(Self::SagCompVoltage),
-            (8u32, Inav6_0_0) => Some(Self::RemFlightTime),
+            (8u32, Inav6_0_0 | Inav7_0_0) => Some(Self::RemFlightTime),
             (9u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::EscSensor),
             (9u32, Inav5_0_0) => Some(Self::Vibe),
-            (9u32, Inav6_0_0) => Some(Self::Smartaudio),
+            (9u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Smartaudio),
             (10u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Scheduler),
             (10u32, Inav5_0_0) => Some(Self::Cruise),
-            (10u32, Inav6_0_0) => Some(Self::Acc),
+            (10u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Acc),
             (11u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Stack),
             (11u32, Inav5_0_0) => Some(Self::RemFlightTime),
-            (11u32, Inav6_0_0) => Some(Self::NavYaw),
+            (11u32, Inav6_0_0 | Inav7_0_0) => Some(Self::NavYaw),
             (12u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
                 Some(Self::EscSensorRpm)
             }
             (12u32, Inav5_0_0) => Some(Self::Smartaudio),
-            (12u32, Inav6_0_0) => Some(Self::Pcf8574),
+            (12u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Pcf8574),
             (13u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
                 Some(Self::EscSensorTmp)
             }
             (13u32, Inav5_0_0) => Some(Self::Acc),
-            (13u32, Inav6_0_0) => Some(Self::DynamicGyroLpf),
+            (13u32, Inav6_0_0 | Inav7_0_0) => Some(Self::DynamicGyroLpf),
             (14u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Altitude),
             (14u32, Inav5_0_0) => Some(Self::Erpm),
-            (14u32, Inav6_0_0) => Some(Self::AutoLevel),
+            (14u32, Inav6_0_0 | Inav7_0_0) => Some(Self::AutoLevel),
             (15u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::Fft),
             (15u32, Inav5_0_0) => Some(Self::RpmFilter),
-            (15u32, Inav6_0_0) => Some(Self::Altitude),
+            (15u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Altitude),
             (16u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::FftTime),
             (16u32, Inav5_0_0) => Some(Self::RpmFreq),
-            (16u32, Inav6_0_0) => Some(Self::AutoTrim),
+            (16u32, Inav6_0_0 | Inav7_0_0) => Some(Self::AutoTrim),
             (17u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::FftFreq),
             (17u32, Inav5_0_0) => Some(Self::NavYaw),
-            (17u32, Inav6_0_0) => Some(Self::AutoTune),
+            (17u32, Inav6_0_0 | Inav7_0_0) => Some(Self::AutoTune),
             (18u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::RxFrskySpi),
             (18u32, Inav5_0_0) => Some(Self::DynamicFilter),
-            (18u32, Inav6_0_0) => Some(Self::RateDynamics),
+            (18u32, Inav6_0_0 | Inav7_0_0) => Some(Self::RateDynamics),
             (19u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::RxSfhssSpi),
             (19u32, Inav5_0_0) => Some(Self::DynamicFilterFrequency),
-            (19u32, Inav6_0_0) => Some(Self::Landing),
+            (19u32, Inav6_0_0 | Inav7_0_0) => Some(Self::Landing),
             (20u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::GyroRaw),
             (20u32, Inav5_0_0) => Some(Self::Irlock),
-            (20u32, Inav6_0_0) => Some(Self::PosEst),
+            (20u32, Inav6_0_0 | Inav7_0_0) => Some(Self::PosEst),
             (21u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => Some(Self::DualGyroRaw),
             (21u32, Inav5_0_0) => Some(Self::KalmanGain),
             (22u32, Betaflight4_2_0 | Betaflight4_3_0 | Betaflight4_4_0) => {
