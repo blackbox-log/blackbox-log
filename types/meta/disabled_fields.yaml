@@ -4,3 +4,5 @@ set:
 flags:
   name: FieldGroup
   doc: A set of fields that can be disabled in Betaflight logs.
+  rename:
+    GYROUNFILT: GyroUnfiltered

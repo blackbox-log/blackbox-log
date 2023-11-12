@@ -78,6 +78,8 @@ pub enum FieldGroup {
     Gps,
     /// `GYRO`
     Gyro,
+    /// `GYROUNFILT`
+    GyroUnfiltered,
     /// `MAG`
     Mag,
     /// `MOTOR`
@@ -86,6 +88,8 @@ pub enum FieldGroup {
     Pid,
     /// `RC_COMMANDS`
     RcCommands,
+    /// `RPM`
+    Rpm,
     /// `RSSI`
     Rssi,
     /// `SETPOINT`
@@ -101,10 +105,12 @@ impl crate::units::Flag for FieldGroup {
             Self::DebugLog => "DEBUG_LOG",
             Self::Gps => "GPS",
             Self::Gyro => "GYRO",
+            Self::GyroUnfiltered => "GYROUNFILT",
             Self::Mag => "MAG",
             Self::Motor => "MOTOR",
             Self::Pid => "PID",
             Self::RcCommands => "RC_COMMANDS",
+            Self::Rpm => "RPM",
             Self::Rssi => "RSSI",
             Self::Setpoint => "SETPOINT",
         }
@@ -127,18 +133,20 @@ impl FieldGroup {
     const fn from_bit(bit: u32, fw: crate::headers::InternalFirmware) -> Option<Self> {
         use crate::headers::InternalFirmware::*;
         match (bit, fw) {
-            (0u32, Betaflight4_3 | Betaflight4_4) => Some(Self::Pid),
-            (1u32, Betaflight4_3 | Betaflight4_4) => Some(Self::RcCommands),
-            (2u32, Betaflight4_3 | Betaflight4_4) => Some(Self::Setpoint),
-            (3u32, Betaflight4_3 | Betaflight4_4) => Some(Self::Battery),
-            (4u32, Betaflight4_3 | Betaflight4_4) => Some(Self::Mag),
-            (5u32, Betaflight4_3 | Betaflight4_4) => Some(Self::Altitude),
-            (6u32, Betaflight4_3 | Betaflight4_4) => Some(Self::Rssi),
-            (7u32, Betaflight4_3 | Betaflight4_4) => Some(Self::Gyro),
-            (8u32, Betaflight4_3 | Betaflight4_4) => Some(Self::Acc),
-            (9u32, Betaflight4_3 | Betaflight4_4) => Some(Self::DebugLog),
-            (10u32, Betaflight4_3 | Betaflight4_4) => Some(Self::Motor),
-            (11u32, Betaflight4_3 | Betaflight4_4) => Some(Self::Gps),
+            (0u32, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(Self::Pid),
+            (1u32, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(Self::RcCommands),
+            (2u32, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(Self::Setpoint),
+            (3u32, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(Self::Battery),
+            (4u32, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(Self::Mag),
+            (5u32, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(Self::Altitude),
+            (6u32, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(Self::Rssi),
+            (7u32, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(Self::Gyro),
+            (8u32, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(Self::Acc),
+            (9u32, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(Self::DebugLog),
+            (10u32, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(Self::Motor),
+            (11u32, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(Self::Gps),
+            (12u32, Betaflight4_5) => Some(Self::Rpm),
+            (13u32, Betaflight4_5) => Some(Self::GyroUnfiltered),
             _ => None,
         }
     }
@@ -146,18 +154,20 @@ impl FieldGroup {
     const fn to_bit(self, fw: crate::headers::InternalFirmware) -> Option<u32> {
         use crate::headers::InternalFirmware::*;
         match (self, fw) {
-            (Self::Pid, Betaflight4_3 | Betaflight4_4) => Some(0u32),
-            (Self::RcCommands, Betaflight4_3 | Betaflight4_4) => Some(1u32),
-            (Self::Setpoint, Betaflight4_3 | Betaflight4_4) => Some(2u32),
-            (Self::Battery, Betaflight4_3 | Betaflight4_4) => Some(3u32),
-            (Self::Mag, Betaflight4_3 | Betaflight4_4) => Some(4u32),
-            (Self::Altitude, Betaflight4_3 | Betaflight4_4) => Some(5u32),
-            (Self::Rssi, Betaflight4_3 | Betaflight4_4) => Some(6u32),
-            (Self::Gyro, Betaflight4_3 | Betaflight4_4) => Some(7u32),
-            (Self::Acc, Betaflight4_3 | Betaflight4_4) => Some(8u32),
-            (Self::DebugLog, Betaflight4_3 | Betaflight4_4) => Some(9u32),
-            (Self::Motor, Betaflight4_3 | Betaflight4_4) => Some(10u32),
-            (Self::Gps, Betaflight4_3 | Betaflight4_4) => Some(11u32),
+            (Self::Pid, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(0u32),
+            (Self::RcCommands, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(1u32),
+            (Self::Setpoint, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(2u32),
+            (Self::Battery, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(3u32),
+            (Self::Mag, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(4u32),
+            (Self::Altitude, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(5u32),
+            (Self::Rssi, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(6u32),
+            (Self::Gyro, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(7u32),
+            (Self::Acc, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(8u32),
+            (Self::DebugLog, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(9u32),
+            (Self::Motor, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(10u32),
+            (Self::Gps, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(11u32),
+            (Self::Rpm, Betaflight4_5) => Some(12u32),
+            (Self::GyroUnfiltered, Betaflight4_5) => Some(13u32),
             _ => None,
         }
     }
