@@ -9,8 +9,8 @@ license.workspace = true
 [dependencies]
 glob = "0.3.1"
 heck = "0.4.1"
-proc-macro2 = { version = "1.0.67", default-features = false }
-quote = "1.0.33"
-serde = { version = "^1.0.188", features = ["derive"] }
-serde_yaml = "0.9.25"
-syn = { version = "2.0.37", features = ["full"] }
+proc-macro2 = { version = "1.0.74", default-features = false }
+quote = "1.0.35"
+serde = { version = "^1.0.194", features = ["derive"] }
+serde_yaml = "0.9.30"
+syn = { version = "2.0.46", features = ["full"] }
