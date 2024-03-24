@@ -1,0 +1,12 @@
+---
+source: tests/snapshots.rs
+expression: snapshot
+input_file: ".modules/gimbal-ghost/test/rtfl_001.bbl"
+---
+File(
+  count: 2,
+  logs: [
+    Err(InvalidFirmware("Rotorflight 4.3.0-RC1 (19d3380) STM32G47X")),
+    Err(InvalidFirmware("Rotorflight 4.3.0-RC1 (19d3380) STM32G47X")),
+  ],
+)
