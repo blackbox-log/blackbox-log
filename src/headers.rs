@@ -448,6 +448,7 @@ pub(crate) enum InternalFirmware {
     Betaflight4_2,
     Betaflight4_3,
     Betaflight4_4,
+    Betaflight4_5,
     Inav5,
     Inav6,
     Inav7,
@@ -456,7 +457,10 @@ pub(crate) enum InternalFirmware {
 impl InternalFirmware {
     pub(crate) const fn is_betaflight(self) -> bool {
         match self {
-            Self::Betaflight4_2 | Self::Betaflight4_3 | Self::Betaflight4_4 => true,
+            Self::Betaflight4_2
+            | Self::Betaflight4_3
+            | Self::Betaflight4_4
+            | Self::Betaflight4_5 => true,
             Self::Inav5 | Self::Inav6 | Self::Inav7 => false,
         }
     }
@@ -481,6 +485,9 @@ impl From<Firmware> for InternalFirmware {
             Firmware::Betaflight(FirmwareVersion {
                 major: 4, minor: 4, ..
             }) => Self::Betaflight4_4,
+            Firmware::Betaflight(FirmwareVersion {
+                major: 4, minor: 5, ..
+            }) => Self::Betaflight4_5,
             Firmware::Inav(FirmwareVersion { major: 5, .. }) => Self::Inav5,
             Firmware::Inav(FirmwareVersion { major: 6, .. }) => Self::Inav6,
             Firmware::Inav(FirmwareVersion { major: 7, .. }) => Self::Inav7,
