@@ -1,4 +1,4 @@
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 #![warn(clippy::std_instead_of_alloc, clippy::std_instead_of_core)]
 #![warn(unreachable_pub, clippy::missing_panics_doc)]
 
@@ -85,6 +85,8 @@
 //! [inav-doc]: https://github.com/iNavFlight/inav/blob/master/docs/development/Blackbox%20Internals.md
 
 extern crate alloc;
+#[cfg(feature = "std")]
+extern crate std;
 
 #[macro_use]
 mod utils;
