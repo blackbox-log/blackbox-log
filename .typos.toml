@@ -4,5 +4,8 @@ extend-exclude = ["tests/logs", "tests/snapshots"]
 [default]
 locale = "en-us"
 
+[default.extend-identifiers]
+THR_VBAT_COMP = "THR_VBAT_COMP"
+
 [default.extend-words]
 iterm = "iterm"
