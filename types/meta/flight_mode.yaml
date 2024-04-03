@@ -6,6 +6,7 @@ flags:
   doc: A flight mode.
   rename:
     3D: ThreeD
+    ANGLEHOLD: AngleHold
     AUTOLEVEL: AutoLevel
     AUTOTRIM: AutoTrim
     AUTOTUNE: AutoTune

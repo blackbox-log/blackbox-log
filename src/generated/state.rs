@@ -122,6 +122,8 @@ pub enum State {
     SetReversibleMotorsForward,
     /// `SMALL_ANGLE`
     SmallAngle,
+    /// `TAILSITTER`
+    Tailsitter,
 }
 #[allow(unused_qualifications)]
 impl crate::units::Flag for State {
@@ -155,6 +157,7 @@ impl crate::units::Flag for State {
             Self::Rover => "ROVER",
             Self::SetReversibleMotorsForward => "SET_REVERSIBLE_MOTORS_FORWARD",
             Self::SmallAngle => "SMALL_ANGLE",
+            Self::Tailsitter => "TAILSITTER",
         }
     }
 }
@@ -207,6 +210,7 @@ impl State {
             (25u32, Inav5 | Inav6 | Inav7) => Some(Self::AntiWindupDeactivated),
             (26u32, Inav5 | Inav6 | Inav7) => Some(Self::LandingDetected),
             (27u32, Inav7) => Some(Self::InFlightEmergencyRearm),
+            (28u32, Inav7) => Some(Self::Tailsitter),
             _ => None,
         }
     }
@@ -248,6 +252,7 @@ impl State {
             (Self::AntiWindupDeactivated, Inav5 | Inav6 | Inav7) => Some(25u32),
             (Self::LandingDetected, Inav5 | Inav6 | Inav7) => Some(26u32),
             (Self::InFlightEmergencyRearm, Inav7) => Some(27u32),
+            (Self::Tailsitter, Inav7) => Some(28u32),
             _ => None,
         }
     }

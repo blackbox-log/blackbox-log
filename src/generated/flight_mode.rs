@@ -72,6 +72,8 @@ pub enum FlightMode {
     Airmode,
     /// `ANGLE`
     Angle,
+    /// `ANGLEHOLD`
+    AngleHold,
     /// `ANTI GRAVITY`
     AntiGravity,
     /// `ARM`
@@ -224,6 +226,7 @@ impl crate::units::Flag for FlightMode {
             Self::AcroTrainer => "ACRO TRAINER",
             Self::Airmode => "AIRMODE",
             Self::Angle => "ANGLE",
+            Self::AngleHold => "ANGLEHOLD",
             Self::AntiGravity => "ANTI GRAVITY",
             Self::Arm => "ARM",
             Self::AutoLevel => "AUTOLEVEL",
@@ -422,6 +425,7 @@ impl FlightMode {
             (52u32, Inav7) => Some(Self::Multifunction),
             (53u32, Inav7) => Some(Self::Mixerprofile),
             (54u32, Inav7) => Some(Self::Mixertransition),
+            (55u32, Inav7) => Some(Self::AngleHold),
             _ => None,
         }
     }
@@ -540,6 +544,7 @@ impl FlightMode {
             (Self::Multifunction, Inav7) => Some(52u32),
             (Self::Mixerprofile, Inav7) => Some(53u32),
             (Self::Mixertransition, Inav7) => Some(54u32),
+            (Self::AngleHold, Inav7) => Some(55u32),
             _ => None,
         }
     }
