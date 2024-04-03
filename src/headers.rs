@@ -363,9 +363,7 @@ impl Firmware {
             ),
             Some("inav") => (
                 Firmware::Inav(version),
-                crate::INAV_SUPPORT
-                    .iter()
-                    .any(|range| range.contains(&version)),
+                crate::INAV_SUPPORT.contains(&version),
             ),
             Some("emuflight") => {
                 tracing::error!("EmuFlight is not supported");

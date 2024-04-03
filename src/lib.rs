@@ -119,8 +119,5 @@ const MARKER: &[u8] = b"H Product:Blackbox flight data recorder by Nicholas Sher
 
 const BETAFLIGHT_SUPPORT: Range<FirmwareVersion> =
     FirmwareVersion::new(4, 2, 0)..FirmwareVersion::new(4, 5, 0);
-const INAV_SUPPORT: &[Range<FirmwareVersion>] = &[
-    FirmwareVersion::new(5, 0, 0)..FirmwareVersion::new(5, 2, 0),
-    FirmwareVersion::new(6, 0, 0)..FirmwareVersion::new(6, 2, 0),
-    FirmwareVersion::new(7, 0, 0)..FirmwareVersion::new(7, 1, 0),
-];
+const INAV_SUPPORT: Range<FirmwareVersion> =
+    FirmwareVersion::new(5, 0, 0)..FirmwareVersion::new(8, 0, 0);
