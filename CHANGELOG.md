@@ -2,12 +2,21 @@
 
 ## [Unreleased]
 
-## [0.4.1] - 2023-12-06
+## [0.4.2] - 2024-04-28
 
 ### Added
 
 - Support Betaflight version 4.5.x
-- Support INAV version 7.x
+
+### Changed
+
+- Support all minor versions of supported INAV major versions
+
+## [0.4.1] - 2023-12-06
+
+### Added
+
+- Support INAV version 7.0
 
 ## [0.4.0] - 2023-10-29
 
@@ -81,7 +90,8 @@ This version was a major rework of the way the data section is parsed:
 
 Initial release
 
-[unreleased]: https://github.com/blackbox-log/blackbox-log/compare/v0.4.1...HEAD
+[unreleased]: https://github.com/blackbox-log/blackbox-log/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/blackbox-log/blackbox-log/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/blackbox-log/blackbox-log/compare/v0.4.0...v0.4.1
 [0.3.2]: https://github.com/blackbox-log/blackbox-log/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/blackbox-log/blackbox-log/compare/v0.3.1...v0.3.2

@@ -9,7 +9,7 @@ rust-version = "1.66"
 
 [package]
 name = "blackbox-log"
-version = "0.4.1"
+version = "0.4.2"
 description = "Ergonomic parser for BetaFlight blackbox logs"
 repository = "https://github.com/blackbox-log/blackbox-log"
 readme = "README.md"
