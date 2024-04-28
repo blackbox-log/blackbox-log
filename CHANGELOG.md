@@ -6,7 +6,8 @@
 
 ### Added
 
-- Support INAV version 7.0
+- Support Betaflight version 4.5.x
+- Support INAV version 7.x
 
 ## [0.4.0] - 2023-10-29
 
