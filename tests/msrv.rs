@@ -58,7 +58,7 @@ fn toolchain_file() -> io::Result<()> {
     let msrv = file
         .lines()
         .map(Result::unwrap)
-        .find(|line| line.starts_with("version"))
+        .find(|line| line.starts_with("channel"))
         .expect("version line");
 
     let (_, msrv) = msrv.split_once('=').unwrap();
