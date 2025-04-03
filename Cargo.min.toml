@@ -7,12 +7,14 @@ edition = "2021"
 
 [features]
 default = ["std"]
-std = ["memchr/std", "uom/std"]
+std = ["memchr/std", "serde?/std", "uom/std"]
+_serde = ["dep:serde"]
 
 [dependencies]
 bitvec = { version = "=1.0.0", default-features = false }
 hashbrown = "=0.12.0"
 memchr = { version = "=2.4.0", default-features = false }
+serde = { version = "=1.0.96", default-features = false, features = ["alloc", "derive"], optional = true }
 time = { version = "=0.3.3", default-features = false, features = ["macros", "parsing"] }
 tracing = { version = "=0.1.16", default-features = false, features = ["attributes"] }
 uom = { version = "=0.34.0", default-features = false, features = ["si", "f64"] }
