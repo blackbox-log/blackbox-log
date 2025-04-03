@@ -4,7 +4,7 @@ RUN apk add --no-cache curl
 
 COPY cargo-binstall.sh /
 RUN mkdir /binstall && \
-    /cargo-binstall.sh -y --locked --install-path /binstall cargo-cranky cargo-llvm-cov cargo-nextest flamegraph
+    /cargo-binstall.sh -y --locked --install-path /binstall cargo-llvm-cov cargo-nextest flamegraph
 
 
 # cargo-criterion does not provide pre-built binaries
