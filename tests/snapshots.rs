@@ -244,7 +244,7 @@ impl GpsSnapshot {
 struct Fields(Vec<FieldSnapshot>);
 
 impl Fields {
-    fn update<F: blackbox_log::frame::Frame>(&mut self, frame: F) {
+    fn update<F: frame::Frame>(&mut self, frame: F) {
         for (field, value) in self.0.iter_mut().zip(frame.iter()) {
             field.update(value.into());
         }

@@ -5,14 +5,14 @@ _default:
 fmt *args='':
     cargo +nightly fmt {{ args }}
 
-# Run clippy using cargo-cranky
+# Run clippy
 [no-cd]
 check *args='--all-features':
-    cargo cranky --all-targets {{ args }}
+    cargo clippy --all-targets {{ args }}
 
-# Run clippy using cargo-cranky for a no_std target
+# Run clippy for a no_std target
 check-no_std:
-    cargo cranky --no-default-features --target thumbv7em-none-eabihf
+    cargo clippy --no-default-features --target thumbv7em-none-eabihf
 
 # Run tests
 [no-cd]

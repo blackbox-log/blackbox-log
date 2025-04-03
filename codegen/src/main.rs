@@ -1,5 +1,3 @@
-#![allow(clippy::print_stdout)]
-
 mod type_def;
 
 use std::collections::HashMap;

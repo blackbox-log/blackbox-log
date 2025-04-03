@@ -8,8 +8,8 @@ use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 use serde::Deserialize;
 
-use self::r#enum::Enum;
 use self::flag_set::{FlagSet, Flags};
+use self::r#enum::Enum;
 
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]

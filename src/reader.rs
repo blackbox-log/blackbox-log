@@ -71,7 +71,7 @@ impl<'data> Reader<'data> {
     /// Returns true if the [`Reader`] has reached the end of the underlying
     /// buffer.
     #[must_use]
-    #[allow(dead_code)]
+    #[cfg_attr(not(test), expect(dead_code))]
     pub(crate) fn is_empty(&self) -> bool {
         self.remaining() == 0
     }
@@ -169,6 +169,7 @@ macro_rules! impl_read {
 
         #[allow(dead_code)]
         pub(crate) fn $iread(&mut self) -> Option<$itype> {
+            #[expect(clippy::cast_possible_wrap)]
             self.$read().map(|x| x as $itype)
         }
     };

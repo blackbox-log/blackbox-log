@@ -1,4 +1,3 @@
 [language-server.rust-analyzer.config]
 cargo.features = "all"
-checkOnSave.command = "cranky"
 rustfmt.extraArgs = ["+nightly"]

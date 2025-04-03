@@ -49,7 +49,7 @@ pub(crate) fn tagged_16(data: &mut Reader) -> InternalResult<[i16; COUNT]> {
                     let [middle, lower] = data.read_u16().ok_or(InternalError::Eof)?.to_le_bytes();
 
                     buffer = lower;
-                    as_i16(upper | u16::from(middle) << 4 | u16::from(lower >> 4))
+                    as_i16(upper | (u16::from(middle) << 4) | u16::from(lower >> 4))
                 }
             }
         }

@@ -268,6 +268,7 @@ macro_rules! impl_next_larger {
             type Wide = $wide;
 
             #[inline]
+            #[expect(clippy::cast_possible_truncation)]
             fn truncate_from(wide: Self::Wide) -> Self {
                 wide as $base
             }

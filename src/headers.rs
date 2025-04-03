@@ -75,10 +75,7 @@ impl fmt::Display for ParseError {
     }
 }
 
-// TODO: waiting on https://github.com/rust-lang/rust-clippy/pull/9545 to land
-#[allow(clippy::std_instead_of_core)]
-#[cfg(feature = "std")]
-impl std::error::Error for ParseError {}
+impl core::error::Error for ParseError {}
 
 /// Decoded headers containing metadata for a blackbox log.
 #[derive(Debug, Clone)]
@@ -128,7 +125,7 @@ impl<'data> Headers<'data> {
 
         // Skip product header
         let product = data.read_line();
-        debug_assert_eq!(crate::MARKER.strip_suffix(&[b'\n']), product);
+        debug_assert_eq!(crate::MARKER.strip_suffix(b"\n"), product);
         let data_version = data.read_line();
         if !matches!(data_version, Some(b"H Data version:2")) {
             return Err(ParseError::UnsupportedDataVersion);
@@ -463,7 +460,7 @@ impl InternalFirmware {
         }
     }
 
-    #[allow(unused)]
+    #[expect(unused)]
     pub(crate) const fn is_inav(self) -> bool {
         // Will need to be changed if any new firmwares are added
         !self.is_betaflight()
@@ -472,7 +469,7 @@ impl InternalFirmware {
 
 impl From<Firmware> for InternalFirmware {
     fn from(fw: Firmware) -> Self {
-        #[allow(clippy::wildcard_enum_match_arm)]
+        #[expect(clippy::wildcard_enum_match_arm)]
         match fw {
             Firmware::Betaflight(FirmwareVersion {
                 major: 4, minor: 2, ..
@@ -507,7 +504,7 @@ impl PartialOrd for InternalFirmware {
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct MotorOutputRange {
     pub(crate) min: u16,
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub(crate) max: u16,
 }
 

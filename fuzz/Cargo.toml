@@ -24,3 +24,6 @@ name = "no-panic"
 test = false
 bench = false
 doc = false
+
+[lints]
+workspace = true
