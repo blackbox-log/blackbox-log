@@ -73,7 +73,6 @@ unused_qualifications = "warn"
 
 [workspace.lints.clippy]
 alloc_instead_of_core = "warn"
-allow_attributes_without_reason = "warn"
 as_underscore = "deny"
 borrow_as_ptr = "warn"
 cast_lossless = "deny"

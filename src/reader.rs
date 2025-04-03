@@ -169,6 +169,7 @@ macro_rules! impl_read {
 
         #[allow(dead_code)]
         pub(crate) fn $iread(&mut self) -> Option<$itype> {
+            #[expect(clippy::cast_possible_wrap)]
             self.$read().map(|x| x as $itype)
         }
     };
