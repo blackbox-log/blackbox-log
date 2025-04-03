@@ -75,8 +75,7 @@ impl fmt::Display for ParseError {
     }
 }
 
-#[cfg(feature = "std")]
-impl std::error::Error for ParseError {}
+impl core::error::Error for ParseError {}
 
 /// Decoded headers containing metadata for a blackbox log.
 #[derive(Debug, Clone)]
