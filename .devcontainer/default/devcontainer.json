@@ -3,7 +3,7 @@
 	"build": {
 		"dockerfile": "Dockerfile",
 		"args": {
-			"msrv": "1.66",
+			"msrv": "1.83",
 		},
 	},
 	"features": {

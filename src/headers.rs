@@ -128,7 +128,7 @@ impl<'data> Headers<'data> {
 
         // Skip product header
         let product = data.read_line();
-        debug_assert_eq!(crate::MARKER.strip_suffix(&[b'\n']), product);
+        debug_assert_eq!(crate::MARKER.strip_suffix(b"\n"), product);
         let data_version = data.read_line();
         if !matches!(data_version, Some(b"H Data version:2")) {
             return Err(ParseError::UnsupportedDataVersion);
