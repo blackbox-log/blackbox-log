@@ -307,7 +307,6 @@ mod tests {
 
         let read = bytes.read_n_bytes(0);
         assert_eq!(read.len(), 0);
-        assert_eq!(read, &[]);
 
         let read = bytes.read_n_bytes(3);
         assert_eq!(read.len(), 3);
