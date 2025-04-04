@@ -118,7 +118,7 @@ jobs:
       - name: Generate coverage
         run: cargo llvm-cov --all-features --lcov --output-path=coverage.lcov --ignore-filename-regex generated nextest --profile=ci --run-ignored=all
       - name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: coverage.lcov
 
