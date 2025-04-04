@@ -1,0 +1,9 @@
+---
+source: tests/snapshots.rs
+expression: snapshot
+input_file: ".modules/gimbal-ghost/test/FPV DRONE-2025-02-26-221920.csv"
+---
+File(
+  count: 0,
+  logs: [],
+)
