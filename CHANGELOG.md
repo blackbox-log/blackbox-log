@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.4.3] - 2024.04.13
+
+### Added
+
+- Support INAV version 8.0
+
+### Changed
+
+- Bumped MSRV to 1.81
+
 ## [0.4.2] - 2024-04-28
 
 ### Added
@@ -90,7 +100,8 @@ This version was a major rework of the way the data section is parsed:
 
 Initial release
 
-[unreleased]: https://github.com/blackbox-log/blackbox-log/compare/v0.4.2...HEAD
+[unreleased]: https://github.com/blackbox-log/blackbox-log/compare/v0.4.3...HEAD
+[0.4.3]: https://github.com/blackbox-log/blackbox-log/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/blackbox-log/blackbox-log/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/blackbox-log/blackbox-log/compare/v0.4.0...v0.4.1
 [0.3.2]: https://github.com/blackbox-log/blackbox-log/compare/v0.3.2...v0.4.0
