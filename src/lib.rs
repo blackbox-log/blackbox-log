@@ -96,6 +96,7 @@ mod file;
 mod filter;
 pub mod frame;
 pub mod headers;
+pub mod low_level;
 mod parser;
 mod predictor;
 pub mod prelude;
@@ -111,7 +112,7 @@ pub use self::filter::{FieldFilter, Filter, FilterSet};
 pub use self::frame::{Unit, Value};
 use self::headers::FirmwareVersion;
 pub use self::headers::Headers;
-use self::reader::Reader;
+pub(crate) use self::reader::Reader;
 
 /// The first line of any blackbox log.
 const MARKER: &[u8] = b"H Product:Blackbox flight data recorder by Nicholas Sherlock\n";
