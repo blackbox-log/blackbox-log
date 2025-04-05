@@ -13,7 +13,6 @@ use crate::frame::gps_home::{GpsHomeFrameDef, GpsHomeFrameDefBuilder};
 use crate::frame::main::{MainFrameDef, MainFrameDefBuilder};
 use crate::frame::slow::{SlowFrameDef, SlowFrameDefBuilder};
 use crate::frame::{is_frame_def_header, parse_frame_def_header, DataFrameKind};
-use crate::parser::{InternalError, InternalResult};
 use crate::predictor::Predictor;
 use crate::utils::as_u32;
 use crate::{DataParser, FilterSet, Reader, Unit};
@@ -133,31 +132,22 @@ impl<'data> Headers<'data> {
 
         let mut state = State::new();
 
-        loop {
-            if data.peek() != Some(b'H') {
-                break;
-            }
-
-            let restore = data.get_restore_point();
-            let (name, value) = match parse_header(&mut data) {
-                Ok(x) => x,
-                Err(InternalError::Retry) => {
-                    tracing::debug!("found corrupted header");
-                    data.restore(restore);
-                    break;
+        let mut headers = crate::low_level::Headers::new(data);
+        for result in &mut headers {
+            match result {
+                Ok((name, value)) => {
+                    if !state.update(name, value) {
+                        return Err(ParseError::InvalidHeader {
+                            header: name.to_owned(),
+                            value: value.to_owned(),
+                        });
+                    }
                 }
-                Err(InternalError::Eof) => return Err(ParseError::IncompleteHeaders),
-            };
-
-            if !state.update(name, value) {
-                return Err(ParseError::InvalidHeader {
-                    header: name.to_owned(),
-                    value: value.to_owned(),
-                });
+                Err(_) => todo!(),
             }
         }
 
-        state.finish(data)
+        state.finish(headers.into_reader())
     }
 
     fn validate(&self) -> ParseResult<()> {
@@ -730,36 +720,5 @@ impl<'data> State<'data> {
         headers.validate()?;
 
         Ok(headers)
-    }
-}
-
-/// Expects the next character to be the leading H
-fn parse_header<'data>(bytes: &mut Reader<'data>) -> InternalResult<(&'data str, &'data str)> {
-    match bytes.read_u8() {
-        Some(b'H') => {}
-        Some(_) => return Err(InternalError::Retry),
-        None => return Err(InternalError::Eof),
-    }
-
-    let line = bytes.read_line().ok_or(InternalError::Eof)?;
-
-    let line = str::from_utf8(line).map_err(|_| InternalError::Retry)?;
-    let line = line.strip_prefix(' ').unwrap_or(line);
-    let (name, value) = line.split_once(':').ok_or(InternalError::Retry)?;
-
-    tracing::trace!("read header `{name}` = `{value}`");
-
-    Ok((name, value))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    #[should_panic(expected = "Retry")]
-    fn invalid_utf8() {
-        let mut b = Reader::new(b"H \xFF:\xFF\n");
-        parse_header(&mut b).unwrap();
     }
 }
