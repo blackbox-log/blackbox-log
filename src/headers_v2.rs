@@ -1,15 +1,17 @@
 use core::iter::FusedIterator;
-use core::str;
 
 use crate::Reader;
 
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    #[error(transparent)]
-    Utf8Error(#[from] str::Utf8Error),
-    #[error("missing colon between header name and value")]
-    MissingColon,
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct MissingColonError;
+
+impl fmt::Display for MissingColonError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("missing colon between header name and value")
+    }
 }
+
+impl core::error::Error for MissingColonError {}
 
 #[derive(Debug, Clone)]
 pub struct HeadersParser<'data> {
@@ -25,7 +27,7 @@ impl<'data> HeadersParser<'data> {
 }
 
 impl<'data> Iterator for HeadersParser<'data> {
-    type Item = Result<(&'data str, &'data str), Error>;
+    type Item = Result<(&'data [u8], &'data [u8]), MissingColonError>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.data.peek() != Some(b'H') {
@@ -36,10 +38,10 @@ impl<'data> Iterator for HeadersParser<'data> {
         let line = self.data.read_line().unwrap();
         let line = line.strip_prefix(b" ").unwrap_or(line);
 
-        Some(match str::from_utf8(line) {
-            Ok(line) => line.split_once(':').ok_or(Error::MissingColon),
-            Err(err) => Err(Error::Utf8Error(err)),
-        })
+        let Some(colon) = line.iter().position(|&x| x == b':') else {
+            return Some(Err(MissingColonError));
+        };
+        Some(Ok((&line[0..colon], &line[(colon + 1)..])))
     }
 }
 
