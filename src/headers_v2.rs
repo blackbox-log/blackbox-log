@@ -3,7 +3,7 @@ use core::str;
 
 use crate::Reader;
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Clone, PartialEq, thiserror::Error)]
 pub enum Error {
     #[error(transparent)]
     Utf8Error(#[from] str::Utf8Error),
@@ -50,19 +50,16 @@ impl FusedIterator for HeadersParser<'_> {}
 mod tests {
     use super::*;
 
-    fn header<'n, 'v>(
-        name: &'n [u8],
-        value: &'v [u8],
-    ) -> Result<(&'n [u8], &'v [u8]), MissingColonError> {
+    fn header<'n, 'v>(name: &'n str, value: &'v str) -> Result<(&'n str, &'v str), Error> {
         Ok((name, value))
     }
 
     #[test]
     fn valid() {
         let mut headers = HeadersParser::new(b"H Test:true\nH :empty header\nH Empty value:\nbody");
-        assert_eq!(header(b"Test", b"true"), headers.next().unwrap());
-        assert_eq!(header(b"", b"empty header"), headers.next().unwrap());
-        assert_eq!(header(b"Empty value", b""), headers.next().unwrap());
+        assert_eq!(header("Test", "true"), headers.next().unwrap());
+        assert_eq!(header("", "empty header"), headers.next().unwrap());
+        assert_eq!(header("Empty value", ""), headers.next().unwrap());
         assert!(headers.next().is_none());
         assert_eq!(Some(b"body".as_slice()), headers.data.read_line());
     }
@@ -73,11 +70,11 @@ mod tests {
             72, 32, 72, 97, 115, 58, 110, 117, 0, 108, 108, 10, 72, 32, 78, 111, 110, 45, 117, 116,
             102, 56, 58, 0, 159, 146, 150, 10, 98, 111, 100, 121,
         ]);
-        assert_eq!(header(b"Has", b"nu\0ll"), headers.next().unwrap());
-        assert_eq!(
-            header(b"Non-utf8", &[0, 159, 146, 150]),
-            headers.next().unwrap()
-        );
+        assert_eq!(header("Has", "nu\0ll"), headers.next().unwrap());
+        assert!(matches!(
+            headers.next().unwrap().unwrap_err(),
+            Error::Utf8Error(_)
+        ));
         assert!(headers.next().is_none());
     }
 }
