@@ -1,3 +1,5 @@
+pub mod frame_defs;
+
 use core::iter::FusedIterator;
 use core::str;
 
@@ -21,6 +23,10 @@ impl<'data> HeadersParser<'data> {
         Self {
             data: Reader::new(data),
         }
+    }
+
+    pub fn data(self) -> Reader<'data> {
+        self.data
     }
 }
 
