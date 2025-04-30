@@ -91,6 +91,7 @@ extern crate std;
 mod utils;
 
 pub mod data;
+pub mod data_v2;
 pub mod event;
 mod file;
 mod filter;

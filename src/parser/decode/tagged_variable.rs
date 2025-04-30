@@ -1,19 +1,18 @@
 use crate::parser::{InternalError, InternalResult};
+use crate::utils::as_u32;
 use crate::Reader;
 
-pub(crate) fn tagged_variable(data: &mut Reader, extra: usize) -> InternalResult<[i32; 8]> {
-    debug_assert!(extra < 8);
+pub(crate) fn tagged_variable(data: &mut Reader, out: &mut [u32]) -> InternalResult<()> {
+    debug_assert!(!out.is_empty() && out.len() <= 8);
 
-    let mut values = [0; 8];
-
-    if extra == 0 {
-        values[0] = super::variable_signed(data)?;
+    if out.len() == 1 {
+        out[0] = as_u32(super::variable_signed(data)?);
     } else {
         let mut header = data.read_u8().ok_or(InternalError::Eof)?;
 
-        for value in values.iter_mut().take(extra + 1) {
+        for value in out {
             *value = if (header & 1) == 1 {
-                super::variable_signed(data)?
+                as_u32(super::variable_signed(data)?)
             } else {
                 0
             };
@@ -26,7 +25,7 @@ pub(crate) fn tagged_variable(data: &mut Reader, extra: usize) -> InternalResult
         }
     }
 
-    Ok(values)
+    Ok(())
 }
 
 #[cfg(test)]
@@ -37,8 +36,9 @@ mod tests {
     fn one_value() {
         let mut b = Reader::new(&[2]);
 
-        let expected = [1, 0, 0, 0, 0, 0, 0, 0];
-        assert_eq!(expected, tagged_variable(&mut b, 0).unwrap());
+        let mut out = [0];
+        tagged_variable(&mut b, &mut out).unwrap();
+        assert_eq!([1], out);
         assert!(b.is_empty());
     }
 
@@ -47,8 +47,9 @@ mod tests {
         let b = [0b0000_0011, 2, 2];
         let mut b = Reader::new(&b);
 
-        let expected = [1, 1, 0, 0, 0, 0, 0, 0];
-        assert_eq!(expected, tagged_variable(&mut b, 1).unwrap());
+        let mut out = [0; 2];
+        tagged_variable(&mut b, &mut out).unwrap();
+        assert_eq!([1, 1], out);
         assert!(b.is_empty());
     }
 
@@ -57,8 +58,9 @@ mod tests {
         let b = [0b0000_0010, 2];
         let mut b = Reader::new(&b);
 
-        let expected = [0, 1, 0, 0, 0, 0, 0, 0];
-        assert_eq!(expected, tagged_variable(&mut b, 1).unwrap());
+        let mut out = [0; 2];
+        tagged_variable(&mut b, &mut out).unwrap();
+        assert_eq!([0, 1], out);
         assert!(b.is_empty());
     }
 
@@ -67,7 +69,7 @@ mod tests {
     fn multiple_expected_but_empty() {
         let mut b = Reader::new(&[]);
 
-        tagged_variable(&mut b, 1).unwrap();
+        tagged_variable(&mut b, &mut [0; 2]).unwrap();
     }
 
     #[test]
@@ -76,6 +78,6 @@ mod tests {
         let b = [0b0000_0111, 2, 2, 2];
         let mut b = Reader::new(&b);
 
-        tagged_variable(&mut b, 1).unwrap();
+        tagged_variable(&mut b, &mut [0; 2]).unwrap();
     }
 }

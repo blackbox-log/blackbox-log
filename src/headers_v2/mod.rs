@@ -25,8 +25,8 @@ impl<'data> HeadersParser<'data> {
         }
     }
 
-    pub fn data(self) -> Reader<'data> {
-        self.data
+    pub fn data(&self) -> &'data [u8] {
+        self.data.rest()
     }
 }
 

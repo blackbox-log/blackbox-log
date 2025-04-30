@@ -42,30 +42,29 @@ impl<'data> Reader<'data> {
         self.index = restore.0;
     }
 
-    /// Advances past all bytes not matching any of the needles, returning
-    /// `true` if any are found before the end of the buffer.
-    pub(crate) fn skip_until_any(&mut self, needles: &[u8]) -> bool {
+    /// Advances past all bytes not matching any of the needles. Skips to the
+    /// end of the buffer if nothing is found.
+    pub(crate) fn skip_until_any(&mut self, needles: &[u8]) {
         debug_assert_ne!(
             needles.len(),
             0,
             "searching for any of 0 bytes makes no sense"
         );
 
-        let position = self.data[self.index..]
+        self.index = self.data[self.index..]
             .iter()
-            .position(|x| needles.contains(x));
-
-        if let Some(position) = position {
-            self.index += position;
-        }
-
-        position.is_some()
+            .position(|x| needles.contains(x))
+            .map_or(self.data.len(), |x| self.index + x);
     }
 
     /// Returns the number of bytes that have not yet been read.
     #[must_use]
     pub(crate) const fn remaining(&self) -> usize {
         self.data.len() - self.index
+    }
+
+    pub(crate) fn rest(&self) -> &'data [u8] {
+        &self.data[self.index..]
     }
 
     /// Returns true if the [`Reader`] has reached the end of the underlying
@@ -212,20 +211,21 @@ mod tests {
     fn skip_until_any() {
         let mut bytes = Reader::new(&[10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
         bytes.read_u8();
-        assert!(bytes.skip_until_any(&[10, 9]));
+        bytes.skip_until_any(&[10, 9]);
         assert_eq!(Some(9), bytes.read_u8());
     }
 
     #[test]
     fn skip_until_any_not_found() {
         let mut bytes = Reader::new(&[2, 3, 4]);
-        assert!(!bytes.skip_until_any(&[0, 1]));
+        bytes.skip_until_any(&[0, 1]);
+        assert_eq!(bytes.remaining(), 0);
     }
 
     #[test]
     fn skip_until_any_no_skip() {
         let mut bytes = Reader::new(&[0]);
-        assert!(bytes.skip_until_any(&[0]));
+        bytes.skip_until_any(&[0]);
         assert_eq!(Some(0), bytes.read_u8());
         assert!(bytes.is_empty());
     }

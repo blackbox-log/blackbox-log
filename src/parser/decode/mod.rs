@@ -6,8 +6,6 @@ mod tagged_32;
 mod tagged_variable;
 mod variable;
 
-use alloc::vec::Vec;
-
 pub(crate) use self::negative_14_bit::negative_14_bit;
 pub(crate) use self::tagged_16::tagged_16;
 pub(crate) use self::tagged_32::tagged_32;
@@ -65,28 +63,19 @@ impl Encoding {
         }
     }
 
-    pub(crate) fn decode_into(
-        &self,
-        data: &mut Reader,
-        extra: usize,
-        into: &mut Vec<u32>,
-    ) -> InternalResult<()> {
-        let range = 0..=extra;
+    pub(crate) fn decode_into(&self, data: &mut Reader, out: &mut [u32]) -> InternalResult<()> {
+        let first = &mut out[0];
         match self {
-            Self::VariableSigned => into.push(as_u32(variable_signed(data)?)),
-            Self::Variable => into.push(variable(data)?),
+            Self::VariableSigned => *first = as_u32(variable_signed(data)?),
+            Self::Variable => *first = variable(data)?,
 
-            Self::Negative14Bit => into.push(as_u32(negative_14_bit(data)?)),
+            Self::Negative14Bit => *first = as_u32(negative_14_bit(data)?),
 
-            Self::TaggedVariable => {
-                into.extend_from_slice(&tagged_variable(data, extra)?.map(as_u32)[range]);
-            }
-            Self::Tagged32 => into.extend_from_slice(&tagged_32(data)?.map(as_u32)[range]),
-            Self::Tagged16 => {
-                into.extend_from_slice(&tagged_16(data)?.map(|x| as_u32(x.into()))[range]);
-            }
+            Self::TaggedVariable => tagged_variable(data, out)?,
+            Self::Tagged32 => tagged_32(data, out)?,
+            Self::Tagged16 => tagged_16(data, out)?,
 
-            Self::Null => into.push(0),
+            Self::Null => *first = 0,
         };
 
         Ok(())

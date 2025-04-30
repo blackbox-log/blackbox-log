@@ -1,64 +1,64 @@
 use super::sign_extend;
 use crate::parser::{InternalError, InternalResult};
-use crate::utils::{as_i16, as_i32, as_i8};
+use crate::utils::{as_i16, as_i8, as_u32};
 use crate::Reader;
 
 const COUNT: usize = 3;
 
-pub(crate) fn tagged_32(data: &mut Reader) -> InternalResult<[i32; COUNT]> {
+pub(crate) fn tagged_32(data: &mut Reader, out: &mut [u32]) -> InternalResult<()> {
     fn read_u8_or_eof(bytes: &mut Reader) -> InternalResult<u8> {
         bytes.read_u8().ok_or(InternalError::Eof)
     }
 
-    let mut result = [0; COUNT];
+    assert_eq!(out.len(), COUNT);
 
     let byte = read_u8_or_eof(data)?;
     match (byte & 0xC0) >> 6 {
         // 2 bits
         0 => {
             #[inline(always)]
-            fn convert(x: u8) -> i32 {
-                sign_extend::<2>((x & 3).into())
+            fn convert(x: u8) -> u32 {
+                as_u32(sign_extend::<2>((x & 3).into()))
             }
 
-            result[0] = convert(byte >> 4);
-            result[1] = convert(byte >> 2);
-            result[2] = convert(byte);
+            out[0] = convert(byte >> 4);
+            out[1] = convert(byte >> 2);
+            out[2] = convert(byte);
         }
 
         // 4 bits
         1 => {
             #[inline(always)]
-            fn convert(x: u8) -> i32 {
-                sign_extend::<4>(x.into())
+            fn convert(x: u8) -> u32 {
+                as_u32(sign_extend::<4>(x.into()))
             }
 
-            result[0] = convert(byte & 0x0F);
+            out[0] = convert(byte & 0x0F);
 
             let byte = read_u8_or_eof(data)?;
-            result[1] = convert(byte >> 4);
-            result[2] = convert(byte & 0x0F);
+            out[1] = convert(byte >> 4);
+            out[2] = convert(byte & 0x0F);
         }
 
         // 6 bits
         2 => {
             #[inline(always)]
-            fn convert(x: u8) -> i32 {
-                sign_extend::<6>((x & 0x3F).into())
+            fn convert(x: u8) -> u32 {
+                as_u32(sign_extend::<6>((x & 0x3F).into()))
             }
 
-            result[0] = convert(byte);
+            out[0] = convert(byte);
 
             let byte = read_u8_or_eof(data)?;
-            result[1] = convert(byte);
+            out[1] = convert(byte);
 
             let byte = read_u8_or_eof(data)?;
-            result[2] = convert(byte);
+            out[2] = convert(byte);
         }
 
         3.. => {
             let mut tags = byte & 0x3F;
-            for x in &mut result {
+            for x in out {
                 let tag = tags & 3;
                 tags >>= 2;
 
@@ -66,32 +66,29 @@ pub(crate) fn tagged_32(data: &mut Reader) -> InternalResult<[i32; COUNT]> {
                     // 8 bits
                     0 => {
                         let x = read_u8_or_eof(data)?;
-                        as_i8(x).into()
+                        as_u32(as_i8(x).into())
                     }
 
                     // 16 bits
                     1 => {
                         let value = data.read_u16().ok_or(InternalError::Eof)?;
-                        as_i16(value).into()
+                        as_u32(as_i16(value).into())
                     }
 
                     // 24 bits
                     2 => {
                         let x = data.read_u24().ok_or(InternalError::Eof)?;
-                        sign_extend::<24>(x)
+                        as_u32(sign_extend::<24>(x))
                     }
 
                     // 32 bits
-                    3.. => {
-                        let value = data.read_u32().ok_or(InternalError::Eof)?;
-                        as_i32(value)
-                    }
+                    3.. => data.read_u32().ok_or(InternalError::Eof)?,
                 }
             }
         }
     }
 
-    Ok(result)
+    Ok(())
 }
 
 #[cfg(test)]
@@ -100,6 +97,7 @@ mod tests {
     use alloc::vec::Vec;
 
     use super::*;
+    use crate::utils::as_i32;
 
     fn bytes(tag: u8, width: usize) -> Vec<u8> {
         assert_eq!(tag, tag & 3);
@@ -120,7 +118,9 @@ mod tests {
         let b = [0x0D];
         let mut b = Reader::new(&b);
 
-        assert_eq!([0, -1, 1], tagged_32(&mut b).unwrap());
+        let mut out = [0; 3];
+        tagged_32(&mut b, &mut out).unwrap();
+        assert_eq!([0, -1, 1], out.map(as_i32));
         assert!(b.is_empty());
     }
 
@@ -129,7 +129,9 @@ mod tests {
         let b = [0x41, 0x23];
         let mut b = Reader::new(&b);
 
-        assert_eq!([1, 2, 3], tagged_32(&mut b).unwrap());
+        let mut out = [0; 3];
+        tagged_32(&mut b, &mut out).unwrap();
+        assert_eq!([1, 2, 3], out.map(as_i32));
         assert!(b.is_empty());
     }
 
@@ -138,7 +140,9 @@ mod tests {
         let b = [0x81, 0x02, 0x03];
         let mut b = Reader::new(&b);
 
-        assert_eq!([1, 2, 3], tagged_32(&mut b).unwrap());
+        let mut out = [0; 3];
+        tagged_32(&mut b, &mut out).unwrap();
+        assert_eq!([1, 2, 3], out.map(as_i32));
         assert!(b.is_empty());
     }
 
@@ -147,7 +151,9 @@ mod tests {
         let b = bytes(0, 1);
         let mut b = Reader::new(&b);
 
-        assert_eq!([1, 2, 3], tagged_32(&mut b).unwrap());
+        let mut out = [0; 3];
+        tagged_32(&mut b, &mut out).unwrap();
+        assert_eq!([1, 2, 3], out.map(as_i32));
         assert!(b.is_empty());
     }
 
@@ -156,7 +162,9 @@ mod tests {
         let b = bytes(1, 2);
         let mut b = Reader::new(&b);
 
-        assert_eq!([1, 2, 3], tagged_32(&mut b).unwrap());
+        let mut out = [0; 3];
+        tagged_32(&mut b, &mut out).unwrap();
+        assert_eq!([1, 2, 3], out.map(as_i32));
         assert!(b.is_empty());
     }
 
@@ -165,7 +173,9 @@ mod tests {
         let b = bytes(2, 3);
         let mut b = Reader::new(&b);
 
-        assert_eq!([1, 2, 3], tagged_32(&mut b).unwrap());
+        let mut out = [0; 3];
+        tagged_32(&mut b, &mut out).unwrap();
+        assert_eq!([1, 2, 3], out.map(as_i32));
         assert!(b.is_empty());
     }
 
@@ -174,7 +184,9 @@ mod tests {
         let b = bytes(3, 4);
         let mut b = Reader::new(&b);
 
-        assert_eq!([1, 2, 3], tagged_32(&mut b).unwrap());
+        let mut out = [0; 3];
+        tagged_32(&mut b, &mut out).unwrap();
+        assert_eq!([1, 2, 3], out.map(as_i32));
         assert!(b.is_empty());
     }
 
@@ -182,13 +194,13 @@ mod tests {
     #[should_panic(expected = "Eof")]
     fn eof_04_bit() {
         let mut b = Reader::new(&[0x40]);
-        tagged_32(&mut b).unwrap();
+        tagged_32(&mut b, &mut [0; 3]).unwrap();
     }
 
     #[test]
     #[should_panic(expected = "Eof")]
     fn eof_06_bit() {
         let mut b = Reader::new(&[0x80]);
-        tagged_32(&mut b).unwrap();
+        tagged_32(&mut b, &mut [0; 3]).unwrap();
     }
 }

@@ -2,11 +2,11 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::str::FromStr;
-use core::{fmt, num};
+use core::{fmt, num, slice};
 
 use crate::parser::Encoding;
 use crate::predictor::Predictor;
-use crate::utils::as_u8;
+use crate::utils::{as_i8, as_u8};
 
 #[derive(Debug, Clone, thiserror::Error)]
 pub enum ParseError {
@@ -190,7 +190,7 @@ macro_rules! impl_common_frame {
             }
 
             // TODO: move this onto CommonField?
-            pub fn build(&self) -> Result<Vec<$field>, BuildError> {
+            pub fn build(&self) -> Result<Vec<$field<'data>>, BuildError> {
                 // For some reason $self has to be an ident or other parts of it break...
                 let inner = &self.0;
                 impl_build! {
@@ -219,12 +219,42 @@ macro_rules! impl_common_frame {
                 Self::new()
             }
         }
+
+        impl Field for $field<'_> {
+            type Kind = $kind;
+
+            fn kind(&self) -> Self::Kind {
+                self.0.kind()
+            }
+
+            fn index(&self) -> Option<u8> {
+                self.0.index()
+            }
+
+            fn raw_kind(&self) -> &str {
+                self.0.raw_kind()
+            }
+
+            fn raw_name(&self) -> &str {
+                self.0.raw_name()
+            }
+
+            fn signed(&self) -> bool {
+                self.0.signed()
+            }
+        }
+
+        impl FieldDetails for $field<'_> {
+            fn encoding(&self) -> Encoding {
+                self.0.encoding
+            }
+        }
     };
 }
 
-impl_common_frame!(SlowBuilder, SlowFrame, SlowFieldKind, "S");
-impl_common_frame!(GpsBuilder, GpsFrame, GpsFieldKind, "G");
-impl_common_frame!(GpsHomeBuilder, GpsHomeFrame, GpsHomeFieldKind, "H");
+impl_common_frame!(SlowBuilder, SlowField, SlowFieldKind, "S");
+impl_common_frame!(GpsBuilder, GpsField, GpsFieldKind, "G");
+impl_common_frame!(GpsHomeBuilder, GpsHomeField, GpsHomeFieldKind, "H");
 
 #[derive(Debug)]
 pub struct FrameDefBuilders<'data> {
@@ -275,12 +305,37 @@ impl<'data> FrameDefBuilders<'data> {
 
         Ok(())
     }
+
+    pub fn build(self) -> Result<FrameDefs<'data>, BuildError> {
+        fn optional<T>(r: Result<T, BuildError>) -> Result<Option<T>, BuildError> {
+            match r {
+                Ok(ok) => Ok(Some(ok)),
+                Err(BuildError::NotDeclared) => Ok(None),
+                Err(err) => Err(err),
+            }
+        }
+
+        Ok(FrameDefs {
+            main: self.main.build()?,
+            slow: self.slow.build()?,
+            gps: optional(self.gps.build())?,
+            gps_home: optional(self.gps_home.build())?,
+        })
+    }
 }
 
 impl Default for FrameDefBuilders<'_> {
     fn default() -> Self {
         Self::new()
     }
+}
+
+#[derive(Debug)]
+pub struct FrameDefs<'data> {
+    pub main: Vec<MainField<'data>>,
+    pub slow: Vec<SlowField<'data>>,
+    pub gps: Option<Vec<GpsField<'data>>>,
+    pub gps_home: Option<Vec<GpsHomeField<'data>>>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -344,7 +399,11 @@ pub trait Field {
     fn signed(&self) -> bool;
 }
 
-#[derive(Debug)]
+pub(crate) trait FieldDetails {
+    fn encoding(&self) -> Encoding;
+}
+
+#[derive(Debug, Clone)]
 pub struct MainField<'data> {
     raw_name: &'data str,
     kind: MainFieldKind,
@@ -393,6 +452,31 @@ impl Field for MainField<'_> {
         self.signed
     }
 }
+
+macro_rules! main_field_wrapper {
+    ($n:ident, $as:ident, $enc:ident) => {
+        #[derive(Debug, Clone)]
+        #[repr(transparent)]
+        pub(crate) struct $n<'data>(MainField<'data>);
+
+        impl FieldDetails for $n<'_> {
+            fn encoding(&self) -> Encoding {
+                self.0.$enc
+            }
+        }
+
+        #[expect(unsafe_code)]
+        impl<'data> MainField<'data> {
+            pub(crate) const fn $as<'a>(fields: &'a [Self]) -> &'a [$n<'data>] {
+                // SAFETY: TODO
+                unsafe { slice::from_raw_parts(fields.as_ptr().cast(), fields.len()) }
+            }
+        }
+    };
+}
+
+main_field_wrapper!(IntraField, all_as_intra, encoding_intra);
+main_field_wrapper!(InterField, all_as_inter, encoding_inter);
 
 #[derive(Debug)]
 struct CommonField<'data, K> {
@@ -511,7 +595,7 @@ fn parse_field_name(raw: &str) -> (&str, FieldIndex) {
     };
 
     match index.parse::<u8>() {
-        Ok(index) => (name, FieldIndex(index as i8)),
+        Ok(index) => (name, FieldIndex(as_i8(index))),
         Err(err) if matches!(err.kind(), num::IntErrorKind::PosOverflow) => (name, FieldIndex(-1)),
         Err(_) => default,
     }

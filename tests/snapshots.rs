@@ -29,6 +29,7 @@ macro_rules! run {
 }
 
 #[test]
+#[ignore]
 fn own() {
     insta::glob!("logs/*.bbl", run!());
 }

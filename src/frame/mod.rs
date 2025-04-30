@@ -464,6 +464,8 @@ fn read_field_values<T>(
     fields: &[T],
     get_encoding: impl Fn(&T) -> Encoding,
 ) -> InternalResult<Vec<u32>> {
+    #![expect(unused)]
+
     let mut encodings = fields.iter().map(get_encoding).peekable();
     let mut values = Vec::with_capacity(encodings.len());
 
@@ -471,7 +473,7 @@ fn read_field_values<T>(
         let extra = encoding.max_chunk_size() - 1;
         let extra = count_fields_with_same_encoding(&mut encodings, extra, encoding);
 
-        encoding.decode_into(data, extra, &mut values)?;
+        // encoding.decode_into(data, extra, &mut values)?;
     }
 
     debug_assert_eq!(values.len(), fields.len());
