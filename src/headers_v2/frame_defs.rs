@@ -2,7 +2,7 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::str::FromStr;
-use core::{fmt, num, slice};
+use core::{fmt, num};
 
 use crate::parser::Encoding;
 use crate::predictor::Predictor;
@@ -173,9 +173,22 @@ impl<'data> CommonBuilder<'data> {
 }
 
 macro_rules! impl_common_frame {
-    ($builder:ident, $field:ident, $kind:ty, $raw_kind:literal) => {
+    ($builder:ident, $frame:ident, $field:ident, $kind:ty, $raw_kind:literal) => {
         #[derive(Debug)]
         pub struct $builder<'data>(CommonBuilder<'data>);
+
+        #[derive(Debug)]
+        pub struct $frame<'data>(Vec<$field<'data>>);
+
+        impl FrameDef for $frame<'_> {
+            fn len(&self) -> usize {
+                self.0.len()
+            }
+
+            fn encodings(&self) -> impl Iterator<Item = Encoding> {
+                self.0.iter().map(|f| f.0.encoding)
+            }
+        }
 
         #[derive(Debug)]
         pub struct $field<'data>(CommonField<'data, $kind>);
@@ -243,18 +256,18 @@ macro_rules! impl_common_frame {
                 self.0.signed()
             }
         }
-
-        impl FieldDetails for $field<'_> {
-            fn encoding(&self) -> Encoding {
-                self.0.encoding
-            }
-        }
     };
 }
 
-impl_common_frame!(SlowBuilder, SlowField, SlowFieldKind, "S");
-impl_common_frame!(GpsBuilder, GpsField, GpsFieldKind, "G");
-impl_common_frame!(GpsHomeBuilder, GpsHomeField, GpsHomeFieldKind, "H");
+impl_common_frame!(SlowBuilder, SlowFrameDef, SlowField, SlowFieldKind, "S");
+impl_common_frame!(GpsBuilder, GpsFrameDef, GpsField, GpsFieldKind, "G");
+impl_common_frame!(
+    GpsHomeBuilder,
+    GpsHomeFrameDef,
+    GpsHomeField,
+    GpsHomeFieldKind,
+    "H"
+);
 
 #[derive(Debug)]
 pub struct FrameDefBuilders<'data> {
@@ -316,10 +329,10 @@ impl<'data> FrameDefBuilders<'data> {
         }
 
         Ok(FrameDefs {
-            main: self.main.build()?,
-            slow: self.slow.build()?,
-            gps: optional(self.gps.build())?,
-            gps_home: optional(self.gps_home.build())?,
+            main: MainFrameDef(self.main.build()?),
+            slow: SlowFrameDef(self.slow.build()?),
+            gps: optional(self.gps.build())?.map(GpsFrameDef),
+            gps_home: optional(self.gps_home.build())?.map(GpsHomeFrameDef),
         })
     }
 }
@@ -332,10 +345,10 @@ impl Default for FrameDefBuilders<'_> {
 
 #[derive(Debug)]
 pub struct FrameDefs<'data> {
-    pub main: Vec<MainField<'data>>,
-    pub slow: Vec<SlowField<'data>>,
-    pub gps: Option<Vec<GpsField<'data>>>,
-    pub gps_home: Option<Vec<GpsHomeField<'data>>>,
+    pub main: MainFrameDef<'data>,
+    pub slow: SlowFrameDef<'data>,
+    pub gps: Option<GpsFrameDef<'data>>,
+    pub gps_home: Option<GpsHomeFrameDef<'data>>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -399,8 +412,69 @@ pub trait Field {
     fn signed(&self) -> bool;
 }
 
-pub(crate) trait FieldDetails {
-    fn encoding(&self) -> Encoding;
+pub(crate) trait FrameDef {
+    fn len(&self) -> usize;
+    fn encodings(&self) -> impl Iterator<Item = Encoding>;
+}
+
+impl<T: FrameDef> FrameDef for &'_ T {
+    fn len(&self) -> usize {
+        (*self).len()
+    }
+
+    fn encodings(&self) -> impl Iterator<Item = Encoding> {
+        (*self).encodings()
+    }
+}
+
+#[derive(Debug)]
+pub struct MainFrameDef<'data>(Vec<MainField<'data>>);
+
+#[derive(Debug)]
+pub(crate) struct MainFrameDefRef<'f, 'data> {
+    fields: &'f [MainField<'data>],
+    kind: MainFrameKind,
+}
+
+#[derive(Debug, Clone, Copy)]
+enum MainFrameKind {
+    Intra,
+    Inter,
+}
+
+impl<'data> MainFrameDef<'data> {
+    pub(crate) fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub(crate) fn as_intra<'f>(&'f self) -> MainFrameDefRef<'f, 'data> {
+        MainFrameDefRef {
+            fields: &self.0,
+            kind: MainFrameKind::Intra,
+        }
+    }
+
+    pub(crate) fn as_inter<'f>(&'f self) -> MainFrameDefRef<'f, 'data> {
+        MainFrameDefRef {
+            fields: &self.0,
+            kind: MainFrameKind::Inter,
+        }
+    }
+}
+
+impl FrameDef for MainFrameDefRef<'_, '_> {
+    fn len(&self) -> usize {
+        self.fields.len()
+    }
+
+    fn encodings(&self) -> impl Iterator<Item = Encoding> {
+        let map = match self.kind {
+            MainFrameKind::Intra => |f: &MainField<'_>| f.encoding_intra,
+            MainFrameKind::Inter => |f: &MainField<'_>| f.encoding_inter,
+        };
+
+        self.fields.iter().map(map)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -452,31 +526,6 @@ impl Field for MainField<'_> {
         self.signed
     }
 }
-
-macro_rules! main_field_wrapper {
-    ($n:ident, $as:ident, $enc:ident) => {
-        #[derive(Debug, Clone)]
-        #[repr(transparent)]
-        pub(crate) struct $n<'data>(MainField<'data>);
-
-        impl FieldDetails for $n<'_> {
-            fn encoding(&self) -> Encoding {
-                self.0.$enc
-            }
-        }
-
-        #[expect(unsafe_code)]
-        impl<'data> MainField<'data> {
-            pub(crate) const fn $as<'a>(fields: &'a [Self]) -> &'a [$n<'data>] {
-                // SAFETY: TODO
-                unsafe { slice::from_raw_parts(fields.as_ptr().cast(), fields.len()) }
-            }
-        }
-    };
-}
-
-main_field_wrapper!(IntraField, all_as_intra, encoding_intra);
-main_field_wrapper!(InterField, all_as_inter, encoding_inter);
 
 #[derive(Debug)]
 struct CommonField<'data, K> {

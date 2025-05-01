@@ -1,6 +1,6 @@
 use alloc::vec::Vec;
 
-use crate::headers_v2::frame_defs::{FieldDetails, FrameDefs, MainField};
+use crate::headers_v2::frame_defs::{FrameDef, FrameDefs};
 use crate::Reader;
 
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
@@ -23,8 +23,8 @@ impl<'data> DataParser<'data> {
             data: Reader::new(data),
             main: alloc::vec![0; frames.main.len()],
             slow: alloc::vec![0; frames.slow.len()],
-            gps: alloc::vec![0; frames.gps.as_ref().map_or(0, Vec::len)],
-            gps_home: alloc::vec![0; frames.gps_home.as_ref().map_or(0, Vec::len)],
+            gps: alloc::vec![0; frames.gps.as_ref().map_or(0, FrameDef::len)],
+            gps_home: alloc::vec![0; frames.gps_home.as_ref().map_or(0, FrameDef::len)],
             frames,
         }
     }
@@ -38,25 +38,25 @@ impl<'data> DataParser<'data> {
 
         Some(match kind {
             b'I' => {
-                let intra_frame = MainField::all_as_intra(&self.frames.main);
-                decode_frame(&mut self.data, intra_frame, &mut self.main)
+                let frame = self.frames.main.as_intra();
+                decode_frame(&mut self.data, frame, &mut self.main)
                     .map(|raw| visitor.main(MainFrameKind::Intra, raw))
             }
             b'P' => {
-                let inter_frame = MainField::all_as_inter(&self.frames.main);
-                decode_frame(&mut self.data, inter_frame, &mut self.main)
+                let frame = self.frames.main.as_inter();
+                decode_frame(&mut self.data, frame, &mut self.main)
                     .map(|raw| visitor.main(MainFrameKind::Inter, raw))
             }
             b'S' => decode_frame(&mut self.data, &self.frames.slow, &mut self.slow)
                 .map(|raw| visitor.slow(raw)),
             b'G' => {
-                let Some(frame) = self.frames.gps.as_deref() else {
+                let Some(frame) = self.frames.gps.as_ref() else {
                     todo!()
                 };
                 decode_frame(&mut self.data, frame, &mut self.gps).map(|raw| visitor.gps(raw))
             }
             b'H' => {
-                let Some(frame) = self.frames.gps_home.as_deref() else {
+                let Some(frame) = self.frames.gps_home.as_ref() else {
                     todo!()
                 };
                 decode_frame(&mut self.data, frame, &mut self.gps_home)
@@ -84,12 +84,12 @@ pub enum MainFrameKind {
     Inter,
 }
 
-fn decode_frame<'a, F: FieldDetails>(
+fn decode_frame<'a, F: FrameDef>(
     data: &mut Reader,
-    frame: &'a [F],
+    frame: F,
     raw: &'a mut [u32],
 ) -> Result<&'a mut [u32], Error> {
-    let mut encodings = frame.iter().map(F::encoding).peekable();
+    let mut encodings = frame.encodings().peekable();
 
     let mut i = 0;
     while let Some(encoding) = encodings.next() {
