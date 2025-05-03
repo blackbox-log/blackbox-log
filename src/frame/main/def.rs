@@ -7,7 +7,7 @@ use super::{MainUnit, RawMainFrame};
 use crate::frame::{self, DataFrameKind, DataFrameProperty, FieldDef, FieldDefDetails, FrameDef};
 use crate::headers::{ParseError, ParseResult};
 use crate::parser::{decode, Encoding, InternalResult};
-use crate::predictor::{self, Predictor, PredictorContext};
+use crate::predictor::{Predictor, PredictorContext};
 use crate::utils::to_base_field;
 use crate::{Headers, Reader, Unit};
 
@@ -144,7 +144,7 @@ impl<'data> MainFrameDef<'data> {
                 .filter(|f| !f.intra)
                 .and_then(|_| last_last.map(|f| f.time));
 
-            let time = predictor::straight_line(last.map(|f| f.time), last_last);
+            let time: u64 = todo!();
             let offset = decode::variable_signed(data)?;
             let time = time.saturating_add_signed(offset.into());
 

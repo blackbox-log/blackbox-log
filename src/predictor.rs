@@ -1,6 +1,7 @@
 use core::ops::{Add, Div, Sub};
 
 use super::frame::GpsPosition;
+use crate::data_v2::History;
 use crate::utils::{as_i32, as_u32};
 use crate::Headers;
 
@@ -25,106 +26,74 @@ pub(crate) enum Predictor {
 impl Predictor {
     pub(crate) fn apply(
         self,
+        _value: u32,
+        _signed: bool,
+        _current: Option<&[u32]>,
+        _ctx: &PredictorContext,
+    ) -> u32 {
+        todo!()
+    }
+
+    pub(crate) fn apply_v2(
+        self,
         value: u32,
         signed: bool,
-        current: Option<&[u32]>,
-        ctx: &PredictorContext,
+        skipped: u32,
+        ctx: &PredictorContextV2,
+        history: History<u32>,
     ) -> u32 {
-        let _span = if signed {
-            tracing::trace_span!(
-                "Predictor::apply",
-                ?self,
-                value = as_i32(value),
-                last = ctx.last.map(as_i32),
-                last_last = ctx.last_last.map(as_i32),
-                skipped_frames = ctx.skipped_frames,
-            )
-        } else {
-            tracing::trace_span!(
-                "Predictor::apply",
-                ?self,
-                value,
-                last = ctx.last,
-                last_last = ctx.last_last,
-                skipped_frames = ctx.skipped_frames
-            )
-        };
-        let _span = _span.enter();
-
         let diff = match self {
             Self::Zero => 0,
-            Self::Previous => ctx.last.unwrap_or(0),
+            Self::Previous => history.last_or(0),
             Self::StraightLine => {
                 if signed {
-                    as_u32(straight_line(
-                        ctx.last.map(as_i32),
-                        ctx.last_last.map(as_i32),
-                    ))
+                    as_u32(straight_line(history.as_i32()))
                 } else {
-                    straight_line(ctx.last, ctx.last_last)
+                    straight_line(history)
                 }
             }
             Self::Average2 => {
                 if signed {
-                    as_u32(average(ctx.last.map(as_i32), ctx.last_last.map(as_i32)))
+                    as_u32(average(history.as_i32()))
                 } else {
-                    average(ctx.last, ctx.last_last)
+                    average(history)
                 }
             }
-            Self::MinThrottle => ctx.headers.min_throttle.unwrap().into(),
-            Self::Motor0 => current.map_or_else(
-                || {
-                    tracing::debug!("found {self:?} without current values");
-                    0
-                },
-                |current| ctx.headers.main_frame_def().get_motor_0_from(current),
-            ),
+            Self::MinThrottle => ctx.min_throttle,
+            Self::Motor0 => ctx.motor_0,
             Self::Increment => {
+                // FIXME: switched?
                 if signed {
-                    ctx.skipped_frames
-                        .wrapping_add(1)
-                        .wrapping_add(ctx.last.unwrap_or(0))
+                    skipped.wrapping_add(1).wrapping_add(history.last_or(0))
                 } else {
-                    let skipped_frames = i32::try_from(ctx.skipped_frames)
-                        .expect("never skip more than i32::MAX frames");
+                    let skipped =
+                        i32::try_from(skipped).expect("never skip more than i32::MAX frames");
                     as_u32(
-                        skipped_frames
+                        skipped
                             .wrapping_add(1)
-                            .wrapping_add(as_i32(ctx.last.unwrap_or(0))),
+                            .wrapping_add(as_i32(history.last_or(0))),
                     )
                 }
             }
-            Self::HomeLat | Self::HomeLon => ctx.gps_home.map_or_else(
-                || {
-                    tracing::debug!("found {self:?} without gps home");
-                    // TODO: invalidate result
-                    0
-                },
-                |home| {
-                    as_u32(if self == Self::HomeLat {
-                        home.latitude
-                    } else {
-                        home.longitude
-                    })
-                },
-            ),
+            Self::HomeLat | Self::HomeLon => as_u32(if self == Self::HomeLat {
+                ctx.gps_home.latitude
+            } else {
+                ctx.gps_home.longitude
+            }),
             Self::FifteenHundred => 1500,
-            Self::VBatReference => ctx.headers.vbat_reference.unwrap().into(),
+            Self::VBatReference => ctx.vbat_reference,
             Self::LastMainFrameTime => {
+                // TODO
                 tracing::debug!("found unhandled {self:?}");
                 0
             }
-            Self::MinMotor => ctx.headers.motor_output_range.unwrap().min.into(),
+            Self::MinMotor => ctx.min_motor,
         };
 
         if signed {
-            let signed = as_i32(value).wrapping_add(as_i32(diff));
-            tracing::trace!(return = signed);
-            as_u32(signed)
+            as_u32(as_i32(value).wrapping_add(as_i32(diff)))
         } else {
-            let x = value.wrapping_add(diff);
-            tracing::trace!(return = x);
-            x
+            value.wrapping_add(diff)
         }
     }
 
@@ -143,6 +112,30 @@ impl Predictor {
             "10" => Some(Self::LastMainFrameTime),
             "11" => Some(Self::MinMotor),
             _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct PredictorContextV2 {
+    gps_home: GpsPosition,
+    min_motor: u32,
+    min_throttle: u32,
+    motor_0: u32,
+    vbat_reference: u32,
+}
+impl PredictorContextV2 {
+    pub(crate) fn new() -> Self {
+        // TODO
+        Self {
+            gps_home: GpsPosition {
+                latitude: 0,
+                longitude: 0,
+            },
+            min_motor: 0,
+            min_throttle: 0,
+            motor_0: 0,
+            vbat_reference: 0,
         }
     }
 }
@@ -201,13 +194,13 @@ impl<'a, 'data> PredictorContext<'a, 'data> {
 }
 
 #[inline]
-pub(crate) fn straight_line<T>(last: Option<T>, last_last: Option<T>) -> T
+pub(crate) fn straight_line<T>(history: History<T>) -> T
 where
     T: TemporaryOverflow + Default,
     T::Wide: Copy + Sub<Output = T::Wide> + Add<Output = T::Wide> + PartialOrd,
 {
-    match (last, last_last) {
-        (Some(last), Some(last_last)) => {
+    match history {
+        History::Two(last, last_last) => {
             let fallback = last;
 
             let result = {
@@ -224,21 +217,24 @@ where
             };
             T::try_from(result).unwrap_or(fallback)
         }
-        (Some(last), None) => last,
-        _ => T::default(),
+        History::One(last) => last,
+        History::None => T::default(),
     }
 }
 
 #[inline]
-fn average<T>(last: Option<T>, last_last: Option<T>) -> T
+fn average<T>(history: History<T>) -> T
 where
     T: TemporaryOverflow + Copy + Default,
     T::Wide: Add<Output = T::Wide> + Div<Output = T::Wide> + From<u8>,
 {
-    let last = last.unwrap_or_default();
-    last_last.map_or(last, |last_last| {
-        T::truncate_from((last.widen() + last_last.widen()) / 2.into())
-    })
+    match history {
+        History::None => T::default(),
+        History::One(last) => last,
+        History::Two(last, last_last) => {
+            T::truncate_from((last.widen() + last_last.widen()) / 2.into())
+        }
+    }
 }
 
 pub(crate) trait TemporaryOverflow
@@ -285,41 +281,43 @@ impl_next_larger!(unsigned u64 -> u128, signed i64 -> i128);
 mod tests {
     use test_case::case;
 
-    #[case(None, None => 0)]
-    #[case(Some(10), None => 10)]
-    #[case(Some(-2), None => -2)]
-    #[case(Some(12), Some(10) => 14)]
-    #[case(Some(10), Some(12) => 8)]
-    #[case(Some(0), Some(i8::MAX) => -i8::MAX)]
-    #[case(Some(0), Some(i8::MIN) => 0 ; "underflow")]
-    #[case(Some(126), Some(0) => 126 ; "overflow")]
-    fn straight_line_signed(last: Option<i8>, last_last: Option<i8>) -> i8 {
-        super::straight_line(last, last_last)
+    use super::History;
+
+    #[case(History::None => 0)]
+    #[case(History::One(10) => 10)]
+    #[case(History::One(-2) => -2)]
+    #[case(History::Two(12, 10) => 14)]
+    #[case(History::Two(10, 12) => 8)]
+    #[case(History::Two(0, i8::MAX) => -i8::MAX)]
+    #[case(History::Two(0, i8::MIN) => 0 ; "underflow")]
+    #[case(History::Two(126, 0) => 126 ; "overflow")]
+    fn straight_line_signed(history: History<i8>) -> i8 {
+        super::straight_line(history)
     }
 
-    #[case(Some(2),Some(2) => 2)]
-    #[case(Some(12), Some(10) => 14)]
-    #[case(Some(10), Some(12) => 8)]
-    #[case(Some(0), Some(u8::MIN) => 0 ; "underflow")]
-    #[case(Some(u8::MAX - 1), Some(0) => 254 ; "overflow")]
-    #[case(Some(0), Some(u8::MAX) => 0 ; "negative result")]
-    fn straight_line_unsigned(last: Option<u8>, last_last: Option<u8>) -> u8 {
-        super::straight_line(last, last_last)
+    #[case(History::Two(2, 2) => 2)]
+    #[case(History::Two(12, 10) => 14)]
+    #[case(History::Two(10, 12) => 8)]
+    #[case(History::Two(0, u8::MIN) => 0 ; "underflow")]
+    #[case(History::Two(u8::MAX - 1, 0) => 254 ; "overflow")]
+    #[case(History::Two(0, u8::MAX) => 0 ; "negative result")]
+    fn straight_line_unsigned(history: History<u8>) -> u8 {
+        super::straight_line(history)
     }
 
-    #[case(None, None => 0)]
-    #[case(Some(-1), None => -1)]
-    #[case(Some(2), Some(-1) => 0)]
-    #[case(Some(i32::MAX), Some(1) => 0x4000_0000 ; "overflow")]
-    fn average_signed(last: Option<i32>, last_last: Option<i32>) -> i32 {
-        super::average(last, last_last)
+    #[case(History::None => 0)]
+    #[case(History::One(-1) => -1)]
+    #[case(History::Two(2, -1) => 0)]
+    #[case(History::Two(i32::MAX, 1) => 0x4000_0000 ; "overflow")]
+    fn average_signed(history: History<i32>) -> i32 {
+        super::average(history)
     }
 
-    #[case(None, None => 0)]
-    #[case(Some(1), None => 1)]
-    #[case(Some(2), Some(10) => 6)]
-    #[case(Some(u32::MAX), Some(1) => 0x8000_0000 ; "overflow")]
-    fn average_unsigned(last: Option<u32>, last_last: Option<u32>) -> u32 {
-        super::average(last, last_last)
+    #[case(History::None => 0)]
+    #[case(History::One(1) => 1)]
+    #[case(History::Two(2, 10) => 6)]
+    #[case(History::Two(u32::MAX, 1) => 0x8000_0000 ; "overflow")]
+    fn average_unsigned(history: History<u32>) -> u32 {
+        super::average(history)
     }
 }

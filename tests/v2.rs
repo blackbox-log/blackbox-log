@@ -1,7 +1,9 @@
 #![expect(clippy::use_debug)]
 
-use blackbox_log::data_v2::DataParser;
-use blackbox_log::headers_v2::frame_defs::FrameDefBuilders;
+use blackbox_log::data_v2::{DataParser, Frame};
+use blackbox_log::headers_v2::frame_defs::{
+    FrameDefBuilders, GpsFrameDef, GpsHomeFrameDef, MainFrameDef, SlowFrameDef,
+};
 use blackbox_log::headers_v2::HeadersParser;
 
 static LOG: &[u8] = include_bytes!("./logs/error-recovery.bbl");
@@ -35,21 +37,21 @@ impl<'a> blackbox_log::data_v2::Visitor<'a> for Visitor {
     fn main(
         &mut self,
         kind: blackbox_log::data_v2::MainFrameKind,
-        frame: &'a [u32],
+        frame: Frame<'a, MainFrameDef>,
     ) -> Self::Output {
-        eprintln!("main({kind:?}): {frame:?}");
+        eprintln!("main({kind:?}): {:?}", frame.iter().collect::<Vec<_>>());
     }
 
-    fn slow(&mut self, frame: &'a [u32]) -> Self::Output {
-        eprintln!("slow: {frame:?}");
+    fn slow(&mut self, frame: Frame<'a, SlowFrameDef>) -> Self::Output {
+        eprintln!("slow: {:?}", frame.iter_raw().collect::<Vec<_>>());
     }
 
-    fn gps(&mut self, frame: &'a [u32]) -> Self::Output {
-        eprintln!("gps: {frame:?}");
+    fn gps(&mut self, frame: Frame<'a, GpsFrameDef>) -> Self::Output {
+        eprintln!("gps: {:?}", frame.iter_raw().collect::<Vec<_>>());
     }
 
-    fn gps_home(&mut self, frame: &'a [u32]) -> Self::Output {
-        eprintln!("gps_home: {frame:?}");
+    fn gps_home(&mut self, frame: Frame<'a, GpsHomeFrameDef>) -> Self::Output {
+        eprintln!("gps_home: {:?}", frame.iter_raw().collect::<Vec<_>>());
     }
 
     fn event(&mut self) -> Self::Output {

@@ -177,16 +177,22 @@ macro_rules! impl_common_frame {
         #[derive(Debug)]
         pub struct $builder<'data>(CommonBuilder<'data>);
 
-        #[derive(Debug)]
-        pub struct $frame<'data>(Vec<$field<'data>>);
+        #[derive(Debug, Clone, Copy)]
+        pub struct $frame<'a, 'data>(&'a [$field<'data>]);
 
-        impl FrameDef for $frame<'_> {
+        impl<'a, 'data> FrameDef for $frame<'a, 'data> {
+            type Field = &'a $field<'data>;
+
             fn len(&self) -> usize {
                 self.0.len()
             }
 
             fn encodings(&self) -> impl Iterator<Item = Encoding> {
                 self.0.iter().map(|f| f.0.encoding)
+            }
+
+            fn iter(&self) -> impl Iterator<Item = Self::Field> {
+                self.0.iter()
             }
         }
 
@@ -254,6 +260,12 @@ macro_rules! impl_common_frame {
 
             fn signed(&self) -> bool {
                 self.0.signed()
+            }
+        }
+
+        impl FieldDetails for &'_ $field<'_> {
+            fn predictor(&self) -> Predictor {
+                self.0.predictor
             }
         }
     };
@@ -329,10 +341,10 @@ impl<'data> FrameDefBuilders<'data> {
         }
 
         Ok(FrameDefs {
-            main: MainFrameDef(self.main.build()?),
-            slow: SlowFrameDef(self.slow.build()?),
-            gps: optional(self.gps.build())?.map(GpsFrameDef),
-            gps_home: optional(self.gps_home.build())?.map(GpsHomeFrameDef),
+            main: self.main.build()?,
+            slow: self.slow.build()?,
+            gps: optional(self.gps.build())?,
+            gps_home: optional(self.gps_home.build())?,
         })
     }
 }
@@ -345,10 +357,38 @@ impl Default for FrameDefBuilders<'_> {
 
 #[derive(Debug)]
 pub struct FrameDefs<'data> {
-    pub main: MainFrameDef<'data>,
-    pub slow: SlowFrameDef<'data>,
-    pub gps: Option<GpsFrameDef<'data>>,
-    pub gps_home: Option<GpsHomeFrameDef<'data>>,
+    pub(crate) main: Vec<MainField<'data>>,
+    pub(crate) slow: Vec<SlowField<'data>>,
+    pub(crate) gps: Option<Vec<GpsField<'data>>>,
+    pub(crate) gps_home: Option<Vec<GpsHomeField<'data>>>,
+}
+
+impl<'data> FrameDefs<'data> {
+    pub(crate) fn intra<'a>(&'a self) -> MainFrameDef<'a, 'data> {
+        MainFrameDef {
+            fields: &self.main,
+            kind: MainFrameKind::Intra,
+        }
+    }
+
+    pub(crate) fn inter<'a>(&'a self) -> MainFrameDef<'a, 'data> {
+        MainFrameDef {
+            fields: &self.main,
+            kind: MainFrameKind::Inter,
+        }
+    }
+
+    pub(crate) fn slow<'a>(&'a self) -> SlowFrameDef<'a, 'data> {
+        SlowFrameDef(&self.slow)
+    }
+
+    pub(crate) fn gps<'a>(&'a self) -> Option<GpsFrameDef<'a, 'data>> {
+        self.gps.as_deref().map(GpsFrameDef)
+    }
+
+    pub(crate) fn gps_home<'a>(&'a self) -> Option<GpsHomeFrameDef<'a, 'data>> {
+        self.gps_home.as_deref().map(GpsHomeFrameDef)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -412,26 +452,44 @@ pub trait Field {
     fn signed(&self) -> bool;
 }
 
+impl<T: Field> Field for &'_ T {
+    type Kind = T::Kind;
+
+    fn kind(&self) -> Self::Kind {
+        (*self).kind()
+    }
+
+    fn index(&self) -> Option<u8> {
+        (*self).index()
+    }
+
+    fn raw_kind(&self) -> &str {
+        (*self).raw_kind()
+    }
+
+    fn raw_name(&self) -> &str {
+        (*self).raw_name()
+    }
+
+    fn signed(&self) -> bool {
+        (*self).signed()
+    }
+}
+
 pub(crate) trait FrameDef {
+    type Field: FieldDetails;
+
     fn len(&self) -> usize;
     fn encodings(&self) -> impl Iterator<Item = Encoding>;
+    fn iter(&self) -> impl Iterator<Item = Self::Field>;
 }
 
-impl<T: FrameDef> FrameDef for &'_ T {
-    fn len(&self) -> usize {
-        (*self).len()
-    }
-
-    fn encodings(&self) -> impl Iterator<Item = Encoding> {
-        (*self).encodings()
-    }
+pub(crate) trait FieldDetails: Field {
+    fn predictor(&self) -> Predictor;
 }
 
-#[derive(Debug)]
-pub struct MainFrameDef<'data>(Vec<MainField<'data>>);
-
-#[derive(Debug)]
-pub(crate) struct MainFrameDefRef<'f, 'data> {
+#[derive(Debug, Clone, Copy)]
+pub struct MainFrameDef<'f, 'data> {
     fields: &'f [MainField<'data>],
     kind: MainFrameKind,
 }
@@ -442,27 +500,9 @@ enum MainFrameKind {
     Inter,
 }
 
-impl<'data> MainFrameDef<'data> {
-    pub(crate) fn len(&self) -> usize {
-        self.0.len()
-    }
+impl<'f, 'data> FrameDef for MainFrameDef<'f, 'data> {
+    type Field = MainFieldDetails<'f, 'data>;
 
-    pub(crate) fn as_intra<'f>(&'f self) -> MainFrameDefRef<'f, 'data> {
-        MainFrameDefRef {
-            fields: &self.0,
-            kind: MainFrameKind::Intra,
-        }
-    }
-
-    pub(crate) fn as_inter<'f>(&'f self) -> MainFrameDefRef<'f, 'data> {
-        MainFrameDefRef {
-            fields: &self.0,
-            kind: MainFrameKind::Inter,
-        }
-    }
-}
-
-impl FrameDef for MainFrameDefRef<'_, '_> {
     fn len(&self) -> usize {
         self.fields.len()
     }
@@ -474,6 +514,13 @@ impl FrameDef for MainFrameDefRef<'_, '_> {
         };
 
         self.fields.iter().map(map)
+    }
+
+    fn iter(&self) -> impl Iterator<Item = Self::Field> {
+        self.fields.iter().map(|field| MainFieldDetails {
+            field,
+            kind: self.kind,
+        })
     }
 }
 
@@ -524,6 +571,45 @@ impl Field for MainField<'_> {
 
     fn signed(&self) -> bool {
         self.signed
+    }
+}
+
+#[derive(Debug)]
+pub(crate) struct MainFieldDetails<'a, 'data> {
+    field: &'a MainField<'data>,
+    kind: MainFrameKind,
+}
+
+impl Field for MainFieldDetails<'_, '_> {
+    type Kind = MainFieldKind;
+
+    fn kind(&self) -> Self::Kind {
+        self.field.kind()
+    }
+
+    fn index(&self) -> Option<u8> {
+        self.field.index()
+    }
+
+    fn raw_kind(&self) -> &str {
+        self.field.raw_kind()
+    }
+
+    fn raw_name(&self) -> &str {
+        self.field.raw_name()
+    }
+
+    fn signed(&self) -> bool {
+        self.field.signed()
+    }
+}
+
+impl FieldDetails for MainFieldDetails<'_, '_> {
+    fn predictor(&self) -> Predictor {
+        match self.kind {
+            MainFrameKind::Intra => self.field.predictor_intra,
+            MainFrameKind::Inter => self.field.predictor_inter,
+        }
     }
 }
 
