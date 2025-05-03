@@ -36,6 +36,7 @@ impl_sign_conversions!(as_i16, i16, as_u16, u16);
 impl_sign_conversions!(as_i32, i32, as_u32, u32);
 impl_sign_conversions!(as_i64, i64, as_u64, u64);
 impl_sign_conversions!(as_i128, i128, as_u128, u128);
+impl_sign_conversions!(as_isize, isize, as_usize, usize);
 
 macro_rules! byte_enum {
     (
