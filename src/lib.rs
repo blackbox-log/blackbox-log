@@ -95,10 +95,12 @@ pub mod data_v2;
 pub mod event;
 mod file;
 mod filter;
+#[allow(unused)]
 pub mod frame;
 pub mod headers;
 pub mod headers_v2;
 mod parser;
+#[allow(unused)]
 mod predictor;
 pub mod prelude;
 mod reader;

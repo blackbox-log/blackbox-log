@@ -5,7 +5,7 @@ use core::marker::PhantomData;
 use core::ops;
 use core::ptr::NonNull;
 
-use crate::utils::as_i32;
+use crate::utils::{as_i32, as_isize};
 
 #[derive(Debug)]
 pub(super) struct FrameHistory {
@@ -106,7 +106,7 @@ impl<'a> Iterator for Iter<'a> {
             return None;
         }
 
-        let i = self.i as isize;
+        let i = as_isize(self.i);
         self.i += 1;
 
         Some(unsafe {
@@ -140,8 +140,7 @@ impl<T> History<T> {
     {
         match self {
             Self::None => default,
-            Self::One(last) => *last,
-            Self::Two(last, _) => *last,
+            Self::One(last) | Self::Two(last, _) => *last,
         }
     }
 }
