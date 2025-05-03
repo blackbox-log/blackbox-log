@@ -1,8 +1,8 @@
 #![expect(clippy::use_debug)]
 
-use blackbox_log::data_v2::{DataParser, Frame};
+use blackbox_log::data_v2::{Context as DataContext, DataParser, Frame};
 use blackbox_log::headers_v2::frame_defs::{
-    FrameDefBuilders, GpsFrameDef, GpsHomeFrameDef, MainFrameDef, SlowFrameDef,
+    GpsFrameDef, GpsHomeFrameDef, MainFrameDef, SlowFrameDef,
 };
 use blackbox_log::headers_v2::HeadersParser;
 
@@ -11,16 +11,16 @@ static LOG: &[u8] = include_bytes!("./logs/error-recovery.bbl");
 #[test]
 fn v2() {
     let mut headers = HeadersParser::new(LOG);
-    let mut frames = FrameDefBuilders::new();
+    let mut data_context = DataContext::builder();
     for pair in &mut headers {
         let (header, value) = pair.unwrap();
-        frames.update(header, value).unwrap();
+        data_context.update(header, value).unwrap();
 
         eprintln!("{header:?}: {value:?}");
     }
 
-    let frames = frames.build().unwrap();
-    let mut data = DataParser::new(headers.data(), frames);
+    let data_context = data_context.build().unwrap();
+    let mut data = DataParser::new(headers.data(), data_context);
 
     while let Some(result) = data.next(Visitor) {
         result.unwrap();

@@ -443,13 +443,23 @@ impl FromStr for FrameProperty {
 }
 
 pub trait Field {
-    type Kind: Copy + Eq;
+    type Kind: Copy + Eq + Into<Kind>;
 
     fn kind(&self) -> Self::Kind;
     fn index(&self) -> Option<u8>;
     fn raw_kind(&self) -> &str;
     fn raw_name(&self) -> &str;
     fn signed(&self) -> bool;
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[non_exhaustive]
+pub enum Kind {
+    Motor,
+    FailsafePhase,
+    HomeLatittude,
+    HomeLongitude,
+    Unknown,
 }
 
 impl<T: Field> Field for &'_ T {
@@ -539,12 +549,25 @@ pub struct MainField<'data> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[non_exhaustive]
 pub enum MainFieldKind {
+    Motor,
     Unknown,
 }
 
+impl From<MainFieldKind> for Kind {
+    fn from(kind: MainFieldKind) -> Self {
+        match kind {
+            MainFieldKind::Motor => Self::Motor,
+            MainFieldKind::Unknown => Self::Unknown,
+        }
+    }
+}
+
 impl MainFieldKind {
-    fn new(_name: &str, _index: FieldIndex) -> Self {
-        Self::Unknown
+    fn new(name: &str, _index: FieldIndex) -> Self {
+        match name {
+            "motor" => Self::Motor,
+            _ => Self::Unknown,
+        }
     }
 }
 
@@ -623,7 +646,7 @@ struct CommonField<'data, K> {
     signed: bool,
 }
 
-impl<K: Copy + Eq> Field for CommonField<'_, K> {
+impl<K: Copy + Eq + Into<Kind>> Field for CommonField<'_, K> {
     type Kind = K;
 
     fn kind(&self) -> Self::Kind {
@@ -658,10 +681,19 @@ pub enum SlowFieldKind {
 }
 
 impl SlowFieldKind {
-    fn new(_name: &str, _index: FieldIndex) -> Self {
-        match _name {
+    fn new(name: &str, _index: FieldIndex) -> Self {
+        match name {
             "failsafePhase" => Self::FailsafePhase,
             _ => Self::Unknown,
+        }
+    }
+}
+
+impl From<SlowFieldKind> for Kind {
+    fn from(kind: SlowFieldKind) -> Self {
+        match kind {
+            SlowFieldKind::FailsafePhase => Self::FailsafePhase,
+            SlowFieldKind::Unknown => Self::Unknown,
         }
     }
 }
@@ -676,6 +708,14 @@ pub enum GpsFieldKind {
 impl GpsFieldKind {
     fn new(_name: &str, _index: FieldIndex) -> Self {
         Self::Unknown
+    }
+}
+
+impl From<GpsFieldKind> for Kind {
+    fn from(kind: GpsFieldKind) -> Self {
+        match kind {
+            GpsFieldKind::Unknown => Self::Unknown,
+        }
     }
 }
 
@@ -694,6 +734,16 @@ impl GpsHomeFieldKind {
             ("GPS_home", 0) => Self::Latittude,
             ("GPS_home", 1) => Self::Longitude,
             _ => Self::Unknown,
+        }
+    }
+}
+
+impl From<GpsHomeFieldKind> for Kind {
+    fn from(kind: GpsHomeFieldKind) -> Self {
+        match kind {
+            GpsHomeFieldKind::Latittude => Self::HomeLatittude,
+            GpsHomeFieldKind::Longitude => Self::HomeLongitude,
+            GpsHomeFieldKind::Unknown => Self::Unknown,
         }
     }
 }

@@ -124,8 +124,9 @@ pub(crate) struct PredictorContextV2 {
     motor_0: u32,
     vbat_reference: u32,
 }
+
 impl PredictorContextV2 {
-    pub(crate) fn new() -> Self {
+    pub(crate) const fn new() -> Self {
         // TODO
         Self {
             gps_home: GpsPosition {
@@ -137,6 +138,32 @@ impl PredictorContextV2 {
             motor_0: 0,
             vbat_reference: 0,
         }
+    }
+
+    pub(crate) fn update(&mut self, header: &str, value: &str) -> Result<(), ()> {
+        match header {
+            "minthrottle" => self.min_throttle = value.parse().map_err(|_| ())?,
+            "motorOutput" => {
+                let (min, _) = value.split_once(',').ok_or(())?;
+                self.min_motor = min.parse().map_err(|_| ())?;
+            }
+            "vbatref" => self.vbat_reference = value.parse().map_err(|_| ())?,
+            _ => {}
+        }
+
+        Ok(())
+    }
+
+    pub(crate) fn set_gps_home_lat(&mut self, raw: u32) {
+        self.gps_home.latitude = as_i32(raw);
+    }
+
+    pub(crate) fn set_gps_home_lon(&mut self, raw: u32) {
+        self.gps_home.longitude = as_i32(raw);
+    }
+
+    pub(crate) fn set_motor_0(&mut self, raw: u32) {
+        self.motor_0 = raw;
     }
 }
 

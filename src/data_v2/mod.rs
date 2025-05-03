@@ -1,11 +1,13 @@
+pub mod context;
 mod history;
 
 use alloc::vec::Vec;
 
+pub use self::context::Context;
 use self::history::FrameHistory;
 pub(crate) use self::history::History;
 use crate::headers_v2::frame_defs::{
-    Field as _, FieldDetails as _, FrameDef, FrameDefs, GpsFrameDef, GpsHomeFrameDef, MainFrameDef,
+    Field as _, FieldDetails as _, FrameDef, GpsFrameDef, GpsHomeFrameDef, Kind, MainFrameDef,
     SlowFrameDef,
 };
 use crate::predictor::PredictorContextV2;
@@ -17,8 +19,7 @@ pub enum Error {}
 #[derive(Debug)]
 pub struct DataParser<'data> {
     data: Reader<'data>,
-    frames: FrameDefs<'data>,
-    predictor_ctx: PredictorContextV2,
+    context: Context<'data>,
 
     main: FrameHistory,
     slow: FrameHistory,
@@ -27,15 +28,16 @@ pub struct DataParser<'data> {
 }
 
 impl<'data> DataParser<'data> {
-    pub fn new(data: &'data [u8], frames: FrameDefs<'data>) -> Self {
+    pub fn new(data: &'data [u8], context: Context<'data>) -> Self {
         Self {
             data: Reader::new(data),
-            main: FrameHistory::new(frames.main.len()),
-            slow: FrameHistory::new(frames.slow.len()),
-            gps: FrameHistory::new(frames.gps.as_ref().map_or(0, Vec::len)),
-            gps_home: FrameHistory::new(frames.gps_home.as_ref().map_or(0, Vec::len)),
-            frames,
-            predictor_ctx: PredictorContextV2::new(),
+
+            main: FrameHistory::new(context.frames.main.len()),
+            slow: FrameHistory::new(context.frames.slow.len()),
+            gps: FrameHistory::new(context.frames.gps.as_ref().map_or(0, Vec::len)),
+            gps_home: FrameHistory::new(context.frames.gps_home.as_ref().map_or(0, Vec::len)),
+
+            context,
         }
     }
 
@@ -49,45 +51,45 @@ impl<'data> DataParser<'data> {
         Some(match kind {
             b'I' => decode_frame(
                 &mut self.data,
-                self.frames.intra(),
-                &mut self.predictor_ctx,
+                self.context.frames.intra(),
+                &mut self.context.predictor,
                 &mut self.main,
             )
             .map(|frame| visitor.main(MainFrameKind::Intra, frame)),
             b'P' => decode_frame(
                 &mut self.data,
-                self.frames.inter(),
-                &mut self.predictor_ctx,
+                self.context.frames.inter(),
+                &mut self.context.predictor,
                 &mut self.main,
             )
             .map(|frame| visitor.main(MainFrameKind::Inter, frame)),
             b'S' => decode_frame(
                 &mut self.data,
-                self.frames.slow(),
-                &mut self.predictor_ctx,
+                self.context.frames.slow(),
+                &mut self.context.predictor,
                 &mut self.slow,
             )
             .map(|frame| visitor.slow(frame)),
             b'G' => {
-                let Some(frame) = self.frames.gps() else {
+                let Some(frame) = self.context.frames.gps() else {
                     todo!()
                 };
                 decode_frame(
                     &mut self.data,
                     frame,
-                    &mut self.predictor_ctx,
+                    &mut self.context.predictor,
                     &mut self.gps,
                 )
                 .map(|frame| visitor.gps(frame))
             }
             b'H' => {
-                let Some(frame) = self.frames.gps_home() else {
+                let Some(frame) = self.context.frames.gps_home() else {
                     todo!()
                 };
                 decode_frame(
                     &mut self.data,
                     frame,
-                    &mut self.predictor_ctx,
+                    &mut self.context.predictor,
                     &mut self.gps_home,
                 )
                 .map(|frame| visitor.gps_home(frame))
@@ -173,6 +175,13 @@ fn decode_frame<'a, F: FrameDef>(
         *current = field
             .predictor()
             .apply_v2(*current, field.signed(), skipped, ctx, history);
+
+        match (field.kind().into(), field.index()) {
+            (Kind::Motor, Some(0)) => ctx.set_motor_0(*current),
+            (Kind::HomeLatittude, _) => ctx.set_gps_home_lat(*current),
+            (Kind::HomeLongitude, _) => ctx.set_gps_home_lon(*current),
+            _ => {}
+        }
     }
 
     let raw = history.finish();
