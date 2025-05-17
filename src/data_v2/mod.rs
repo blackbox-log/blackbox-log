@@ -11,7 +11,7 @@ use crate::headers_v2::frame_defs::{
     SlowFrameDef,
 };
 use crate::predictor::PredictorContextV2;
-use crate::Reader;
+use crate::{Event, Reader};
 
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
 pub enum Error {}
@@ -94,7 +94,12 @@ impl<'data> DataParser<'data> {
                 )
                 .map(|frame| visitor.gps_home(frame))
             }
-            b'E' => Ok(visitor.event()),
+            b'E' => {
+                let Ok(event) = Event::parse(&mut self.data) else {
+                    todo!()
+                };
+                Ok(visitor.event(event))
+            }
             _ => unreachable!(),
         })
     }
@@ -107,7 +112,7 @@ pub trait Visitor<'a> {
     fn slow(&mut self, frame: Frame<'a, SlowFrameDef>) -> Self::Output;
     fn gps(&mut self, frame: Frame<'a, GpsFrameDef>) -> Self::Output;
     fn gps_home(&mut self, frame: Frame<'a, GpsHomeFrameDef>) -> Self::Output;
-    fn event(&mut self) -> Self::Output;
+    fn event(&mut self, event: Event) -> Self::Output;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

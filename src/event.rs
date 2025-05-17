@@ -43,11 +43,13 @@ pub enum AdjustedValue {
 impl Event {
     #[instrument(level = "debug", name = "Event::parse", skip_all, fields(kind))]
     pub(crate) fn parse(data: &mut Reader) -> InternalResult<Self> {
-        let byte = data.read_u8().ok_or(InternalError::Eof)?;
-        let kind = EventKind::from_byte(byte).ok_or_else(|| {
-            tracing::debug!("found invalid event: {byte:0>#2x}");
-            InternalError::Retry
-        })?;
+        let kind = loop {
+            let byte = data.read_u8().ok_or(InternalError::Eof)?;
+            if let Some(kind) = EventKind::from_byte(byte) {
+                break kind;
+            }
+            tracing::debug!("skipping invalid event kind: {byte:0>#2x}");
+        };
 
         let event = match kind {
             EventKind::SyncBeep => {

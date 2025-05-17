@@ -5,6 +5,7 @@ use blackbox_log::headers_v2::frame_defs::{
     GpsFrameDef, GpsHomeFrameDef, MainFrameDef, SlowFrameDef,
 };
 use blackbox_log::headers_v2::HeadersParser;
+use blackbox_log::Event;
 
 static LOG: &[u8] = include_bytes!("./logs/error-recovery.bbl");
 
@@ -54,7 +55,7 @@ impl<'a> blackbox_log::data_v2::Visitor<'a> for Visitor {
         eprintln!("gps_home: {:?}", frame.iter_raw().collect::<Vec<_>>());
     }
 
-    fn event(&mut self) -> Self::Output {
-        eprintln!("event");
+    fn event(&mut self, event: Event) -> Self::Output {
+        eprintln!("event: {event:?}");
     }
 }
