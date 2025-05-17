@@ -1,4 +1,4 @@
-use core::ops::{Add, Div, Sub};
+use core::ops::{Add, Sub};
 
 use super::frame::GpsPosition;
 use crate::Headers;
@@ -206,8 +206,7 @@ impl<'a, 'data> PredictorContext<'a, 'data> {
 #[inline]
 pub(crate) fn straight_line<T>(last: Option<T>, last_last: Option<T>) -> T
 where
-    T: TemporaryOverflow + Default,
-    T::Wide: Copy + Sub<Output = T::Wide> + Add<Output = T::Wide> + PartialOrd,
+    T: NarrowInteger + Default,
 {
     match (last, last_last) {
         (Some(last), Some(last_last)) => {
@@ -218,12 +217,11 @@ where
                 let last_last = last_last.widen();
                 let sum = last + last;
 
-                // Work around not being able to use .checked_sub()
-                if !T::SIGNED && last_last > sum {
+                if let Some(diff) = sum.checked_sub(last_last) {
+                    diff
+                } else {
                     return fallback;
                 }
-
-                sum - last_last
             };
             T::try_from(result).unwrap_or(fallback)
         }
@@ -233,56 +231,51 @@ where
 }
 
 #[inline]
-fn average<T>(last: Option<T>, last_last: Option<T>) -> T
-where
-    T: TemporaryOverflow + Copy + Default,
-    T::Wide: Add<Output = T::Wide> + Div<Output = T::Wide> + From<u8>,
-{
+fn average<T: Integer + Default>(last: Option<T>, last_last: Option<T>) -> T {
     let last = last.unwrap_or_default();
-    last_last.map_or(last, |last_last| {
-        T::truncate_from((last.widen() + last_last.widen()) / 2.into())
-    })
+    last_last.map_or(last, |last_last| last.midpoint(last_last))
 }
 
-pub(crate) trait TemporaryOverflow
-where
-    Self: Copy + TryFrom<Self::Wide>,
-    Self::Wide: From<Self>,
-{
-    const SIGNED: bool;
-    type Wide;
-    fn truncate_from(larger: Self::Wide) -> Self;
+pub(crate) trait Integer: Copy + Add<Output = Self> + Sub<Output = Self> {
+    fn checked_sub(self, rhs: Self) -> Option<Self>;
+    fn midpoint(self, rhs: Self) -> Self;
+}
 
-    #[inline]
+pub(crate) trait NarrowInteger: Integer
+where
+    Self: TryFrom<Self::Wide>,
+    Self::Wide: From<Self> + Integer,
+{
+    type Wide;
+
     fn widen(self) -> Self::Wide {
         self.into()
     }
 }
 
-macro_rules! impl_next_larger {
-    ($($sign:ident $base:ident -> $wide:ident),+ $(,)?) => {
-        $(impl_next_larger!($sign, $base, $wide);)+
-    };
-    (signed, $base:ident, $wide:ident) => { impl_next_larger!(true, $base, $wide); };
-    (unsigned, $base:ident, $wide:ident) => { impl_next_larger!(false, $base, $wide); };
-    ($sign:expr, $base:ident, $wide:ident) => {
-        impl TemporaryOverflow for $base {
-            const SIGNED: bool = $sign;
-            type Wide = $wide;
+macro_rules! impl_integer {
+    ($($t:ty $(=> $wide:ty)?),* $(,)?) => {$(
+        impl Integer for $t {
+            fn checked_sub(self, rhs: Self) -> Option<Self> {
+                <$t>::checked_sub(self, rhs)
+            }
 
-            #[inline]
-            #[expect(clippy::cast_possible_truncation)]
-            fn truncate_from(wide: Self::Wide) -> Self {
-                wide as $base
+            fn midpoint(self, rhs: Self) -> Self {
+                <$t>::midpoint(self, rhs)
             }
         }
-    }
+
+        $(impl NarrowInteger for $t {
+            type Wide = $wide;
+        })?
+    )*};
 }
 
-impl_next_larger!(unsigned u8 -> u16, signed i8 -> i16);
-impl_next_larger!(unsigned u16 -> u32, signed i16 -> i32);
-impl_next_larger!(unsigned u32 -> u64, signed i32 -> i64);
-impl_next_larger!(unsigned u64 -> u128, signed i64 -> i128);
+impl_integer!(u8 => u16, i8 => i16);
+impl_integer!(u16 => u32, i16 => i32);
+impl_integer!(u32 => u64, i32 => i64);
+impl_integer!(u64 => u128, i64 => i128);
+impl_integer!(u128, i128);
 
 #[cfg(test)]
 mod tests {
