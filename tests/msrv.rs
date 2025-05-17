@@ -1,6 +1,6 @@
 use std::env;
 use std::fs::File;
-use std::io::{self, BufRead, BufReader};
+use std::io::{self, BufRead as _, BufReader};
 use std::path::PathBuf;
 
 const MSRV: &str = env!("CARGO_PKG_RUST_VERSION");

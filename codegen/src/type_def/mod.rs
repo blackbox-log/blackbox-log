@@ -3,7 +3,7 @@ mod flag_set;
 
 use std::collections::HashMap;
 
-use heck::ToUpperCamelCase;
+use heck::ToUpperCamelCase as _;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 use serde::Deserialize;

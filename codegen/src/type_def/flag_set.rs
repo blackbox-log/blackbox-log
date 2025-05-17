@@ -55,7 +55,7 @@ impl FlagSet {
                 type Flag = #flag_name;
 
                 fn is_set(&self, flag: Self::Flag) -> bool {
-                    flag.to_bit(self.firmware).map_or(false, |bit| self.raw[bit as usize])
+                    flag.to_bit(self.firmware).is_some_and(|bit| self.raw[bit as usize])
                 }
 
                 fn as_names(&self) -> ::alloc::vec::Vec<&'static str> {
@@ -80,7 +80,7 @@ impl FlagSet {
                 where
                     S: serde::Serializer,
                 {
-                    use serde::ser::SerializeSeq;
+                    use serde::ser::SerializeSeq as _;
 
                     // TODO: length
                     let mut seq = serializer.serialize_seq(None)?;

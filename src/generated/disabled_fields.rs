@@ -28,7 +28,7 @@ impl crate::units::FlagSet for DisabledFields {
 
     fn is_set(&self, flag: Self::Flag) -> bool {
         flag.to_bit(self.firmware)
-            .map_or(false, |bit| self.raw[bit as usize])
+            .is_some_and(|bit| self.raw[bit as usize])
     }
 
     fn as_names(&self) -> ::alloc::vec::Vec<&'static str> {
@@ -51,7 +51,7 @@ impl ::serde::Serialize for DisabledFields {
     where
         S: serde::Serializer,
     {
-        use serde::ser::SerializeSeq;
+        use serde::ser::SerializeSeq as _;
         let mut seq = serializer.serialize_seq(None)?;
         for flag in self.iter() {
             seq.serialize_element(&flag)?;

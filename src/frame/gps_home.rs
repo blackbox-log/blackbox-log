@@ -1,4 +1,4 @@
-use alloc::borrow::ToOwned;
+use alloc::borrow::ToOwned as _;
 use alloc::vec::Vec;
 
 use tracing::instrument;

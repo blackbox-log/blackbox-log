@@ -87,7 +87,7 @@ impl Encoding {
             }
 
             Self::Null => into.push(0),
-        };
+        }
 
         Ok(())
     }

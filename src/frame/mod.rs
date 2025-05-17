@@ -8,7 +8,7 @@ pub(crate) mod gps_home;
 pub(crate) mod main;
 pub(crate) mod slow;
 
-use alloc::borrow::ToOwned;
+use alloc::borrow::ToOwned as _;
 use alloc::format;
 use alloc::vec::Vec;
 use core::fmt;

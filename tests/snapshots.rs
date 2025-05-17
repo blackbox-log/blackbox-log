@@ -1,13 +1,13 @@
 use std::collections::BTreeMap;
 use std::fs;
-use std::io::Read;
+use std::io::Read as _;
 
 use blackbox_log::data::Stats;
 use blackbox_log::frame::{self, FieldDef};
 use blackbox_log::prelude::*;
 use blackbox_log::units::si;
 use blackbox_log::{headers, Event, Unit, Value};
-use serde::ser::{SerializeStruct, Serializer};
+use serde::ser::{SerializeStruct as _, Serializer};
 use serde::Serialize;
 
 const MAX_EVENTS: usize = 200_000;

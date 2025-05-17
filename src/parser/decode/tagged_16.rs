@@ -36,7 +36,7 @@ pub(crate) fn tagged_16(data: &mut Reader) -> InternalResult<[i16; COUNT]> {
                 } else {
                     let upper = buffer << 4;
                     buffer = data.read_u8().ok_or(InternalError::Eof)?;
-                    as_i8(upper | buffer >> 4)
+                    as_i8(upper | (buffer >> 4))
                 };
 
                 byte.into()
@@ -73,9 +73,7 @@ mod tests {
     use super::*;
 
     fn bytes(first: u8, zeros: usize) -> Vec<u8> {
-        iter::once(first)
-            .chain(iter::repeat(0).take(zeros))
-            .collect()
+        iter::once(first).chain(iter::repeat_n(0, zeros)).collect()
     }
 
     #[test]
