@@ -5,7 +5,6 @@ use alloc::vec::Vec;
 pub use self::def::*;
 use super::Unit;
 use crate::filter::AppliedFilter;
-use crate::utils::as_i32;
 use crate::{units, Headers};
 
 /// Data parsed from a slow frame.
@@ -94,7 +93,7 @@ pub enum SlowValue {
 impl SlowValue {
     const fn new_unitless(value: u32, signed: bool) -> Self {
         if signed {
-            Self::Signed(as_i32(value))
+            Self::Signed(value.cast_signed())
         } else {
             Self::Unsigned(value)
         }

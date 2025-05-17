@@ -5,7 +5,7 @@
 [![dependency status](https://deps.rs/repo/github/blackbox-log/blackbox-log/status.svg)](https://deps.rs/repo/github/blackbox-log/blackbox-log)
 [![crates.io](https://img.shields.io/crates/v/blackbox-log)](https://crates.io/blackbox-log)
 [![docs.rs](https://img.shields.io/docsrs/blackbox-log)](https://docs.rs/blackbox-log)
-[![MSRV](https://img.shields.io/static/v1?logo=rust&label=MSRV&color=dea584&message=1.81)](https://github.com/rust-lang/rust/blob/master/RELEASES.md)
+[![MSRV](https://img.shields.io/static/v1?logo=rust&label=MSRV&color=dea584&message=1.87)](https://github.com/rust-lang/rust/blob/master/RELEASES.md)
 ![license](https://img.shields.io/crates/l/blackbox-log)
 
 

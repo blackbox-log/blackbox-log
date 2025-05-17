@@ -2,7 +2,7 @@ mod type_def;
 
 use std::collections::HashMap;
 use std::fs::{self, File};
-use std::io::{self, BufWriter, Write};
+use std::io::{self, BufWriter, Write as _};
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 

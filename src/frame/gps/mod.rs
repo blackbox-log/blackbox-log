@@ -6,7 +6,6 @@ pub use self::def::*;
 use super::Unit;
 use crate::filter::AppliedFilter;
 use crate::units::prelude::*;
-use crate::utils::as_i32;
 use crate::{units, Headers};
 
 /// Data parsed from a GPS frame.
@@ -42,13 +41,13 @@ impl super::Frame for GpsFrame<'_, '_, '_> {
         let value = match def.unit {
             GpsUnit::Coordinate => {
                 assert!(def.signed);
-                let value = as_i32(raw);
+                let value = raw.cast_signed();
 
                 GpsValue::Coordinate(f64::from(value) / 10000000.)
             }
             GpsUnit::Altitude => {
                 let altitude = if def.signed {
-                    as_i32(raw).into()
+                    raw.cast_signed().into()
                 } else {
                     raw.into()
                 };
@@ -116,7 +115,7 @@ pub enum GpsValue {
 impl GpsValue {
     const fn new_unitless(value: u32, signed: bool) -> Self {
         if signed {
-            Self::Signed(as_i32(value))
+            Self::Signed(value.cast_signed())
         } else {
             Self::Unsigned(value)
         }

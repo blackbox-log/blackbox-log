@@ -146,7 +146,7 @@ impl<'data, 'headers> DataParser<'data, 'headers> {
                     if self
                         .data
                         .peek()
-                        .map_or(true, |byte| FrameKind::from_byte(byte).is_some()) =>
+                        .is_none_or(|byte| FrameKind::from_byte(byte).is_some()) =>
                 {
                     match frame {
                         InternalFrame::Event(event) => {

@@ -1,6 +1,6 @@
 //! Types for the header section of blackbox logs.
 
-use alloc::borrow::ToOwned;
+use alloc::borrow::ToOwned as _;
 use alloc::string::String;
 use core::str::FromStr;
 use core::{cmp, fmt, str};
@@ -15,7 +15,6 @@ use crate::frame::slow::{SlowFrameDef, SlowFrameDefBuilder};
 use crate::frame::{is_frame_def_header, parse_frame_def_header, DataFrameKind};
 use crate::parser::{InternalError, InternalResult};
 use crate::predictor::Predictor;
-use crate::utils::as_u32;
 use crate::{DataParser, FilterSet, Reader, Unit};
 
 include_generated!("debug_mode");
@@ -433,7 +432,7 @@ impl serde::Serialize for FirmwareVersion {
     where
         S: serde::Serializer,
     {
-        use alloc::string::ToString;
+        use alloc::string::ToString as _;
         serializer.serialize_str(&self.to_string())
     }
 }
@@ -512,11 +511,10 @@ pub(crate) struct MotorOutputRange {
 
 impl MotorOutputRange {
     pub(crate) fn from_str(s: &str) -> Option<Self> {
-        s.split_once(',').and_then(|(min, max)| {
-            let min = min.parse().ok()?;
-            let max = max.parse().ok()?;
-            Some(Self { min, max })
-        })
+        let (min, max) = s.split_once(',')?;
+        let min = min.parse().ok()?;
+        let max = max.parse().ok()?;
+        Some(Self { min, max })
     }
 }
 
@@ -620,7 +618,7 @@ impl<'data> State<'data> {
                     self.debug_mode = Some(debug_mode);
                 }
                 "fields_disabled_mask" => self.disabled_fields = value.parse().map_err(|_| ())?,
-                "features" => self.features = as_u32(value.parse().map_err(|_| ())?),
+                "features" => self.features = value.parse::<i32>().map_err(|_| ())?.cast_unsigned(),
                 "motor_pwm_protocol" => {
                     let protocol = RawHeaderValue::parse(header, value).map_err(|_| ())?;
                     self.pwm_protocol = Some(protocol);
@@ -673,7 +671,7 @@ impl<'data> State<'data> {
                     tracing::debug!("skipping unknown header: `{header}` = `{value}`");
                     self.unknown.insert(header, value);
                 }
-            };
+            }
 
             Ok(())
         })()

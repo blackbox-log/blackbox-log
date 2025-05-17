@@ -1,6 +1,5 @@
 use super::sign_extend;
 use crate::parser::{InternalError, InternalResult};
-use crate::utils::{as_i16, as_i8};
 use crate::Reader;
 
 const COUNT: usize = 4;
@@ -36,7 +35,7 @@ pub(crate) fn tagged_16(data: &mut Reader) -> InternalResult<[i16; COUNT]> {
                 } else {
                     let upper = buffer << 4;
                     buffer = data.read_u8().ok_or(InternalError::Eof)?;
-                    as_i8(upper | buffer >> 4)
+                    (upper | (buffer >> 4)).cast_signed()
                 };
 
                 byte.into()
@@ -49,7 +48,7 @@ pub(crate) fn tagged_16(data: &mut Reader) -> InternalResult<[i16; COUNT]> {
                     let [middle, lower] = data.read_u16().ok_or(InternalError::Eof)?.to_le_bytes();
 
                     buffer = lower;
-                    as_i16(upper | (u16::from(middle) << 4) | u16::from(lower >> 4))
+                    (upper | (u16::from(middle) << 4) | u16::from(lower >> 4)).cast_signed()
                 }
             }
         }
@@ -73,9 +72,7 @@ mod tests {
     use super::*;
 
     fn bytes(first: u8, zeros: usize) -> Vec<u8> {
-        iter::once(first)
-            .chain(iter::repeat(0).take(zeros))
-            .collect()
+        iter::once(first).chain(iter::repeat_n(0, zeros)).collect()
     }
 
     #[test]
