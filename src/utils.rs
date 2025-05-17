@@ -13,30 +13,6 @@ macro_rules! include_generated {
     };
 }
 
-macro_rules! impl_sign_conversions {
-    ($as_i:ident, $i:ty, $as_u:ident, $u:ty) => {
-        #[doc = concat!("Wrapper for `x as ", stringify!($i), "` that typechecks `x`")]
-        #[allow(dead_code, clippy::cast_possible_wrap)]
-        #[inline(always)]
-        pub(crate) const fn $as_i(x: $u) -> $i {
-            x as $i
-        }
-
-        #[doc = concat!("Wrapper for `x as ", stringify!($u), "` that typechecks `x`")]
-        #[allow(dead_code, clippy::cast_sign_loss)]
-        #[inline(always)]
-        pub(crate) const fn $as_u(x: $i) -> $u {
-            x as $u
-        }
-    };
-}
-
-impl_sign_conversions!(as_i8, i8, as_u8, u8);
-impl_sign_conversions!(as_i16, i16, as_u16, u16);
-impl_sign_conversions!(as_i32, i32, as_u32, u32);
-impl_sign_conversions!(as_i64, i64, as_u64, u64);
-impl_sign_conversions!(as_i128, i128, as_u128, u128);
-
 macro_rules! byte_enum {
     (
         $( #[$attr:meta] )*

@@ -8,7 +8,6 @@ use crate::data::MainFrameHistory;
 use crate::filter::AppliedFilter;
 use crate::parser::InternalResult;
 use crate::units::prelude::*;
-use crate::utils::as_i32;
 use crate::{units, Headers, Reader};
 
 /// Data parsed from a main frame.
@@ -56,7 +55,7 @@ impl super::Frame for MainFrame<'_, '_, '_> {
         let value = match def.unit {
             MainUnit::Amperage => {
                 debug_assert!(def.signed);
-                let raw = as_i32(raw);
+                let raw = raw.cast_signed();
                 MainValue::Amperage(units::new::current(raw))
             }
             MainUnit::Voltage => {
@@ -65,12 +64,12 @@ impl super::Frame for MainFrame<'_, '_, '_> {
             }
             MainUnit::Acceleration => {
                 debug_assert!(def.signed);
-                let raw = as_i32(raw);
+                let raw = raw.cast_signed();
                 MainValue::Acceleration(units::new::acceleration(raw, self.headers))
             }
             MainUnit::Rotation => {
                 debug_assert!(def.signed);
-                let raw = as_i32(raw);
+                let raw = raw.cast_signed();
                 MainValue::Rotation(units::new::angular_velocity(raw, self.headers))
             }
             MainUnit::Unitless => MainValue::new_unitless(raw, def.signed),
@@ -150,7 +149,7 @@ pub enum MainValue {
 impl MainValue {
     const fn new_unitless(value: u32, signed: bool) -> Self {
         if signed {
-            Self::Signed(as_i32(value))
+            Self::Signed(value.cast_signed())
         } else {
             Self::Unsigned(value)
         }

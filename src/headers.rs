@@ -15,7 +15,6 @@ use crate::frame::slow::{SlowFrameDef, SlowFrameDefBuilder};
 use crate::frame::{is_frame_def_header, parse_frame_def_header, DataFrameKind};
 use crate::parser::{InternalError, InternalResult};
 use crate::predictor::Predictor;
-use crate::utils::as_u32;
 use crate::{DataParser, FilterSet, Reader, Unit};
 
 include_generated!("debug_mode");
@@ -619,7 +618,7 @@ impl<'data> State<'data> {
                     self.debug_mode = Some(debug_mode);
                 }
                 "fields_disabled_mask" => self.disabled_fields = value.parse().map_err(|_| ())?,
-                "features" => self.features = as_u32(value.parse().map_err(|_| ())?),
+                "features" => self.features = value.parse::<i32>().map_err(|_| ())?.cast_unsigned(),
                 "motor_pwm_protocol" => {
                     let protocol = RawHeaderValue::parse(header, value).map_err(|_| ())?;
                     self.pwm_protocol = Some(protocol);

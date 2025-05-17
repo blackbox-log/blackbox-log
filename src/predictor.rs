@@ -1,7 +1,6 @@
 use core::ops::{Add, Div, Sub};
 
 use super::frame::GpsPosition;
-use crate::utils::{as_i32, as_u32};
 use crate::Headers;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -34,9 +33,9 @@ impl Predictor {
             tracing::trace_span!(
                 "Predictor::apply",
                 ?self,
-                value = as_i32(value),
-                last = ctx.last.map(as_i32),
-                last_last = ctx.last_last.map(as_i32),
+                value = value.cast_signed(),
+                last = ctx.last.map(u32::cast_signed),
+                last_last = ctx.last_last.map(u32::cast_signed),
                 skipped_frames = ctx.skipped_frames,
             )
         } else {
@@ -56,17 +55,22 @@ impl Predictor {
             Self::Previous => ctx.last.unwrap_or(0),
             Self::StraightLine => {
                 if signed {
-                    as_u32(straight_line(
-                        ctx.last.map(as_i32),
-                        ctx.last_last.map(as_i32),
-                    ))
+                    straight_line(
+                        ctx.last.map(u32::cast_signed),
+                        ctx.last_last.map(u32::cast_signed),
+                    )
+                    .cast_unsigned()
                 } else {
                     straight_line(ctx.last, ctx.last_last)
                 }
             }
             Self::Average2 => {
                 if signed {
-                    as_u32(average(ctx.last.map(as_i32), ctx.last_last.map(as_i32)))
+                    average(
+                        ctx.last.map(u32::cast_signed),
+                        ctx.last_last.map(u32::cast_signed),
+                    )
+                    .cast_unsigned()
                 } else {
                     average(ctx.last, ctx.last_last)
                 }
@@ -87,11 +91,10 @@ impl Predictor {
                 } else {
                     let skipped_frames = i32::try_from(ctx.skipped_frames)
                         .expect("never skip more than i32::MAX frames");
-                    as_u32(
-                        skipped_frames
-                            .wrapping_add(1)
-                            .wrapping_add(as_i32(ctx.last.unwrap_or(0))),
-                    )
+                    skipped_frames
+                        .wrapping_add(1)
+                        .wrapping_add(ctx.last.unwrap_or(0).cast_signed())
+                        .cast_unsigned()
                 }
             }
             Self::HomeLat | Self::HomeLon => ctx.gps_home.map_or_else(
@@ -101,11 +104,11 @@ impl Predictor {
                     0
                 },
                 |home| {
-                    as_u32(if self == Self::HomeLat {
-                        home.latitude
+                    if self == Self::HomeLat {
+                        home.latitude.cast_unsigned()
                     } else {
-                        home.longitude
-                    })
+                        home.longitude.cast_unsigned()
+                    }
                 },
             ),
             Self::FifteenHundred => 1500,
@@ -118,9 +121,9 @@ impl Predictor {
         };
 
         if signed {
-            let signed = as_i32(value).wrapping_add(as_i32(diff));
+            let signed = value.cast_signed().wrapping_add(diff.cast_signed());
             tracing::trace!(return = signed);
-            as_u32(signed)
+            signed.cast_unsigned()
         } else {
             let x = value.wrapping_add(diff);
             tracing::trace!(return = x);

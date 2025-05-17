@@ -7,7 +7,6 @@ use super::{read_field_values, DataFrameKind, DataFrameProperty};
 use crate::headers::{ParseError, ParseResult};
 use crate::parser::{Encoding, InternalResult};
 use crate::predictor::{Predictor, PredictorContext};
-use crate::utils::as_i32;
 use crate::{Headers, Reader};
 
 #[derive(Debug, Clone)]
@@ -69,7 +68,7 @@ impl<'data> GpsHomeFrameDef<'data> {
                     value,
                 );
 
-                as_i32(value)
+                value.cast_signed()
             })
             .collect::<Vec<_>>();
 
