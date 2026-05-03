@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- Support for iNAV 9.0 (verified against an iNAV 9.0.1 log; source enum
+  headers are byte-identical to iNAV 8.0 so the same data tables are reused).
+
 ## [0.4.3] - 2024.04.13
 
 ### Added

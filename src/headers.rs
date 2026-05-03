@@ -447,6 +447,7 @@ pub(crate) enum InternalFirmware {
     Inav6,
     Inav7,
     Inav8,
+    Inav9,
 }
 
 impl InternalFirmware {
@@ -456,7 +457,7 @@ impl InternalFirmware {
             | Self::Betaflight4_3
             | Self::Betaflight4_4
             | Self::Betaflight4_5 => true,
-            Self::Inav5 | Self::Inav6 | Self::Inav7 | Self::Inav8 => false,
+            Self::Inav5 | Self::Inav6 | Self::Inav7 | Self::Inav8 | Self::Inav9 => false,
         }
     }
 
@@ -487,6 +488,7 @@ impl From<Firmware> for InternalFirmware {
             Firmware::Inav(FirmwareVersion { major: 6, .. }) => Self::Inav6,
             Firmware::Inav(FirmwareVersion { major: 7, .. }) => Self::Inav7,
             Firmware::Inav(FirmwareVersion { major: 8, .. }) => Self::Inav8,
+            Firmware::Inav(FirmwareVersion { major: 9, .. }) => Self::Inav9,
             _ => unreachable!(),
         }
     }
