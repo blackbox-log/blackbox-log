@@ -110,7 +110,7 @@ impl<'data, 'headers, 'parser> MainFrame<'data, 'headers, 'parser> {
 
 #[derive(Debug, Clone)]
 pub(crate) struct RawMainFrame {
-    intra: bool,
+    pub(crate) intra: bool,
     pub(crate) iteration: u32,
     pub(crate) time: u64,
     pub(crate) values: Vec<u32>,
@@ -127,7 +127,7 @@ impl RawMainFrame {
         let def = headers.main_frame_def();
 
         if kind == FrameKind::Data(DataFrameKind::Intra) {
-            def.parse_intra(data, headers, last)
+            def.parse_intra(data, headers, history.last_intra())
         } else {
             let skipped = 0; // FIXME
 

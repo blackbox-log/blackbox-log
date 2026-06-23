@@ -46,7 +46,7 @@ impl Filter {
             Filter::OnlyFields(fields) => frame
                 .iter()
                 .enumerate()
-                .filter_map(|(i, field)| fields.0.contains(field.name).then_some(i))
+                .filter_map(|(i, field)| fields.0.contains(to_base_field(field.name)).then_some(i))
                 .collect(),
         }
     }

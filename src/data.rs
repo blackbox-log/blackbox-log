@@ -260,6 +260,7 @@ fn skip_to_frame(data: &mut Reader) {
 pub(crate) struct MainFrameHistory {
     history: [Option<RawMainFrame>; 2],
     index_new: usize,
+    last_intra: Option<RawMainFrame>,
 }
 
 impl MainFrameHistory {
@@ -269,6 +270,14 @@ impl MainFrameHistory {
 
     fn push(&mut self, frame: RawMainFrame) -> &RawMainFrame {
         self.index_new = self.index_old();
+        if frame.intra {
+            // Betaflight resets both last and lastlast to the I-frame value so
+            // that the first P-frame after the I-frame boundary uses
+            // Average2(I, I) = I as its predictor, matching the encoder.
+            // This fixes issue #164
+            self.history[self.index_old()] = Some(frame.clone());
+            self.last_intra = Some(frame.clone());
+        }
         self.history[self.index_new] = Some(frame);
         self.last().unwrap()
     }
@@ -279,6 +288,45 @@ impl MainFrameHistory {
 
     pub(crate) fn last_last(&self) -> Option<&RawMainFrame> {
         self.history[self.index_old()].as_ref()
+    }
+
+    pub(crate) fn last_intra(&self) -> Option<&RawMainFrame> {
+        self.last_intra.as_ref()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use alloc::vec;
+
+    use super::*;
+
+    fn main_frame(intra: bool, iteration: u32, value: u32) -> RawMainFrame {
+        RawMainFrame {
+            intra,
+            iteration,
+            time: u64::from(iteration),
+            values: vec![value],
+        }
+    }
+
+    #[test]
+    fn intra_frames_keep_separate_intra_and_inter_history() {
+        let mut history = MainFrameHistory::default();
+
+        history.push(main_frame(true, 10, 100));
+        history.push(main_frame(false, 11, 101));
+        history.push(main_frame(false, 12, 102));
+
+        assert_eq!(Some(12), history.last().map(|frame| frame.iteration));
+        assert_eq!(Some(11), history.last_last().map(|frame| frame.iteration));
+        assert_eq!(Some(10), history.last_intra().map(|frame| frame.iteration));
+
+        history.push(main_frame(true, 20, 200));
+
+        assert_eq!(Some(20), history.last().map(|frame| frame.iteration));
+        assert_eq!(Some(20), history.last_last().map(|frame| frame.iteration));
+        assert_eq!(Some(20), history.last_intra().map(|frame| frame.iteration));
     }
 }
 
