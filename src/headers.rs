@@ -355,7 +355,7 @@ impl Firmware {
         let (fw, is_supported) = match kind.as_deref() {
             Some("betaflight") => (
                 Firmware::Betaflight(version),
-                crate::BETAFLIGHT_SUPPORT.contains(&version),
+                crate::is_supported_betaflight_version(version),
             ),
             Some("inav") => (
                 Firmware::Inav(version),
@@ -391,13 +391,13 @@ impl PartialOrd for Firmware {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FirmwareVersion {
-    pub major: u8,
+    pub major: u16,
     pub minor: u8,
     pub patch: u8,
 }
 
 impl FirmwareVersion {
-    pub const fn new(major: u8, minor: u8, patch: u8) -> Self {
+    pub const fn new(major: u16, minor: u8, patch: u8) -> Self {
         Self {
             major,
             minor,
@@ -406,11 +406,11 @@ impl FirmwareVersion {
     }
 
     fn parse(s: &str) -> Option<Self> {
-        let mut components = s.splitn(3, '.').map(|s| s.parse().ok());
+        let mut components = s.splitn(3, '.');
 
-        let major = components.next()??;
-        let minor = components.next()??;
-        let patch = components.next()??;
+        let major = components.next()?.parse().ok()?;
+        let minor = components.next()?.parse().ok()?;
+        let patch = components.next()?.parse().ok()?;
 
         Some(Self {
             major,
@@ -443,6 +443,7 @@ pub(crate) enum InternalFirmware {
     Betaflight4_3,
     Betaflight4_4,
     Betaflight4_5,
+    Betaflight2025_12,
     Inav5,
     Inav6,
     Inav7,
@@ -455,7 +456,8 @@ impl InternalFirmware {
             Self::Betaflight4_2
             | Self::Betaflight4_3
             | Self::Betaflight4_4
-            | Self::Betaflight4_5 => true,
+            | Self::Betaflight4_5
+            | Self::Betaflight2025_12 => true,
             Self::Inav5 | Self::Inav6 | Self::Inav7 | Self::Inav8 => false,
         }
     }
@@ -483,6 +485,11 @@ impl From<Firmware> for InternalFirmware {
             Firmware::Betaflight(FirmwareVersion {
                 major: 4, minor: 5, ..
             }) => Self::Betaflight4_5,
+            Firmware::Betaflight(FirmwareVersion {
+                major: 2025,
+                minor: 12,
+                ..
+            }) => Self::Betaflight2025_12,
             Firmware::Inav(FirmwareVersion { major: 5, .. }) => Self::Inav5,
             Firmware::Inav(FirmwareVersion { major: 6, .. }) => Self::Inav6,
             Firmware::Inav(FirmwareVersion { major: 7, .. }) => Self::Inav7,
@@ -753,6 +760,28 @@ fn parse_header<'data>(bytes: &mut Reader<'data>) -> InternalResult<(&'data str,
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn betaflight_2025_12_is_supported() {
+        assert_eq!(
+            Firmware::Betaflight(FirmwareVersion::new(2025, 12, 2)),
+            Firmware::parse("Betaflight 2025.12.2 (79065c96b) STM32F7X2").unwrap()
+        );
+    }
+
+    #[test]
+    fn unmapped_betaflight_4_6_is_rejected() {
+        assert!(matches!(
+            Firmware::parse("Betaflight 4.6.0 (abc123) STM32F7X2"),
+            Err(ParseError::UnsupportedFirmwareVersion(
+                Firmware::Betaflight(FirmwareVersion {
+                    major: 4,
+                    minor: 6,
+                    patch: 0
+                })
+            ))
+        ));
+    }
 
     #[test]
     #[should_panic(expected = "Retry")]

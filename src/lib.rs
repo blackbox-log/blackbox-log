@@ -120,3 +120,15 @@ const BETAFLIGHT_SUPPORT: Range<FirmwareVersion> =
     FirmwareVersion::new(4, 2, 0)..FirmwareVersion::new(4, 6, 0);
 const INAV_SUPPORT: Range<FirmwareVersion> =
     FirmwareVersion::new(5, 0, 0)..FirmwareVersion::new(9, 0, 0);
+
+pub(crate) fn is_supported_betaflight_version(version: FirmwareVersion) -> bool {
+    BETAFLIGHT_SUPPORT.contains(&version)
+        || matches!(
+            version,
+            FirmwareVersion {
+                major: 2025,
+                minor: 12,
+                ..
+            }
+        )
+}

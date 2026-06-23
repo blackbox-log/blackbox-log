@@ -183,15 +183,17 @@ impl State {
         match (bit, fw) {
             (
                 0u32,
-                Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5 | Inav5 | Inav6
-                | Inav7 | Inav8,
+                Betaflight2025_12 | Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5
+                | Inav5 | Inav6 | Inav7 | Inav8,
             ) => Some(Self::GpsFixHome),
             (
                 1u32,
-                Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5 | Inav5 | Inav6
-                | Inav7 | Inav8,
+                Betaflight2025_12 | Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5
+                | Inav5 | Inav6 | Inav7 | Inav8,
             ) => Some(Self::GpsFix),
-            (2u32, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(Self::GpsFixEver),
+            (2u32, Betaflight2025_12 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => {
+                Some(Self::GpsFixEver)
+            }
             (2u32, Inav5 | Inav6 | Inav7 | Inav8) => Some(Self::CalibrateMag),
             (3u32, Inav5 | Inav6 | Inav7 | Inav8) => Some(Self::SmallAngle),
             (4u32, Inav5 | Inav6 | Inav7 | Inav8) => Some(Self::FixedWingLegacy),
@@ -228,15 +230,18 @@ impl State {
         match (self, fw) {
             (
                 Self::GpsFixHome,
-                Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5 | Inav5 | Inav6
-                | Inav7 | Inav8,
+                Betaflight2025_12 | Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5
+                | Inav5 | Inav6 | Inav7 | Inav8,
             ) => Some(0u32),
             (
                 Self::GpsFix,
-                Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5 | Inav5 | Inav6
-                | Inav7 | Inav8,
+                Betaflight2025_12 | Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5
+                | Inav5 | Inav6 | Inav7 | Inav8,
             ) => Some(1u32),
-            (Self::GpsFixEver, Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Some(2u32),
+            (
+                Self::GpsFixEver,
+                Betaflight2025_12 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5,
+            ) => Some(2u32),
             (Self::CalibrateMag, Inav5 | Inav6 | Inav7 | Inav8) => Some(2u32),
             (Self::SmallAngle, Inav5 | Inav6 | Inav7 | Inav8) => Some(3u32),
             (Self::FixedWingLegacy, Inav5 | Inav6 | Inav7 | Inav8) => Some(4u32),

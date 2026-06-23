@@ -59,29 +59,38 @@ impl FailsafePhase {
         match (raw, fw) {
             (
                 0u32,
-                Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5 | Inav5 | Inav6
-                | Inav7 | Inav8,
+                Betaflight2025_12 | Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5
+                | Inav5 | Inav6 | Inav7 | Inav8,
             ) => Self::Idle,
             (
                 1u32,
-                Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5 | Inav5 | Inav6
-                | Inav7 | Inav8,
+                Betaflight2025_12 | Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5
+                | Inav5 | Inav6 | Inav7 | Inav8,
             ) => Self::RxLossDetected,
-            (2u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Self::Landing,
+            (
+                2u32,
+                Betaflight2025_12 | Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5,
+            ) => Self::Landing,
             (2u32, Inav5 | Inav6 | Inav7 | Inav8) => Self::RxLossIdle,
-            (3u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => Self::Landed,
+            (
+                3u32,
+                Betaflight2025_12 | Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5,
+            ) => Self::Landed,
             (3u32, Inav5 | Inav6 | Inav7 | Inav8) => Self::ReturnToHome,
-            (4u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => {
-                Self::RxLossMonitoring
-            }
+            (
+                4u32,
+                Betaflight2025_12 | Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5,
+            ) => Self::RxLossMonitoring,
             (4u32, Inav5 | Inav6 | Inav7 | Inav8) => Self::Landing,
-            (5u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => {
-                Self::RxLossRecovered
-            }
+            (
+                5u32,
+                Betaflight2025_12 | Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5,
+            ) => Self::RxLossRecovered,
             (5u32, Inav5 | Inav6 | Inav7 | Inav8) => Self::Landed,
-            (6u32, Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5) => {
-                Self::GpsRescue
-            }
+            (
+                6u32,
+                Betaflight2025_12 | Betaflight4_2 | Betaflight4_3 | Betaflight4_4 | Betaflight4_5,
+            ) => Self::GpsRescue,
             (6u32, Inav5 | Inav6 | Inav7 | Inav8) => Self::RxLossMonitoring,
             (7u32, Inav5 | Inav6 | Inav7 | Inav8) => Self::RxLossRecovered,
             _ => {

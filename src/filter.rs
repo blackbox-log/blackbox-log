@@ -46,7 +46,7 @@ impl Filter {
             Filter::OnlyFields(fields) => frame
                 .iter()
                 .enumerate()
-                .filter_map(|(i, field)| fields.0.contains(field.name).then_some(i))
+                .filter_map(|(i, field)| fields.0.contains(to_base_field(field.name)).then_some(i))
                 .collect(),
         }
     }
@@ -106,5 +106,70 @@ where
 {
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
         Self(Vec::from_iter(iter))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use alloc::vec::Vec;
+
+    use super::*;
+    use crate::frame::{DataFrameKind, DataFrameProperty};
+
+    fn main_frame_def() -> crate::frame::MainFrameDef<'static> {
+        let mut builder = crate::frame::MainFrameDef::builder();
+        builder.update(
+            DataFrameKind::Intra,
+            DataFrameProperty::Name,
+            "loopIteration,time,rcCommand[0],rcCommand[1],rcCommand[2],rcCommand[3],gyroADC[0]",
+        );
+        builder.update(
+            DataFrameKind::Intra,
+            DataFrameProperty::Predictor,
+            "0,0,0,0,0,0,0",
+        );
+        builder.update(
+            DataFrameKind::Inter,
+            DataFrameProperty::Predictor,
+            "6,2,1,1,1,1,1",
+        );
+        builder.update(
+            DataFrameKind::Intra,
+            DataFrameProperty::Encoding,
+            "1,1,1,1,1,1,1",
+        );
+        builder.update(
+            DataFrameKind::Inter,
+            DataFrameProperty::Encoding,
+            "9,0,0,0,0,0,0",
+        );
+        builder.update(
+            DataFrameKind::Intra,
+            DataFrameProperty::Signed,
+            "0,0,1,1,1,1,1",
+        );
+
+        builder.parse().unwrap()
+    }
+
+    #[test]
+    fn only_fields_matches_indexed_fields_by_base_name() {
+        let frame = main_frame_def();
+        let filter = Filter::OnlyFields(["rcCommand"].into()).apply(&frame);
+        let field_names = filter
+            .0
+            .iter()
+            .map(|index| frame.get(*index).unwrap().name)
+            .collect::<Vec<_>>();
+
+        assert_eq!(
+            field_names,
+            [
+                "rcCommand[0]",
+                "rcCommand[1]",
+                "rcCommand[2]",
+                "rcCommand[3]"
+            ]
+        );
     }
 }
